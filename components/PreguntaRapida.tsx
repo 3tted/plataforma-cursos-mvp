@@ -29,7 +29,7 @@ export default function PreguntaRapida({
   return (
     <form className="pregunta-rapida" onSubmit={enviar}>
       <input
-        id={`pregunta-rapida-${leccion ?? origen}`}
+        id={leccion ? `pregunta-rapida-${leccion}-${origen}` : `pregunta-rapida-${origen}`}
         value={pregunta}
         onChange={(e) => setPregunta(e.target.value)}
         placeholder="Escribe tu duda…"

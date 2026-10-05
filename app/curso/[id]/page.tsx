@@ -309,6 +309,23 @@ export default function PaginaLeccion() {
           )}
         </nav>
       </article>
+
+      <aside className="lateral-leccion" aria-label="Asistente del curso">
+        <section className="tarjeta-asistente">
+          <h2>
+            <IconoAsistente width={18} height={18} /> Asistente del curso
+          </h2>
+          <p>¿Una duda mientras lees? Te responde con el curso y te dice de qué lección sale.</p>
+          <div className="sugerencias">
+            {(bloqueada ? [`¿De qué trata «${leccion.titulo}»?`] : leccion.preguntas_sugeridas.slice(0, 2)).map((q) => (
+              <button key={q} type="button" className="sugerencia" onClick={() => preguntar(q)}>
+                {q}
+              </button>
+            ))}
+          </div>
+          <PreguntaRapida leccion={leccion.id} origen="lateral" />
+        </section>
+      </aside>
     </div>
   );
 }

@@ -11,7 +11,7 @@ Cubre el criterio del MVP de la ficha: *comunidad con feed simple + un curso de 
 | Pieza | Qué hace | Estado |
 |---|---|---|
 | **Comunidad** | Feed con categorías; publicar, comentar y marcar "Me sirve". Los anuncios son solo para la coach. | Funciona (datos en un archivo JSON) |
-| **Curso** | "Finanzas claras para tu negocio": 3 módulos, 8 lecciones con texto y transcripción. Progreso por alumno. El módulo 1 es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`) |
+| **Curso** | "Finanzas claras para tu negocio": 3 módulos, 8 lecciones con texto y transcripción. Progreso por alumno. El módulo 1 es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
 | **Asistente de IA** | Responde dudas usando el contenido de las lecciones y **cita la lección** de donde sale cada idea ([L4], [L5]…). Si algo no está en el curso, lo dice y ofrece llevar la pregunta a la comunidad. | Real con clave de API · modo demo sin ella |
 | **Pagos locales** | Membresía de $490 MXN/mes con OXXO (ficha con referencia), SPEI (CLABE) o Mercado Pago. | **Simulado**: no se cobra nada |
 | **Panel de la coach** | Qué preguntan los alumnos al asistente, lecciones más consultadas, pagos y un formulario para **pegar una lección propia** y que la IA responda con ella. | Funciona |
@@ -69,7 +69,7 @@ La validación convence mucho más cuando el coach ve **su propio contenido**. T
 - **Rápida**: en el *Panel de la coach*, sección "Prueba el asistente con tu propio contenido", pega el texto o la transcripción de una lección. Aparece en el curso como `C1`, `C2`… y el asistente responde con ella de inmediato.
 - **Completa**: edita `data/curso.json` (datos de la comunidad, módulos, lecciones y preguntas sugeridas) y los archivos `data/lecciones/L*.md`. En cada archivo, lo que va después de `<!-- transcripcion -->` es la transcripción del video.
 
-Para reiniciar la comunidad a los datos de ejemplo, borra la carpeta `.data/`.
+Para reiniciar la comunidad a los datos de ejemplo, borra la carpeta `.data/`. Al crearse de nuevo, cada lección recibe su video de muestra desde `data/videos/` (por ejemplo `L1.webm`); para cambiar los de muestra, reemplaza esos archivos.
 
 Guía para la sesión con el coach: [VALIDACION.md](VALIDACION.md).
 

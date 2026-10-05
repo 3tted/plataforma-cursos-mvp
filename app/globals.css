@@ -1843,6 +1843,37 @@ main:focus {
   color: var(--exito-texto);
 }
 
+/* El asistente acompaña la lección en una tercera columna solo cuando hay
+   espacio; en pantallas más chicas queda el recuadro al final de la lección. */
+.lateral-leccion {
+  display: none;
+}
+
+@media (min-width: 1240px) {
+  body:has(.rejilla-leccion) .envoltura {
+    max-width: 1440px;
+  }
+  .rejilla-leccion {
+    grid-template-columns: 240px minmax(0, 1fr) 290px;
+    gap: 40px;
+  }
+  .lateral-leccion {
+    display: block;
+    position: sticky;
+    top: calc(var(--alto-barra) + 20px);
+  }
+  .lateral-leccion .tarjeta-asistente {
+    margin: 0;
+  }
+  .lateral-leccion .sugerencias {
+    display: grid;
+    gap: 8px;
+  }
+  .lateral-leccion .sugerencia {
+    text-align: left;
+  }
+}
+
 @media (max-width: 900px) {
   .rejilla-leccion {
     grid-template-columns: minmax(0, 1fr);

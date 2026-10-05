@@ -32,6 +32,7 @@ const ARCHIVO = path.join(DIRECTORIO, "almacen.json");
 /** Los videos de las lecciones se guardan como archivos junto al almacén. */
 export const DIRECTORIO_VIDEOS = path.join(DIRECTORIO, "videos");
 const SEMILLA = path.join(process.cwd(), "data", "comunidad-seed.json");
+const VIDEOS_MUESTRA = path.join(process.cwd(), "data", "videos");
 
 const MAX_PREGUNTAS = 500;
 
@@ -78,7 +79,37 @@ async function sembrar(): Promise<Almacen> {
       }),
     ),
   }));
-  return { siguienteId: id, publicaciones, leccionesCoach: [], preguntas: [], pagos: [], videos: [] };
+  return { siguienteId: id, publicaciones, leccionesCoach: [], preguntas: [], pagos: [], videos: await sembrarVideos() };
+}
+
+// Videos de muestra que viajan con el proyecto (data/videos/L1.webm…). Se
+// copian junto al almacén para que la coach pueda reemplazarlos o quitarlos
+// como cualquier video subido.
+async function sembrarVideos(): Promise<VideoLeccion[]> {
+  let archivos: string[];
+  try {
+    archivos = (await fs.readdir(VIDEOS_MUESTRA)).filter((a) => /^[A-Za-z0-9]+\.webm$/.test(a));
+  } catch {
+    return [];
+  }
+  await fs.mkdir(DIRECTORIO_VIDEOS, { recursive: true });
+  const subidoEn = new Date().toISOString();
+  return Promise.all(
+    archivos.map(async (a) => {
+      const leccion = a.replace(/\.webm$/, "");
+      const archivo = `${leccion}-muestra.webm`;
+      await fs.copyFile(path.join(VIDEOS_MUESTRA, a), path.join(DIRECTORIO_VIDEOS, archivo));
+      const { size } = await fs.stat(path.join(DIRECTORIO_VIDEOS, archivo));
+      return {
+        leccion,
+        archivo,
+        tipo: "video/webm",
+        bytes: size,
+        nombreOriginal: `video-de-muestra-${leccion}.webm`,
+        subidoEn,
+      };
+    }),
+  );
 }
 
 async function leer(): Promise<Almacen> {

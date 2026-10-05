@@ -1,0 +1,22 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Datos locales del prototipo (publicaciones, preguntas, pagos simulados)
+.data/
+
+# Variables de entorno: nunca subas tu clave de API
+.env
+.env.local
+
+# Configuración local de Claude Code e impeccable (rutas de esta computadora)
+.claude/settings.local.json
+.impeccable/config.local.json
+.impeccable/hook.cache.json
+.impeccable/live/sessions/
+.impeccable/review/
+
+# Documentos de trabajo
+*.docx

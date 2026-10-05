@@ -1,0 +1,1167 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T14:54:23.695Z",
+  "title": "Design System: Finanzas Claras (Merkatics)",
+  "extensions": {
+    "colorMeta": {
+      "fondo": {
+        "role": "neutral",
+        "displayName": "Stone Ground",
+        "canonical": "#f2f1f1",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.001 106)",
+          "oklch(26% 0.001 106)",
+          "oklch(37% 0.001 106)",
+          "oklch(48% 0.001 106)",
+          "oklch(60% 0.001 106)",
+          "oklch(72% 0.001 106)",
+          "oklch(84% 0 106)",
+          "oklch(95% 0 106)"
+        ],
+        "dark": "#141313"
+      },
+      "superficie": {
+        "role": "neutral",
+        "displayName": "Sheet",
+        "canonical": "#fefefd",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.001 106)",
+          "oklch(26% 0.001 106)",
+          "oklch(37% 0.001 106)",
+          "oklch(48% 0.001 106)",
+          "oklch(60% 0.001 106)",
+          "oklch(72% 0.001 106)",
+          "oklch(84% 0 106)",
+          "oklch(95% 0 106)"
+        ],
+        "dark": "#1c1b1b"
+      },
+      "superficie-2": {
+        "role": "neutral",
+        "displayName": "Shaded Sheet",
+        "canonical": "#efeeec",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.002 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(37% 0.003 85)",
+          "oklch(48% 0.003 85)",
+          "oklch(60% 0.003 85)",
+          "oklch(72% 0.003 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ],
+        "dark": "#262424"
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Brand Black",
+        "canonical": "#1e1e1e",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0 90)",
+          "oklch(26% 0 90)",
+          "oklch(37% 0 90)",
+          "oklch(48% 0 90)",
+          "oklch(60% 0 90)",
+          "oklch(72% 0 90)",
+          "oklch(84% 0 90)",
+          "oklch(95% 0 90)"
+        ],
+        "dark": "#f2efee"
+      },
+      "tinta-2": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "#4f4a49",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.002 49)",
+          "oklch(26% 0.002 49)",
+          "oklch(37% 0.003 49)",
+          "oklch(48% 0.003 49)",
+          "oklch(60% 0.003 49)",
+          "oklch(72% 0.003 49)",
+          "oklch(84% 0.001 49)",
+          "oklch(95% 0.001 49)"
+        ],
+        "dark": "#b3adab"
+      },
+      "tinta-3": {
+        "role": "neutral",
+        "displayName": "Soft Graphite",
+        "canonical": "#6b6866",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.003 56)",
+          "oklch(26% 0.003 56)",
+          "oklch(37% 0.005 56)",
+          "oklch(48% 0.005 56)",
+          "oklch(60% 0.005 56)",
+          "oklch(72% 0.005 56)",
+          "oklch(84% 0.002 56)",
+          "oklch(95% 0.002 56)"
+        ],
+        "dark": "#8f8988"
+      },
+      "tinta-rubor": {
+        "role": "secondary",
+        "displayName": "Blush Ink",
+        "canonical": "#74504b",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.03 28)",
+          "oklch(26% 0.03 28)",
+          "oklch(37% 0.05 28)",
+          "oklch(48% 0.05 28)",
+          "oklch(60% 0.05 28)",
+          "oklch(72% 0.05 28)",
+          "oklch(84% 0.017 28)",
+          "oklch(95% 0.017 28)"
+        ],
+        "dark": "#d9b3ae"
+      },
+      "linea": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e5e3e1",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.002 68)",
+          "oklch(26% 0.002 68)",
+          "oklch(37% 0.003 68)",
+          "oklch(48% 0.003 68)",
+          "oklch(60% 0.003 68)",
+          "oklch(72% 0.003 68)",
+          "oklch(84% 0.001 68)",
+          "oklch(95% 0.001 68)"
+        ],
+        "dark": "#312e2e"
+      },
+      "linea-fuerte": {
+        "role": "neutral",
+        "displayName": "Strong Line",
+        "canonical": "#cfccca",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.003 56)",
+          "oklch(26% 0.003 56)",
+          "oklch(37% 0.004 56)",
+          "oklch(48% 0.004 56)",
+          "oklch(60% 0.004 56)",
+          "oklch(72% 0.004 56)",
+          "oklch(84% 0.002 56)",
+          "oklch(95% 0.002 56)"
+        ],
+        "dark": "#4a4545"
+      },
+      "linea-campo": {
+        "role": "neutral",
+        "displayName": "Field Line",
+        "canonical": "#928e8c",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.003 49)",
+          "oklch(26% 0.003 49)",
+          "oklch(37% 0.006 49)",
+          "oklch(48% 0.006 49)",
+          "oklch(60% 0.006 49)",
+          "oklch(72% 0.006 49)",
+          "oklch(84% 0.002 49)",
+          "oklch(95% 0.002 49)"
+        ],
+        "dark": "#7a7272"
+      },
+      "acento": {
+        "role": "primary",
+        "displayName": "Merkatics Red",
+        "canonical": "#c6443f",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.096 26)",
+          "oklch(26% 0.096 26)",
+          "oklch(37% 0.16 26)",
+          "oklch(48% 0.16 26)",
+          "oklch(60% 0.16 26)",
+          "oklch(72% 0.16 26)",
+          "oklch(84% 0.056 26)",
+          "oklch(95% 0.056 26)"
+        ],
+        "dark": "#e95349"
+      },
+      "acento-hover": {
+        "role": "primary",
+        "displayName": "Pressed Red",
+        "canonical": "#b23a35",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.094 26)",
+          "oklch(26% 0.094 26)",
+          "oklch(37% 0.157 26)",
+          "oklch(48% 0.157 26)",
+          "oklch(60% 0.157 26)",
+          "oklch(72% 0.157 26)",
+          "oklch(84% 0.055 26)",
+          "oklch(95% 0.055 26)"
+        ],
+        "dark": "#f06a5f"
+      },
+      "acento-texto": {
+        "role": "primary",
+        "displayName": "Red Ink",
+        "canonical": "#b03a35",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.093 26)",
+          "oklch(26% 0.093 26)",
+          "oklch(37% 0.155 26)",
+          "oklch(48% 0.155 26)",
+          "oklch(60% 0.155 26)",
+          "oklch(72% 0.155 26)",
+          "oklch(84% 0.054 26)",
+          "oklch(95% 0.054 26)"
+        ],
+        "dark": "#f4908a"
+      },
+      "acento-suave": {
+        "role": "primary",
+        "displayName": "Red Wash",
+        "canonical": "#fceae7",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.012 29)",
+          "oklch(26% 0.012 29)",
+          "oklch(37% 0.02 29)",
+          "oklch(48% 0.02 29)",
+          "oklch(60% 0.02 29)",
+          "oklch(72% 0.02 29)",
+          "oklch(84% 0.007 29)",
+          "oklch(95% 0.007 29)"
+        ],
+        "dark": "#3a201f"
+      },
+      "rubor": {
+        "role": "secondary",
+        "displayName": "Blush",
+        "canonical": "#fceeeb",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.009 32)",
+          "oklch(26% 0.009 32)",
+          "oklch(37% 0.016 32)",
+          "oklch(48% 0.016 32)",
+          "oklch(60% 0.016 32)",
+          "oklch(72% 0.016 32)",
+          "oklch(84% 0.006 32)",
+          "oklch(95% 0.006 32)"
+        ],
+        "dark": "#2a1d1c"
+      },
+      "rubor-2": {
+        "role": "secondary",
+        "displayName": "Deep Blush",
+        "canonical": "#f8deda",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.018 28)",
+          "oklch(26% 0.018 28)",
+          "oklch(37% 0.029 28)",
+          "oklch(48% 0.029 28)",
+          "oklch(60% 0.029 28)",
+          "oklch(72% 0.029 28)",
+          "oklch(84% 0.01 28)",
+          "oklch(95% 0.01 28)"
+        ],
+        "dark": "#3a2422"
+      },
+      "progreso": {
+        "role": "secondary",
+        "displayName": "Progress Coral",
+        "canonical": "#e95349",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.096 27)",
+          "oklch(26% 0.096 27)",
+          "oklch(37% 0.16 27)",
+          "oklch(48% 0.16 27)",
+          "oklch(60% 0.16 27)",
+          "oklch(72% 0.16 27)",
+          "oklch(84% 0.056 27)",
+          "oklch(95% 0.056 27)"
+        ],
+        "dark": "#f07c73"
+      },
+      "arco-1": {
+        "role": "tertiary",
+        "displayName": "Arc Coral",
+        "canonical": "#e26a69",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.09 22)",
+          "oklch(26% 0.09 22)",
+          "oklch(37% 0.15 22)",
+          "oklch(48% 0.15 22)",
+          "oklch(60% 0.15 22)",
+          "oklch(72% 0.15 22)",
+          "oklch(84% 0.053 22)",
+          "oklch(95% 0.053 22)"
+        ]
+      },
+      "arco-2": {
+        "role": "tertiary",
+        "displayName": "Arc Red",
+        "canonical": "#d64d4d",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.096 24)",
+          "oklch(26% 0.096 24)",
+          "oklch(37% 0.16 24)",
+          "oklch(48% 0.16 24)",
+          "oklch(60% 0.16 24)",
+          "oklch(72% 0.16 24)",
+          "oklch(84% 0.056 24)",
+          "oklch(95% 0.056 24)"
+        ]
+      },
+      "arco-3": {
+        "role": "tertiary",
+        "displayName": "Arc Rose",
+        "canonical": "#f4c2bd",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.035 25)",
+          "oklch(26% 0.035 25)",
+          "oklch(37% 0.058 25)",
+          "oklch(48% 0.058 25)",
+          "oklch(60% 0.058 25)",
+          "oklch(72% 0.058 25)",
+          "oklch(84% 0.02 25)",
+          "oklch(95% 0.02 25)"
+        ],
+        "dark": "#5a3431"
+      },
+      "exito": {
+        "role": "semantic",
+        "displayName": "Success Green",
+        "canonical": "#2f7d4f",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.063 154)",
+          "oklch(26% 0.063 154)",
+          "oklch(37% 0.106 154)",
+          "oklch(48% 0.106 154)",
+          "oklch(60% 0.106 154)",
+          "oklch(72% 0.106 154)",
+          "oklch(84% 0.037 154)",
+          "oklch(95% 0.037 154)"
+        ],
+        "dark": "#7acb98"
+      },
+      "exito-suave": {
+        "role": "semantic",
+        "displayName": "Success Wash",
+        "canonical": "#e6f3ea",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.011 156)",
+          "oklch(26% 0.011 156)",
+          "oklch(37% 0.018 156)",
+          "oklch(48% 0.018 156)",
+          "oklch(60% 0.018 156)",
+          "oklch(72% 0.018 156)",
+          "oklch(84% 0.006 156)",
+          "oklch(95% 0.006 156)"
+        ],
+        "dark": "#1d3326"
+      },
+      "exito-texto": {
+        "role": "semantic",
+        "displayName": "Success Ink",
+        "canonical": "#236b41",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.059 154)",
+          "oklch(26% 0.059 154)",
+          "oklch(37% 0.099 154)",
+          "oklch(48% 0.099 154)",
+          "oklch(60% 0.099 154)",
+          "oklch(72% 0.099 154)",
+          "oklch(84% 0.035 154)",
+          "oklch(95% 0.035 154)"
+        ],
+        "dark": "#8fd6a9"
+      },
+      "pendiente": {
+        "role": "semantic",
+        "displayName": "Pending Amber",
+        "canonical": "#8a5a00",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.065 73)",
+          "oklch(26% 0.065 73)",
+          "oklch(37% 0.108 73)",
+          "oklch(48% 0.108 73)",
+          "oklch(60% 0.108 73)",
+          "oklch(72% 0.108 73)",
+          "oklch(84% 0.038 73)",
+          "oklch(95% 0.038 73)"
+        ],
+        "dark": "#f0b45a"
+      },
+      "pendiente-suave": {
+        "role": "semantic",
+        "displayName": "Pending Wash",
+        "canonical": "#fdf1d8",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.021 85)",
+          "oklch(26% 0.021 85)",
+          "oklch(37% 0.035 85)",
+          "oklch(48% 0.035 85)",
+          "oklch(60% 0.035 85)",
+          "oklch(72% 0.035 85)",
+          "oklch(84% 0.012 85)",
+          "oklch(95% 0.012 85)"
+        ],
+        "dark": "#2e2412"
+      },
+      "peligro": {
+        "role": "semantic",
+        "displayName": "Error Red",
+        "canonical": "#9f1d2b",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.096 22)",
+          "oklch(26% 0.096 22)",
+          "oklch(37% 0.16 22)",
+          "oklch(48% 0.16 22)",
+          "oklch(60% 0.16 22)",
+          "oklch(72% 0.16 22)",
+          "oklch(84% 0.056 22)",
+          "oklch(95% 0.056 22)"
+        ],
+        "dark": "#f59aa3"
+      },
+      "peligro-suave": {
+        "role": "semantic",
+        "displayName": "Error Wash",
+        "canonical": "#fbe4e6",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.015 12)",
+          "oklch(26% 0.015 12)",
+          "oklch(37% 0.025 12)",
+          "oklch(48% 0.025 12)",
+          "oklch(60% 0.025 12)",
+          "oklch(72% 0.025 12)",
+          "oklch(84% 0.009 12)",
+          "oklch(95% 0.009 12)"
+        ],
+        "dark": "#3a1a1e"
+      },
+      "fondo-oscuro": {
+        "role": "neutral",
+        "displayName": "Stone Ground (dark)",
+        "canonical": "#141313",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.001 17)",
+          "oklch(26% 0.001 17)",
+          "oklch(37% 0.002 17)",
+          "oklch(48% 0.002 17)",
+          "oklch(60% 0.002 17)",
+          "oklch(72% 0.002 17)",
+          "oklch(84% 0.001 17)",
+          "oklch(95% 0.001 17)"
+        ]
+      },
+      "superficie-oscuro": {
+        "role": "neutral",
+        "displayName": "Sheet (dark)",
+        "canonical": "#1c1b1b",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.001 17)",
+          "oklch(26% 0.001 17)",
+          "oklch(37% 0.002 17)",
+          "oklch(48% 0.002 17)",
+          "oklch(60% 0.002 17)",
+          "oklch(72% 0.002 17)",
+          "oklch(84% 0.001 17)",
+          "oklch(95% 0.001 17)"
+        ]
+      },
+      "superficie-2-oscuro": {
+        "role": "neutral",
+        "displayName": "Shaded Sheet (dark)",
+        "canonical": "#262424",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.002 17)",
+          "oklch(26% 0.002 17)",
+          "oklch(37% 0.003 17)",
+          "oklch(48% 0.003 17)",
+          "oklch(60% 0.003 17)",
+          "oklch(72% 0.003 17)",
+          "oklch(84% 0.001 17)",
+          "oklch(95% 0.001 17)"
+        ]
+      },
+      "tinta-oscuro": {
+        "role": "neutral",
+        "displayName": "Brand Black (dark)",
+        "canonical": "#f2efee",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.002 39)",
+          "oklch(26% 0.002 39)",
+          "oklch(37% 0.004 39)",
+          "oklch(48% 0.004 39)",
+          "oklch(60% 0.004 39)",
+          "oklch(72% 0.004 39)",
+          "oklch(84% 0.001 39)",
+          "oklch(95% 0.001 39)"
+        ]
+      },
+      "tinta-2-oscuro": {
+        "role": "neutral",
+        "displayName": "Graphite (dark)",
+        "canonical": "#b3adab",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.004 39)",
+          "oklch(26% 0.004 39)",
+          "oklch(37% 0.007 39)",
+          "oklch(48% 0.007 39)",
+          "oklch(60% 0.007 39)",
+          "oklch(72% 0.007 39)",
+          "oklch(84% 0.003 39)",
+          "oklch(95% 0.003 39)"
+        ]
+      },
+      "tinta-3-oscuro": {
+        "role": "neutral",
+        "displayName": "Soft Graphite (dark)",
+        "canonical": "#8f8988",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.004 29)",
+          "oklch(26% 0.004 29)",
+          "oklch(37% 0.007 29)",
+          "oklch(48% 0.007 29)",
+          "oklch(60% 0.007 29)",
+          "oklch(72% 0.007 29)",
+          "oklch(84% 0.003 29)",
+          "oklch(95% 0.003 29)"
+        ]
+      },
+      "tinta-rubor-oscuro": {
+        "role": "secondary",
+        "displayName": "Blush Ink (dark)",
+        "canonical": "#d9b3ae",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.027 27)",
+          "oklch(26% 0.027 27)",
+          "oklch(37% 0.045 27)",
+          "oklch(48% 0.045 27)",
+          "oklch(60% 0.045 27)",
+          "oklch(72% 0.045 27)",
+          "oklch(84% 0.016 27)",
+          "oklch(95% 0.016 27)"
+        ]
+      },
+      "linea-oscuro": {
+        "role": "neutral",
+        "displayName": "Hairline (dark)",
+        "canonical": "#312e2e",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.003 17)",
+          "oklch(26% 0.003 17)",
+          "oklch(37% 0.004 17)",
+          "oklch(48% 0.004 17)",
+          "oklch(60% 0.004 17)",
+          "oklch(72% 0.004 17)",
+          "oklch(84% 0.002 17)",
+          "oklch(95% 0.002 17)"
+        ]
+      },
+      "linea-fuerte-oscuro": {
+        "role": "neutral",
+        "displayName": "Strong Line (dark)",
+        "canonical": "#4a4545",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.004 17)",
+          "oklch(26% 0.004 17)",
+          "oklch(37% 0.007 17)",
+          "oklch(48% 0.007 17)",
+          "oklch(60% 0.007 17)",
+          "oklch(72% 0.007 17)",
+          "oklch(84% 0.002 17)",
+          "oklch(95% 0.002 17)"
+        ]
+      },
+      "linea-campo-oscuro": {
+        "role": "neutral",
+        "displayName": "Field Line (dark)",
+        "canonical": "#7a7272",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.006 17)",
+          "oklch(26% 0.006 17)",
+          "oklch(37% 0.01 17)",
+          "oklch(48% 0.01 17)",
+          "oklch(60% 0.01 17)",
+          "oklch(72% 0.01 17)",
+          "oklch(84% 0.003 17)",
+          "oklch(95% 0.003 17)"
+        ]
+      },
+      "acento-oscuro": {
+        "role": "primary",
+        "displayName": "Merkatics Red (dark)",
+        "canonical": "#e95349",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.096 27)",
+          "oklch(26% 0.096 27)",
+          "oklch(37% 0.16 27)",
+          "oklch(48% 0.16 27)",
+          "oklch(60% 0.16 27)",
+          "oklch(72% 0.16 27)",
+          "oklch(84% 0.056 27)",
+          "oklch(95% 0.056 27)"
+        ]
+      },
+      "acento-hover-oscuro": {
+        "role": "primary",
+        "displayName": "Pressed Red (dark)",
+        "canonical": "#f06a5f",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.096 27)",
+          "oklch(26% 0.096 27)",
+          "oklch(37% 0.16 27)",
+          "oklch(48% 0.16 27)",
+          "oklch(60% 0.16 27)",
+          "oklch(72% 0.16 27)",
+          "oklch(84% 0.056 27)",
+          "oklch(95% 0.056 27)"
+        ]
+      },
+      "acento-texto-oscuro": {
+        "role": "primary",
+        "displayName": "Red Ink (dark)",
+        "canonical": "#f4908a",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.073 24)",
+          "oklch(26% 0.073 24)",
+          "oklch(37% 0.122 24)",
+          "oklch(48% 0.122 24)",
+          "oklch(60% 0.122 24)",
+          "oklch(72% 0.122 24)",
+          "oklch(84% 0.043 24)",
+          "oklch(95% 0.043 24)"
+        ]
+      },
+      "acento-suave-oscuro": {
+        "role": "primary",
+        "displayName": "Red Wash (dark)",
+        "canonical": "#3a201f",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.024 22)",
+          "oklch(26% 0.024 22)",
+          "oklch(37% 0.041 22)",
+          "oklch(48% 0.041 22)",
+          "oklch(60% 0.041 22)",
+          "oklch(72% 0.041 22)",
+          "oklch(84% 0.014 22)",
+          "oklch(95% 0.014 22)"
+        ]
+      },
+      "acento-tinta-oscuro": {
+        "role": "primary",
+        "displayName": "Text on Red (dark)",
+        "canonical": "#1e1e1e",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0 90)",
+          "oklch(26% 0 90)",
+          "oklch(37% 0 90)",
+          "oklch(48% 0 90)",
+          "oklch(60% 0 90)",
+          "oklch(72% 0 90)",
+          "oklch(84% 0 90)",
+          "oklch(95% 0 90)"
+        ]
+      },
+      "rubor-oscuro": {
+        "role": "secondary",
+        "displayName": "Blush (dark)",
+        "canonical": "#2a1d1c",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.012 24)",
+          "oklch(26% 0.012 24)",
+          "oklch(37% 0.021 24)",
+          "oklch(48% 0.021 24)",
+          "oklch(60% 0.021 24)",
+          "oklch(72% 0.021 24)",
+          "oklch(84% 0.007 24)",
+          "oklch(95% 0.007 24)"
+        ]
+      },
+      "rubor-2-oscuro": {
+        "role": "secondary",
+        "displayName": "Deep Blush (dark)",
+        "canonical": "#3a2422",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.02 25)",
+          "oklch(26% 0.02 25)",
+          "oklch(37% 0.034 25)",
+          "oklch(48% 0.034 25)",
+          "oklch(60% 0.034 25)",
+          "oklch(72% 0.034 25)",
+          "oklch(84% 0.012 25)",
+          "oklch(95% 0.012 25)"
+        ]
+      },
+      "progreso-oscuro": {
+        "role": "secondary",
+        "displayName": "Progress Coral (dark)",
+        "canonical": "#f07c73",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.087 26)",
+          "oklch(26% 0.087 26)",
+          "oklch(37% 0.144 26)",
+          "oklch(48% 0.144 26)",
+          "oklch(60% 0.144 26)",
+          "oklch(72% 0.144 26)",
+          "oklch(84% 0.05 26)",
+          "oklch(95% 0.05 26)"
+        ]
+      },
+      "arco-3-oscuro": {
+        "role": "tertiary",
+        "displayName": "Arc Rose (dark)",
+        "canonical": "#5a3431",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.033 25)",
+          "oklch(26% 0.033 25)",
+          "oklch(37% 0.056 25)",
+          "oklch(48% 0.056 25)",
+          "oklch(60% 0.056 25)",
+          "oklch(72% 0.056 25)",
+          "oklch(84% 0.019 25)",
+          "oklch(95% 0.019 25)"
+        ]
+      },
+      "exito-oscuro": {
+        "role": "semantic",
+        "displayName": "Success Green (dark)",
+        "canonical": "#7acb98",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.065 155)",
+          "oklch(26% 0.065 155)",
+          "oklch(37% 0.109 155)",
+          "oklch(48% 0.109 155)",
+          "oklch(60% 0.109 155)",
+          "oklch(72% 0.109 155)",
+          "oklch(84% 0.038 155)",
+          "oklch(95% 0.038 155)"
+        ]
+      },
+      "exito-suave-oscuro": {
+        "role": "semantic",
+        "displayName": "Success Wash (dark)",
+        "canonical": "#1d3326",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.022 157)",
+          "oklch(26% 0.022 157)",
+          "oklch(37% 0.037 157)",
+          "oklch(48% 0.037 157)",
+          "oklch(60% 0.037 157)",
+          "oklch(72% 0.037 157)",
+          "oklch(84% 0.013 157)",
+          "oklch(95% 0.013 157)"
+        ]
+      },
+      "exito-texto-oscuro": {
+        "role": "semantic",
+        "displayName": "Success Ink (dark)",
+        "canonical": "#8fd6a9",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.057 156)",
+          "oklch(26% 0.057 156)",
+          "oklch(37% 0.096 156)",
+          "oklch(48% 0.096 156)",
+          "oklch(60% 0.096 156)",
+          "oklch(72% 0.096 156)",
+          "oklch(84% 0.034 156)",
+          "oklch(95% 0.034 156)"
+        ]
+      },
+      "pendiente-oscuro": {
+        "role": "semantic",
+        "displayName": "Pending Amber (dark)",
+        "canonical": "#f0b45a",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.076 75)",
+          "oklch(26% 0.076 75)",
+          "oklch(37% 0.127 75)",
+          "oklch(48% 0.127 75)",
+          "oklch(60% 0.127 75)",
+          "oklch(72% 0.127 75)",
+          "oklch(84% 0.045 75)",
+          "oklch(95% 0.045 75)"
+        ]
+      },
+      "pendiente-suave-oscuro": {
+        "role": "semantic",
+        "displayName": "Pending Wash (dark)",
+        "canonical": "#2e2412",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.02 81)",
+          "oklch(26% 0.02 81)",
+          "oklch(37% 0.033 81)",
+          "oklch(48% 0.033 81)",
+          "oklch(60% 0.033 81)",
+          "oklch(72% 0.033 81)",
+          "oklch(84% 0.012 81)",
+          "oklch(95% 0.012 81)"
+        ]
+      },
+      "peligro-oscuro": {
+        "role": "semantic",
+        "displayName": "Error Red (dark)",
+        "canonical": "#f59aa3",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.066 13)",
+          "oklch(26% 0.066 13)",
+          "oklch(37% 0.109 13)",
+          "oklch(48% 0.109 13)",
+          "oklch(60% 0.109 13)",
+          "oklch(72% 0.109 13)",
+          "oklch(84% 0.038 13)",
+          "oklch(95% 0.038 13)"
+        ]
+      },
+      "peligro-suave-oscuro": {
+        "role": "semantic",
+        "displayName": "Error Wash (dark)",
+        "canonical": "#3a1a1e",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.03 13)",
+          "oklch(26% 0.03 13)",
+          "oklch(37% 0.051 13)",
+          "oklch(48% 0.051 13)",
+          "oklch(60% 0.051 13)",
+          "oklch(72% 0.051 13)",
+          "oklch(84% 0.018 13)",
+          "oklch(95% 0.018 13)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page h1 and cover titles."
+      },
+      "precio": {
+        "displayName": "Price",
+        "purpose": "The membership price only."
+      },
+      "ventana": {
+        "displayName": "Window title",
+        "purpose": "The welcome modal title."
+      },
+      "cifra-destacada": {
+        "displayName": "Hero figure",
+        "purpose": "Single hero figures: course progress count, OXXO amount, card price."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "h2, the seal title, coach and community stat figures."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "h3, card and post titles, brand name, sidebar titles."
+      },
+      "lectura": {
+        "displayName": "Reading",
+        "purpose": "Lesson prose, max 36em."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default text, chat answers, post bodies."
+      },
+      "boton": {
+        "displayName": "Button",
+        "purpose": "Button labels."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Meta, chips, filters, lesson row details."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Form labels, timestamps, citation chips."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Pills, badges, bottom-nav labels. Never uppercase-tracked."
+      },
+      "referencia": {
+        "displayName": "Reference (mono)",
+        "purpose": "Lesson ids, the OXXO reference and the CLABE only."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "sellar",
+        "value": "0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The completion seal stamp (scale 1.5 and -18deg to rest), once, when the student marks a lesson. The only authored motion; gated by prefers-reduced-motion: no-preference."
+      },
+      {
+        "name": "progreso",
+        "value": "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Progress-bar fill moving to its new value."
+      },
+      {
+        "name": "estado",
+        "value": "0.15s",
+        "purpose": "Color, background and border-color state transitions on buttons, chips, rows and links."
+      },
+      {
+        "name": "latido",
+        "value": "1.2s ease-in-out infinite, staggered 0.15s",
+        "purpose": "Three coral dots while the assistant is thinking."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "modal-stack",
+        "value": "440px"
+      },
+      {
+        "name": "rows-compact",
+        "value": "600px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "membership-coach-stack",
+        "value": "860px"
+      },
+      {
+        "name": "lesson-stack",
+        "value": "900px"
+      },
+      {
+        "name": "community-stack",
+        "value": "920px"
+      }
+    ],
+    "brandSource": {
+      "manual": "Merkatics corporate identity manual",
+      "reds": [
+        "#C6443F",
+        "#D64D4D",
+        "#E95349",
+        "#E26A69"
+      ],
+      "black": "#1E1E1E",
+      "reservedFaces": {
+        "logo": "Futura Bold / Caros (logo only, not used in UI)",
+        "stationery": "Montreal Serial (stationery only)"
+      },
+      "iconFamily": "Phosphor (@phosphor-icons/react), single family",
+      "motif": "Three concentric quarter-annulus bands anchored top-right (components/Arcos.tsx)"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Red pill for the one action a screen asks for; the membership CTA always reads the same.",
+      "html": "<button class=\"ds-btn\">Unirme por $490 al mes</button>",
+      "css": ".ds-btn { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 9px 20px; border: 1.5px solid transparent; border-radius: 999px; background: var(--acento, #c6443f); color: var(--acento-tinta, #fefefd); font-size: 0.9375rem; font-weight: 700; line-height: 1.25; cursor: pointer; transition: background 0.15s, transform 0.1s; } .ds-btn:hover { background: var(--acento-hover, #b23a35); } .ds-btn:active { transform: translateY(1px); } .ds-btn:focus-visible { outline: 2px solid var(--acento, #c6443f); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Red-outlined pill for the second path; fills with red wash on hover.",
+      "html": "<button class=\"ds-btn-sec\">Ver el curso</button>",
+      "css": ".ds-btn-sec { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; min-height: 42px; padding: 9px 20px; border: 1.5px solid var(--acento, #c6443f); border-radius: 999px; background: transparent; color: var(--acento-texto, #b03a35); font-size: 0.9375rem; font-weight: 700; cursor: pointer; transition: background 0.15s; } .ds-btn-sec:hover { background: var(--acento-suave, #fceae7); } .ds-btn-sec:focus-visible { outline: 2px solid var(--acento, #c6443f); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Sheet field with a 3:1 field line; border and outline turn red on focus.",
+      "html": "<label class=\"ds-campo\"><span>Título</span><input placeholder=\"¿De qué quieres hablar?\" /></label>",
+      "css": ".ds-campo { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; display: grid; gap: 6px; } .ds-campo span { font-size: 0.8125rem; font-weight: 700; color: var(--tinta-2, #4f4a49); } .ds-campo input { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; min-height: 44px; padding: 10px 14px; border: 1px solid var(--linea-campo, #928e8c); border-radius: 12px; background: var(--superficie, #fefefd); color: var(--tinta, #1e1e1e); font-size: 1rem; } .ds-campo input::placeholder { color: var(--tinta-3, #6b6866); } .ds-campo input:focus { outline: 2px solid var(--acento, #c6443f); outline-offset: 1px; border-color: var(--acento, #c6443f); }"
+    },
+    {
+      "name": "Top Bar Navigation",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "White bar; the active section gets brand-black text, a red icon and a 3px red underline.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\">Comunidad</a><a href=\"#\" aria-current=\"page\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 256 256\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M32 56h64a32 32 0 0 1 32 32v112a24 24 0 0 0-24-24H32Z\"/><path d=\"M224 56h-64a32 32 0 0 0-32 32v112a24 24 0 0 1 24-24h72Z\"/></svg>Curso</a><a href=\"#\">Asistente</a></nav>",
+      "css": ".ds-nav { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; display: flex; gap: 2px; min-height: 64px; background: var(--superficie, #fefefd); border-bottom: 1px solid var(--linea, #e5e3e1); } .ds-nav a { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; color: var(--tinta-2, #4f4a49); text-decoration: none; font-weight: 600; transition: color 0.15s; } .ds-nav a:hover { color: var(--tinta, #1e1e1e); } .ds-nav a:focus-visible { outline: 2px solid var(--acento, #c6443f); outline-offset: 2px; } .ds-nav a[aria-current=\"page\"] { color: var(--tinta, #1e1e1e); } .ds-nav a[aria-current=\"page\"] svg { color: var(--acento-texto, #b03a35); } .ds-nav a[aria-current=\"page\"]::after { content: \"\"; position: absolute; left: 14px; right: 14px; bottom: 0; height: 3px; border-radius: 999px 999px 0 0; background: var(--acento, #c6443f); }"
+    },
+    {
+      "name": "Filter Chips and Status Pills",
+      "kind": "chip",
+      "refersTo": "filter-chip",
+      "description": "Outlined pill filters (pressed = red wash) and scoped status pills (neutral, paid, pending).",
+      "html": "<div class=\"ds-fila\"><button class=\"ds-filtro\" aria-pressed=\"true\">Todo</button><button class=\"ds-filtro\" aria-pressed=\"false\">Preguntas</button><span class=\"ds-pastilla\">Gratis</span><span class=\"ds-pastilla ds-ok\">Miembro</span><span class=\"ds-pastilla ds-pend\">Pendiente de pago</span></div>",
+      "css": ".ds-fila { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .ds-filtro { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; padding: 6px 15px; border: 1px solid var(--linea-fuerte, #cfccca); border-radius: 999px; background: var(--superficie, #fefefd); color: var(--tinta-2, #4f4a49); font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: background 0.15s, color 0.15s; } .ds-filtro:hover { color: var(--tinta, #1e1e1e); } .ds-filtro:focus-visible { outline: 2px solid var(--acento, #c6443f); outline-offset: 2px; } .ds-filtro[aria-pressed=\"true\"] { background: var(--acento-suave, #fceae7); border-color: var(--acento, #c6443f); color: var(--acento-texto, #b03a35); } .ds-pastilla { padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: var(--superficie-2, #efeeec); color: var(--tinta-2, #4f4a49); } .ds-ok { background: var(--exito-suave, #e6f3ea); color: var(--exito-texto, #236b41); } .ds-pend { background: var(--pendiente-suave, #fdf1d8); color: var(--pendiente, #8a5a00); }"
+    },
+    {
+      "name": "Cover with Corner Arcs",
+      "kind": "custom",
+      "refersTo": "portada",
+      "description": "Blush identity field at 24px radius with the three concentric corner bands; supporting text in blush ink.",
+      "html": "<section class=\"ds-portada\"><svg class=\"ds-arcos\" viewBox=\"0 0 200 200\" aria-hidden=\"true\"><path d=\"M0 0A200 200 0 0 0 200 200L200 172A172 172 0 0 1 28 0Z\" fill=\"var(--arco-1, #e26a69)\"/><path d=\"M36 0A164 164 0 0 0 200 164L200 140A140 140 0 0 1 60 0Z\" fill=\"var(--arco-2, #d64d4d)\"/><path d=\"M68 0A132 132 0 0 0 200 132L200 118A118 118 0 0 1 82 0Z\" fill=\"var(--arco-3, #f4c2bd)\"/></svg><h1>Finanzas claras para tu negocio</h1><p>De la caja de zapatos al control de tu dinero en 3 módulos.</p></section>",
+      "css": ".ds-portada { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; position: relative; overflow: hidden; display: grid; gap: 8px; padding: 30px 202px 30px 30px; background: var(--rubor, #fceeeb); border-radius: 24px; color: var(--tinta, #1e1e1e); } .ds-portada > :not(.ds-arcos) { position: relative; margin: 0; } .ds-portada h1 { font-family: Red Hat Display, ui-sans-serif, system-ui, sans-serif; font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.55rem); font-weight: 700; line-height: 1.12; letter-spacing: -0.02em; } .ds-portada p { color: var(--tinta-rubor, #74504b); } .ds-arcos { position: absolute; top: 0; right: 0; width: 190px; height: auto; pointer-events: none; }"
+    },
+    {
+      "name": "Lesson Rows",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Module card with lesson rows led by state circles: open (red wash, red play), done (green check), locked (gray lock).",
+      "html": "<div class=\"ds-modulo\"><div class=\"ds-cab\"><span class=\"ds-num\">Módulo 1</span><h3>Ordena tu dinero</h3></div><a class=\"ds-fila-l\" href=\"#\"><span class=\"ds-estado ds-hecha\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 256 256\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"24\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"40 144 96 200 224 72\"/></svg></span><span><b>Separa el dinero del negocio</b><small>Gratis, 8 min</small></span></a><a class=\"ds-fila-l\" href=\"#\"><span class=\"ds-estado\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240 128a15.74 15.74 0 0 1-7.6 13.51L88.32 229.65a16 16 0 0 1-16.2.3A15.86 15.86 0 0 1 64 216.13V39.87a15.86 15.86 0 0 1 8.12-13.82 16 16 0 0 1 16.2.3l144.08 88.14A15.74 15.74 0 0 1 240 128Z\"/></svg></span><span><b>Págate un sueldo</b><small>Gratis, 7 min</small></span></a><a class=\"ds-fila-l ds-bloq\" href=\"#\"><span class=\"ds-estado ds-bloqueada\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 256 256\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"40\" y=\"88\" width=\"176\" height=\"128\" rx=\"8\"/><path d=\"M92 88V52a36 36 0 0 1 72 0v36\"/></svg></span><span><b>Costos fijos y variables</b><small>9 min</small></span></a></div>",
+      "css": ".ds-modulo { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; background: var(--superficie, #fefefd); border: 1px solid var(--linea, #e5e3e1); border-radius: 16px; padding: 8px 8px 10px; } .ds-cab { display: flex; align-items: baseline; gap: 10px; padding: 12px 12px 8px; } .ds-cab h3 { font-family: Red Hat Display, ui-sans-serif, system-ui, sans-serif; margin: 0; font-size: 1.125rem; font-weight: 600; } .ds-num { font-size: 0.875rem; font-weight: 700; color: var(--acento-texto, #b03a35); } .ds-fila-l { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 12px; color: var(--tinta, #1e1e1e); text-decoration: none; transition: background 0.15s; } .ds-fila-l:hover { background: var(--superficie-2, #efeeec); } .ds-fila-l:focus-visible { outline: 2px solid var(--acento, #c6443f); outline-offset: 2px; } .ds-fila-l > span:last-child { display: grid; font-size: 0.8125rem; color: var(--tinta-2, #4f4a49); } .ds-fila-l b { font-weight: 800; font-size: 1rem; color: var(--tinta, #1e1e1e); } .ds-bloq b { color: var(--tinta-2, #4f4a49); } .ds-estado { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: var(--acento-suave, #fceae7); color: var(--acento-texto, #b03a35); } .ds-hecha { background: var(--exito, #2f7d4f); color: var(--superficie, #fefefd); } .ds-bloqueada { background: var(--superficie-2, #efeeec); color: var(--tinta-2, #4f4a49); }"
+    },
+    {
+      "name": "Citation Chips",
+      "kind": "chip",
+      "refersTo": "citation-chip",
+      "description": "Red-wash pills tying an answer to its lesson, with a mono id capsule; the locked variant is gray with a lock.",
+      "html": "<p class=\"ds-citas\">Separa las cuentas primero <a class=\"ds-cita\" href=\"#\"><span class=\"ds-id\">M1-L1</span>Separa el dinero</a> <a class=\"ds-cita ds-cita-bloq\" href=\"#\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 256 256\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"40\" y=\"88\" width=\"176\" height=\"128\" rx=\"8\"/><path d=\"M92 88V52a36 36 0 0 1 72 0v36\"/></svg><span class=\"ds-id\">M2-L2</span>Cómo calcular tu precio</a></p>",
+      "css": ".ds-citas { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; font-size: 1rem; line-height: 2; } .ds-cita { display: inline-flex; align-items: center; gap: 5px; padding: 1px 10px 1px 3px; border-radius: 999px; background: var(--acento-suave, #fceae7); color: var(--acento-texto, #b03a35); font-size: 0.8125rem; font-weight: 700; line-height: 1.6; text-decoration: none; white-space: nowrap; transition: background 0.15s, color 0.15s; } .ds-cita:hover { background: var(--acento, #c6443f); color: var(--superficie, #fefefd); } .ds-cita:focus-visible { outline: 2px solid var(--acento, #c6443f); outline-offset: 2px; } .ds-cita-bloq { padding-left: 8px; background: var(--superficie-2, #efeeec); color: var(--tinta-2, #4f4a49); } .ds-cita-bloq:hover { background: var(--tinta, #1e1e1e); color: var(--superficie, #fefefd); } .ds-id { font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 0.75rem; font-weight: 500; padding: 0 6px; border-radius: 999px; background: var(--superficie, #fefefd); color: var(--acento-texto, #b03a35); }"
+    },
+    {
+      "name": "OXXO Ficha",
+      "kind": "custom",
+      "refersTo": "oxxo-ficha",
+      "description": "Dashed reference box: amount in the hero figure, grouped mono reference with a copy button, amber pending pill.",
+      "html": "<div class=\"ds-ficha\"><span class=\"ds-pend-p\">Pendiente de pago</span><dl><div><dt>Monto</dt><dd class=\"ds-monto\">$490.00</dd></div><div><dt>Referencia</dt><dd><span class=\"ds-ref\">9300 4521 8876 12</span><button class=\"ds-copiar\" aria-label=\"Copiar referencia\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 256 256\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"168 168 216 168 216 40 88 40 88 88\"/><rect x=\"40\" y=\"88\" width=\"128\" height=\"128\"/></svg></button></dd></div></dl></div>",
+      "css": ".ds-ficha { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; display: grid; gap: 14px; justify-items: start; } .ds-pend-p { padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: var(--pendiente-suave, #fdf1d8); color: var(--pendiente, #8a5a00); } .ds-ficha dl { display: grid; gap: 12px; margin: 0; padding: 16px 18px; border: 1.5px dashed var(--linea-fuerte, #cfccca); border-radius: 12px; width: 100%; } .ds-ficha dt { font-size: 0.8125rem; font-weight: 700; color: var(--tinta-2, #4f4a49); } .ds-ficha dd { margin: 2px 0 0; display: flex; align-items: center; gap: 6px; } .ds-monto { font-family: Red Hat Display, ui-sans-serif, system-ui, sans-serif; font-size: 1.75rem; font-weight: 700; font-variant-numeric: tabular-nums; } .ds-ref { font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 1.125rem; letter-spacing: 0.04em; } .ds-copiar { display: inline-grid; place-items: center; width: 30px; height: 30px; border: none; border-radius: 50%; background: transparent; color: var(--tinta-2, #4f4a49); cursor: pointer; } .ds-copiar:hover { background: var(--superficie-2, #efeeec); color: var(--tinta, #1e1e1e); } .ds-copiar:focus-visible { outline: 2px solid var(--acento, #c6443f); outline-offset: 2px; }"
+    },
+    {
+      "name": "Completion Seal",
+      "kind": "custom",
+      "refersTo": "completion-seal",
+      "description": "Green-wash sheet whose SealCheck icon stamps in once when a lesson is marked done; the system's only authored motion.",
+      "html": "<div class=\"ds-sello\"><span class=\"ds-sello-marca\"><svg width=\"40\" height=\"40\" viewBox=\"0 0 256 256\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"16\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M54.46 201.54c-9.2-9.2-3.1-28.53-7.78-39.85C41.83 150 24 140.5 24 128s17.83-22 22.68-33.69C51.36 83 45.26 63.66 54.46 54.46S83 51.36 94.31 46.68C106.05 41.83 115.5 24 128 24s22 17.83 33.69 22.68c11.32 4.68 30.65-1.42 39.85 7.78s3.1 28.53 7.78 39.85C214.17 106.05 232 115.5 232 128s-17.83 22-22.68 33.69c-4.68 11.32 1.42 30.65-7.78 39.85s-28.53 3.1-39.85 7.78C150 214.17 140.5 232 128 232s-22-17.83-33.69-22.68c-11.32-4.68-30.65 1.42-39.85-7.78Z\"/><polyline points=\"88 136 112 160 168 104\"/></svg></span><div><p class=\"ds-sello-titulo\">Lección completada</p><p>2 de 8 lecciones</p></div></div>",
+      "css": ".ds-sello { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; align-items: center; padding: 18px 20px; border-radius: 16px; background: var(--exito-suave, #e6f3ea); font-size: 0.875rem; color: var(--tinta, #1e1e1e); } .ds-sello p { margin: 0; } .ds-sello-marca { display: grid; place-items: center; color: var(--exito-texto, #236b41); } .ds-sello-titulo { font-family: Red Hat Display, ui-sans-serif, system-ui, sans-serif; font-size: 1.3rem; font-weight: 700; line-height: 1.2; color: var(--exito-texto, #236b41); } @media (prefers-reduced-motion: no-preference) { .ds-sello:hover .ds-sello-marca { animation: ds-sellar 0.5s cubic-bezier(0.16, 1, 0.3, 1); } } @keyframes ds-sellar { from { opacity: 0; transform: scale(1.5) rotate(-18deg); } to { opacity: 1; transform: none; } }"
+    },
+    {
+      "name": "Chat Exchange",
+      "kind": "custom",
+      "refersTo": "chat-bubble-user",
+      "description": "Deep-blush student bubble with a 4px tail bottom-right; white assistant card with the tail top-left.",
+      "html": "<div class=\"ds-chat\"><p class=\"ds-yo\">¿Cuánto me pago de sueldo?</p><div class=\"ds-ia\"><span class=\"ds-autor\">Asistente del curso</span><p>Parte de tu utilidad real, no de tus ventas.</p></div></div>",
+      "css": ".ds-chat { font-family: 'Red Hat Text', ui-sans-serif, system-ui, sans-serif; display: grid; gap: 16px; } .ds-chat p { margin: 0; } .ds-yo { justify-self: end; max-width: 80%; padding: 10px 16px; border-radius: 24px 24px 4px 24px; background: var(--rubor-2, #f8deda); color: var(--tinta, #1e1e1e); } .ds-ia { display: grid; gap: 8px; padding: 16px 20px; border: 1px solid var(--linea, #e5e3e1); border-radius: 4px 24px 24px 24px; background: var(--superficie, #fefefd); color: var(--tinta, #1e1e1e); } .ds-autor { font-size: 0.8125rem; font-weight: 800; color: var(--acento-texto, #b03a35); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Merkatics en luz de día",
+    "overview": "The Merkatics corporate identity manual, a printed system of corporate reds, brand black and concentric coral arcs, translated into a light product interface. Near-white sheets sit on a pale stone ground; blush fields (the manual's coral, diluted) mark the few places that carry identity: page covers, the assistant block and the student's own chat bubble. Three concentric quarter-annulus bands in coral and red anchor the top-right corner of those covers, exactly as the manual places them on stationery. The corporate red is reserved for doing things: filled actions and the active section.\n\nDensity is product, not landing: dials of variation 4, motion 4, density 4. The student reads it on a phone in strong daylight, the coach on a laptop, so contrast is carried by ink and lines, and color is spent only where it means something. Light dominates by explicit request of the client: the brand black lives only in text, and no frame, bar or panel is dark. The light theme is always shown, even when the operating system or browser prefers dark (explicit client request); the dark theme exists only as an opt-in through `data-theme=\"dark\"` on `<html>`.\n\nIt rejects the previous version's black frame and the generic gray course-platform feed.",
+    "keyCharacteristics": [
+      "Pale stone ground, near-white sheets, blush fields for covers and the assistant.",
+      "Corner arcs (three concentric coral bands) as the single brand motif.",
+      "Corporate red only on filled actions, the active nav underline and focus.",
+      "Flat: no shadows, no glass; depth by tonal fields and 1px lines.",
+      "Pill buttons, chips and filters; 12 / 16 / 24px corners for controls, sheets and windows.",
+      "Red Hat Display over Red Hat Text; IBM Plex Mono only for references.",
+      "One authored motion moment: the lesson-completion seal stamp."
+    ],
+    "rules": [
+      {
+        "name": "The Red Means Act Rule",
+        "body": "Merkatics Red fills only actions (buttons, icon buttons, the brand disc) and marks only the active section. It is never a background field, a heading color or decoration. Red text uses Red Ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Black Is Ink Rule",
+        "body": "Brand black appears only as text. No dark bars, frames, panels or video placeholders in the light theme.",
+        "section": "colors"
+      },
+      {
+        "name": "The Scoped Semantics Rule",
+        "body": "Green means completed or paid; amber means pending payment; error red means an error. None of them is used for anything else.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Pure Values Rule",
+        "body": "No #fff and no #000 anywhere; the lightest value is Sheet, the darkest is Brand Black.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Every number that is compared or summed takes tabular numerals (`.cifra`, font-feature `tnum`) without changing the font. Figures of one kind share one scale: all coach stats are Headline.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mono Is For Codes Rule",
+        "body": "Monospace marks things a person copies or cites (lesson id, payment reference, CLABE). It never sets headings, figures or labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tone Not Shadow Rule",
+        "body": "A surface sits above another by being lighter or tinted and outlined by a hairline, never by a shadow.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Lines Before Boxes Rule",
+        "body": "Group with dividers first; a card is only for a real object (a post, a module, the checkout, a stat row, a lesson's neighbors). The community sidebar stays unboxed on desktop.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do fill actions with Merkatics Red (#c6443f) and write red text in Red Ink (#b03a35).",
+      "Do mark identity with Blush fields (#fceeeb) and the corner arcs, and set secondary text on blush in Blush Ink (#74504b).",
+      "Do keep every surface light in the light theme: Stone Ground, Sheet and Shaded Sheet.",
+      "Do separate with 1px hairlines and tonal fields; reserve cards for real objects.",
+      "Do use one CTA label per intent, the same everywhere (\"Unirme por $490 al mes\").",
+      "Do set compared or summed numbers in tabular figures, one scale per kind.",
+      "Do use Phosphor icons only, one family, regular weight by default.",
+      "Do keep touch targets at 44px or more under `pointer: coarse`, and move navigation to the bottom bar at 760px.",
+      "Do gate every animation behind `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't use brand black for bars, frames, panels or placeholders; it is text only.",
+      "Don't use red as a field, heading color or decoration; don't use green outside completed or paid, or amber outside pending payment.",
+      "Don't add shadows, blur or glass.",
+      "Don't use pure #fff or #000.",
+      "Don't use Futura or Caros in the interface; they are reserved for the logo, which is not redrawn.",
+      "Don't set anything but lesson ids, the OXXO reference and the CLABE in monospace.",
+      "Don't use em-dashes in UI copy, or more than one middle dot per line.",
+      "Don't add a second authored motion moment beside the completion seal."
+    ]
+  }
+}

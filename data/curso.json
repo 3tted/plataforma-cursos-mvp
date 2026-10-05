@@ -1,0 +1,145 @@
+{
+  "comunidad": {
+    "nombre": "Finanzas Claras",
+    "coach": "Daniela Ortega",
+    "coach_titulo": "Consultora financiera para pequeños negocios",
+    "descripcion": "Comunidad para dueñas y dueños de pequeños negocios que quieren entender sus números sin volverse contadores.",
+    "precio_mensual": 490,
+    "moneda": "MXN"
+  },
+  "curso": {
+    "id": "finanzas-negocio",
+    "titulo": "Finanzas claras para tu negocio",
+    "subtitulo": "De la caja de zapatos al control de tu dinero en 3 módulos.",
+    "preguntas_sugeridas": [
+      "¿Qué diferencia hay entre margen y markup?",
+      "Vendo servicios, no productos. ¿Cómo calculo mi punto de equilibrio?",
+      "Vendo $60,000 al mes pero nunca me alcanza. ¿Por dónde empiezo?",
+      "¿Cuánto debería pagarme de sueldo?"
+    ],
+    "modulos": [
+      {
+        "id": "M1",
+        "titulo": "Ordena tu dinero",
+        "lecciones": [
+          {
+            "id": "L1",
+            "titulo": "Separa el dinero del negocio del tuyo",
+            "duracion_min": 8,
+            "gratis": true,
+            "resumen": "Por qué mezclar cuentas te impide saber si tu negocio gana, y cómo separarlas esta misma semana.",
+            "preguntas_sugeridas": [
+              "¿Necesito una cuenta bancaria nueva o basta con una hoja de cálculo?",
+              "¿Qué es la regla del traspaso único?",
+              "¿Qué hago con los gastos que son mitad personales y mitad del negocio?"
+            ],
+            "archivo": "lecciones/L1.md"
+          },
+          {
+            "id": "L2",
+            "titulo": "Págate un sueldo (aunque sea pequeño)",
+            "duracion_min": 7,
+            "gratis": true,
+            "resumen": "Cómo calcular un sueldo fijo para ti a partir de la utilidad real del negocio.",
+            "preguntas_sugeridas": [
+              "¿Cómo calculo mi sueldo si mis ventas cambian mucho cada mes?",
+              "¿Mi sueldo cuenta como gasto del negocio?",
+              "¿Qué hago si un mes no alcanza para pagarme?"
+            ],
+            "archivo": "lecciones/L2.md"
+          },
+          {
+            "id": "L3",
+            "titulo": "Registro simple de ingresos y gastos",
+            "duracion_min": 10,
+            "gratis": true,
+            "resumen": "Una hoja de cinco columnas y diez minutos a la semana para saber cuánto ganas.",
+            "preguntas_sugeridas": [
+              "¿Qué categorías de gastos me recomiendas?",
+              "¿Cómo registro la comisión de la terminal?",
+              "¿Para qué me sirve pedir factura de mis compras?"
+            ],
+            "archivo": "lecciones/L3.md"
+          }
+        ]
+      },
+      {
+        "id": "M2",
+        "titulo": "Precios que sí dejan ganancia",
+        "lecciones": [
+          {
+            "id": "L4",
+            "titulo": "Costos fijos y costos variables",
+            "duracion_min": 9,
+            "gratis": false,
+            "resumen": "Aprende a separar lo que pagas aunque no vendas de lo que pagas por cada venta.",
+            "preguntas_sugeridas": [
+              "¿La luz es un costo fijo o variable?",
+              "¿Cómo calculo el costo variable de un servicio?",
+              "¿Por qué el sueldo de Ana está en costos fijos?"
+            ],
+            "archivo": "lecciones/L4.md"
+          },
+          {
+            "id": "L5",
+            "titulo": "Cómo calcular tu precio",
+            "duracion_min": 11,
+            "gratis": false,
+            "resumen": "Margen, markup y la fórmula para poner un precio que cubra tus costos y deje ganancia.",
+            "preguntas_sugeridas": [
+              "¿Qué diferencia hay entre margen y markup?",
+              "Mi producto me cuesta $80, ¿en cuánto lo vendo para tener 60% de margen?",
+              "¿El IVA va incluido en mi precio?"
+            ],
+            "archivo": "lecciones/L5.md"
+          },
+          {
+            "id": "L6",
+            "titulo": "Punto de equilibrio",
+            "duracion_min": 8,
+            "gratis": false,
+            "resumen": "Cuántas ventas necesitas al mes para no perder dinero, y qué hacer si la cifra es imposible.",
+            "preguntas_sugeridas": [
+              "Tengo $25,000 de costos fijos y gano $250 por venta. ¿Cuál es mi punto de equilibrio?",
+              "¿Qué hago si mi punto de equilibrio es inalcanzable?",
+              "¿Cómo cambia el punto de equilibrio si subo mi precio?"
+            ],
+            "archivo": "lecciones/L6.md"
+          }
+        ]
+      },
+      {
+        "id": "M3",
+        "titulo": "Flujo de efectivo y crecimiento",
+        "lecciones": [
+          {
+            "id": "L7",
+            "titulo": "Flujo de efectivo: que no te falte para pagar",
+            "duracion_min": 12,
+            "gratis": false,
+            "resumen": "Por qué puedes tener utilidad y aun así quedarte sin dinero, y cómo proyectar 13 semanas.",
+            "preguntas_sugeridas": [
+              "¿Por qué tengo utilidad pero no tengo dinero en la cuenta?",
+              "¿Cómo armo mi flujo de 13 semanas?",
+              "Un cliente grande me paga a 30 días. ¿Qué hago?"
+            ],
+            "archivo": "lecciones/L7.md"
+          },
+          {
+            "id": "L8",
+            "titulo": "Fondo de reserva y cuándo invertir",
+            "duracion_min": 9,
+            "gratis": false,
+            "resumen": "Cuánto guardar para emergencias y cómo decidir si una inversión vale la pena.",
+            "preguntas_sugeridas": [
+              "¿De cuánto debe ser mi fondo de reserva?",
+              "¿Cómo sé si me conviene comprar equipo nuevo?",
+              "¿Dónde guardo el fondo de reserva?"
+            ],
+            "archivo": "lecciones/L8.md"
+          }
+        ]
+      }
+    ]
+  }
+}

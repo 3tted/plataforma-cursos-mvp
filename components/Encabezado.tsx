@@ -1,0 +1,114 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { moneda } from "@/lib/cliente";
+import Avatar from "./Avatar";
+import { useApp } from "./Contexto";
+import { IconoAsistente, IconoComunidad, IconoCurso, IconoPanel, IconoSalir } from "./Iconos";
+
+export default function Encabezado() {
+  const ruta = usePathname();
+  const router = useRouter();
+  const { datos, usuario, membresia, pagoPendiente, cerrarSesion } = useApp();
+  const comunidad = datos?.comunidad;
+
+  const enlaces = [
+    {
+      href: "/",
+      texto: "Comunidades",
+      corto: "Comunidades",
+      Icono: IconoComunidad,
+      activo: ruta === "/" || ruta.startsWith("/comunidad"),
+    },
+    { href: "/cursos", texto: "Cursos", corto: "Cursos", Icono: IconoCurso, activo: ruta.startsWith("/curso") },
+    { href: "/asistente", texto: "Asistente", corto: "Asistente", Icono: IconoAsistente, activo: ruta === "/asistente" },
+    ...(usuario?.rol === "coach"
+      ? [{ href: "/coach", texto: "Panel de la coach", corto: "Panel", Icono: IconoPanel, activo: ruta === "/coach" }]
+      : []),
+  ];
+
+  // En la membresía el botón de la barra sobra. En el celular la barra no lo
+  // muestra (no cabe junto a la marca y la cuenta): ahí la invitación vive en
+  // el bloque de membresía de la comunidad, en la lección bloqueada y en el curso.
+  const ocultarUnirse = ruta === "/membresia";
+
+  return (
+    <header className="barra" data-app-fondo>
+      <div className="envoltura barra-interior">
+        {/* Imagotipo oficial, tomado del manual de identidad (página "Identidad Básica"). */}
+        <Link href="/" className="marca">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="marca-logo"
+            src="/merkatics-logo.png"
+            alt="Merkatics Growth Operating System, inicio"
+            width={2311}
+            height={544}
+          />
+        </Link>
+
+        <nav className="nav" aria-label="Secciones">
+          {enlaces.map(({ href, texto, corto, Icono, activo }) => (
+            <Link key={href} href={href} className="nav-enlace" aria-current={activo ? "page" : undefined}>
+              <Icono />
+              {texto === corto ? (
+                <span>{texto}</span>
+              ) : (
+                <>
+                  <span className="nav-texto-largo">{texto}</span>
+                  <span className="nav-texto-corto">{corto}</span>
+                </>
+              )}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="barra-acciones">
+          {usuario?.rol === "alumno" &&
+            (membresia ? (
+              <span className="pastilla pastilla-ok">Miembro</span>
+            ) : pagoPendiente ? (
+              <Link href="/membresia" className="pastilla pastilla-pendiente pendiente-cabecera">
+                Pago pendiente
+              </Link>
+            ) : (
+              !ocultarUnirse && (
+                <Link href="/membresia" className="boton boton-chico boton-unirse">
+                  {`Unirme por ${moneda(comunidad?.precio_mensual ?? 490)} al mes`}
+                </Link>
+              )
+            ))}
+          {usuario && (
+            <span className="cuenta">
+              <Link
+                href="/perfil"
+                className="usuario"
+                aria-current={ruta === "/perfil" ? "page" : undefined}
+                aria-label={`Tu perfil: ${usuario.nombre}, ${usuario.rol === "coach" ? "coach" : "alumno"}`}
+              >
+                <Avatar nombre={usuario.nombre} tamaño={34} coach={usuario.rol === "coach"} />
+                <span className="usuario-textos" aria-hidden="true">
+                  <span className="usuario-nombre">{usuario.nombre}</span>
+                  <span className="usuario-rol">{usuario.rol === "coach" ? "Coach" : "Alumno"}</span>
+                </span>
+              </Link>
+              <button
+                type="button"
+                className="boton-icono boton-icono-chico salir"
+                onClick={() => {
+                  cerrarSesion();
+                  router.push("/");
+                }}
+                aria-label="Cerrar sesión"
+                title="Cerrar sesión"
+              >
+                <IconoSalir width={20} height={20} />
+              </button>
+            </span>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}

@@ -183,23 +183,6 @@ export default function PaginaLeccion() {
               </details>
             )}
 
-            <section className="tarjeta preguntar-leccion" aria-labelledby="preguntar-titulo">
-              <h2 id="preguntar-titulo">
-                <IconoAsistente /> ¿Te quedó una duda?
-              </h2>
-              <p className="texto-suave">El asistente responde con el contenido de esta lección y del resto del curso.</p>
-              {leccion.preguntas_sugeridas.length > 0 && (
-                <div className="sugerencias">
-                  {leccion.preguntas_sugeridas.map((q) => (
-                    <button key={q} type="button" className="sugerencia" onClick={() => preguntar(q)}>
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <PreguntaRapida leccion={leccion.id} />
-            </section>
-
             <div className="cierre-leccion" role="status">
               {!hecha ? (
                 <div className="cierre-pendiente">

@@ -1469,7 +1469,6 @@ main:focus {
 }
 
 .tarjeta-asistente p,
-.preguntar-leccion .texto-suave,
 .portada .texto-suave {
   color: var(--tinta-rubor);
 }
@@ -1844,7 +1843,7 @@ main:focus {
 }
 
 /* El asistente acompaña la lección en una tercera columna solo cuando hay
-   espacio; en pantallas más chicas queda el recuadro al final de la lección. */
+   espacio; en pantallas más chicas se llega desde "Asistente" en el menú. */
 .lateral-leccion {
   display: none;
 }
@@ -2086,21 +2085,6 @@ main:focus {
   border-radius: 50%;
   background: var(--acento-suave);
   color: var(--acento-texto);
-}
-
-.preguntar-leccion {
-  display: grid;
-  gap: 12px;
-  background: var(--acento-suave);
-  border-color: transparent;
-}
-
-.preguntar-leccion h2 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--acento-texto);
-  font-size: var(--t-title);
 }
 
 .bloqueo-acciones {

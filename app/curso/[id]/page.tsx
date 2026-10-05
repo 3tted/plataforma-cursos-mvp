@@ -83,7 +83,7 @@ export default function PaginaLeccion() {
   const preguntar = (pregunta: string) => {
     setLeccionContexto(leccion.id);
     setPreguntaPendiente(pregunta);
-    router.push("/asistente");
+    router.push("/curso/asistente");
   };
 
   const marcar = () => {

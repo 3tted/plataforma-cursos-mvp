@@ -175,7 +175,7 @@ export default function PaginaPerfil() {
         texto: q.pregunta,
         contexto: "Pregunta al asistente",
         fecha: q.creadaEn,
-        enlace: "/asistente",
+        enlace: "/curso/asistente",
       })),
     ].sort((a, b) => b.fecha.localeCompare(a.fecha));
   }, [perfil]);

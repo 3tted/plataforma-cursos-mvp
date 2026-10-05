@@ -12,7 +12,8 @@ Cubre el criterio del MVP de la ficha: *comunidad con feed simple + un curso de 
 |---|---|---|
 | **Comunidad** | Feed con categorías; publicar, comentar y marcar "Me sirve". Los anuncios son solo para la coach. | Funciona (datos en un archivo JSON) |
 | **Curso** | "Finanzas claras para tu negocio": 3 módulos, 8 lecciones con texto y transcripción. Progreso por alumno. El módulo 1 es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
-| **Asistente de IA** | Responde dudas usando el contenido de las lecciones y **cita la lección** de donde sale cada idea ([L4], [L5]…). Si algo no está en el curso, lo dice y ofrece llevar la pregunta a la comunidad. | Real con clave de API · modo demo sin ella |
+| **Asistente del curso** | En cada lección, en la comunidad y en `/curso/asistente`. Responde dudas usando el contenido de las lecciones y **cita la lección** de donde sale cada idea ([L4], [L5]…). Si algo no está en el curso, lo dice y ofrece llevar la pregunta a la comunidad. | Real con clave de API · modo demo sin ella |
+| **Asistente Merkatics** | El de "Asistente" en el menú (`/asistente`): IA de uso general (ideas, mensajes, explicaciones). No usa los cursos y sus preguntas no aparecen en el panel de la coach. | Solo con clave de API |
 | **Pagos locales** | Membresía de $490 MXN/mes con OXXO (ficha con referencia), SPEI (CLABE) o Mercado Pago. | **Simulado**: no se cobra nada |
 | **Panel de la coach** | Qué preguntan los alumnos al asistente, lecciones más consultadas, pagos y un formulario para **pegar una lección propia** y que la IA responda con ella. | Funciona |
 
@@ -79,7 +80,8 @@ Guía para la sesión con el coach: [VALIDACION.md](VALIDACION.md).
 app/
   page.tsx                 Comunidad (feed)
   curso/                   Índice del curso y vista de lección
-  asistente/page.tsx       Chat con el asistente
+  asistente/page.tsx       Asistente Merkatics (general, sin los cursos)
+  curso/asistente/         Asistente del curso (cita las lecciones)
   membresia/page.tsx       Checkout simulado (OXXO, SPEI, Mercado Pago)
   coach/page.tsx           Panel de la coach
   api/                     Rutas del servidor

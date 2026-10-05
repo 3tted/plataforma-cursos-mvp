@@ -14,6 +14,37 @@ export async function api<T>(ruta: string, opciones?: RequestInit & { json?: unk
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
+// Pregunta al asistente (del curso o general) y entrega la respuesta a medida
+// que llega. Si se aborta, lanza el error del abort: quien llama ya tiene el
+// texto parcial por medio de alAvanzar.
+export async function preguntarAlAsistente(
+  cuerpo: Record<string, unknown>,
+  senal: AbortSignal,
+  alAvanzar: (texto: string, modo: "ia" | "demo") => void,
+): Promise<{ texto: string; modo: "ia" | "demo" }> {
+  const res = await fetch("/api/asistente", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cuerpo),
+    signal: senal,
+  });
+  if (!res.ok || !res.body) {
+    const datos = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(datos?.error ?? "No se pudo obtener una respuesta.");
+  }
+  const modo = res.headers.get("X-Modo") === "demo" ? "demo" : "ia";
+  const lector = res.body.getReader();
+  const decodificador = new TextDecoder();
+  let texto = "";
+  for (;;) {
+    const { done, value } = await lector.read();
+    if (done) break;
+    texto += decodificador.decode(value, { stream: true });
+    alAvanzar(texto, modo);
+  }
+  return { texto, modo };
+}
+
 // localStorage puede fallar (modo privado, almacenamiento bloqueado): la app
 // debe funcionar igual, solo sin recordar al usuario.
 export function leerLocal<T>(clave: string): T | null {

@@ -188,7 +188,7 @@ export default function PaginaCoach() {
           <h2 id="preguntas-titulo">Lo que más preguntan tus alumnos</h2>
           {resumen && grupos.length === 0 && (
             <p className="vacio">
-              Todavía no hay preguntas. <Link href="/asistente">Haz una de prueba</Link> para ver cómo aparece aquí.
+              Todavía no hay preguntas. <Link href="/curso/asistente">Haz una de prueba</Link> para ver cómo aparece aquí.
             </p>
           )}
           <ul className="lista-preguntas">
@@ -315,7 +315,7 @@ export default function PaginaCoach() {
           <p className="aviso aviso-ok" role="status">
             <span>
               Listo: la lección ya está en el curso como <span className="cita-id">{agregada}</span>.{" "}
-              <Link href={`/curso/${agregada}`}>Ábrela</Link> o <Link href="/asistente">pregúntale al asistente</Link>{" "}
+              <Link href={`/curso/${agregada}`}>Ábrela</Link> o <Link href="/curso/asistente">pregúntale al asistente</Link>{" "}
               sobre ella.
             </span>
           </p>

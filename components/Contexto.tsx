@@ -74,6 +74,9 @@ interface ContextoApp {
   alternarCompletada: (id: string) => void;
   chat: MensajeChat[];
   setChat: Dispatch<SetStateAction<MensajeChat[]>>;
+  /** Conversación con el asistente general (no usa los cursos). */
+  chatGeneral: MensajeChat[];
+  setChatGeneral: Dispatch<SetStateAction<MensajeChat[]>>;
   leccionContexto: string | null;
   setLeccionContexto: (id: string | null) => void;
   preguntaPendiente: string | null;
@@ -94,6 +97,7 @@ const CLAVES = {
   pagoPendiente: "fc.pagoPendiente",
   leccionDeseada: "fc.leccionDeseada",
   chat: "fc.chat",
+  chatGeneral: "fc.chatGeneral",
 };
 
 export function ProveedorApp({ children }: { children: ReactNode }) {
@@ -107,6 +111,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   const [pagoPendiente, setPagoPendiente] = useState<Pago | null>(null);
   const [completadas, setCompletadas] = useState<string[]>([]);
   const [chat, setChat] = useState<MensajeChat[]>([]);
+  const [chatGeneral, setChatGeneral] = useState<MensajeChat[]>([]);
   const [leccionContexto, setLeccionContexto] = useState<string | null>(null);
   const [preguntaPendiente, setPreguntaPendiente] = useState<string | null>(null);
   const [borrador, setBorrador] = useState<Borrador | null>(null);
@@ -141,8 +146,12 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     setLeccionDeseada(leerLocal<string>(CLAVES.leccionDeseada));
     // La conversación sobrevive a una recarga o a cambiar de app. Una respuesta
     // que se estaba escribiendo cuando se cerró la página queda como detenida.
-    const guardado = leerSesion<MensajeChat[]>(CLAVES.chat) ?? [];
-    setChat(guardado.map((m) => (m.estado === "escribiendo" ? { ...m, estado: "detenido" } : m)));
+    const restaurar = (clave: string) =>
+      (leerSesion<MensajeChat[]>(clave) ?? []).map((m) =>
+        m.estado === "escribiendo" ? { ...m, estado: "detenido" as const } : m,
+      );
+    setChat(restaurar(CLAVES.chat));
+    setChatGeneral(restaurar(CLAVES.chatGeneral));
     setListo(true);
     void recargarCurso();
     api<EstadoPlataforma>("/api/estado")
@@ -164,12 +173,14 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
       guardarLocal(clave, null);
     }
     guardarSesion(CLAVES.chat, null);
+    guardarSesion(CLAVES.chatGeneral, null);
     setUsuario(null);
     setMembresia(null);
     setCompletadas([]);
     setPagoPendiente(null);
     setLeccionDeseada(null);
     setChat([]);
+    setChatGeneral([]);
     setLeccionContexto(null);
     setPreguntaPendiente(null);
     setBorrador(null);
@@ -189,6 +200,10 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (listo) guardarSesion(CLAVES.chat, chat.length ? chat.slice(-30) : null);
   }, [chat, listo]);
+
+  useEffect(() => {
+    if (listo) guardarSesion(CLAVES.chatGeneral, chatGeneral.length ? chatGeneral.slice(-30) : null);
+  }, [chatGeneral, listo]);
 
   const guardarLeccionDeseada = useCallback((id: string | null) => {
     setLeccionDeseada(id);
@@ -230,6 +245,8 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     alternarCompletada,
     chat,
     setChat,
+    chatGeneral,
+    setChatGeneral,
     leccionContexto,
     setLeccionContexto,
     preguntaPendiente,

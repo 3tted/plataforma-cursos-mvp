@@ -23,7 +23,7 @@ export default function PreguntaRapida({
     if (!pregunta.trim()) return;
     setLeccionContexto(leccion);
     setPreguntaPendiente(pregunta.trim());
-    router.push("/asistente");
+    router.push("/curso/asistente");
   };
 
   return (

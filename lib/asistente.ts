@@ -89,6 +89,17 @@ ${contenidoDelCurso({ comunidad, curso }, miembro)}
 </curso>`;
 }
 
+// Asistente general (el de "Asistente" en el menú): no conoce los cursos ni
+// cita lecciones. Las dudas de un curso las responde el asistente del curso.
+export const INSTRUCCIONES_GENERALES = `Eres el Asistente Merkatics, un asistente de IA de uso general dentro de la plataforma de cursos y comunidades de Merkatics. Ayudas a alumnos y coaches con lo que necesiten: ideas para su negocio, redactar mensajes o publicaciones, explicar un tema, organizar su trabajo o resolver dudas generales.
+
+Cómo responder:
+- Escribe en español de México, con un tono cercano y claro. Trata a la persona de "tú".
+- No tienes acceso al contenido de los cursos. Si te preguntan por un curso, una lección o lo que dijo una coach, explica que para eso está el asistente del curso (en cada lección y en la comunidad), que responde con las lecciones y las cita.
+- No inventes datos de la plataforma, como precios, coaches, fechas o políticas.
+- En temas fiscales, legales, médicos o financieros que dependan del caso de la persona, da una orientación general y recomienda confirmarlo con un profesional.
+- Sé breve y útil: de uno a tres párrafos cortos, o una lista corta. Usa **negritas** para lo más importante. No uses tablas ni encabezados.`;
+
 // La pregunta del alumno, con la lección que está viendo si viene de una.
 export function preguntaConContexto(datos: DatosCurso, pregunta: string, leccionActual: string | null): string {
   const leccion = leccionActual
@@ -115,13 +126,7 @@ function mensajes(
 
 let cliente: Anthropic | null = null;
 
-export function responderConClaude(
-  datos: DatosCurso,
-  pregunta: string,
-  historial: TurnoChat[],
-  leccionActual: string | null,
-  miembro: boolean,
-) {
+function streamDeClaude(sistema: string, messages: Anthropic.Beta.BetaMessageParam[]) {
   cliente ??= new Anthropic();
   const conRespaldo = MODELOS_CON_RESPALDO.has(MODELO);
   return cliente.beta.messages.stream({
@@ -129,15 +134,27 @@ export function responderConClaude(
     max_tokens: 16000,
     // El curso va en el prompt de sistema con caché: las preguntas siguientes
     // reutilizan ese prefijo y cuestan mucho menos.
-    system: [
-      { type: "text", text: instrucciones(datos, miembro), cache_control: { type: "ephemeral" } },
-    ],
-    messages: mensajes(datos, pregunta, historial, leccionActual),
+    system: [{ type: "text", text: sistema, cache_control: { type: "ephemeral" } }],
+    messages,
     output_config: { effort: ESFUERZO },
     ...(conRespaldo
       ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
       : {}),
   });
+}
+
+export function responderConClaude(
+  datos: DatosCurso,
+  pregunta: string,
+  historial: TurnoChat[],
+  leccionActual: string | null,
+  miembro: boolean,
+) {
+  return streamDeClaude(instrucciones(datos, miembro), mensajes(datos, pregunta, historial, leccionActual));
+}
+
+export function responderGeneralConClaude(pregunta: string, historial: TurnoChat[]) {
+  return streamDeClaude(INSTRUCCIONES_GENERALES, [...historial, { role: "user", content: pregunta }]);
 }
 
 export function mensajeDeError(error: unknown): string {

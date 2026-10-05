@@ -5,8 +5,9 @@ import {
   proveedorIA,
   responderConClaude,
   responderEnModoDemo,
+  responderGeneralConClaude,
 } from "@/lib/asistente";
-import { mensajeDeErrorGemini, responderConGemini } from "@/lib/asistente-gemini";
+import { mensajeDeErrorGemini, responderConGemini, responderGeneralConGemini } from "@/lib/asistente-gemini";
 import { extraerCitas } from "@/lib/citas";
 import { cargarCurso } from "@/lib/curso";
 import { error, leerJson, manejar, texto } from "@/lib/http";
@@ -72,82 +73,67 @@ async function registrarPregunta(
   }
 }
 
-export const POST = manejar(async (req: Request) => {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
-  if (iaDisponible() && superaLimite(ip)) {
-    return error("Hiciste muchas preguntas seguidas. Espera unos minutos e inténtalo de nuevo.", 429);
-  }
+const codificador = new TextEncoder();
+const ENCABEZADOS = {
+  "Content-Type": "text/plain; charset=utf-8",
+  "Cache-Control": "no-store",
+};
 
-  const datos = await leerJson(req);
-  const pregunta = texto(datos.pregunta, "pregunta", 1000);
-  const autor = typeof datos.autor === "string" && datos.autor.trim() ? datos.autor.trim().slice(0, 60) : "Anónimo";
-  const historial = limpiarHistorial(datos.historial);
-  // En el prototipo la membresía vive en el navegador y llega con la pregunta.
-  // En la Fase 2 se valida con la sesión, del lado del servidor.
-  const miembro = datos.miembro === true;
-  const curso = await cargarCurso();
-  const leccionActual =
-    typeof datos.leccion === "string" &&
-    curso.curso.modulos.some((m) => m.lecciones.some((l) => l.id === datos.leccion))
-      ? datos.leccion
-      : null;
+// Texto ya listo (modo demostración): se envía en pedazos para que la interfaz
+// se comporte igual que con la IA.
+function respuestaFija(texto: string): Response {
+  const piezas = texto.match(/[\s\S]{1,24}/g) ?? [texto];
+  const flujo = new ReadableStream<Uint8Array>({
+    async start(controlador) {
+      for (const pieza of piezas) {
+        controlador.enqueue(codificador.encode(pieza));
+        await new Promise((r) => setTimeout(r, 12));
+      }
+      controlador.close();
+    },
+  });
+  return new Response(flujo, { headers: { ...ENCABEZADOS, "X-Modo": "demo" } });
+}
 
-  const codificador = new TextEncoder();
-  const encabezados = {
-    "Content-Type": "text/plain; charset=utf-8",
-    "Cache-Control": "no-store",
-  };
-
-  if (!iaDisponible()) {
-    const respuesta = responderEnModoDemo(curso, pregunta, leccionActual, miembro);
-    await registrarPregunta(autor, pregunta, leccionActual, respuesta, "demo");
-    // Se envía en pedazos para que la interfaz se comporte igual que con la IA.
-    const piezas = respuesta.match(/[\s\S]{1,24}/g) ?? [respuesta];
-    const flujo = new ReadableStream<Uint8Array>({
-      async start(controlador) {
-        for (const pieza of piezas) {
-          controlador.enqueue(codificador.encode(pieza));
-          await new Promise((r) => setTimeout(r, 12));
+function respuestaGemini(
+  generar: (senal: AbortSignal) => AsyncGenerator<string>,
+  alTerminar: (respuesta: string) => Promise<void>,
+): Response {
+  const cancelar = new AbortController();
+  const flujo = new ReadableStream<Uint8Array>({
+    async start(controlador) {
+      let respuesta = "";
+      try {
+        for await (const trozo of generar(cancelar.signal)) {
+          respuesta += trozo;
+          controlador.enqueue(codificador.encode(trozo));
         }
-        controlador.close();
-      },
-    });
-    return new Response(flujo, { headers: { ...encabezados, "X-Modo": "demo" } });
-  }
-
-  if (proveedorIA() === "gemini") {
-    const cancelar = new AbortController();
-    const flujo = new ReadableStream<Uint8Array>({
-      async start(controlador) {
-        let respuesta = "";
+        await alTerminar(respuesta);
+      } catch (e) {
+        if (!cancelar.signal.aborted) {
+          console.error("Error del asistente (Gemini):", e);
+          controlador.enqueue(codificador.encode(`${respuesta ? "\n\n" : ""}_${mensajeDeErrorGemini(e)}_`));
+        }
+      } finally {
         try {
-          for await (const trozo of responderConGemini(curso, pregunta, historial, leccionActual, miembro, cancelar.signal)) {
-            respuesta += trozo;
-            controlador.enqueue(codificador.encode(trozo));
-          }
-          await registrarPregunta(autor, pregunta, leccionActual, respuesta, "ia");
-        } catch (e) {
-          if (!cancelar.signal.aborted) {
-            console.error("Error del asistente (Gemini):", e);
-            controlador.enqueue(codificador.encode(`${respuesta ? "\n\n" : ""}_${mensajeDeErrorGemini(e)}_`));
-          }
-        } finally {
-          try {
-            controlador.close();
-          } catch {
-            // el cliente ya cerró la conexión
-          }
+          controlador.close();
+        } catch {
+          // el cliente ya cerró la conexión
         }
-      },
-      cancel() {
-        // El alumno presionó "Detener" o cerró la página.
-        cancelar.abort();
-      },
-    });
-    return new Response(flujo, { headers: { ...encabezados, "X-Modo": "ia" } });
-  }
+      }
+    },
+    cancel() {
+      // El alumno presionó "Detener" o cerró la página.
+      cancelar.abort();
+    },
+  });
+  return new Response(flujo, { headers: { ...ENCABEZADOS, "X-Modo": "ia" } });
+}
 
-  const stream = responderConClaude(curso, pregunta, historial, leccionActual, miembro);
+function respuestaClaude(
+  stream: ReturnType<typeof responderConClaude>,
+  alTerminar: (respuesta: string) => Promise<void>,
+): Response {
   const flujo = new ReadableStream<Uint8Array>({
     async start(controlador) {
       let respuesta = "";
@@ -166,7 +152,7 @@ export const POST = manejar(async (req: Request) => {
         } else if (final.stop_reason === "max_tokens") {
           controlador.enqueue(codificador.encode("\n\n_La respuesta se cortó por ser demasiado larga._"));
         }
-        await registrarPregunta(autor, pregunta, leccionActual, respuesta, "ia");
+        await alTerminar(respuesta);
       } catch (e) {
         if (!stream.controller.signal.aborted) {
           console.error("Error del asistente:", e);
@@ -185,5 +171,56 @@ export const POST = manejar(async (req: Request) => {
       stream.abort();
     },
   });
-  return new Response(flujo, { headers: { ...encabezados, "X-Modo": "ia" } });
+  return new Response(flujo, { headers: { ...ENCABEZADOS, "X-Modo": "ia" } });
+}
+
+const nadaQueRegistrar = async () => {};
+
+export const POST = manejar(async (req: Request) => {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
+  if (iaDisponible() && superaLimite(ip)) {
+    return error("Hiciste muchas preguntas seguidas. Espera unos minutos e inténtalo de nuevo.", 429);
+  }
+
+  const datos = await leerJson(req);
+  const pregunta = texto(datos.pregunta, "pregunta", 1000);
+  const historial = limpiarHistorial(datos.historial);
+
+  // Asistente general (menú "Asistente"): no usa el curso y sus preguntas no
+  // van al panel de la coach, que solo mide las dudas sobre las lecciones.
+  if (datos.tipo === "general") {
+    if (!iaDisponible()) {
+      return respuestaFija(
+        "El asistente general necesita la IA conectada, y en esta demostración no lo está. Para dudas sobre las lecciones usa el **asistente del curso**: responde con el contenido del curso aun sin IA.",
+      );
+    }
+    return proveedorIA() === "gemini"
+      ? respuestaGemini((senal) => responderGeneralConGemini(pregunta, historial, senal), nadaQueRegistrar)
+      : respuestaClaude(responderGeneralConClaude(pregunta, historial), nadaQueRegistrar);
+  }
+
+  const autor = typeof datos.autor === "string" && datos.autor.trim() ? datos.autor.trim().slice(0, 60) : "Anónimo";
+  // En el prototipo la membresía vive en el navegador y llega con la pregunta.
+  // En la Fase 2 se valida con la sesión, del lado del servidor.
+  const miembro = datos.miembro === true;
+  const curso = await cargarCurso();
+  const leccionActual =
+    typeof datos.leccion === "string" &&
+    curso.curso.modulos.some((m) => m.lecciones.some((l) => l.id === datos.leccion))
+      ? datos.leccion
+      : null;
+
+  if (!iaDisponible()) {
+    const respuesta = responderEnModoDemo(curso, pregunta, leccionActual, miembro);
+    await registrarPregunta(autor, pregunta, leccionActual, respuesta, "demo");
+    return respuestaFija(respuesta);
+  }
+
+  const registrar = (respuesta: string) => registrarPregunta(autor, pregunta, leccionActual, respuesta, "ia");
+  return proveedorIA() === "gemini"
+    ? respuestaGemini(
+        (senal) => responderConGemini(curso, pregunta, historial, leccionActual, miembro, senal),
+        registrar,
+      )
+    : respuestaClaude(responderConClaude(curso, pregunta, historial, leccionActual, miembro), registrar);
 });

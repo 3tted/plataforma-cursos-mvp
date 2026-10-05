@@ -1,10 +1,11 @@
 import { ApiError, FinishReason, GoogleGenAI, type Content } from "@google/genai";
-import { MODELO_GEMINI, instrucciones, preguntaConContexto } from "./asistente";
+import { INSTRUCCIONES_GENERALES, MODELO_GEMINI, instrucciones, preguntaConContexto } from "./asistente";
 import type { DatosCurso, TurnoChat } from "./tipos";
 
-// Asistente con Gemini (SDK oficial @google/genai). Usa las mismas
-// instrucciones que la versión con Claude: responder con el curso, citar
-// la lección y no entregar lo de pago a quien no es miembro.
+// Asistentes con Gemini (SDK oficial @google/genai). Usan las mismas
+// instrucciones que la versión con Claude: el del curso responde con las
+// lecciones, las cita y no entrega lo de pago a quien no es miembro; el
+// general no conoce los cursos.
 
 let cliente: GoogleGenAI | null = null;
 
@@ -16,7 +17,7 @@ const FINALES_NORMALES = new Set<FinishReason | undefined>([
   FinishReason.FINISH_REASON_UNSPECIFIED,
 ]);
 
-export async function* responderConGemini(
+export function responderConGemini(
   datos: DatosCurso,
   pregunta: string,
   historial: TurnoChat[],
@@ -24,15 +25,32 @@ export async function* responderConGemini(
   miembro: boolean,
   senal: AbortSignal,
 ): AsyncGenerator<string> {
+  return generar(instrucciones(datos, miembro), historial, preguntaConContexto(datos, pregunta, leccionActual), senal);
+}
+
+export function responderGeneralConGemini(
+  pregunta: string,
+  historial: TurnoChat[],
+  senal: AbortSignal,
+): AsyncGenerator<string> {
+  return generar(INSTRUCCIONES_GENERALES, historial, pregunta, senal);
+}
+
+async function* generar(
+  sistema: string,
+  historial: TurnoChat[],
+  pregunta: string,
+  senal: AbortSignal,
+): AsyncGenerator<string> {
   cliente ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY });
 
   const contents: Content[] = [
     ...historial.map((t) => ({ role: t.role === "assistant" ? "model" : "user", parts: [{ text: t.content }] })),
-    { role: "user", parts: [{ text: preguntaConContexto(datos, pregunta, leccionActual) }] },
+    { role: "user", parts: [{ text: pregunta }] },
   ];
 
   const config = {
-    systemInstruction: instrucciones(datos, miembro),
+    systemInstruction: sistema,
     // Holgado: en los modelos que razonan, ese razonamiento también cuenta aquí.
     maxOutputTokens: 8192,
     abortSignal: senal,

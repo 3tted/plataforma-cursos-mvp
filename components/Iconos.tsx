@@ -20,6 +20,7 @@ import {
   Question,
   SealCheck,
   SignOut,
+  Sparkle,
   Student,
   Stop,
   ThumbsUp,
@@ -43,6 +44,8 @@ function icono(Componente: Icon, peso: IconWeight = "regular") {
 export const IconoComunidad = icono(ChatsCircle);
 export const IconoCurso = icono(BookOpenText);
 export const IconoAsistente = icono(NotePencil);
+/** Asistente general de Merkatics (el del menú), distinto del asistente del curso. */
+export const IconoAsistenteGeneral = icono(Sparkle);
 export const IconoPanel = icono(ChartBar);
 export const IconoCandado = icono(LockSimple);
 export const IconoCheck = icono(Check, "bold");

@@ -1,42 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import Avatar from "@/components/Avatar";
 import { useApp, type MensajeChat } from "@/components/Contexto";
-import { IconoAsistente, IconoCerrar, IconoComunidad, IconoDetener, IconoEnviar } from "@/components/Iconos";
+import { IconoAsistente, IconoAsistenteGeneral, IconoDetener, IconoEnviar } from "@/components/Iconos";
 import Markdown from "@/components/Markdown";
 import { useTitulo } from "@/components/useTitulo";
+import { preguntarAlAsistente } from "@/lib/cliente";
 
-export default function PaginaAsistente() {
-  const router = useRouter();
-  const {
-    datos,
-    lecciones,
-    usuario,
-    estado,
-    chat,
-    setChat,
-    leccionContexto,
-    setLeccionContexto,
-    preguntaPendiente,
-    setPreguntaPendiente,
-    setBorrador,
-    tieneAcceso,
-  } = useApp();
+// Asistente general de Merkatics: una IA para cualquier duda, separada del
+// asistente del curso (que responde solo con las lecciones y las cita).
+const SUGERENCIAS = [
+  "Escríbeme un mensaje amable para cobrarle a un cliente que se atrasó",
+  "Dame 5 ideas para promocionar mi negocio en redes sociales",
+  "¿Cómo organizo mi semana si atiendo el negocio yo sola?",
+];
+
+export default function PaginaAsistenteGeneral() {
+  const { usuario, estado, chatGeneral: chat, setChatGeneral: setChat } = useApp();
   const [entrada, setEntrada] = useState("");
   const [enCurso, setEnCurso] = useState(false);
   // Un solo aviso para lectores de pantalla, en vez de anunciar cada fragmento de la respuesta.
   const [anuncio, setAnuncio] = useState("");
   const control = useRef<AbortController | null>(null);
-  const ultimaPendiente = useRef<string | null>(null);
   const campo = useRef<HTMLTextAreaElement>(null);
   // "Empezar de nuevo" se puede deshacer unos segundos: borrar no pide confirmación.
   const [borrada, setBorrada] = useState<MensajeChat[] | null>(null);
-  useTitulo("Asistente del curso");
-
-  const leccion = lecciones.find((l) => l.id === leccionContexto);
+  useTitulo("Asistente Merkatics");
 
   const actualizarUltimo = useCallback(
     (cambio: Partial<MensajeChat>) =>
@@ -57,7 +48,7 @@ export default function PaginaAsistente() {
         .map(({ role, content }) => ({ role, content }));
       setChat((m) => [
         ...m,
-        { role: "user", content: limpia, leccion: leccionContexto },
+        { role: "user", content: limpia },
         { role: "assistant", content: "", estado: "escribiendo" },
       ]);
       setEntrada("");
@@ -67,31 +58,14 @@ export default function PaginaAsistente() {
       control.current = abortar;
       let texto = "";
       try {
-        const res = await fetch("/api/asistente", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            pregunta: limpia,
-            historial,
-            leccion: leccionContexto,
-            autor: usuario?.nombre,
-            miembro: tieneAcceso,
-          }),
-          signal: abortar.signal,
-        });
-        if (!res.ok || !res.body) {
-          const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
-          throw new Error(cuerpo?.error ?? "No se pudo obtener una respuesta.");
-        }
-        const modo = res.headers.get("X-Modo") === "demo" ? "demo" : "ia";
-        const lector = res.body.getReader();
-        const decodificador = new TextDecoder();
-        for (;;) {
-          const { done, value } = await lector.read();
-          if (done) break;
-          texto += decodificador.decode(value, { stream: true });
-          actualizarUltimo({ content: texto, modo });
-        }
+        const { modo } = await preguntarAlAsistente(
+          { tipo: "general", pregunta: limpia, historial },
+          abortar.signal,
+          (parcial, modoParcial) => {
+            texto = parcial;
+            actualizarUltimo({ content: parcial, modo: modoParcial });
+          },
+        );
         actualizarUltimo({ content: texto, estado: "listo", modo });
         setAnuncio("Respuesta lista.");
       } catch (e) {
@@ -99,7 +73,6 @@ export default function PaginaAsistente() {
           actualizarUltimo({ content: texto, estado: "detenido" });
           setAnuncio("Respuesta detenida.");
         } else {
-          // Un fallo de red llega como TypeError: se explica en palabras del alumno.
           const mensaje =
             e instanceof TypeError
               ? "No pudimos conectar con el asistente. Revisa tu conexión e inténtalo de nuevo."
@@ -112,19 +85,10 @@ export default function PaginaAsistente() {
         control.current = null;
       }
     },
-    [chat, enCurso, leccionContexto, usuario, tieneAcceso, setChat, actualizarUltimo],
+    [chat, enCurso, setChat, actualizarUltimo],
   );
 
-  // Pregunta que llega desde otra página (una lección o la comunidad).
-  useEffect(() => {
-    if (!preguntaPendiente || !datos || ultimaPendiente.current === preguntaPendiente) return;
-    ultimaPendiente.current = preguntaPendiente;
-    setPreguntaPendiente(null);
-    void enviar(preguntaPendiente);
-  }, [preguntaPendiente, datos, enviar, setPreguntaPendiente]);
-
-  // Al preguntar, la pregunta sube al inicio de la vista y la respuesta se lee debajo,
-  // en vez de perseguir el final del texto mientras llega.
+  // Al preguntar, la pregunta sube al inicio de la vista y la respuesta se lee debajo.
   const cantidad = chat.length;
   useEffect(() => {
     const ultimaPregunta = chat.findLastIndex((m) => m.role === "user");
@@ -171,40 +135,16 @@ export default function PaginaAsistente() {
     }
   };
 
-  const llevarAComunidad = (pregunta: string) => {
-    setBorrador({
-      categoria: "Dudas",
-      titulo: pregunta.length > 140 ? pregunta.slice(0, 137) + "…" : pregunta,
-      cuerpo: `${pregunta}\n\n(Se lo pregunté al asistente del curso, pero me gustaría la opinión de la coach y de la comunidad.)`,
-    });
-    router.push("/comunidad");
-  };
-
-  // Sin membresía, las sugerencias salen de las lecciones gratis: así la primera
-  // pregunta de prueba recibe una respuesta completa, no un "es para miembros".
-  const sugerenciasGratis = lecciones
-    .filter((l) => l.gratis && !l.deCoach)
-    .map((l) => l.preguntas_sugeridas[0])
-    .filter(Boolean);
-  const sugerencias = leccion?.preguntas_sugeridas.length
-    ? leccion.preguntas_sugeridas
-    : tieneAcceso
-      ? (datos?.curso.preguntas_sugeridas ?? [])
-      : sugerenciasGratis;
-
   return (
     <div className="pagina-asistente">
       <header className="asistente-cabecera">
         <div className="cabecera-pagina">
-          <h1>Asistente del curso</h1>
-          <p className="texto-suave">
-            Pregunta lo que quieras sobre las lecciones.
-            {estado && !estado.iaActiva && " En esta demostración responde con fragmentos del curso, sin redactar."}
-          </p>
+          <h1>Asistente Merkatics</h1>
+          <p className="texto-suave">Pregúntale lo que quieras: ideas, mensajes, explicaciones o cómo organizarte.</p>
         </div>
         {estado && (
           <span className={estado.iaActiva ? "pastilla pastilla-ok" : "pastilla"}>
-            {estado.iaActiva ? `IA conectada · ${estado.modelo}` : "Modo demostración"}
+            {estado.iaActiva ? `IA conectada · ${estado.modelo}` : "IA sin conectar"}
           </span>
         )}
       </header>
@@ -213,36 +153,19 @@ export default function PaginaAsistente() {
         {anuncio}
       </p>
 
-      {leccion && (
-        <div className="contexto-leccion">
-          <span>
-            Preguntando sobre <span className="cita-id">{leccion.id}</span> <strong>{leccion.titulo}</strong>
-          </span>
-          <button
-            type="button"
-            className="boton-icono boton-icono-chico"
-            onClick={() => setLeccionContexto(null)}
-            aria-label="Preguntar sobre todo el curso"
-            title="Preguntar sobre todo el curso"
-          >
-            <IconoCerrar width={16} height={16} />
-          </button>
-        </div>
-      )}
-
       <div className="conversacion">
         {chat.length === 0 && (
           <div className="chat-vacio">
             <span className="chat-vacio-icono">
-              <IconoAsistente width={28} height={28} />
+              <IconoAsistenteGeneral width={28} height={28} />
             </span>
             <p>
-              Respondo con el contenido de las lecciones de <strong>{datos?.curso.titulo ?? "este curso"}</strong> y te
-              digo de qué lección sale cada respuesta. Si algo no está en el curso, te lo digo y puedes llevar la
-              pregunta a la comunidad.
+              Soy una IA de uso general: te ayudo a redactar, a pensar ideas para tu negocio o a entender un tema. No
+              uso el contenido de los cursos; para dudas de una lección está el{" "}
+              <Link href="/curso/asistente">asistente del curso</Link>, que responde con las lecciones y las cita.
             </p>
             <div className="sugerencias">
-              {sugerencias.map((q) => (
+              {SUGERENCIAS.map((q) => (
                 <button key={q} type="button" className="sugerencia" onClick={() => void enviar(q)}>
                   {q}
                 </button>
@@ -260,7 +183,7 @@ export default function PaginaAsistente() {
           ) : (
             <div key={i} id={`mensaje-${i}`} className="mensaje mensaje-asistente" data-estado={m.estado}>
               <span className="mensaje-autor">
-                <IconoAsistente width={15} height={15} /> Asistente
+                <IconoAsistenteGeneral width={15} height={15} /> Asistente Merkatics
               </span>
               {m.estado === "escribiendo" && !m.content ? (
                 <p className="pensando" aria-label="El asistente está pensando">
@@ -281,51 +204,39 @@ export default function PaginaAsistente() {
                 <Markdown texto={m.content} className="prosa prosa-chat" />
               )}
               {m.estado === "detenido" && <p className="nota">Respuesta detenida.</p>}
-              {(m.estado === "listo" || m.estado === "detenido") && chat[i - 1] && (
-                <div className="mensaje-acciones">
-                  <button
-                    type="button"
-                    className="accion"
-                    onClick={() => llevarAComunidad(chat[i - 1].content)}
-                  >
-                    <IconoComunidad width={15} height={15} />
-                    Llevar esta pregunta a la comunidad
-                  </button>
-                </div>
-              )}
             </div>
           ),
         )}
       </div>
 
       <div className="chat-dock">
-      <form className="chat-entrada" onSubmit={alEnviar}>
-        <textarea
-          id="chat-pregunta"
-          ref={campo}
-          value={entrada}
-          onChange={(e) => setEntrada(e.target.value)}
-          onKeyDown={alTeclear}
-          placeholder={leccion ? `Pregunta sobre "${leccion.titulo}"…` : "Escribe tu pregunta…"}
-          maxLength={1000}
-          rows={2}
-          aria-label="Tu pregunta"
-        />
-        {enCurso ? (
-          <button type="button" className="boton" onClick={() => control.current?.abort()}>
-            <IconoDetener width={16} height={16} /> Detener
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="boton"
-            disabled={!entrada.trim()}
-            title={entrada.trim() ? undefined : "Escribe una pregunta para enviarla"}
-          >
-            <IconoEnviar width={16} height={16} /> Enviar
-          </button>
-        )}
-      </form>
+        <form className="chat-entrada" onSubmit={alEnviar}>
+          <textarea
+            id="chat-general-pregunta"
+            ref={campo}
+            value={entrada}
+            onChange={(e) => setEntrada(e.target.value)}
+            onKeyDown={alTeclear}
+            placeholder="Escribe lo que necesites…"
+            maxLength={1000}
+            rows={2}
+            aria-label="Tu pregunta"
+          />
+          {enCurso ? (
+            <button type="button" className="boton" onClick={() => control.current?.abort()}>
+              <IconoDetener width={16} height={16} /> Detener
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="boton"
+              disabled={!entrada.trim()}
+              title={entrada.trim() ? undefined : "Escribe una pregunta para enviarla"}
+            >
+              <IconoEnviar width={16} height={16} /> Enviar
+            </button>
+          )}
+        </form>
       </div>
       {borrada && chat.length === 0 && (
         <p className="nota nota-centro">
@@ -341,8 +252,8 @@ export default function PaginaAsistente() {
             Empezar una conversación nueva
           </button>
           {" · "}
-          <Link href={leccion ? `/curso/${leccion.id}` : "/curso"} className="enlace">
-            {leccion ? `Volver a «${leccion.titulo}»` : "Volver al curso"}
+          <Link href="/curso/asistente" className="enlace">
+            <IconoAsistente width={14} height={14} /> Ir al asistente del curso
           </Link>
         </p>
       )}

@@ -8,12 +8,14 @@ import {
   IconoAsistente,
   IconoCandado,
   IconoCheck,
+  IconoExamen,
   IconoFlechaDer,
   IconoFlechaIzq,
   IconoSello,
 } from "@/components/Iconos";
 import Markdown from "@/components/Markdown";
 import PreguntaRapida from "@/components/PreguntaRapida";
+import RepasoLeccion from "@/components/RepasoLeccion";
 import { useTitulo } from "@/components/useTitulo";
 import VideoLeccion from "@/components/VideoLeccion";
 import { moneda } from "@/lib/cliente";
@@ -31,7 +33,6 @@ export default function PaginaLeccion() {
     tieneAcceso,
     setLeccionContexto,
     setPreguntaPendiente,
-    setBorrador,
     pagoPendiente,
   } = useApp();
   // El sello se anima solo cuando la alumna marca la lección, no al volver a abrirla.
@@ -91,15 +92,6 @@ export default function PaginaLeccion() {
     alternarCompletada(leccion.id);
   };
 
-  const compartirLogro = () => {
-    setBorrador({
-      categoria: "Logros",
-      titulo: `Terminé «${datos.curso.titulo}»`,
-      cuerpo: "Lo que más me sirvió del curso fue…",
-    });
-    router.push("/comunidad");
-  };
-
   return (
     <div className="rejilla-leccion">
       <nav className="indice-lecciones" aria-label="Lecciones del curso">
@@ -136,6 +128,15 @@ export default function PaginaLeccion() {
             </ul>
           </div>
         ))}
+        <Link href="/curso/examen" className="indice-examen">
+          <IconoExamen width={16} height={16} /> Examen final
+          {!cursoTerminado && (
+            <>
+              <IconoCandado width={12} height={12} />
+              <span className="sr-only"> (se desbloquea al terminar las lecciones)</span>
+            </>
+          )}
+        </Link>
       </nav>
 
       <article className="leccion">
@@ -183,6 +184,8 @@ export default function PaginaLeccion() {
               </details>
             )}
 
+            {!leccion.deCoach && <RepasoLeccion key={leccion.id} leccion={leccion} />}
+
             <div className="cierre-leccion" role="status">
               {!hecha ? (
                 <div className="cierre-pendiente">
@@ -205,7 +208,7 @@ export default function PaginaLeccion() {
                   <div className="sello-textos">
                     <p className="sello-titulo">
                       {cursoTerminado
-                        ? "Terminaste el curso"
+                        ? "Terminaste todas las lecciones"
                         : siguienteBloqueada && hechasModulo === modulo.lecciones.length
                           ? "Terminaste el módulo gratis"
                           : "Lección completada"}
@@ -240,9 +243,9 @@ export default function PaginaLeccion() {
                   </div>
                   <div className="sello-acciones">
                     {cursoTerminado ? (
-                      <button type="button" className="boton" onClick={compartirLogro}>
-                        Compartir mi logro en la comunidad
-                      </button>
+                      <Link href="/curso/examen" className="boton">
+                        <IconoExamen width={16} height={16} /> Presentar el examen final
+                      </Link>
                     ) : siguienteBloqueada ? (
                       <Link href={enlaceMembresia(siguiente.id)} className="boton">
                         {textoUnirse}

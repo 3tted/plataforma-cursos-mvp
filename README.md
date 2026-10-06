@@ -14,6 +14,8 @@ Cubre el criterio del MVP de la ficha: *comunidad con feed simple + un curso de 
 | **Curso** | "Finanzas claras para tu negocio": 3 módulos, 8 lecciones con texto y transcripción. Progreso por alumno. El módulo 1 es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
 | **Asistente del curso** | En cada lección, en la comunidad y en `/curso/asistente`. Responde dudas usando el contenido de las lecciones y **cita la lección** de donde sale cada idea ([L4], [L5]…). Si algo no está en el curso, lo dice y ofrece llevar la pregunta a la comunidad. | Real con clave de API · modo demo sin ella |
 | **Asistente Merkatics** | El de "Asistente" en el menú (`/asistente`): IA de uso general (ideas, mensajes, explicaciones). No usa los cursos y sus preguntas no aparecen en el panel de la coach. | Solo con clave de API |
+| **Repaso y examen final** | Cada lección cierra con un repaso de 2 preguntas (no cuenta para la calificación; explica la respuesta y ofrece preguntarle al asistente). Al terminar las 8 lecciones se desbloquea el examen final: 12 preguntas, se aprueba con 70% y hay 3 intentos. Las respuestas correctas solo viven en el servidor (`data/evaluaciones.json`). | Funciona |
+| **Expediente y matriz** | El alumno ve su expediente en su perfil; la coach ve en su panel la matriz de alumnos (avance por módulo, repaso, examen y estado), las preguntas que más se fallan y puede descargarla en CSV. Trae avance de ejemplo (`data/avance-seed.json`). | Funciona (alumnos identificados por nombre) |
 | **Pagos locales** | Membresía de $490 MXN/mes con OXXO (ficha con referencia), SPEI (CLABE) o Mercado Pago. | **Simulado**: no se cobra nada |
 | **Panel de la coach** | Qué preguntan los alumnos al asistente, lecciones más consultadas, pagos y un formulario para **pegar una lección propia** y que la IA responda con ella. | Funciona |
 
@@ -111,6 +113,7 @@ La Fase 2 solo empieza cuando Carlos o el coordinador aprueben este MVP con evid
 | `Publicacion`, `Comentario` en `.data/almacen.json` | Modelos `Publicacion`, `Comentario`, `Reaccion` |
 | Nombre en `localStorage` | Usuarios reales (`Alumno`, coach) con autenticación |
 | `lib/asistente.ts` (curso completo en el prompt) | Mismo enfoque mientras el curso quepa; con cursos grandes, búsqueda por fragmentos (RAG) |
+| `data/evaluaciones.json` y los intentos en `.data/almacen.json` | Modelos `Examen`, `Pregunta`, `Opcion`, `Intento` e `Inscripcion`, con cuentas reales para que la matriz sea confiable |
 | `app/api/pagos` simulado | Integración con el proveedor que defina Carlos (Mercado Pago, Conekta u otro) en sandbox, con webhooks |
 | Videos en `.data/videos` servidos por `app/api/videos/[leccion]` | Almacenamiento de objetos o servicio de video, con acceso solo para miembros y transcripción automática |
 

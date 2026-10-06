@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
 import { useApp } from "@/components/Contexto";
+import ExpedienteCurso from "@/components/ExpedienteCurso";
 import { IconoCalendario, IconoComentario, IconoEditar, IconoPregunta, IconoPublicacion } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
 import { api, hace } from "@/lib/cliente";
@@ -237,6 +238,13 @@ export default function PaginaPerfil() {
             </li>
           </ul>
         </section>
+
+        {usuario.rol === "alumno" && (
+          <section aria-labelledby="expediente-titulo" className="perfil-seccion">
+            <h2 id="expediente-titulo">Expediente del curso</h2>
+            <ExpedienteCurso autor={usuario.nombre} />
+          </section>
+        )}
 
         <section aria-labelledby="contribuciones-titulo" className="perfil-seccion">
           <div className="perfil-seccion-cabecera">

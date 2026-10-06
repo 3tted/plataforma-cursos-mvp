@@ -210,13 +210,43 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     guardarLocal(CLAVES.leccionDeseada, id);
   }, []);
 
-  const alternarCompletada = useCallback((id: string) => {
-    setCompletadas((actual) => {
-      const nuevo = actual.includes(id) ? actual.filter((x) => x !== id) : [...actual, id];
-      guardarLocal(CLAVES.completadas, nuevo);
-      return nuevo;
+  // El avance también se guarda en el servidor: la coach lo ve en su matriz,
+  // el examen final lo revisa y el alumno lo recupera al volver a entrar.
+  const enviarProgreso = useCallback((nombre: string, lista: string[]) => {
+    void api("/api/progreso", { method: "POST", json: { autor: nombre, completadas: lista } }).catch(() => {
+      // sin conexión: el navegador lo conserva y se reenvía en el siguiente cambio
     });
   }, []);
+
+  useEffect(() => {
+    if (!listo || usuario?.rol !== "alumno") return;
+    const nombre = usuario.nombre;
+    let vigente = true;
+    api<{ completadas: string[] }>(`/api/progreso?autor=${encodeURIComponent(nombre)}`)
+      .then(({ completadas: remotas }) => {
+        if (!vigente) return;
+        setCompletadas((locales) => [...new Set([...locales, ...remotas])]);
+        const union = [...new Set([...(leerLocal<string[]>(CLAVES.completadas) ?? []), ...remotas])];
+        guardarLocal(CLAVES.completadas, union);
+        if (union.length !== remotas.length) enviarProgreso(nombre, union);
+      })
+      .catch(() => {
+        // sin conexión: se queda con lo que recuerda el navegador
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [listo, usuario?.nombre, usuario?.rol, enviarProgreso]);
+
+  const alternarCompletada = useCallback(
+    (id: string) => {
+      const nuevo = completadas.includes(id) ? completadas.filter((x) => x !== id) : [...completadas, id];
+      setCompletadas(nuevo);
+      guardarLocal(CLAVES.completadas, nuevo);
+      if (usuario?.rol === "alumno") enviarProgreso(usuario.nombre, nuevo);
+    },
+    [completadas, usuario, enviarProgreso],
+  );
 
   const lecciones = useMemo(
     () =>

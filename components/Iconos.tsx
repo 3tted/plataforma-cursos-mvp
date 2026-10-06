@@ -1,7 +1,14 @@
 import type { Icon, IconProps, IconWeight } from "@phosphor-icons/react";
 import {
+  ArrowCounterClockwise,
   ArrowLeft,
   ArrowRight,
+  CheckCircle,
+  DownloadSimple,
+  Exam,
+  GraduationCap,
+  ListChecks,
+  XCircle,
   BookOpenText,
   ChartBar,
   ChatCircleText,
@@ -70,3 +77,10 @@ export const IconoEditar = icono(PencilSimple);
 export const IconoPregunta = icono(Question);
 export const IconoPublicacion = icono(Article);
 export const IconoVideo = icono(VideoCamera);
+export const IconoRepaso = icono(ListChecks);
+export const IconoExamen = icono(Exam);
+export const IconoAprobado = icono(GraduationCap);
+export const IconoAcierto = icono(CheckCircle, "fill");
+export const IconoError = icono(XCircle, "fill");
+export const IconoReintentar = icono(ArrowCounterClockwise);
+export const IconoDescargar = icono(DownloadSimple);

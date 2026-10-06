@@ -1,5 +1,16 @@
 // Utilidades de la interfaz (se ejecutan en el navegador).
 
+import type { EstadoAlumno } from "./tipos";
+
+/** Cómo se nombra y se colorea el estado de un alumno en el expediente y en la matriz. */
+export const ESTADO_ALUMNO: Record<EstadoAlumno, { texto: string; clase: string }> = {
+  aprobado: { texto: "Aprobado", clase: "pastilla pastilla-ok" },
+  "requiere-apoyo": { texto: "Requiere apoyo", clase: "pastilla pastilla-peligro" },
+  "examen-pendiente": { texto: "Examen pendiente", clase: "pastilla pastilla-pendiente" },
+  "en-curso": { texto: "En curso", clase: "pastilla" },
+  "sin-iniciar": { texto: "Sin iniciar", clase: "pastilla" },
+};
+
 export async function api<T>(ruta: string, opciones?: RequestInit & { json?: unknown }): Promise<T> {
   const { json, ...resto } = opciones ?? {};
   const res = await fetch(ruta, {

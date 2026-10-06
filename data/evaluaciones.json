@@ -1,0 +1,303 @@
+{
+  "aprobar_con": 70,
+  "intentos_examen": 3,
+  "repaso": {
+    "L1": [
+      {
+        "id": "R1-1",
+        "enunciado": "¿Cuál es el principal problema de mezclar el dinero del negocio con el de tu casa?",
+        "opciones": [
+          "No puedes saber si el negocio gana o pierde",
+          "Pagas más impuestos de forma automática",
+          "El banco puede cerrar tu cuenta",
+          "Tus clientes dejan de comprarte"
+        ],
+        "correcta": 0,
+        "explicacion": "Si los gastos de tu casa salen del negocio, se ven como costos y tus números mienten."
+      },
+      {
+        "id": "R1-2",
+        "enunciado": "Según la regla del traspaso único, ¿cuándo pasa dinero del negocio a tu cuenta personal?",
+        "opciones": [
+          "Cada vez que lo necesitas",
+          "Una o dos veces al mes, como tu sueldo",
+          "Solo a fin de año",
+          "Nunca"
+        ],
+        "correcta": 1,
+        "explicacion": "Del negocio solo sale tu sueldo, una o dos veces al mes. Si necesitas más, se decide en tu revisión mensual."
+      }
+    ],
+    "L2": [
+      {
+        "id": "R2-1",
+        "enunciado": "Al empezar, ¿qué parte de la utilidad antes de tu sueldo conviene pagarte?",
+        "opciones": ["Entre 20% y 30%", "Entre 50% y 60%", "El 100%", "Entre 80% y 90%"],
+        "correcta": 1,
+        "explicacion": "La regla es pagarte entre 50% y 60%; el resto se queda en el negocio como colchón y para crecer."
+      },
+      {
+        "id": "R2-2",
+        "enunciado": "Si un mes el negocio no alcanza a pagar tu sueldo completo, ¿qué recomienda la lección?",
+        "opciones": [
+          "Cubrirlo con tu tarjeta de crédito personal",
+          "Pagarte lo que haya, anotarlo y revisar qué pasó en tu cierre",
+          "Subir los precios ese mismo día",
+          "Cerrar el negocio"
+        ],
+        "correcta": 1,
+        "explicacion": "Te pagas lo disponible y en el siguiente cierre revisas si bajaron las ventas, subió un costo o tus precios ya no alcanzan."
+      }
+    ],
+    "L3": [
+      {
+        "id": "R3-1",
+        "enunciado": "¿Cuáles son las cinco columnas del registro simple?",
+        "opciones": [
+          "Fecha, concepto, categoría, ingreso y gasto",
+          "Cliente, producto, precio, IVA y total",
+          "Mes, ventas, costos, utilidad y sueldo",
+          "Banco, tarjeta, efectivo, deuda y ahorro"
+        ],
+        "correcta": 0,
+        "explicacion": "Fecha, concepto, categoría, ingreso y gasto: con eso basta para empezar."
+      },
+      {
+        "id": "R3-2",
+        "enunciado": "¿Cómo se registra una venta cobrada con terminal?",
+        "opciones": [
+          "Solo el monto que llega después de la comisión",
+          "La venta completa como ingreso y la comisión como un gasto aparte",
+          "No se registra porque ya está en el banco",
+          "Como gasto de publicidad"
+        ],
+        "correcta": 1,
+        "explicacion": "La venta va completa como ingreso y la comisión en la categoría «comisiones de cobro»; si no, tu margen real es menor del que crees."
+      }
+    ],
+    "L4": [
+      {
+        "id": "R4-1",
+        "enunciado": "¿Cuál de estos es un costo fijo?",
+        "opciones": [
+          "La renta del local",
+          "Los ingredientes de cada pastel",
+          "El empaque de cada pedido",
+          "La comisión de cobro de cada venta"
+        ],
+        "correcta": 0,
+        "explicacion": "La renta se paga aunque no vendas nada; los otros aparecen con cada venta."
+      },
+      {
+        "id": "R4-2",
+        "enunciado": "En el ejemplo de Ana, ¿cuánto suman sus costos fijos al mes?",
+        "opciones": ["$8,000", "$150", "$18,000", "$42,000"],
+        "correcta": 2,
+        "explicacion": "Renta $7,000 + sueldo $8,000 + servicios $1,800 + apps $1,200 = $18,000 al mes."
+      }
+    ],
+    "L5": [
+      {
+        "id": "R5-1",
+        "enunciado": "Si un pastel cuesta $150 y se vende en $350, ¿cuál es su margen de contribución?",
+        "opciones": ["133%", "57%", "30%", "43%"],
+        "correcta": 1,
+        "explicacion": "El margen se calcula sobre el precio: ($350 − $150) ÷ $350 = 57%. El 133% es el markup, sobre el costo."
+      },
+      {
+        "id": "R5-2",
+        "enunciado": "¿Cuál es la fórmula para calcular tu precio con un margen deseado?",
+        "opciones": [
+          "Costo variable × (1 + margen)",
+          "Costo variable ÷ (1 − margen deseado)",
+          "Costos fijos ÷ unidades vendidas",
+          "Precio de la competencia menos 10%"
+        ],
+        "correcta": 1,
+        "explicacion": "Precio = costo variable ÷ (1 − margen deseado). Con $150 y 55%: $150 ÷ 0.45 = $333."
+      }
+    ],
+    "L6": [
+      {
+        "id": "R6-1",
+        "enunciado": "¿Cómo se calcula el punto de equilibrio en unidades?",
+        "opciones": [
+          "Costos fijos ÷ (precio − costo variable)",
+          "Precio × unidades vendidas",
+          "Costo variable ÷ precio",
+          "Ventas − costos fijos"
+        ],
+        "correcta": 0,
+        "explicacion": "Se dividen los costos fijos entre la contribución por unidad, que es el precio menos el costo variable."
+      },
+      {
+        "id": "R6-2",
+        "enunciado": "Con costos fijos de $18,000 y una contribución de $200 por pastel, ¿cuántos pasteles necesita vender Ana para no perder?",
+        "opciones": ["60", "90", "120", "180"],
+        "correcta": 1,
+        "explicacion": "$18,000 ÷ $200 = 90 pasteles al mes, unos 21 por semana."
+      }
+    ],
+    "L7": [
+      {
+        "id": "R7-1",
+        "enunciado": "¿Por qué un negocio puede tener utilidad y aun así quedarse sin efectivo?",
+        "opciones": [
+          "Porque la utilidad siempre está mal calculada",
+          "Por ventas a crédito, inventario pagado por adelantado o pagos grandes que no son mensuales",
+          "Porque el banco retiene el dinero",
+          "Porque los costos fijos no cuentan"
+        ],
+        "correcta": 1,
+        "explicacion": "La utilidad no dice cuándo entra y sale el dinero: los cobros tardíos y los pagos grandes pueden dejar la cuenta en cero."
+      },
+      {
+        "id": "R7-2",
+        "enunciado": "¿Qué hacer con una semana que queda en rojo en el flujo a 13 semanas?",
+        "opciones": [
+          "Esperar a que se resuelva sola",
+          "Pedir anticipos, negociar plazos o escalonar compras",
+          "Dejar de registrar esa semana",
+          "Pagar todo con tarjeta de crédito"
+        ],
+        "correcta": 1,
+        "explicacion": "Una semana en rojo se ve con anticipación justo para actuar: anticipos, plazos con proveedores, compras por etapas y cobrar lo vencido."
+      }
+    ],
+    "L8": [
+      {
+        "id": "R8-1",
+        "enunciado": "¿De cuánto debe ser la meta del fondo de reserva?",
+        "opciones": ["Un mes de ventas", "Tres meses de costos fijos", "El 10% de un solo cobro", "Seis meses de tu sueldo"],
+        "correcta": 1,
+        "explicacion": "La meta es juntar tres meses de costos fijos; para Ana, 3 × $18,000 = $54,000."
+      },
+      {
+        "id": "R8-2",
+        "enunciado": "Un horno de $45,000 deja $8,000 extra al mes. ¿En cuánto tiempo se recupera?",
+        "opciones": ["Unos 3 meses", "Unos 5.6 meses", "Unos 12 meses", "Unos 24 meses"],
+        "correcta": 1,
+        "explicacion": "Meses para recuperar = costo ÷ contribución extra al mes: $45,000 ÷ $8,000 = 5.6 meses."
+      }
+    ]
+  },
+  "examen_final": {
+    "titulo": "Examen final: Finanzas claras para tu negocio",
+    "preguntas": [
+      {
+        "id": "F1",
+        "leccion": "L1",
+        "enunciado": "Ana vendió $42,000 en septiembre. Al separar sus cuentas, ¿qué descubrió?",
+        "opciones": [
+          "Que el negocio perdía dinero",
+          "Que $9,500 eran gastos de su casa pagados por el negocio",
+          "Que debía impuestos atrasados",
+          "Que sus precios eran demasiado altos"
+        ],
+        "correcta": 1
+      },
+      {
+        "id": "F2",
+        "leccion": "L1",
+        "enunciado": "¿Cómo se manejan los gastos mixtos, como el celular que usas para el negocio y para ti?",
+        "opciones": [
+          "Los paga siempre el negocio",
+          "Se dividen con una regla fija, por ejemplo 60% y 40%",
+          "Los pagas siempre tú",
+          "Se decide cada mes según cómo vayan las ventas"
+        ],
+        "correcta": 1
+      },
+      {
+        "id": "F3",
+        "leccion": "L2",
+        "enunciado": "Ana tiene una utilidad antes de su sueldo de $14,000 al mes. ¿Qué sueldo eligió con la regla de la lección?",
+        "opciones": ["$4,000", "$8,000", "$14,000", "$12,000"],
+        "correcta": 1
+      },
+      {
+        "id": "F4",
+        "leccion": "L2",
+        "enunciado": "¿Cada cuánto conviene revisar tu sueldo?",
+        "opciones": ["Cada semana", "Cada tres meses", "Solo cuando hay problemas", "Una vez al año"],
+        "correcta": 1
+      },
+      {
+        "id": "F5",
+        "leccion": "L3",
+        "enunciado": "¿Cuánto tiempo propone la lección dedicar cada viernes a tu registro?",
+        "opciones": ["10 minutos", "Una hora", "Medio día", "No hace falta un día fijo"],
+        "correcta": 0
+      },
+      {
+        "id": "F6",
+        "leccion": "L4",
+        "enunciado": "La comisión de cobro de cada venta es un costo…",
+        "opciones": ["Fijo", "Variable", "Mixto que siempre va como fijo", "Que no se registra"],
+        "correcta": 1
+      },
+      {
+        "id": "F7",
+        "leccion": "L4",
+        "enunciado": "Si vendes servicios, ¿con qué se paga tu tiempo según la lección?",
+        "opciones": [
+          "Con el costo variable de cada cliente",
+          "Con tu sueldo, que es un costo fijo",
+          "No se toma en cuenta",
+          "Con las comisiones de cobro"
+        ],
+        "correcta": 1
+      },
+      {
+        "id": "F8",
+        "leccion": "L5",
+        "enunciado": "Si le subes 30% al costo (un markup de 30%), ¿qué margen obtienes aproximadamente?",
+        "opciones": ["30%", "23%", "50%", "70%"],
+        "correcta": 1
+      },
+      {
+        "id": "F9",
+        "leccion": "L5",
+        "enunciado": "Si facturas, ¿qué pasa con el IVA?",
+        "opciones": [
+          "Es parte de tu ganancia",
+          "Se suma a tu precio y se le entrega al SAT",
+          "Se resta de tus costos fijos",
+          "Solo aplica a productos, no a servicios"
+        ],
+        "correcta": 1
+      },
+      {
+        "id": "F10",
+        "leccion": "L6",
+        "enunciado": "Si Ana sube el pastel a $380 (contribución de $230), ¿qué pasa con su punto de equilibrio?",
+        "opciones": ["Sube a 100 pasteles", "Baja a unos 79 pasteles", "Se queda en 90 pasteles", "Baja a 45 pasteles"],
+        "correcta": 1
+      },
+      {
+        "id": "F11",
+        "leccion": "L7",
+        "enunciado": "¿Qué mínimo de seguridad sugiere la lección para tu flujo a 13 semanas?",
+        "opciones": [
+          "El equivalente a dos semanas de costos fijos",
+          "Un año de ventas",
+          "Mil pesos",
+          "No hace falta un mínimo"
+        ],
+        "correcta": 0
+      },
+      {
+        "id": "F12",
+        "leccion": "L8",
+        "enunciado": "Según la regla práctica, ¿cuándo conviene hacer una inversión?",
+        "opciones": [
+          "Siempre que haya dinero en la cuenta",
+          "Si se recupera en menos de 12 meses, la demanda ya existe y tu flujo no queda en rojo",
+          "Solo si la competencia ya la hizo",
+          "Cuando el fondo de reserva está vacío"
+        ],
+        "correcta": 1
+      }
+    ]
+  }
+}

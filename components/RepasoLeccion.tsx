@@ -1,0 +1,133 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { api } from "@/lib/cliente";
+import type { ResultadoRepaso } from "@/lib/tipos";
+import { useApp } from "./Contexto";
+import { IconoAsistente, IconoReintentar, IconoRepaso } from "./Iconos";
+import PreguntaOpciones from "./PreguntaOpciones";
+import { useEvaluaciones } from "./useEvaluaciones";
+
+// Repaso al final de la lección: preguntas que no cuentan para la calificación.
+// Muestra la respuesta correcta con su explicación y, si el alumno falla, le
+// ofrece preguntarle al asistente del curso. La página lo monta con
+// key={leccion.id} para que empiece de cero en cada lección.
+export default function RepasoLeccion({ leccion }: { leccion: { id: string; titulo: string } }) {
+  const router = useRouter();
+  const evaluaciones = useEvaluaciones();
+  const { usuario, setLeccionContexto, setPreguntaPendiente } = useApp();
+  const [respuestas, setRespuestas] = useState<(number | null)[]>([]);
+  const [resultado, setResultado] = useState<ResultadoRepaso | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const preguntas = evaluaciones?.repaso[leccion.id];
+  if (!preguntas?.length || !usuario) return null;
+
+  const completas = preguntas.every((_, i) => respuestas[i] != null);
+
+  const revisar = async () => {
+    setEnviando(true);
+    setError(null);
+    try {
+      setResultado(
+        await api<ResultadoRepaso>("/api/repaso", {
+          method: "POST",
+          json: { autor: usuario.nombre, rol: usuario.rol, leccion: leccion.id, respuestas },
+        }),
+      );
+    } catch (e) {
+      setError(e instanceof TypeError ? "No pudimos revisar tus respuestas. Revisa tu conexión." : (e as Error).message);
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const reiniciar = () => {
+    setRespuestas([]);
+    setResultado(null);
+  };
+
+  const preguntarAlAsistente = (enunciado: string, correcta: string) => {
+    setLeccionContexto(leccion.id);
+    setPreguntaPendiente(`En el repaso fallé esta pregunta: «${enunciado}». ¿Me explicas por qué la respuesta es «${correcta}»?`);
+    router.push("/curso/asistente");
+  };
+
+  return (
+    <section className="tarjeta repaso" aria-labelledby="repaso-titulo">
+      <div className="repaso-cabecera">
+        <h2 id="repaso-titulo">
+          <IconoRepaso width={20} height={20} /> Repaso rápido
+        </h2>
+        <p className="texto-suave">
+          {preguntas.length} preguntas para comprobar que te quedó claro. No cuentan para tu calificación.
+        </p>
+      </div>
+
+      <ol className="repaso-preguntas">
+        {preguntas.map((p, i) => {
+          const revision = resultado?.detalle[i];
+          return (
+            <li key={p.id}>
+              <PreguntaOpciones
+                numero={i + 1}
+                pregunta={p}
+                elegida={respuestas[i] ?? null}
+                alElegir={(opcion) => setRespuestas((r) => Object.assign([...r], { [i]: opcion }))}
+                revision={revision ? { acierto: revision.acierto, correcta: revision.correcta } : null}
+                deshabilitada={enviando}
+              >
+                {revision && (
+                  <div className="repaso-explicacion" data-acierto={revision.acierto}>
+                    <p>
+                      <strong>{revision.acierto ? "Correcto." : `La respuesta es «${p.opciones[revision.correcta]}».`}</strong>{" "}
+                      {revision.explicacion} <span className="cita-id">{leccion.id}</span>
+                    </p>
+                    {!revision.acierto && (
+                      <button
+                        type="button"
+                        className="accion"
+                        onClick={() => preguntarAlAsistente(p.enunciado, p.opciones[revision.correcta])}
+                      >
+                        <IconoAsistente width={15} height={15} /> Pregúntale al asistente
+                      </button>
+                    )}
+                  </div>
+                )}
+              </PreguntaOpciones>
+            </li>
+          );
+        })}
+      </ol>
+
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+
+      <div className="repaso-pie" role="status">
+        {resultado ? (
+          <>
+            <p className="repaso-total">
+              <span className="cifra">
+                {resultado.aciertos} de {resultado.total}
+              </span>{" "}
+              correctas
+              {resultado.aciertos === resultado.total ? ": lo tienes claro." : "."}
+            </p>
+            <button type="button" className="boton boton-secundario boton-chico" onClick={reiniciar}>
+              <IconoReintentar width={15} height={15} /> Intentar de nuevo
+            </button>
+          </>
+        ) : (
+          <button type="button" className="boton boton-secundario" onClick={revisar} disabled={!completas || enviando}>
+            {enviando ? "Revisando…" : "Revisar mis respuestas"}
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}

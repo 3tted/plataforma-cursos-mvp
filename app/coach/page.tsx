@@ -7,6 +7,7 @@ import { useApp } from "@/components/Contexto";
 import { IconoBorrar, IconoComunidad } from "@/components/Iconos";
 import Arcos from "@/components/Arcos";
 import Markdown from "@/components/Markdown";
+import MatrizAlumnos from "@/components/MatrizAlumnos";
 import { useTitulo } from "@/components/useTitulo";
 import { api, fechaCorta, hace, moneda } from "@/lib/cliente";
 import type { LeccionCoach, PreguntaIA, ResumenCoach } from "@/lib/tipos";
@@ -182,6 +183,8 @@ export default function PaginaCoach() {
           </div>
         </dl>
       </section>
+
+      <MatrizAlumnos />
 
       <div className="rejilla-coach">
         <section className="tarjeta" aria-labelledby="preguntas-titulo">

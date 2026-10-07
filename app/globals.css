@@ -4437,3 +4437,8 @@ main:focus {
 .expediente-modulos li {
   grid-template-columns: minmax(0, 1fr) 48px;
 }
+
+.matriz-acciones {
+  width: 1%;
+  text-align: right;
+}

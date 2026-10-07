@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ESTADO_ALUMNO, api, hace } from "@/lib/cliente";
 import type { EstadoAlumno, Expediente, MatrizAlumnos as Matriz } from "@/lib/tipos";
 import { useApp } from "./Contexto";
-import { IconoDescargar } from "./Iconos";
+import { IconoBorrar, IconoDescargar } from "./Iconos";
 
 const ESTADOS: EstadoAlumno[] = ["aprobado", "examen-pendiente", "en-curso", "requiere-apoyo"];
 
@@ -49,12 +49,30 @@ export default function MatrizAlumnos() {
   const [matriz, setMatriz] = useState<Matriz | null>(null);
   const [error, setError] = useState(false);
   const [filtro, setFiltro] = useState<EstadoAlumno | "todos">("todos");
+  const [porQuitar, setPorQuitar] = useState<string | null>(null);
+  const [errorQuitar, setErrorQuitar] = useState<string | null>(null);
 
-  useEffect(() => {
+  const cargar = useCallback(() => {
     api<Matriz>("/api/coach/alumnos")
       .then(setMatriz)
       .catch(() => setError(true));
   }, []);
+
+  useEffect(cargar, [cargar]);
+
+  const quitar = async (autor: string) => {
+    setErrorQuitar(null);
+    try {
+      await api(`/api/coach/alumnos?autor=${encodeURIComponent(autor)}`, {
+        method: "DELETE",
+        headers: { "X-Rol": "coach" },
+      });
+      setPorQuitar(null);
+      cargar();
+    } catch (e) {
+      setErrorQuitar((e as Error).message);
+    }
+  };
 
   const conteo = useMemo(() => {
     const c = new Map<EstadoAlumno, number>();
@@ -117,6 +135,9 @@ export default function MatrizAlumnos() {
                   <th scope="col">Examen final</th>
                   <th scope="col">Estado</th>
                   <th scope="col">Última actividad</th>
+                  <th scope="col">
+                    <span className="sr-only">Acciones</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -142,12 +163,40 @@ export default function MatrizAlumnos() {
                       <span className={ESTADO_ALUMNO[a.estado].clase}>{ESTADO_ALUMNO[a.estado].texto}</span>
                     </td>
                     <td className="texto-suave">{a.ultimaActividad ? hace(a.ultimaActividad) : "—"}</td>
+                    <td className="matriz-acciones">
+                      {porQuitar === a.autor ? (
+                        <span className="confirmacion" role="group" aria-label={`Confirmar que quitas a ${a.autor}`}>
+                          ¿Quitar su avance?
+                          <button type="button" className="boton boton-chico" onClick={() => quitar(a.autor)}>
+                            Sí, quitar
+                          </button>
+                          <button type="button" className="boton boton-chico boton-fantasma" onClick={() => setPorQuitar(null)}>
+                            Cancelar
+                          </button>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="boton-icono boton-icono-chico"
+                          onClick={() => setPorQuitar(a.autor)}
+                          aria-label={`Quitar a ${a.autor} de la matriz`}
+                          title="Quitar de la matriz"
+                        >
+                          <IconoBorrar width={15} height={15} />
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           {visibles.length === 0 && <p className="vacio">Ningún alumno en este estado.</p>}
+          {errorQuitar && (
+            <p className="error" role="alert">
+              {errorQuitar}
+            </p>
+          )}
         </>
       )}
 

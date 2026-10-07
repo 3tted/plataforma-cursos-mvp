@@ -23,6 +23,10 @@ export async function leerJson(req: Request): Promise<Record<string, unknown>> {
 export function texto(valor: unknown, campo: string, maximo: number): string {
   const limpio = typeof valor === "string" ? valor.trim() : "";
   if (!limpio) throw new ErrorDeDatos(`Falta el campo "${campo}".`);
+  // "�" aparece cuando el texto llegó con otra codificación (no UTF-8).
+  if (limpio.includes("�")) {
+    throw new ErrorDeDatos(`"${campo}" tiene caracteres que no se pudieron leer. Escríbelo de nuevo.`);
+  }
   if (limpio.length > maximo) {
     throw new ErrorDeDatos(`"${campo}" es demasiado largo (máximo ${maximo} caracteres).`);
   }

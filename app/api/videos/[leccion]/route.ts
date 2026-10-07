@@ -1,7 +1,7 @@
 import { createReadStream, promises as fs } from "fs";
 import path from "path";
 import { Readable } from "stream";
-import { DIRECTORIO_VIDEOS, consultar, modificar } from "@/lib/almacen";
+import { DIRECTORIO_VIDEOS, consultar, modificar, rutaDelVideo } from "@/lib/almacen";
 import { cargarCurso, todasLasLecciones } from "@/lib/curso";
 import { error, manejar } from "@/lib/http";
 import { MAX_BYTES_VIDEO, TIPOS_VIDEO, tamañoLegible } from "@/lib/reglas-video";
@@ -44,7 +44,7 @@ export const GET = manejar(async (req: Request, contexto: Contexto) => {
   const video = leccion ? await videoDe(leccion) : undefined;
   if (!video) return error("Esta lección no tiene video.", 404);
 
-  const ruta = path.join(DIRECTORIO_VIDEOS, video.archivo);
+  const ruta = await rutaDelVideo(video);
   const { size } = await fs.stat(ruta).catch(() => ({ size: -1 }));
   if (size < 0) return error("No encontramos el archivo del video.", 404);
 

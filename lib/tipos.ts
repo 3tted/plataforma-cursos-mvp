@@ -121,6 +121,8 @@ export interface Pago {
 export interface EstadoPlataforma {
   iaActiva: boolean;
   modelo: string | null;
+  /** "redis": datos compartidos entre las copias del servidor; "archivo": en el disco de esta copia. */
+  almacen?: "redis" | "archivo";
 }
 
 export interface ResumenCoach {

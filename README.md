@@ -63,7 +63,7 @@ La forma más simple es **Vercel** (gratis):
 2. En vercel.com, importa el repositorio.
 3. En *Settings → Environment Variables*, agrega `ANTHROPIC_API_KEY`.
 
-Importante: en Vercel, las publicaciones, preguntas y pagos se guardan en `/tmp` y **se borran con frecuencia**. Para una demo en vivo no importa. Si necesitas que persistan durante días, usa un servidor con disco (Render o Railway, con `npm run build && npm start`). En la Fase 2 esto se resuelve con la base de datos de Django.
+Importante: en Vercel el servidor corre en varias copias y cada una tiene su propio disco temporal. **Conecta Redis** para que todas compartan los mismos datos (alumnos, avance, exámenes, publicaciones y pagos): en Vercel, *Storage → Create Database → Upstash for Redis* (plan gratuito) y conéctalo al proyecto; agrega solo las variables `KV_REST_API_URL` y `KV_REST_API_TOKEN` (o `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`). Después haz *Redeploy* y comprueba en `/api/estado` que diga `"almacen":"redis"`. Sin Redis, los datos se guardan en `/tmp` de cada copia y **se borran con frecuencia**. Para una demo en vivo no importa. Si necesitas que persistan durante días, usa un servidor con disco (Render o Railway, con `npm run build && npm start`). En la Fase 2 esto se resuelve con la base de datos de Django.
 
 ## Usar el contenido real de un coach
 

@@ -142,7 +142,12 @@ export default function PaginaComunidad() {
         )}
         <div className="lista-publicaciones">
           {visibles.map((p) => (
-            <TarjetaPublicacion key={p.id} publicacion={p} alCambiar={reemplazar} />
+            <TarjetaPublicacion
+              key={p.id}
+              publicacion={p}
+              alCambiar={reemplazar}
+              alBorrar={(id) => setPublicaciones((lista) => lista?.filter((x) => x.id !== id) ?? null)}
+            />
           ))}
         </div>
       </section>

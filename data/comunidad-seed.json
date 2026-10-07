@@ -9,57 +9,7 @@
       "haceHoras": 150,
       "titulo": "Bienvenida a Finanzas Claras: empieza por aquí",
       "cuerpo": "Qué gusto tenerte aquí. Tres cosas para arrancar:\n\n1. Preséntate en la categoría Presentaciones: a qué se dedica tu negocio y qué te gustaría resolver.\n2. El módulo 1 del curso es gratis. Empieza por la lección 1: separar tu dinero del negocio.\n3. Si tienes una duda sobre alguna lección, pregúntale al asistente del curso: te responde al momento y te dice de qué lección sale la respuesta. Si no lo resuelve, publícala aquí y yo la reviso.",
-      "comentarios": [
-        { "autor": "Karla Méndez", "rol": "alumno", "haceHoras": 140, "cuerpo": "¡Gracias, Dani! Ya voy en la lección 2." }
-      ]
-    },
-    {
-      "autor": "Luis Hernández",
-      "rol": "alumno",
-      "categoria": "Dudas",
-      "fijada": false,
-      "haceHoras": 30,
-      "titulo": "¿Mi sueldo va como costo fijo aunque a veces no me lo pague?",
-      "cuerpo": "Tengo una imprenta chica y hay meses que no me pago nada. Si lo meto como costo fijo mi punto de equilibrio sube muchísimo. ¿Lo dejo fuera?",
-      "comentarios": [
-        { "autor": "Daniela Ortega", "rol": "coach", "haceHoras": 26, "cuerpo": "No lo dejes fuera, Luis. Justo eso que ves (que el punto de equilibrio sube) es la foto real de tu negocio. Si lo quitas, tus precios salen tan bajos que solo funcionan si trabajas gratis. Revisa la lección 4 y luego la 5 para ajustar precios." },
-        { "autor": "Luis Hernández", "rol": "alumno", "haceHoras": 25, "cuerpo": "Uf, tiene sentido. Voy a recalcular." }
-      ]
-    },
-    {
-      "autor": "Karla Méndez",
-      "rol": "alumno",
-      "categoria": "Logros",
-      "fijada": false,
-      "haceHoras": 20,
-      "titulo": "Separé cuentas y encontré $6,000 al mes que se iban a la casa",
-      "cuerpo": "Hice el ejercicio de la lección 1 con mi estado de cuenta de agosto. Casi $6,000 salieron del negocio para gastos personales sin darme cuenta. Ya abrí mi cuenta del negocio y le puse de nombre \"NO TOCAR\", como dijo Dani en el video.",
-      "comentarios": [
-        { "autor": "Daniela Ortega", "rol": "coach", "haceHoras": 18, "cuerpo": "¡Eso es, Karla! Ahora el siguiente paso es ponerte un sueldo fijo (lección 2) para que esos $6,000 salgan de forma ordenada." },
-        { "autor": "Jorge Salinas", "rol": "alumno", "haceHoras": 12, "cuerpo": "Me pasó igual. Da miedo verlo, pero ayuda muchísimo." }
-      ]
-    },
-    {
-      "autor": "Jorge Salinas",
-      "rol": "alumno",
-      "categoria": "Presentaciones",
-      "fijada": false,
-      "haceHoras": 14,
-      "titulo": "Hola desde Guadalajara: taller de bicicletas",
-      "cuerpo": "Soy Jorge, tengo un taller de reparación de bicicletas desde hace 4 años. Vendo refacciones y servicio. Mi problema es que nunca sé cuánto cobrar por el servicio, siempre le calculo \"a ojo\". Vengo por el módulo 2.",
       "comentarios": []
-    },
-    {
-      "autor": "Mariana López",
-      "rol": "alumno",
-      "categoria": "Dudas",
-      "fijada": false,
-      "haceHoras": 6,
-      "titulo": "¿Cómo meto la comisión de la terminal en mis precios?",
-      "cuerpo": "Cobro casi todo con terminal. ¿La comisión va en el costo variable o se la cobro aparte al cliente?",
-      "comentarios": [
-        { "autor": "Luis Hernández", "rol": "alumno", "haceHoras": 5, "cuerpo": "Le pregunté al asistente y me dijo que va como costo variable por venta (lección 4) y que la registre aparte como gasto (lección 3). Me sirvió." }
-      ]
     },
     {
       "autor": "Daniela Ortega",

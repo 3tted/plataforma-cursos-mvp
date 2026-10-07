@@ -5,7 +5,7 @@ import { api, hace } from "@/lib/cliente";
 import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
-import { IconoComentario, IconoFijado, IconoUtil } from "./Iconos";
+import { IconoBorrar, IconoComentario, IconoFijado, IconoUtil } from "./Iconos";
 
 // Cuántos comentarios se ven sin abrir la conversación completa.
 const VISTA_PREVIA = 2;
@@ -13,9 +13,12 @@ const VISTA_PREVIA = 2;
 export default function TarjetaPublicacion({
   publicacion: p,
   alCambiar,
+  alBorrar,
 }: {
   publicacion: Publicacion;
   alCambiar: (p: Publicacion) => void;
+  /** La coach modera: al borrar la publicación, la página la quita de la lista. */
+  alBorrar?: (id: number) => void;
 }) {
   const { usuario, setPidiendoUsuario } = useApp();
   const [todos, setTodos] = useState(false);
@@ -29,6 +32,9 @@ export default function TarjetaPublicacion({
   const [recortada, setRecortada] = useState(false);
   const cuerpoRef = useRef<HTMLParagraphElement>(null);
   const campoComentario = useRef<HTMLInputElement>(null);
+  const esCoach = usuario?.rol === "coach";
+  // Qué se está por borrar: la publicación ("p") o un comentario (su id).
+  const [porBorrar, setPorBorrar] = useState<"p" | number | null>(null);
 
   useEffect(() => {
     if (!p.fijada) return;
@@ -75,6 +81,38 @@ export default function TarjetaPublicacion({
     }
   };
 
+  const borrar = async () => {
+    setError(null);
+    try {
+      if (porBorrar === "p") {
+        await api(`/api/publicaciones/${p.id}`, { method: "DELETE", headers: { "X-Rol": "coach" } });
+        alBorrar?.(p.id);
+      } else if (porBorrar !== null) {
+        alCambiar(
+          await api<Publicacion>(`/api/publicaciones/${p.id}/comentarios/${porBorrar}`, {
+            method: "DELETE",
+            headers: { "X-Rol": "coach" },
+          }),
+        );
+      }
+      setPorBorrar(null);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  const confirmacion = (texto: string) => (
+    <span className="confirmacion" role="group" aria-label={texto}>
+      {texto}
+      <button type="button" className="boton boton-chico" onClick={borrar}>
+        Sí, borrar
+      </button>
+      <button type="button" className="boton boton-chico boton-fantasma" onClick={() => setPorBorrar(null)}>
+        Cancelar
+      </button>
+    </span>
+  );
+
   const total = p.comentarios.length;
   const visibles = todos ? p.comentarios : p.comentarios.slice(-VISTA_PREVIA);
   const ocultos = total - visibles.length;
@@ -100,7 +138,19 @@ export default function TarjetaPublicacion({
               <span className={`categoria categoria-${p.categoria.toLowerCase()}`}>{p.categoria}</span>
             </span>
           </div>
+          {esCoach && alBorrar && porBorrar !== "p" && (
+            <button
+              type="button"
+              className="boton-icono boton-icono-chico publicacion-borrar"
+              onClick={() => setPorBorrar("p")}
+              aria-label={`Borrar la publicación «${p.titulo}»`}
+              title="Borrar publicación"
+            >
+              <IconoBorrar width={15} height={15} />
+            </button>
+          )}
         </header>
+        {porBorrar === "p" && confirmacion("¿Borrar esta publicación y sus comentarios?")}
 
         <h2 className="publicacion-titulo">{p.titulo}</h2>
         <p className="publicacion-cuerpo" ref={cuerpoRef} id={`cuerpo-${p.id}`}>
@@ -144,8 +194,19 @@ export default function TarjetaPublicacion({
                 {c.autor}
                 {c.rol === "coach" && <span className="insignia">Coach</span>}
                 <time dateTime={c.creadoEn}>{hace(c.creadoEn)}</time>
+                {esCoach && porBorrar !== c.id && (
+                  <button
+                    type="button"
+                    className="enlace enlace-discreto comentario-borrar"
+                    onClick={() => setPorBorrar(c.id)}
+                    aria-label={`Borrar el comentario de ${c.autor}`}
+                  >
+                    Borrar
+                  </button>
+                )}
               </span>
               <p>{c.cuerpo}</p>
+              {porBorrar === c.id && confirmacion("¿Borrar este comentario?")}
             </div>
           </div>
         ))}

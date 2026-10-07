@@ -4442,3 +4442,13 @@ main:focus {
   width: 1%;
   text-align: right;
 }
+
+.publicacion-cabecera .publicacion-borrar {
+  margin-left: auto;
+  align-self: flex-start;
+}
+
+.comentario-borrar {
+  margin-left: 8px;
+  font-size: var(--t-caption);
+}

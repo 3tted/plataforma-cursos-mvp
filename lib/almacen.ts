@@ -42,8 +42,6 @@ const ARCHIVO = path.join(DIRECTORIO, "almacen.json");
 export const DIRECTORIO_VIDEOS = path.join(DIRECTORIO, "videos");
 const SEMILLA = path.join(process.cwd(), "data", "comunidad-seed.json");
 const VIDEOS_MUESTRA = path.join(process.cwd(), "data", "videos");
-const AVANCE_SEMILLA = path.join(process.cwd(), "data", "avance-seed.json");
-const EVALUACIONES = path.join(process.cwd(), "data", "evaluaciones.json");
 
 const MAX_PREGUNTAS = 500;
 const MAX_INTENTOS = 2000;
@@ -98,65 +96,12 @@ async function sembrar(): Promise<Almacen> {
     preguntas: [],
     pagos: [],
     videos: await sembrarVideos(),
+    // La matriz de la coach empieza vacía: solo muestra a quien de verdad avance.
+    progreso: [],
+    repasos: [],
+    examenes: [],
   };
-  await sembrarAvance(almacen);
   return almacen;
-}
-
-interface AvanceSemilla {
-  autor: string;
-  completadas: string[];
-  hace_dias: number;
-  repasos: { leccion: string; fallas: string[]; hace_dias: number }[];
-  examenes: { fallas: string[]; hace_dias: number }[];
-}
-
-// Avance de ejemplo de los alumnos de la comunidad (data/avance-seed.json),
-// para que la matriz de la coach tenga datos en la demo. También se aplica una
-// vez a los almacenes creados antes de que existieran el repaso y el examen.
-async function sembrarAvance(almacen: Almacen): Promise<void> {
-  almacen.progreso = [];
-  almacen.repasos = [];
-  almacen.examenes = [];
-  let alumnos: AvanceSemilla[];
-  let evaluaciones: { aprobar_con: number; repaso: Record<string, unknown[]>; examen_final: { preguntas: unknown[] } };
-  try {
-    alumnos = (JSON.parse(await fs.readFile(AVANCE_SEMILLA, "utf8")) as { alumnos: AvanceSemilla[] }).alumnos;
-    evaluaciones = JSON.parse(await fs.readFile(EVALUACIONES, "utf8"));
-  } catch {
-    return;
-  }
-  const haceDias = (dias: number) => haceHoras(dias * 24);
-  const totalExamen = evaluaciones.examen_final.preguntas.length;
-  for (const a of alumnos) {
-    almacen.progreso.push({ autor: a.autor, completadas: a.completadas, actualizado: haceDias(a.hace_dias) });
-    for (const r of a.repasos) {
-      const total = evaluaciones.repaso[r.leccion]?.length ?? 0;
-      almacen.repasos.push({
-        autor: a.autor,
-        leccion: r.leccion,
-        aciertos: total - r.fallas.length,
-        total,
-        fallas: r.fallas,
-        creadoEn: haceDias(r.hace_dias),
-      });
-    }
-    // Los intentos van del más antiguo al más reciente, como se guardan al presentarlos.
-    for (const x of [...a.examenes].sort((p, q) => q.hace_dias - p.hace_dias)) {
-      const aciertos = totalExamen - x.fallas.length;
-      const puntaje = Math.round((aciertos / totalExamen) * 100);
-      almacen.examenes.push({
-        id: almacen.siguienteId++,
-        autor: a.autor,
-        aciertos,
-        total: totalExamen,
-        puntaje,
-        aprobado: puntaje >= evaluaciones.aprobar_con,
-        fallas: x.fallas,
-        creadoEn: haceDias(x.hace_dias),
-      });
-    }
-  }
 }
 
 // Videos de muestra que viajan con el proyecto (data/videos/L1.webm…). Se
@@ -266,8 +211,9 @@ async function cargar(): Promise<{ almacen: Almacen; version: string | null; cam
   const { texto, version } = await leerCrudo();
   if (texto === null) return { almacen: await sembrar(), version, cambiado: true };
   const almacen = JSON.parse(texto) as Almacen;
+  // Los almacenes creados antes del repaso y el examen no traen estas listas.
   if (almacen.progreso === undefined) {
-    await sembrarAvance(almacen);
+    Object.assign(almacen, { progreso: [], repasos: [], examenes: [] });
     return { almacen, version, cambiado: true };
   }
   return { almacen, version, cambiado: false };

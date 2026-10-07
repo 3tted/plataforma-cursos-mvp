@@ -196,8 +196,17 @@ async function sembrarVideos(): Promise<VideoLeccion[]> {
 // y cada una tiene su propio disco temporal: con Redis (Upstash, plan gratuito)
 // todas comparten los mismos datos. Basta con definir sus variables de entorno.
 
-const URL_REDIS = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-const TOKEN_REDIS = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+// Vercel puede ponerles un prefijo al conectar Upstash (MIPREFIJO_KV_REST_API_URL),
+// así que se buscan por cómo terminan.
+function variable(...finales: string[]): string | undefined {
+  for (const final of finales) {
+    const nombre = Object.keys(process.env).find((n) => n === final || n.endsWith(`_${final}`));
+    if (nombre && process.env[nombre]) return process.env[nombre];
+  }
+  return undefined;
+}
+const URL_REDIS = variable("UPSTASH_REDIS_REST_URL", "KV_REST_API_URL");
+const TOKEN_REDIS = variable("UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_TOKEN");
 const redis =
   URL_REDIS && TOKEN_REDIS ? new Redis({ url: URL_REDIS, token: TOKEN_REDIS, automaticDeserialization: false }) : null;
 const CLAVE = "plataforma-cursos:almacen";

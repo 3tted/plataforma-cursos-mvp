@@ -76,6 +76,8 @@ Para reiniciar la comunidad a los datos de ejemplo, borra la carpeta `.data/`. A
 
 Guía para la sesión con el coach: [VALIDACION.md](VALIDACION.md).
 
+Cómo se guardan los datos (con diagramas): [docs/base-de-datos.md](docs/base-de-datos.md).
+
 ## Estructura
 
 ```

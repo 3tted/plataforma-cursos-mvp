@@ -42,7 +42,7 @@ Para activar la IA hay dos opciones:
 - **Claude (de pago, por uso):** crea una clave en https://console.anthropic.com/ y pégala en `ANTHROPIC_API_KEY`.
 
 1. Copia `.env.example` como `.env.local` y pega la clave que elijas.
-2. Reinicia `npm run dev`. En la página del asistente verás "IA conectada" con el modelo en uso.
+2. Reinicia `npm run dev`. En `/api/estado` verás `"iaActiva":true` y el modelo en uso.
 
 Si pones las dos claves se usa Claude; para forzar uno, define `IA_PROVEEDOR=gemini` (o `claude`, o `demo`). Gemini usa el SDK oficial `@google/genai` con el modelo `gemini-flash-latest` (se cambia con `GEMINI_MODEL`) y las mismas instrucciones que Claude. En el plan gratuito, Google puede usar las conversaciones para mejorar sus modelos: úsalo con contenido de ejemplo.
 

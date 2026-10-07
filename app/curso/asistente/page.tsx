@@ -186,11 +186,7 @@ export default function PaginaAsistenteCurso() {
             {estado && !estado.iaActiva && " En esta demostración responde con fragmentos del curso, sin redactar."}
           </p>
         </div>
-        {estado && (
-          <span className={estado.iaActiva ? "pastilla pastilla-ok" : "pastilla"}>
-            {estado.iaActiva ? `IA conectada · ${estado.modelo}` : "Modo demostración"}
-          </span>
-        )}
+        {estado && !estado.iaActiva && <span className="pastilla">Modo demostración</span>}
       </header>
 
       <p className="sr-only" role="status" aria-live="polite">

@@ -142,11 +142,7 @@ export default function PaginaAsistenteGeneral() {
           <h1>Asistente Merkatics</h1>
           <p className="texto-suave">Pregúntale lo que quieras: ideas, mensajes, explicaciones o cómo organizarte.</p>
         </div>
-        {estado && (
-          <span className={estado.iaActiva ? "pastilla pastilla-ok" : "pastilla"}>
-            {estado.iaActiva ? `IA conectada · ${estado.modelo}` : "IA sin conectar"}
-          </span>
-        )}
+        {estado && !estado.iaActiva && <span className="pastilla">IA sin conectar</span>}
       </header>
 
       <p className="sr-only" role="status" aria-live="polite">

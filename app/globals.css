@@ -3190,15 +3190,53 @@ main:focus {
 }
 
 
-/* ---------- Directorio de comunidades y catálogo de cursos ---------- */
+/* ---------- Directorio de comunidades ---------- */
 
 .directorio {
   display: grid;
-  gap: 24px;
+  gap: 28px;
 }
 
 .directorio .cabecera-pagina {
   margin-bottom: 0;
+}
+
+/* Portada ilustrada por tema (components/PortadaTema.tsx) */
+.portada-tema {
+  position: relative;
+  display: block;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  background: var(--rubor);
+}
+
+.portada-tema svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.portada-tema[data-tema="Ventas"],
+.portada-tema[data-tema="Diseño"] {
+  background: var(--rubor-2);
+}
+
+.portada-tema[data-tema="Productividad"],
+.portada-tema[data-tema="Liderazgo"] {
+  background: var(--superficie-2);
+}
+
+.portada-tema-etiqueta {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: var(--t-label);
+  font-weight: 700;
 }
 
 .ficha-comunidad {
@@ -3211,9 +3249,9 @@ main:focus {
   overflow: hidden;
 }
 
-/* La comunidad que sí funciona: portada rubor con arcos a la izquierda */
+/* La comunidad que sí funciona: portada a la izquierda, datos a la derecha */
 .ficha-activa {
-  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.6fr);
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.5fr);
   transition: border-color 0.15s;
 }
 
@@ -3225,31 +3263,9 @@ main:focus {
   background: var(--acento-hover);
 }
 
-.ficha-portada {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  min-height: 220px;
-  background: var(--rubor);
-}
-
-.ficha-portada .arcos {
-  width: 62%;
-}
-
-.ficha-sello {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  background: var(--acento);
-  color: var(--acento-tinta);
-  font-family: var(--fuente-display);
-  font-size: 1.75rem;
-  font-weight: 800;
+.ficha-activa .ficha-portada {
+  aspect-ratio: auto;
+  min-height: 240px;
 }
 
 .ficha-cuerpo {
@@ -3262,14 +3278,15 @@ main:focus {
 
 .ficha-nombre {
   font-family: var(--fuente-display);
-  font-size: var(--t-headline);
+  font-size: var(--t-title);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .ficha-activa .ficha-nombre {
   font-size: var(--t-titulo-leccion);
   letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 .ficha-coach {
@@ -3284,6 +3301,15 @@ main:focus {
 .ficha-descripcion {
   color: var(--tinta-2);
   max-width: 56ch;
+}
+
+.ficha-curso {
+  font-size: var(--t-small);
+  color: var(--tinta-2);
+}
+
+.ficha-curso strong {
+  color: var(--tinta);
 }
 
 .dir-datos {
@@ -3312,9 +3338,55 @@ main:focus {
   margin-top: 6px;
 }
 
+/* Próximamente: buscador, filtros por tema y tarjetas */
 .proximas {
   display: grid;
-  gap: 12px;
+  gap: 14px;
+}
+
+.proximas-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
+.proximas-cabecera p {
+  margin-top: 4px;
+}
+
+.buscador-comunidades {
+  flex: 0 1 360px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  border: 1px solid var(--linea-campo);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta-3);
+}
+
+.buscador-comunidades:focus-within {
+  border-color: var(--acento);
+  outline: 2px solid var(--acento-suave);
+}
+
+.buscador-comunidades input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--t-small);
+}
+
+.resultado-busqueda {
+  margin: 0;
+  font-size: var(--t-small);
 }
 
 .proximas-lista {
@@ -3322,39 +3394,54 @@ main:focus {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 18px;
 }
 
-/* Las comunidades de ejemplo se ven, pero claramente cerradas */
-.ficha-proxima {
-  background: var(--superficie-2);
-  border-style: dashed;
-  border-color: var(--linea-fuerte);
-}
-
-.ficha-proxima .pastilla {
+.tarjeta-comunidad {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
   background: var(--superficie);
+  overflow: hidden;
 }
 
-.ficha-proxima .ficha-cuerpo {
-  padding: 22px 24px;
+.tarjeta-comunidad-cuerpo {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 16px 18px 18px;
+}
+
+.tarjeta-comunidad-curso {
+  color: var(--tinta-2);
+  font-size: var(--t-small);
+}
+
+.tarjeta-comunidad-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: var(--t-caption);
+  color: var(--tinta-3);
 }
 
 @media (max-width: 760px) {
   .ficha-activa {
     grid-template-columns: minmax(0, 1fr);
   }
-  .ficha-portada {
-    min-height: 140px;
-  }
-  .ficha-sello {
-    width: 64px;
-    height: 64px;
-    font-size: 1.3rem;
+  .ficha-activa .ficha-portada {
+    aspect-ratio: 2 / 1;
+    min-height: 0;
   }
   .ficha-cuerpo {
     padding: 20px;
+  }
+  .buscador-comunidades {
+    flex-basis: 100%;
   }
 }
 

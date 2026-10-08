@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { moneda } from "@/lib/cliente";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
-import { IconoAsistenteGeneral, IconoComunidad, IconoCurso, IconoPanel, IconoSalir } from "./Iconos";
+import { IconoAsistenteGeneral, IconoComunidad, IconoPanel, IconoSalir } from "./Iconos";
 
 export default function Encabezado() {
   const ruta = usePathname();
@@ -19,9 +19,9 @@ export default function Encabezado() {
       texto: "Comunidades",
       corto: "Comunidades",
       Icono: IconoComunidad,
-      activo: ruta === "/" || ruta.startsWith("/comunidad"),
+      // El curso vive dentro de su comunidad: también marca este enlace.
+      activo: ruta === "/" || ruta.startsWith("/comunidad") || ruta.startsWith("/curso"),
     },
-    { href: "/cursos", texto: "Cursos", corto: "Cursos", Icono: IconoCurso, activo: ruta.startsWith("/curso") },
     { href: "/asistente", texto: "Asistente", corto: "Asistente", Icono: IconoAsistenteGeneral, activo: ruta === "/asistente" },
     ...(usuario?.rol === "coach"
       ? [{ href: "/coach", texto: "Panel de la coach", corto: "Panel", Icono: IconoPanel, activo: ruta === "/coach" }]

@@ -50,8 +50,8 @@ export default function PaginaCurso() {
 
   return (
     <div className="pagina-curso">
-      <Link href="/cursos" className="volver">
-        <IconoFlechaIzq width={16} height={16} /> Todos los cursos
+      <Link href="/comunidad" className="volver">
+        <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
       </Link>
       <header className="curso-portada">
         <Arcos />

@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Arcos from "@/components/Arcos";
 import { useApp } from "@/components/Contexto";
-import { IconoAprobado, IconoCandado, IconoComunidad, IconoFlechaIzq, IconoReintentar } from "@/components/Iconos";
+import {
+  IconoAprobado,
+  IconoBillete,
+  IconoCandado,
+  IconoComunidad,
+  IconoFlechaIzq,
+  IconoReintentar,
+} from "@/components/Iconos";
 import PreguntaOpciones from "@/components/PreguntaOpciones";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
@@ -219,7 +226,12 @@ export default function PaginaExamen() {
                 <Link href={`/curso/${l.id}`}>
                   <span className="cita-id">{l.id}</span> {l.titulo}
                 </Link>
-                {!l.gratis && !tieneAcceso && <IconoCandado width={13} height={13} />}
+                {!l.gratis && !tieneAcceso && (
+                  <>
+                    <IconoBillete width={14} height={14} />
+                    <span className="sr-only"> (para miembros)</span>
+                  </>
+                )}
               </li>
             ))}
           </ul>

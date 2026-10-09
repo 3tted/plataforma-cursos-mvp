@@ -6,6 +6,7 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import { useApp } from "@/components/Contexto";
 import {
   IconoAsistente,
+  IconoBillete,
   IconoCandado,
   IconoCheck,
   IconoExamen,
@@ -211,11 +212,13 @@ export default function PaginaLeccion() {
                       >
                         <span
                           className="indice-marca"
-                          data-estado={lHecha ? "hecha" : lBloqueada || lEnEspera ? "bloqueada" : "abierta"}
+                          data-estado={lHecha ? "hecha" : lBloqueada ? "pago" : lEnEspera ? "bloqueada" : "abierta"}
                         >
                           {lHecha ? (
                             <IconoCheck width={12} height={12} />
-                          ) : lBloqueada || lEnEspera ? (
+                          ) : lBloqueada ? (
+                            <IconoBillete width={13} height={13} />
+                          ) : lEnEspera ? (
                             <IconoCandado width={12} height={12} />
                           ) : null}
                         </span>
@@ -261,8 +264,8 @@ export default function PaginaLeccion() {
 
         {bloqueada ? (
           <div className="tarjeta bloqueo">
-            <span className="bloqueo-icono">
-              <IconoCandado width={22} height={22} />
+            <span className="bloqueo-icono" data-tipo="pago">
+              <IconoBillete width={22} height={22} />
             </span>
             <h2>Esta lección es para miembros</h2>
             <p className="texto-suave">{leccion.resumen}</p>
@@ -434,7 +437,7 @@ export default function PaginaLeccion() {
                 Siguiente
                 {siguienteBloqueada && (
                   <>
-                    <IconoCandado width={13} height={13} />
+                    <IconoBillete width={14} height={14} />
                     <span className="sr-only"> (para miembros)</span>
                   </>
                 )}

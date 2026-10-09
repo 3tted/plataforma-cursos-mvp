@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import { useApp } from "./Contexto";
-import { IconoCandado } from "./Iconos";
+import { IconoBillete } from "./Iconos";
 
 // Renderiza el subconjunto de Markdown que usan las lecciones y el asistente:
 // párrafos, **negritas**, _cursivas_, listas, citas (>), subtítulos (##),
@@ -29,7 +29,7 @@ function Cita({ id }: { id: string }) {
       <span className="cita-id">{id}</span>
       {bloqueada && (
         <span className="cita-candado">
-          <IconoCandado width={12} height={12} />
+          <IconoBillete width={13} height={13} />
           <span className="sr-only">Lección para miembros:</span>
         </span>
       )}

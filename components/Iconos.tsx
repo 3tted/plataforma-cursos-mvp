@@ -18,6 +18,7 @@ import {
   Copy,
   LockSimple,
   MagnifyingGlass,
+  Money,
   NotePencil,
   PaperPlaneRight,
   Play,
@@ -57,6 +58,8 @@ export const IconoAsistente = icono(NotePencil);
 export const IconoAsistenteGeneral = icono(Sparkle);
 export const IconoPanel = icono(ChartBar);
 export const IconoCandado = icono(LockSimple);
+// Lección de pago que la persona todavía no compra (el candado es para las que esperan su turno).
+export const IconoBillete = icono(Money);
 export const IconoCheck = icono(Check, "bold");
 export const IconoPlay = icono(Play, "fill");
 export const IconoEnviar = icono(PaperPlaneRight);

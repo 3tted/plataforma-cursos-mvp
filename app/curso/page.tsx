@@ -7,6 +7,7 @@ import Avatar from "@/components/Avatar";
 import { useApp } from "@/components/Contexto";
 import {
   IconoAprobado,
+  IconoBillete,
   IconoCandado,
   IconoCheck,
   IconoExamen,
@@ -242,12 +243,12 @@ export default function PaginaCurso() {
                           !bloqueada &&
                           indice > 0 &&
                           !completadas.includes(base[indice - 1].id);
-                        const estado = hecha ? "hecha" : bloqueada || enEspera ? "bloqueada" : "abierta";
+                        const estado = hecha ? "hecha" : bloqueada ? "pago" : enEspera ? "bloqueada" : "abierta";
                         return (
                           <li key={l.id}>
                             <Link href={`/curso/${l.id}`} className="fila-leccion" data-bloqueada={bloqueada}>
                               <span className="estado-leccion" data-estado={estado}>
-                                {hecha ? <IconoCheck /> : bloqueada || enEspera ? <IconoCandado /> : <IconoPlay />}
+                                {hecha ? <IconoCheck /> : bloqueada ? <IconoBillete /> : enEspera ? <IconoCandado /> : <IconoPlay />}
                               </span>
                               <span className="fila-leccion-textos">
                                 <span className="fila-leccion-titulo">{l.titulo}</span>

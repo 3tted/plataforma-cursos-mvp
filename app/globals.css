@@ -1728,6 +1728,12 @@ main:focus {
   color: var(--tinta-2);
 }
 
+/* De pago y sin membresía: billete en tono de pago, distinto del candado gris */
+.estado-leccion[data-estado="pago"] {
+  background: var(--pendiente-suave);
+  color: var(--pendiente);
+}
+
 .fila-leccion-textos {
   display: grid;
   gap: 1px;
@@ -1845,6 +1851,10 @@ main:focus {
 
 .indice-marca[data-estado="hecha"] {
   color: var(--exito-texto);
+}
+
+.indice-marca[data-estado="pago"] {
+  color: var(--pendiente);
 }
 
 /* El asistente acompaña la lección en una tercera columna solo cuando hay
@@ -2074,6 +2084,11 @@ main:focus {
   padding-bottom: 14px;
   font-style: italic;
   color: var(--tinta-2);
+}
+
+.bloqueo-icono[data-tipo="pago"] {
+  background: var(--pendiente-suave);
+  color: var(--pendiente);
 }
 
 .bloqueo {

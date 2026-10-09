@@ -37,10 +37,7 @@ export default function PaginaComunidades() {
     <div className="directorio">
       <header className="cabecera-pagina">
         <h1>Comunidades</h1>
-        <p className="texto-suave">
-          Cada comunidad tiene su coach, sus cursos y su asistente. Por ahora puedes entrar a Finanzas Claras y a Vende por
-          WhatsApp; las demás son de ejemplo.
-        </p>
+        <p className="texto-suave">Cada comunidad tiene su coach, sus cursos y su asistente.</p>
       </header>
 
       <div className="proximas-cabecera">

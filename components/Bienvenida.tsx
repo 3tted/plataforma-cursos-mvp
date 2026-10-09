@@ -158,7 +158,7 @@ export default function Bienvenida() {
               Entrar
             </button>
             <p className="nota" id="bienvenida-nota">
-              Es un prototipo: no hay contraseñas y tu nombre solo se usa para firmar lo que publiques.
+              No necesitas contraseña: tu nombre solo se usa para firmar lo que publiques.
             </p>
           </form>
         </div>
@@ -174,7 +174,7 @@ export default function Bienvenida() {
         <h2 id="bienvenida-titulo">Cambiar de usuario</h2>
         {campos}
         <p className="nota" id="bienvenida-nota">
-          Es un prototipo: no hay contraseñas y tu nombre solo se usa para firmar lo que publiques.
+          No necesitas contraseña: tu nombre solo se usa para firmar lo que publiques.
         </p>
         <div className="modal-acciones">
           <button type="button" className="boton boton-fantasma" onClick={() => setPidiendoUsuario(false)}>

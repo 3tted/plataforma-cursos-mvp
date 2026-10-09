@@ -12,8 +12,8 @@ import { useApp } from "./Contexto";
 import { IconoAsistente, IconoFlechaDer } from "./Iconos";
 import PortadaTema from "./PortadaTema";
 import PreguntaRapida from "./PreguntaRapida";
+import EnTendencia from "./EnTendencia";
 import PublicacionesRecientes from "./PublicacionesRecientes";
-import TarjetaComunidad from "./TarjetaComunidad";
 
 // Inicio del alumno: seguir su curso, resolver dudas y ver qué pasa en la
 // comunidad. Quien es nuevo primero se une a una comunidad y luego elige sus
@@ -75,33 +75,11 @@ export default function InicioAlumno() {
     router.push("/curso/asistente");
   };
 
-  // Primero las comunidades abiertas a las que todavía no pertenece; luego las de ejemplo.
-  const tendencia = [
-    ...reales.filter((c) => !enLaComunidad(c.id)),
-    ...COMUNIDADES.filter((c) => c.estado === "proximamente"),
-  ].slice(0, 3);
   const nombre = usuario?.nombre.split(" ")[0] ?? "";
 
   if (!inscripcionLista) return <p className="texto-suave">Cargando…</p>;
 
-  const enTendencia = (
-    <section className="proximas" aria-labelledby="tendencia-titulo">
-      <div className="inicio-bloque-cabecera">
-        <div>
-          <h2 id="tendencia-titulo">Comunidades en tendencia</h2>
-          <p className="texto-suave">Otras comunidades de la plataforma.</p>
-        </div>
-        <Link href="/comunidades" className="enlace inicio-ver-todo">
-          Ver todas <IconoFlechaDer width={15} height={15} />
-        </Link>
-      </div>
-      <ul className="proximas-lista">
-        {tendencia.map((c) => (
-          <TarjetaComunidad key={c.id} comunidad={c} />
-        ))}
-      </ul>
-    </section>
-  );
+  const enTendencia = <EnTendencia />;
 
   // ---------------------------------------------------------------- paso 1: unirse a una comunidad
   if (unidas.length === 0) {
@@ -111,20 +89,7 @@ export default function InicioAlumno() {
           <h1>Hola{nombre && `, ${nombre}`}</h1>
           <p className="texto-suave">Empieza por unirte a una comunidad. Unirte es gratis.</p>
         </header>
-        <section className="proximas" aria-labelledby="unirse-inicio-titulo">
-          <div className="inicio-bloque-cabecera">
-            <div>
-              <h2 id="unirse-inicio-titulo">Primer paso: elige tu comunidad</h2>
-              <p className="texto-suave">Entra a una para ver sus cursos y unirte.</p>
-            </div>
-          </div>
-          <ul className="proximas-lista">
-            {reales.map((c) => (
-              <TarjetaComunidad key={c.id} comunidad={c} />
-            ))}
-          </ul>
-        </section>
-        {enTendencia}
+        <EnTendencia titulo="Para empezar" />
       </div>
     );
   }

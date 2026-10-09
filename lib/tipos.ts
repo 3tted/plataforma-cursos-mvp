@@ -125,6 +125,12 @@ export interface ResumenComunidad {
   miembros: number;
 }
 
+/** Cursos por alumnos y comunidades por miembros, de más a menos. */
+export interface Tendencias {
+  cursos: { id: string; alumnos: number }[];
+  comunidades: { id: string; miembros: number }[];
+}
+
 export type MetodoPago = "oxxo" | "spei" | "mercadopago";
 
 export interface Pago {

@@ -228,7 +228,8 @@ async function escribirCrudo(almacen: Almacen, version: string | null): Promise<
   await fs.mkdir(DIRECTORIO, { recursive: true });
   // Escritura atómica: primero a un archivo temporal y luego se renombra,
   // para que un corte a medias nunca deje el JSON dañado.
-  const temporal = `${ARCHIVO}.${process.pid}.tmp`;
+  // Un temporal por escritura: dos escrituras a la vez no se pisan el archivo.
+  const temporal = `${ARCHIVO}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2, 8)}.tmp`;
   await fs.writeFile(temporal, JSON.stringify(almacen, null, 2), "utf8");
   await fs.rename(temporal, ARCHIVO);
   return true;
@@ -322,7 +323,15 @@ export async function consultar<T>(lectura: (almacen: Almacen) => T): Promise<T>
   await cola;
   const { almacen, version, cambiado } = await cargar();
   // Si otra copia sembró primero, su versión gana y esta escritura se descarta.
-  if (cambiado) await escribirCrudo(almacen, version);
+  // Es solo poner al día el almacén: si choca con otra escritura, se reintenta
+  // en la siguiente lectura y esta consulta responde igual.
+  if (cambiado) {
+    try {
+      await escribirCrudo(almacen, version);
+    } catch (e) {
+      console.warn("No se pudo poner al día el almacén; se reintenta después.", e);
+    }
+  }
   return lectura(almacen);
 }
 

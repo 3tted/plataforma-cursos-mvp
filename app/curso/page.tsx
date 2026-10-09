@@ -89,6 +89,9 @@ export default function PaginaCurso() {
   // Abierto al entrar: el módulo de la lección que sigue (o el primero).
   const moduloActual = siguiente?.modulo.id ?? curso.modulos[0]?.id;
   const estaAbierto = (id: string) => abiertos[id] ?? id === moduloActual;
+  // La coach revisa el curso: no tiene avance ni examen que presentar.
+  const esCoach = usuario?.rol === "coach";
+  const conVideo = base.filter((l) => l.video).length;
 
   return (
     <div className="pagina-curso">
@@ -108,40 +111,58 @@ export default function PaginaCurso() {
               <span className="cifra">{base.length}</span> lecciones
             </li>
             <li>
-              <span className="cifra">{minutos}</span> min de video
+              <span className="cifra">{minutos}</span> min
             </li>
-            <li>Examen final</li>
           </ul>
         </div>
         <div className="curso-progreso">
-          <p className="curso-progreso-cifra">
-            <span className="cifra">{hechas}</span>
-            <span className="curso-progreso-total">
-              de <span className="cifra">{base.length}</span> lecciones completadas
-            </span>
-          </p>
-          <div className="progreso" aria-hidden="true">
-            <span style={{ transform: `scaleX(${base.length ? hechas / base.length : 0})` }} />
-          </div>
-          {siguiente ? (
+          {esCoach ? (
             <>
-              <p className="curso-siguiente">
-                {hechas === 0 ? "Primera lección" : "Sigue"}: <strong>{siguiente.titulo}</strong>
+              <p className="curso-progreso-cifra">
+                <span className="cifra">{conVideo}</span>
+                <span className="curso-progreso-total">
+                  de <span className="cifra">{base.length}</span> lecciones con video
+                </span>
               </p>
-              <Link href={`/curso/${siguiente.id}`} className="boton">
-                {hechas === 0 ? "Empezar el curso" : "Continuar"}
-              </Link>
+              <p className="curso-siguiente">Así ven el curso tus alumnos. Tú puedes abrir cualquier lección.</p>
+              {base[0] && (
+                <Link href={`/curso/${base[0].id}`} className="boton">
+                  Ver la primera lección
+                </Link>
+              )}
             </>
-          ) : terminado ? (
+          ) : (
             <>
-              <p className="curso-siguiente">
-                {examen?.aprobado ? "Aprobaste el curso." : "Terminaste las lecciones. Te falta el examen final."}
+              <p className="curso-progreso-cifra">
+                <span className="cifra">{hechas}</span>
+                <span className="curso-progreso-total">
+                  de <span className="cifra">{base.length}</span> lecciones completadas
+                </span>
               </p>
-              <Link href={examen?.aprobado ? "/perfil" : "/curso/examen"} className="boton">
-                {examen?.aprobado ? "Ver mi expediente" : "Presentar el examen"}
-              </Link>
+              <div className="progreso" aria-hidden="true">
+                <span style={{ transform: `scaleX(${base.length ? hechas / base.length : 0})` }} />
+              </div>
+              {siguiente ? (
+                <>
+                  <p className="curso-siguiente">
+                    {hechas === 0 ? "Primera lección" : "Sigue"}: <strong>{siguiente.titulo}</strong>
+                  </p>
+                  <Link href={`/curso/${siguiente.id}`} className="boton">
+                    {hechas === 0 ? "Empezar el curso" : "Continuar"}
+                  </Link>
+                </>
+              ) : terminado ? (
+                <>
+                  <p className="curso-siguiente">
+                    {examen?.aprobado ? "Aprobaste el curso." : "Terminaste las lecciones. Te falta el examen final."}
+                  </p>
+                  <Link href={examen?.aprobado ? "/perfil" : "/curso/examen"} className="boton">
+                    {examen?.aprobado ? "Ver mi expediente" : "Presentar el examen"}
+                  </Link>
+                </>
+              ) : null}
             </>
-          ) : null}
+          )}
         </div>
       </header>
 
@@ -198,10 +219,14 @@ export default function PaginaCurso() {
                         {modulo.id !== "MC" && (gratis ? " · Gratis" : !tieneAcceso ? " · Para miembros" : "")}
                       </span>
                       <span className="modulo-avance texto-suave">
-                        <span className="cifra">
-                          {hechasModulo}/{modulo.lecciones.length}
-                        </span>
-                        <span className="sr-only"> lecciones completadas</span>
+                        {!esCoach && (
+                          <>
+                            <span className="cifra">
+                              {hechasModulo}/{modulo.lecciones.length}
+                            </span>
+                            <span className="sr-only"> lecciones completadas</span>
+                          </>
+                        )}
                       </span>
                     </summary>
                     <ul className="lista-lecciones">
@@ -284,11 +309,13 @@ export default function PaginaCurso() {
               <span className="cifra">{evaluaciones?.intentosExamen ?? 3}</span> intentos y queda en tu expediente.
             </p>
             <p className="texto-suave curso-al-terminar-estado">
-              {examen?.aprobado
-                ? `Aprobado con ${examen.mejorPuntaje}%.`
-                : terminado
-                  ? "Ya puedes presentarlo."
-                  : `Se desbloquea al terminar las ${base.length} lecciones. Llevas ${hechas}.`}
+              {esCoach
+                ? "Puedes revisarlo como lo verán tus alumnos; tus respuestas no se guardan."
+                : examen?.aprobado
+                  ? `Aprobado con ${examen.mejorPuntaje}%.`
+                  : terminado
+                    ? "Ya puedes presentarlo."
+                    : `Se desbloquea al terminar las ${base.length} lecciones. Llevas ${hechas}.`}
             </p>
             {examen?.aprobado ? (
               <Link href="/perfil" className="boton boton-secundario boton-chico">

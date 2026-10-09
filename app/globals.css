@@ -1888,6 +1888,8 @@ main:focus {
 
 .leccion {
   display: grid;
+  /* Una sola columna que no crece con el contenido (respuestas largas del asistente) */
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   max-width: 720px;
 }
@@ -3995,6 +3997,66 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
 
 .leccion-vecina-espera:hover {
   border-color: var(--linea);
+}
+
+/* Asistente en línea: contesta debajo de la pregunta del repaso */
+.asistente-en-linea {
+  justify-self: stretch;
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--rubor-2);
+  border-radius: var(--radio-control);
+  background: var(--rubor);
+}
+
+.asistente-en-linea-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.asistente-en-linea-cabecera p {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  color: var(--acento-texto);
+}
+
+.asistente-en-linea-mensajes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.asistente-en-linea-pregunta {
+  justify-self: end;
+  max-width: 90%;
+  padding: 8px 12px;
+  border-radius: 14px 14px var(--radio-cola) 14px;
+  background: var(--rubor-2);
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.asistente-en-linea-respuesta {
+  padding: 10px 14px;
+  border-radius: 14px 14px 14px var(--radio-cola);
+  background: var(--superficie);
+}
+
+.asistente-en-linea .prosa-chat {
+  font-size: var(--t-small);
+}
+
+.asistente-en-linea-respuesta .error {
+  margin: 0;
 }
 
 /* ---------- Cuenta en la barra ---------- */

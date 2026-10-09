@@ -1,17 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/cliente";
 import type { ResultadoRepaso } from "@/lib/tipos";
+import AsistenteEnLinea from "./AsistenteEnLinea";
 import { useApp } from "./Contexto";
 import { IconoAsistente, IconoReintentar, IconoRepaso } from "./Iconos";
 import PreguntaOpciones from "./PreguntaOpciones";
 import { useEvaluaciones } from "./useEvaluaciones";
 
 // Repaso al final de la lección: preguntas que no cuentan para la calificación.
-// Muestra la respuesta correcta con su explicación y, si el alumno falla, le
-// ofrece preguntarle al asistente del curso. La página lo monta con
+// Muestra la respuesta correcta con su explicación y, si el alumno falla, el
+// asistente del curso le explica ahí mismo, debajo de la pregunta. La página lo monta con
 // key={leccion.id} para que empiece de cero en cada lección. `alRevisar` avisa
 // cuando el alumno ya lo contestó (cuenta para completar la lección).
 export default function RepasoLeccion({
@@ -21,13 +21,14 @@ export default function RepasoLeccion({
   leccion: { id: string; titulo: string };
   alRevisar?: () => void;
 }) {
-  const router = useRouter();
   const evaluaciones = useEvaluaciones();
-  const { usuario, setLeccionContexto, setPreguntaPendiente } = useApp();
+  const { usuario } = useApp();
   const [respuestas, setRespuestas] = useState<(number | null)[]>([]);
   const [resultado, setResultado] = useState<ResultadoRepaso | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Preguntas del repaso con el asistente abierto debajo.
+  const [consultas, setConsultas] = useState<string[]>([]);
 
   const preguntas = evaluaciones?.repaso[leccion.id];
   if (!preguntas?.length || !usuario) return null;
@@ -55,13 +56,11 @@ export default function RepasoLeccion({
   const reiniciar = () => {
     setRespuestas([]);
     setResultado(null);
+    setConsultas([]);
   };
 
-  const preguntarAlAsistente = (enunciado: string, correcta: string) => {
-    setLeccionContexto(leccion.id);
-    setPreguntaPendiente(`En el repaso fallé esta pregunta: «${enunciado}». ¿Me explicas por qué la respuesta es «${correcta}»?`);
-    router.push("/curso/asistente");
-  };
+  const abrir = (id: string) => setConsultas((c) => (c.includes(id) ? c : [...c, id]));
+  const cerrar = (id: string) => setConsultas((c) => c.filter((x) => x !== id));
 
   return (
     <section className="tarjeta repaso" aria-labelledby="repaso-titulo">
@@ -93,15 +92,19 @@ export default function RepasoLeccion({
                       <strong>{revision.acierto ? "Correcto." : `La respuesta es «${p.opciones[revision.correcta]}».`}</strong>{" "}
                       {revision.explicacion} <span className="cita-id">{leccion.id}</span>
                     </p>
-                    {!revision.acierto && (
-                      <button
-                        type="button"
-                        className="accion"
-                        onClick={() => preguntarAlAsistente(p.enunciado, p.opciones[revision.correcta])}
-                      >
-                        <IconoAsistente width={15} height={15} /> Pregúntale al asistente
-                      </button>
-                    )}
+                    {!revision.acierto &&
+                      (consultas.includes(p.id) ? (
+                        <AsistenteEnLinea
+                          pregunta={`En el repaso fallé esta pregunta: «${p.enunciado}». ¿Me explicas por qué la respuesta es «${p.opciones[revision.correcta]}»?`}
+                          resumen={`¿Por qué la respuesta es «${p.opciones[revision.correcta]}»?`}
+                          leccion={leccion.id}
+                          alCerrar={() => cerrar(p.id)}
+                        />
+                      ) : (
+                        <button type="button" className="accion" onClick={() => abrir(p.id)}>
+                          <IconoAsistente width={15} height={15} /> Pregúntale al asistente
+                        </button>
+                      ))}
                   </div>
                 )}
               </PreguntaOpciones>

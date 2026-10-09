@@ -10,53 +10,10 @@ import Markdown from "@/components/Markdown";
 import MatrizAlumnos from "@/components/MatrizAlumnos";
 import { useTitulo } from "@/components/useTitulo";
 import { api, fechaCorta, hace, moneda } from "@/lib/cliente";
-import type { LeccionCoach, PreguntaIA, ResumenCoach } from "@/lib/tipos";
+import { agrupar } from "@/lib/preguntas";
+import type { LeccionCoach, ResumenCoach } from "@/lib/tipos";
 
 const NOMBRE_METODO = { oxxo: "OXXO", spei: "SPEI", mercadopago: "Mercado Pago" } as const;
-
-interface GrupoPregunta {
-  clave: string;
-  pregunta: string;
-  veces: number;
-  personas: number;
-  citas: string[];
-  ultima: PreguntaIA;
-}
-
-// Saludos y pruebas sueltas ("hola", "ok", "test") no son dudas del curso.
-const SIN_CONTENIDO = new Set(
-  "hola holi buenas buenos buen dia dias tardes noches gracias ok oye saludos test prueba probando hey".split(" "),
-);
-
-// Junta las preguntas iguales (sin importar mayúsculas, acentos ni signos) para
-// que la coach vea qué se repite, y descarta entradas sin contenido.
-function agrupar(preguntas: PreguntaIA[]): GrupoPregunta[] {
-  const grupos = new Map<string, { lista: PreguntaIA[] }>();
-  for (const q of preguntas) {
-    const clave = q.pregunta
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .replace(/[^a-z0-9ñ ]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (clave.replace(/[^a-z]/g, "").length < 4) continue;
-    if (clave.split(" ").every((p) => p.length < 3 || SIN_CONTENIDO.has(p))) continue;
-    const grupo = grupos.get(clave) ?? { lista: [] };
-    grupo.lista.push(q);
-    grupos.set(clave, grupo);
-  }
-  return [...grupos.entries()]
-    .map(([clave, { lista }]) => ({
-      clave,
-      pregunta: lista[0].pregunta,
-      veces: lista.length,
-      personas: new Set(lista.map((q) => q.autor)).size,
-      citas: [...new Set(lista.flatMap((q) => q.citas))],
-      ultima: lista[0],
-    }))
-    .sort((a, b) => b.veces - a.veces || b.ultima.creadaEn.localeCompare(a.ultima.creadaEn));
-}
 
 export default function PaginaCoach() {
   const router = useRouter();

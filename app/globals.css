@@ -3445,6 +3445,266 @@ main:focus {
   }
 }
 
+/* ---------- Inicio (alumno y coach) ---------- */
+
+.inicio {
+  display: grid;
+  gap: 24px;
+}
+
+.inicio-saludo {
+  display: grid;
+  gap: 6px;
+}
+
+.inicio-saludo p {
+  max-width: 62ch;
+}
+
+.inicio-fila {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.inicio-fila-principal {
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+/* Siguiente lección: el bloque que más pesa en el inicio del alumno */
+.inicio-continuar {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  gap: 10px;
+  min-height: 250px;
+  padding: 28px;
+  border-radius: var(--radio-ventana);
+  background: var(--rubor);
+}
+
+.inicio-continuar .arcos {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 190px;
+}
+
+.inicio-continuar > :not(.arcos) {
+  position: relative;
+  /* El texto no se mete debajo de los arcos */
+  max-width: min(34ch, calc(100% - 120px));
+}
+
+.inicio-continuar h2 {
+  font-size: var(--t-titulo-leccion);
+  letter-spacing: -0.02em;
+}
+
+.inicio-continuar .texto-suave {
+  color: var(--tinta-rubor);
+}
+
+.inicio-continuar .boton {
+  margin-top: 4px;
+}
+
+.inicio-etiqueta {
+  font-size: var(--t-small);
+  font-weight: 700;
+  color: var(--acento-texto);
+}
+
+.inicio-bloque {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.inicio-bloque h2 {
+  font-size: var(--t-title);
+}
+
+.inicio-bloque-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px 16px;
+}
+
+.inicio-bloque-cabecera p {
+  margin-top: 4px;
+}
+
+.inicio-ver-todo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-small);
+  font-weight: 700;
+}
+
+.inicio-avance-cifra {
+  font-family: var(--fuente-display);
+  font-size: var(--t-small);
+}
+
+.inicio-avance-cifra > .cifra {
+  font-size: var(--t-cifra-destacada);
+  font-weight: 800;
+}
+
+.inicio-datos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: var(--t-small);
+  color: var(--tinta-2);
+}
+
+.inicio-datos strong {
+  color: var(--tinta);
+}
+
+.inicio-asistente {
+  margin: 0;
+}
+
+.inicio-sugerencias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inicio-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.inicio-lista > li + li {
+  border-top: 1px solid var(--linea);
+}
+
+.inicio-publicacion,
+.inicio-alumno {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.inicio-publicacion:hover .inicio-publicacion-titulo {
+  color: var(--acento-texto);
+}
+
+.inicio-publicacion-texto {
+  display: grid;
+  min-width: 0;
+}
+
+.inicio-publicacion-titulo {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.inicio-meta {
+  font-size: var(--t-caption);
+}
+
+.inicio-publicacion-comentarios {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-caption);
+}
+
+.inicio-pregunta {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 12px 0;
+}
+
+/* Mis cursos de la coach: el publicado y el lugar del que creará con IA */
+.inicio-cursos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 18px;
+}
+
+.inicio-curso {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+  color: var(--tinta);
+  text-decoration: none;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+a.inicio-curso:hover {
+  border-color: var(--acento);
+}
+
+.inicio-curso-cuerpo {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 6px;
+  padding: 16px 18px 18px;
+}
+
+.inicio-curso-nuevo {
+  grid-template-rows: 1fr;
+  border-style: dashed;
+  border-color: var(--linea-fuerte);
+  background: var(--superficie-2);
+}
+
+.inicio-curso-nuevo .inicio-curso-cuerpo {
+  align-content: center;
+  padding: 22px;
+}
+
+.inicio-curso-nuevo .pastilla {
+  background: var(--superficie);
+}
+
+@media (max-width: 860px) {
+  .inicio-fila,
+  .inicio-fila-principal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .inicio-continuar {
+    min-height: 0;
+    padding: 22px;
+  }
+  .inicio-continuar .arcos {
+    width: 130px;
+  }
+  .inicio .datos-coach {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ---------- Cuenta en la barra ---------- */
 
 .cuenta {

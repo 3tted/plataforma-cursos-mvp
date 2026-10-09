@@ -76,7 +76,7 @@ export default function PaginaComunidad() {
   return (
     <div className="rejilla-comunidad">
       <section aria-labelledby="titulo-comunidad" className="columna-principal">
-        <Link href="/" className="volver">
+        <Link href="/comunidades" className="volver">
           <IconoFlechaIzq width={16} height={16} /> Todas las comunidades
         </Link>
         <header className="portada">

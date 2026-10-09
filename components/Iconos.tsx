@@ -7,6 +7,7 @@ import {
   DownloadSimple,
   Exam,
   GraduationCap,
+  House,
   ListChecks,
   XCircle,
   BookOpenText,
@@ -86,3 +87,4 @@ export const IconoError = icono(XCircle, "fill");
 export const IconoReintentar = icono(ArrowCounterClockwise);
 export const IconoDescargar = icono(DownloadSimple);
 export const IconoBuscar = icono(MagnifyingGlass);
+export const IconoInicio = icono(House);

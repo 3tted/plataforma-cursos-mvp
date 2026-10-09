@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { useApp } from "@/components/Contexto";
 import {
   IconoAsistente,
@@ -16,9 +16,12 @@ import {
 import Markdown from "@/components/Markdown";
 import PreguntaRapida from "@/components/PreguntaRapida";
 import RepasoLeccion from "@/components/RepasoLeccion";
+import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import VideoLeccion from "@/components/VideoLeccion";
 import { moneda } from "@/lib/cliente";
+
+type Pestana = "resumen" | "transcripcion" | "repaso";
 
 export default function PaginaLeccion() {
   const { id } = useParams<{ id: string }>();
@@ -38,8 +41,11 @@ export default function PaginaLeccion() {
     cursoId,
     cambiarCurso,
   } = useApp();
+  const evaluaciones = useEvaluaciones();
   // El sello se anima solo cuando la alumna marca la lección, no al volver a abrirla.
   const [recienMarcada, setRecienMarcada] = useState(false);
+  // La pestaña elegida vale para esta lección; al cambiar de lección se vuelve al resumen.
+  const [eleccion, setEleccion] = useState<{ leccion: string; pestana: Pestana } | null>(null);
   const leccion = lecciones.find((l) => l.id === id);
   useTitulo(leccion?.titulo ?? (datos ? "Lección" : null));
 
@@ -92,6 +98,31 @@ export default function PaginaLeccion() {
   const enlaceMembresia = (desde: string) => `/membresia?leccion=${desde}`;
   const textoUnirse = pagoPendiente ? "Ver mi ficha de pago" : `Unirme por ${precio} al mes`;
 
+  // Pestañas del contenido: solo las que esta lección tiene.
+  const preguntasRepaso = leccion.deCoach ? 0 : (evaluaciones?.repaso[leccion.id]?.length ?? 0);
+  const pestanas: { id: Pestana; texto: string; conteo?: number }[] = [
+    { id: "resumen", texto: "Resumen" },
+    ...(leccion.transcripcion ? [{ id: "transcripcion" as const, texto: "Transcripción" }] : []),
+    ...(preguntasRepaso ? [{ id: "repaso" as const, texto: "Repaso", conteo: preguntasRepaso }] : []),
+  ];
+  const elegida = eleccion?.leccion === leccion.id ? eleccion.pestana : "resumen";
+  const pestana = pestanas.some((p) => p.id === elegida) ? elegida : "resumen";
+  const elegir = (p: Pestana) => setEleccion({ leccion: leccion.id, pestana: p });
+  // Flechas, Inicio y Fin mueven entre pestañas, como pide el patrón de pestañas accesibles.
+  const alTeclear = (e: KeyboardEvent<HTMLDivElement>) => {
+    const i = pestanas.findIndex((p) => p.id === pestana);
+    const destino =
+      e.key === "ArrowRight" ? (i + 1) % pestanas.length
+      : e.key === "ArrowLeft" ? (i - 1 + pestanas.length) % pestanas.length
+      : e.key === "Home" ? 0
+      : e.key === "End" ? pestanas.length - 1
+      : -1;
+    if (destino < 0) return;
+    e.preventDefault();
+    elegir(pestanas[destino].id);
+    document.getElementById(`pestana-${pestanas[destino].id}`)?.focus();
+  };
+
   const preguntar = (pregunta: string) => {
     setLeccionContexto(leccion.id);
     setPreguntaPendiente(pregunta);
@@ -104,41 +135,54 @@ export default function PaginaLeccion() {
   };
 
   return (
-    <div className="rejilla-leccion">
+    <div className="rejilla-leccion" data-con-barra={!bloqueada}>
       <nav className="indice-lecciones" aria-label="Lecciones del curso">
         <Link href="/curso" className="volver">
           <IconoFlechaIzq width={16} height={16} /> Todo el curso
         </Link>
-        {datos.curso.modulos.map((m) => (
-          <div key={m.id} className="indice-modulo">
-            <p className="indice-modulo-titulo">{m.titulo}</p>
-            <ul>
-              {m.lecciones.map((l) => {
-                const lHecha = completadas.includes(l.id);
-                const lBloqueada = !l.gratis && !tieneAcceso;
-                return (
-                  <li key={l.id}>
-                    <Link href={`/curso/${l.id}`} aria-current={l.id === leccion.id ? "page" : undefined}>
-                      <span className="indice-marca" data-estado={lHecha ? "hecha" : lBloqueada ? "bloqueada" : "abierta"}>
-                        {lHecha ? (
-                          <IconoCheck width={12} height={12} />
-                        ) : lBloqueada ? (
-                          <IconoCandado width={12} height={12} />
-                        ) : null}
-                      </span>
-                      <span>
-                        {l.titulo}
-                        {(lHecha || lBloqueada) && (
-                          <span className="sr-only">{lHecha ? " (completada)" : " (para miembros)"}</span>
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+        {datos.curso.modulos.map((m) => {
+          const hechasM = m.lecciones.filter((l) => completadas.includes(l.id)).length;
+          const parte = m.lecciones.length ? hechasM / m.lecciones.length : 0;
+          return (
+            <div key={m.id} className="indice-modulo">
+              <p className="indice-modulo-titulo">
+                <span>{m.titulo}</span>
+                <span className="indice-modulo-avance cifra">
+                  {hechasM}/{m.lecciones.length} · {Math.round(parte * 100)}%
+                </span>
+              </p>
+              <span className="indice-modulo-barra" aria-hidden="true">
+                <span style={{ transform: `scaleX(${parte})` }} />
+              </span>
+              <ul>
+                {m.lecciones.map((l) => {
+                  const lHecha = completadas.includes(l.id);
+                  const lBloqueada = !l.gratis && !tieneAcceso;
+                  return (
+                    <li key={l.id}>
+                      <Link href={`/curso/${l.id}`} aria-current={l.id === leccion.id ? "page" : undefined}>
+                        <span className="indice-marca" data-estado={lHecha ? "hecha" : lBloqueada ? "bloqueada" : "abierta"}>
+                          {lHecha ? (
+                            <IconoCheck width={12} height={12} />
+                          ) : lBloqueada ? (
+                            <IconoCandado width={12} height={12} />
+                          ) : null}
+                        </span>
+                        <span className="indice-titulo">
+                          {l.titulo}
+                          {(lHecha || lBloqueada) && (
+                            <span className="sr-only">{lHecha ? " (completada)" : " (para miembros)"}</span>
+                          )}
+                        </span>
+                        <span className="indice-min cifra">{l.duracion_min} min</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
         <Link href="/curso/examen" className="indice-examen">
           <IconoExamen width={16} height={16} /> Examen final
           {!cursoTerminado && (
@@ -186,32 +230,55 @@ export default function PaginaLeccion() {
           <>
             <VideoLeccion leccion={leccion} />
 
-            <Markdown texto={leccion.contenido} nivelTitulos={2} />
-
-            {leccion.transcripcion && (
-              <details className="transcripcion">
-                <summary>Transcripción del video</summary>
-                <Markdown texto={leccion.transcripcion} />
-              </details>
+            {pestanas.length > 1 && (
+              <div className="pestanas" role="tablist" aria-label="Contenido de la lección" onKeyDown={alTeclear}>
+                {pestanas.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    role="tab"
+                    id={`pestana-${p.id}`}
+                    aria-controls={`panel-${p.id}`}
+                    aria-selected={pestana === p.id}
+                    tabIndex={pestana === p.id ? 0 : -1}
+                    className="pestana"
+                    onClick={() => elegir(p.id)}
+                  >
+                    {p.texto}
+                    {p.conteo !== undefined && <span className="pestana-conteo cifra">{p.conteo}</span>}
+                  </button>
+                ))}
+              </div>
             )}
 
-            {!leccion.deCoach && <RepasoLeccion key={leccion.id} leccion={leccion} />}
+            {/* Los paneles quedan montados al cambiar de pestaña: el repaso no pierde lo que ya contestaste. */}
+            <div
+              role={pestanas.length > 1 ? "tabpanel" : undefined}
+              id="panel-resumen"
+              aria-labelledby={pestanas.length > 1 ? "pestana-resumen" : undefined}
+              hidden={pestana !== "resumen"}
+            >
+              <Markdown texto={leccion.contenido} nivelTitulos={2} />
+            </div>
+            {leccion.transcripcion && (
+              <div
+                role="tabpanel"
+                id="panel-transcripcion"
+                aria-labelledby="pestana-transcripcion"
+                hidden={pestana !== "transcripcion"}
+                className="panel-transcripcion"
+              >
+                <Markdown texto={leccion.transcripcion} />
+              </div>
+            )}
+            {preguntasRepaso > 0 && (
+              <div role="tabpanel" id="panel-repaso" aria-labelledby="pestana-repaso" hidden={pestana !== "repaso"}>
+                <RepasoLeccion key={leccion.id} leccion={leccion} />
+              </div>
+            )}
 
-            <div className="cierre-leccion" role="status">
-              {!hecha ? (
-                <div className="cierre-pendiente">
-                  <button type="button" className="boton" onClick={marcar}>
-                    <IconoCheck width={16} height={16} /> Marcar como completada
-                  </button>
-                  <span className="texto-suave">
-                    Llevas{" "}
-                    <span className="cifra">
-                      {completadasBase} de {base.length}
-                    </span>{" "}
-                    lecciones del curso
-                  </span>
-                </div>
-              ) : (
+            {hecha && (
+              <div className="cierre-leccion" role="status">
                 <div className="sello" data-animar={recienMarcada}>
                   <span className="sello-marca">
                     <IconoSello width={52} height={52} />
@@ -252,29 +319,9 @@ export default function PaginaLeccion() {
                       </p>
                     )}
                   </div>
-                  <div className="sello-acciones">
-                    {cursoTerminado ? (
-                      <Link href="/curso/examen" className="boton">
-                        <IconoExamen width={16} height={16} /> Presentar el examen final
-                      </Link>
-                    ) : siguienteBloqueada ? (
-                      <Link href={enlaceMembresia(siguiente.id)} className="boton">
-                        {textoUnirse}
-                      </Link>
-                    ) : (
-                      siguiente && (
-                        <Link href={`/curso/${siguiente.id}`} className="boton">
-                          Siguiente lección <IconoFlechaDer width={16} height={16} />
-                        </Link>
-                      )
-                    )}
-                    <button type="button" className="enlace enlace-discreto" onClick={marcar}>
-                      Desmarcar
-                    </button>
-                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
 
@@ -293,7 +340,7 @@ export default function PaginaLeccion() {
             <Link href={`/curso/${siguiente.id}`} className="leccion-vecina leccion-vecina-der">
               <span className="texto-suave">
                 Siguiente
-                {!siguiente.gratis && !tieneAcceso && (
+                {siguienteBloqueada && (
                   <>
                     <IconoCandado width={13} height={13} />
                     <span className="sr-only"> (para miembros)</span>
@@ -323,6 +370,71 @@ export default function PaginaLeccion() {
           <PreguntaRapida leccion={leccion.id} origen="lateral" />
         </section>
       </aside>
+
+      {/* Barra fija: marcar la lección y pasar a lo que sigue sin buscar el botón. */}
+      {!bloqueada && (
+        <div className="barra-siguiente" role="region" aria-label="Avance de la lección">
+          <div className="envoltura barra-siguiente-interior">
+            <p className="barra-siguiente-texto">
+              {cursoTerminado ? (
+                <>
+                  <small>Último paso</small>
+                  <strong>Examen final</strong>
+                </>
+              ) : siguiente ? (
+                <>
+                  <small>
+                    Siguiente lección · <span className="cifra">{siguiente.duracion_min}</span> min
+                    {siguienteBloqueada && " · para miembros"}
+                  </small>
+                  <strong>{siguiente.titulo}</strong>
+                </>
+              ) : (
+                <>
+                  <small>
+                    Lección <span className="cifra">{indice + 1}</span> de <span className="cifra">{lecciones.length}</span>
+                  </small>
+                  <strong>{leccion.titulo}</strong>
+                </>
+              )}
+            </p>
+            <div className="barra-siguiente-acciones">
+              <button
+                type="button"
+                className="boton boton-secundario barra-marcar"
+                aria-pressed={hecha}
+                onClick={marcar}
+                title={hecha ? "Toca para desmarcarla" : undefined}
+              >
+                <IconoCheck width={16} height={16} />
+                {hecha ? (
+                  "Completada"
+                ) : (
+                  <>
+                    <span className="barra-texto-largo">Marcar como completada</span>
+                    <span className="barra-texto-corto">Completar</span>
+                  </>
+                )}
+              </button>
+              {cursoTerminado ? (
+                <Link href="/curso/examen" className="boton">
+                  Presentar el examen <IconoFlechaDer width={16} height={16} />
+                </Link>
+              ) : siguienteBloqueada ? (
+                <Link href={enlaceMembresia(siguiente.id)} className="boton">
+                  {textoUnirse}
+                </Link>
+              ) : (
+                siguiente && (
+                  <Link href={`/curso/${siguiente.id}`} className="boton">
+                    Siguiente lección <IconoFlechaDer width={16} height={16} />
+                  </Link>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

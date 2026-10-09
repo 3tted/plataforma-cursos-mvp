@@ -3766,6 +3766,197 @@ a.inicio-curso:hover {
   margin-top: 4px;
 }
 
+/* ---------- Lección: temario con avance, pestañas y barra fija ---------- */
+
+.indice-modulo-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.indice-modulo-avance {
+  flex-shrink: 0;
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--t-label);
+  font-weight: 600;
+  color: var(--tinta-3);
+}
+
+.indice-modulo-barra {
+  display: block;
+  height: 4px;
+  margin-bottom: 6px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  overflow: hidden;
+}
+
+.indice-modulo-barra > span {
+  display: block;
+  height: 100%;
+  background: var(--progreso);
+  transform-origin: left;
+}
+
+.indice-titulo {
+  flex: 1;
+  min-width: 0;
+}
+
+.indice-min {
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: var(--t-label);
+  font-weight: 500;
+  color: var(--tinta-3);
+  white-space: nowrap;
+}
+
+.indice-modulo a[aria-current="page"] .indice-min {
+  color: var(--acento-texto);
+}
+
+.pestanas {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--linea);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pestana {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--tinta-2);
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pestana:hover {
+  color: var(--tinta);
+}
+
+.pestana[aria-selected="true"] {
+  color: var(--tinta);
+  border-bottom-color: var(--acento);
+}
+
+.pestana-conteo {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  font-size: var(--t-label);
+}
+
+.pestana[aria-selected="true"] .pestana-conteo {
+  background: var(--acento-suave);
+  color: var(--acento-texto);
+}
+
+.panel-transcripcion .prosa {
+  font-style: italic;
+  color: var(--tinta-2);
+}
+
+.barra-siguiente {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
+  padding-block: 12px calc(12px + env(safe-area-inset-bottom));
+  background: var(--superficie);
+  border-top: 1px solid var(--linea-fuerte);
+  box-shadow: 0 -6px 18px rgb(30 30 30 / 6%);
+}
+
+.barra-siguiente-interior {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+}
+
+.barra-siguiente-texto {
+  display: grid;
+  flex: 1 1 240px;
+  min-width: 0;
+  margin: 0;
+}
+
+.barra-siguiente-texto small {
+  font-size: var(--t-caption);
+  color: var(--tinta-2);
+}
+
+.barra-siguiente-texto strong {
+  overflow: hidden;
+  font-family: var(--fuente-display);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barra-siguiente-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.barra-texto-corto {
+  display: none;
+}
+
+.barra-marcar[aria-pressed="true"] {
+  border-color: var(--exito);
+  background: var(--exito-suave);
+  color: var(--exito-texto);
+}
+
+/* Lo último de la página no queda escondido detrás de la barra */
+body:has(.rejilla-leccion[data-con-barra="true"]) {
+  padding-bottom: 84px;
+}
+
+@media (max-width: 760px) {
+  .barra-siguiente {
+    bottom: calc(var(--alto-nav-inferior) + env(safe-area-inset-bottom));
+    padding-block: 10px;
+  }
+  .barra-siguiente-texto,
+  .barra-texto-largo {
+    display: none;
+  }
+  .barra-texto-corto {
+    display: inline;
+  }
+  .pestana {
+    padding-inline: 10px;
+  }
+  .barra-siguiente-acciones {
+    flex: 1;
+    flex-wrap: nowrap;
+    margin-left: 0;
+  }
+  .barra-siguiente-acciones > * {
+    flex: 1;
+    justify-content: center;
+    padding-inline: 12px;
+  }
+  body:has(.rejilla-leccion[data-con-barra="true"]) {
+    padding-bottom: calc(var(--alto-nav-inferior) + 72px + env(safe-area-inset-bottom));
+  }
+}
+
 /* ---------- Cuenta en la barra ---------- */
 
 .cuenta {

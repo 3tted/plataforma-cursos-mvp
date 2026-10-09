@@ -9,7 +9,16 @@ import type { DatosCurso, TurnoChat } from "./tipos";
 
 let cliente: GoogleGenAI | null = null;
 
-const MODELOS_RESPALDO = ["gemini-flash-lite-latest"];
+// Si el modelo principal está saturado, sin cuota o tarda en empezar, se
+// prueba el siguiente. Flash va sin razonamiento previo: así empieza a
+// escribir en segundos y no en medio minuto (Flash-Lite no acepta esa opción).
+const MODELOS_RESPALDO = ["gemini-flash-lite-latest", "gemini-flash-latest"];
+const OPCIONES_POR_MODELO: Record<string, object> = {
+  "gemini-flash-latest": { thinkingConfig: { thinkingBudget: 0 } },
+};
+
+// Tiempo máximo para que un modelo empiece a responder antes de pasar al siguiente.
+const ESPERA_PRIMER_TEXTO_MS = 12_000;
 
 const FINALES_NORMALES = new Set<FinishReason | undefined>([
   undefined,
@@ -53,33 +62,62 @@ async function* generar(
     systemInstruction: sistema,
     // Holgado: en los modelos que razonan, ese razonamiento también cuenta aquí.
     maxOutputTokens: 8192,
-    abortSignal: senal,
   };
 
-  // Si un modelo está saturado (503) o sin cuota gratuita (429), se prueba
-  // el siguiente. El error llega antes del primer texto, así que el alumno
-  // no ve respuestas mezcladas.
+  // Se pasa al siguiente modelo si uno está saturado (503), sin cuota (429),
+  // no existe (404) o no empieza a responder a tiempo. Todo eso ocurre antes
+  // del primer texto, así que el alumno no ve respuestas mezcladas.
   const modelos = [...new Set([MODELO_GEMINI, ...MODELOS_RESPALDO])];
-  let flujo: Awaited<ReturnType<GoogleGenAI["models"]["generateContentStream"]>> | null = null;
   for (const [i, model] of modelos.entries()) {
+    const ultimo = i === modelos.length - 1;
+    const control = new AbortController();
+    const cancelar = () => control.abort();
+    senal.addEventListener("abort", cancelar);
+    let tarde = false;
+    let empezo = false;
+    const reloj = ultimo
+      ? undefined
+      : setTimeout(() => {
+          tarde = true;
+          control.abort();
+        }, ESPERA_PRIMER_TEXTO_MS);
     try {
-      flujo = await cliente.models.generateContentStream({ model, contents, config });
-      break;
+      const extra = OPCIONES_POR_MODELO[model] ?? {};
+      const flujo = await cliente.models.generateContentStream({
+        model,
+        contents,
+        config: { ...config, ...extra, abortSignal: control.signal },
+      });
+      const lector = flujo[Symbol.asyncIterator]();
+      const primero = await lector.next();
+      clearTimeout(reloj);
+
+      let final: FinishReason | undefined;
+      for (let paso = primero; !paso.done; paso = await lector.next()) {
+        const texto = paso.value.text;
+        if (texto) {
+          empezo = true;
+          yield texto;
+        }
+        final = paso.value.candidates?.[0]?.finishReason ?? final;
+      }
+      yield* avisoDeFinal(final);
+      return;
     } catch (e) {
-      const reintentable = e instanceof ApiError && (e.status === 429 || e.status === 503 || e.status === 404);
-      if (!reintentable || i === modelos.length - 1 || senal.aborted) throw e;
-      console.warn(`Gemini: ${model} respondió ${(e as ApiError).status}, probando ${modelos[i + 1]}.`);
+      clearTimeout(reloj);
+      const reintentable = tarde || (e instanceof ApiError && (e.status === 429 || e.status === 503 || e.status === 404));
+      // Si ya se escribió parte de la respuesta, no se mezcla con la de otro modelo.
+      if (!reintentable || empezo || ultimo || senal.aborted) throw e;
+      console.warn(
+        `Gemini: ${model} ${tarde ? "no empezó a responder a tiempo" : `respondió ${(e as ApiError).status}`}, probando ${modelos[i + 1]}.`,
+      );
+    } finally {
+      senal.removeEventListener("abort", cancelar);
     }
   }
-  if (!flujo) return;
+}
 
-  let final: FinishReason | undefined;
-  for await (const trozo of flujo) {
-    const texto = trozo.text;
-    if (texto) yield texto;
-    final = trozo.candidates?.[0]?.finishReason ?? final;
-  }
-
+function* avisoDeFinal(final: FinishReason | undefined): Generator<string> {
   if (final === FinishReason.MAX_TOKENS) {
     yield "\n\n_La respuesta se cortó por ser demasiado larga._";
   } else if (!FINALES_NORMALES.has(final)) {

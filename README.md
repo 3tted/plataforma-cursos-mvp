@@ -44,7 +44,7 @@ Para activar la IA hay dos opciones:
 1. Copia `.env.example` como `.env.local` y pega la clave que elijas.
 2. Reinicia `npm run dev`. En `/api/estado` verás `"iaActiva":true` y el modelo en uso.
 
-Si pones las dos claves se usa Claude; para forzar uno, define `IA_PROVEEDOR=gemini` (o `claude`, o `demo`). Gemini usa el SDK oficial `@google/genai` con el modelo `gemini-flash-latest` (se cambia con `GEMINI_MODEL`) y las mismas instrucciones que Claude. En el plan gratuito, Google puede usar las conversaciones para mejorar sus modelos: úsalo con contenido de ejemplo.
+Si pones las dos claves se usa Claude; para forzar uno, define `IA_PROVEEDOR=gemini` (o `claude`, o `demo`). Gemini usa el SDK oficial `@google/genai` con el modelo `gemini-flash-lite-latest`, que empieza a responder en menos de un segundo (se cambia con `GEMINI_MODEL`); si está saturado o tarda más de 12 segundos en empezar, pasa a `gemini-flash-latest` y las mismas instrucciones que Claude. En el plan gratuito, Google puede usar las conversaciones para mejorar sus modelos: úsalo con contenido de ejemplo.
 
 Detalles técnicos:
 

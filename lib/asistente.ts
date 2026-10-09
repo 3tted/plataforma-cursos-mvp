@@ -27,7 +27,9 @@ export type ProveedorIA = "claude" | "gemini";
 const claveClaude = () => Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 const claveGemini = () => Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
 
-export const MODELO_GEMINI = process.env.GEMINI_MODEL || "gemini-flash-latest";
+// Flash-Lite empieza a responder en menos de un segundo y casi nunca está
+// saturado; Flash queda de respaldo (ver lib/asistente-gemini.ts).
+export const MODELO_GEMINI = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
 
 export function proveedorIA(): ProveedorIA | null {
   const elegido = process.env.IA_PROVEEDOR?.trim().toLowerCase();

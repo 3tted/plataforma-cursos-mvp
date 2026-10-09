@@ -60,6 +60,63 @@ export interface DatosCurso {
   curso: Curso;
 }
 
+// ---------- Comunidades y cursos que crea la coach desde la plataforma ----------
+
+/** Pregunta de opción múltiple de un curso creado (repaso o examen final). */
+export interface PreguntaCurso {
+  id: string;
+  enunciado: string;
+  opciones: string[];
+  correcta: number;
+  explicacion?: string;
+  /** En el examen: la lección de donde sale (para decirle al alumno qué repasar). */
+  leccion?: string;
+}
+
+export interface LeccionCreada {
+  id: string;
+  titulo: string;
+  duracion_min: number;
+  gratis: boolean;
+  resumen: string;
+  contenido: string;
+  transcripcion: string;
+  preguntas_sugeridas: string[];
+  repaso: PreguntaCurso[];
+}
+
+export interface ModuloCreado {
+  id: string;
+  titulo: string;
+  lecciones: LeccionCreada[];
+}
+
+export interface CursoCreado {
+  id: string;
+  comunidad: string;
+  /** Los alumnos solo ven los publicados. */
+  estado: "borrador" | "publicado";
+  /** Cómo nació el borrador: a mano o a partir de un documento con IA. */
+  origen: "manual" | "ia";
+  titulo: string;
+  subtitulo: string;
+  aprenderas: string[];
+  requisitos: string;
+  preguntas_sugeridas: string[];
+  modulos: ModuloCreado[];
+  examen: PreguntaCurso[];
+  autor: string;
+  creadoEn: string;
+  actualizadoEn: string;
+}
+
+export interface ComunidadCreada extends Comunidad {
+  tema: string;
+  /** Nombre de la coach que la creó (en la Fase 2, su cuenta). */
+  autor: string;
+  creadaEn: string;
+}
+
 /** Ficha corta de cada curso de la comunidad, para elegir cuál tomar. */
 export interface ResumenCurso {
   id: string;

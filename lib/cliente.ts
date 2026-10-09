@@ -1,6 +1,15 @@
 // Utilidades de la interfaz (se ejecutan en el navegador).
 
-import type { EstadoAlumno } from "./tipos";
+import type { Curso, EstadoAlumno } from "./tipos";
+
+/** Qué parte del curso se ve sin membresía, dicho como frase corta. */
+export function parteGratis(curso: Curso): string {
+  const gratis = curso.modulos.flatMap((m) => m.lecciones).filter((l) => l.gratis).length;
+  const primero = curso.modulos[0]?.lecciones ?? [];
+  if (gratis === 0) return "Todo el curso es con la membresía.";
+  if (gratis === primero.length && primero.every((l) => l.gratis)) return "El módulo 1 es gratis; el resto, con la membresía.";
+  return gratis === 1 ? "Una lección es gratis; el resto, con la membresía." : `${gratis} lecciones son gratis; el resto, con la membresía.`;
+}
 
 /** Cómo se nombra y se colorea el estado de un alumno en el expediente y en la matriz. */
 export const ESTADO_ALUMNO: Record<EstadoAlumno, { texto: string; clase: string }> = {
@@ -15,7 +24,8 @@ export async function api<T>(ruta: string, opciones?: RequestInit & { json?: unk
   const { json, ...resto } = opciones ?? {};
   const res = await fetch(ruta, {
     ...resto,
-    headers: json !== undefined ? { "Content-Type": "application/json" } : resto.headers,
+    // Con JSON se agrega su tipo sin perder los encabezados propios (por ejemplo, X-Rol).
+    headers: json !== undefined ? { "Content-Type": "application/json", ...(resto.headers as Record<string, string>) } : resto.headers,
     body: json !== undefined ? JSON.stringify(json) : resto.body,
   });
   if (!res.ok) {

@@ -12,6 +12,7 @@ import {
   type SetStateAction,
 } from "react";
 import { api, guardarLocal, guardarSesion, leerLocal, leerSesion } from "@/lib/cliente";
+import { COMUNIDADES, type ComunidadDirectorio } from "@/lib/comunidades";
 import type {
   Categoria,
   DatosCurso,
@@ -72,6 +73,12 @@ interface ContextoApp {
   cursos: ResumenCurso[];
   /** Los cursos de la comunidad que se está viendo. */
   cursosComunidad: ResumenCurso[];
+  /** Directorio: las comunidades del proyecto y las que crearon las coaches. */
+  comunidades: ComunidadDirectorio[];
+  /** El tema de una comunidad (para su portada ilustrada). */
+  temaDe: (comunidad: string) => string;
+  /** Vuelve a pedir cursos y comunidades (por ejemplo, al publicar un curso). */
+  recargarCatalogo: () => Promise<void>;
   cursoId: string;
   /** Cambia el curso activo: las páginas del curso, el examen y el asistente pasan a ese curso. */
   cambiarCurso: (id: string) => void;
@@ -154,6 +161,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   const [datos, setDatos] = useState<DatosCurso | null>(null);
   const [errorDatos, setErrorDatos] = useState<string | null>(null);
   const [cursos, setCursos] = useState<ResumenCurso[]>([]);
+  const [comunidades, setComunidades] = useState<ComunidadDirectorio[]>(COMUNIDADES);
   const [cursoId, setCursoId] = useState(CURSO_PRINCIPAL);
   const [inscripcion, setInscripcion] = useState<EstadoInscripcion | null>(null);
   const [estado, setEstado] = useState<EstadoPlataforma | null>(null);
@@ -171,12 +179,14 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
 
   const recargarCurso = useCallback(async () => {
     try {
-      setDatos(await api<DatosCurso>(`/api/curso?curso=${encodeURIComponent(cursoId)}`));
+      // La coach también ve sus borradores (vista previa antes de publicar).
+      const borrador = usuario?.rol === "coach" ? "&borrador=1" : "";
+      setDatos(await api<DatosCurso>(`/api/curso?curso=${encodeURIComponent(cursoId)}${borrador}`));
       setErrorDatos(null);
     } catch (e) {
       setErrorDatos((e as Error).message);
     }
-  }, [cursoId]);
+  }, [cursoId, usuario?.rol]);
 
   // Al cambiar de curso se carga el nuevo; la conversación con el asistente
   // del curso empieza de cero porque responde con otras lecciones.
@@ -230,12 +240,19 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     setChatGeneral(restaurar(CLAVES.chatGeneral));
     setCursoId(leerLocal<string>(CLAVES.curso) ?? CURSO_PRINCIPAL);
     setListo(true);
-    api<ResumenCurso[]>("/api/cursos")
-      .then(setCursos)
-      .catch(() => setCursos([]));
+    void recargarCatalogo();
     api<EstadoPlataforma>("/api/estado")
       .then(setEstado)
       .catch(() => setEstado({ iaActiva: false, modelo: null }));
+  }, []);
+
+  const recargarCatalogo = useCallback(async () => {
+    const [lista, directorio] = await Promise.all([
+      api<ResumenCurso[]>("/api/cursos").catch(() => null),
+      api<ComunidadDirectorio[]>("/api/comunidades").catch(() => null),
+    ]);
+    if (lista) setCursos(lista);
+    if (directorio) setComunidades(directorio);
   }, []);
 
   const guardarUsuario = useCallback((u: Usuario) => {
@@ -432,6 +449,10 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   const membresiaEn = useCallback((comunidad: string) => membresias[comunidad] ?? null, [membresias]);
   const membresia = membresias[comunidadId] ?? null;
   const cursosComunidad = useMemo(() => cursos.filter((c) => c.comunidad === comunidadId), [cursos, comunidadId]);
+  const temaDe = useCallback(
+    (comunidad: string) => comunidades.find((c) => c.id === comunidad)?.tema ?? "Finanzas",
+    [comunidades],
+  );
 
   const valor: ContextoApp = {
     listo,
@@ -448,6 +469,9 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     recargarCurso,
     cursos,
     cursosComunidad,
+    comunidades,
+    temaDe,
+    recargarCatalogo,
     cursoId,
     cambiarCurso,
     comunidadId,

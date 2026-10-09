@@ -1,0 +1,40 @@
+import type { Almacen } from "./almacen";
+import { ErrorDeDatos } from "./http";
+import type { ComunidadCreada, CursoCreado } from "./tipos";
+
+// Permisos del MVP: la coach se identifica con el encabezado X-Rol y su
+// nombre. En la Fase 2 los da la sesión de su cuenta.
+
+export class SinPermiso extends Error {}
+
+/** La coach que hace la petición (o un error si no es coach). */
+export function coachDe(req: Request, autor: unknown): string {
+  if (req.headers.get("x-rol") !== "coach") throw new SinPermiso("Esta acción es solo para coaches.");
+  const nombre = typeof autor === "string" ? autor.trim() : "";
+  if (!nombre) throw new ErrorDeDatos("Falta el nombre de la coach.");
+  return nombre;
+}
+
+export function comunidadDeCoach(a: Almacen, id: unknown, autor: string): ComunidadCreada {
+  const c = (a.comunidadesCoach ?? []).find((x) => x.id === id);
+  if (!c) throw new ErrorDeDatos("No encontramos esa comunidad.");
+  if (c.autor !== autor) throw new SinPermiso("Esta comunidad es de otra coach.");
+  return c;
+}
+
+export function cursoDeCoach(a: Almacen, id: unknown, autor: string): CursoCreado {
+  const c = (a.cursosCoach ?? []).find((x) => x.id === id);
+  if (!c) throw new ErrorDeDatos("No encontramos ese curso.");
+  comunidadDeCoach(a, c.comunidad, autor);
+  return c;
+}
+
+/** Convierte los errores de permiso en 403 para quien llama. */
+export async function conPermiso(accion: () => Promise<Response>): Promise<Response> {
+  try {
+    return await accion();
+  } catch (e) {
+    if (e instanceof SinPermiso) return Response.json({ error: e.message }, { status: 403 });
+    throw e;
+  }
+}

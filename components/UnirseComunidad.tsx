@@ -86,7 +86,7 @@ export default function UnirseComunidad({ motivo }: { motivo?: string }) {
           </p>
         )}
         <p className="nota">
-          Unirte es gratis. Después eliges a qué cursos inscribirte: el módulo 1 de cada uno es gratis y el resto es con la
+          Unirte es gratis. Después eliges a qué cursos inscribirte: algunas lecciones son gratis y el resto es con la
           membresía de {moneda(comunidad?.precio_mensual ?? 490)} al mes.
         </p>
       </section>

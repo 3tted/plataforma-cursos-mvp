@@ -11,12 +11,13 @@ Cubre el criterio del MVP de la ficha: *comunidad con feed simple + un curso de 
 | Pieza | Qué hace | Estado |
 |---|---|---|
 | **Comunidad** | Feed con categorías; publicar, comentar y marcar "Me sirve". Los anuncios son solo para la coach. | Funciona (datos en un archivo JSON) |
-| **Comunidades y cursos** | Dos comunidades reales, cada una con su coach, su feed y su membresía: **Finanzas Claras** (Daniela Ortega, $490/mes) con dos cursos, "Finanzas claras para tu negocio" (8 lecciones) y "Precios para tus servicios" (5), y **Vende por WhatsApp** (Mariana Ibarra, $390/mes) con un curso, "De la conversación a la venta" (4). El alumno se une a una comunidad y luego se inscribe a sus cursos. El directorio agrupa todas las comunidades por tema; las demás son de ejemplo. Textos y transcripciones en `data/`. Progreso por alumno. El módulo 1 de cada curso es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
+| **Comunidades y cursos** | Dos comunidades reales, cada una con su coach, su feed y su membresía: **Finanzas Claras** (Daniela Ortega, $490/mes) con dos cursos, "Finanzas claras para tu negocio" (8 lecciones) y "Precios para tus servicios" (5), y **Vende por WhatsApp** (Mariana Ibarra, $390/mes) con un curso, "De la conversación a la venta" (4). El alumno se une a una comunidad y luego se inscribe a sus cursos. El directorio agrupa todas las comunidades por tema; las demás son de ejemplo. Textos y transcripciones en `data/`. Progreso por alumno. En los cursos de archivo el módulo 1 es gratis; en los que crea la coach, ella marca qué lecciones son gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
 | **Asistente del curso** | En cada lección, en la comunidad y en `/curso/asistente`. Responde dudas usando el contenido de las lecciones y **cita la lección** de donde sale cada idea ([L4], [L5]…). Si algo no está en el curso, lo dice y ofrece llevar la pregunta a la comunidad. | Real con clave de API · modo demo sin ella |
 | **Asistente Merkatics** | El de "Asistente" en el menú (`/asistente`): IA de uso general (ideas, mensajes, explicaciones). No usa los cursos y sus preguntas no aparecen en el panel de la coach. | Solo con clave de API |
 | **Repaso y examen final** | Cada lección cierra con un repaso de 2 preguntas (no cuenta para la calificación; explica la respuesta y ofrece preguntarle al asistente). Al terminar las lecciones de un curso se desbloquea su examen final (12 preguntas en Finanzas claras, 8 en Precios), se aprueba con 70% y hay 3 intentos. Las respuestas correctas solo viven en el servidor (`data/evaluaciones*.json`). | Funciona |
 | **Expediente y matriz** | El alumno ve su expediente en su perfil; la coach ve en su panel una matriz de alumnos por curso (avance por módulo, repaso, examen y estado), las preguntas que más se fallan y puede descargarla en CSV. Empieza vacía: solo aparecen los alumnos que de verdad avanzan. | Funciona (alumnos identificados por nombre) |
 | **Pagos locales** | Membresía de $490 MXN/mes con OXXO (ficha con referencia), SPEI (CLABE) o Mercado Pago. | **Simulado**: no se cobra nada |
+| **Crear comunidades y cursos** | En *Mis comunidades* (`/coach/comunidades`) la coach crea su comunidad (nombre, tema, membresía) y le agrega cursos **a mano**: datos del curso, módulos, lecciones (texto, transcripción, video), preguntas de repaso por lección y examen final. El curso se guarda como borrador y se publica cuando está completo; la comunidad aparece en el directorio con su primer curso publicado. Lecciones `K1`, `K2`… La opción **con IA a partir de un documento** llega en la siguiente entrega. | Funciona |
 | **Panel de la coach** | Qué preguntan los alumnos al asistente, lecciones más consultadas, pagos y un formulario para **pegar una lección propia** y que la IA responda con ella. | Funciona |
 
 Fuera de alcance, como indica la ficha: gamificación, calendario, app nativa, mensajes directos y notificaciones.
@@ -88,16 +89,20 @@ app/
   curso/asistente/         Asistente del curso (cita las lecciones)
   membresia/page.tsx       Checkout simulado (OXXO, SPEI, Mercado Pago)
   coach/page.tsx           Panel de la coach
+  coach/comunidades/       Mis comunidades: crear comunidad y agregar cursos
+  coach/curso/[id]/        Editor de un curso (borrador y publicación)
   api/                     Rutas del servidor
     asistente/             Streaming con Claude o modo demo
     publicaciones/         Feed, comentarios y reacciones
     pagos/                 Referencias ficticias y confirmación simulada
-    coach/                 Resumen y lecciones propias
+    coach/                 Resumen, lecciones propias, comunidades y cursos de la coach
 components/                Piezas de la interfaz
 lib/
   asistente.ts             Prompt, llamada a Claude y búsqueda del modo demo
   almacen.ts               Almacén JSON en disco (.data/almacen.json)
-  curso.ts                 Carga del curso desde /data
+  curso.ts                 Carga de cursos: los de /data y los que crea la coach
+  creacion.ts              Validación de comunidades y cursos creados (borrador → publicado)
+  permisos.ts              Solo la coach dueña edita su comunidad y sus cursos
   tipos.ts                 Modelo de datos compartido
 data/
   curso.json               Comunidad y curso principal (módulos y lecciones)

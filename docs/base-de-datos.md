@@ -38,6 +38,8 @@ El alumno no tiene tabla propia: cada registro guarda el nombre con el que la pe
 | `muestras` | lecciones cuyos videos de muestra ya se sembraron |
 | `inscripciones` | autor, comunidades[] (a las que se unió), cursos[] (a los que se inscribió), desde |
 | `semillas` | comunidades cuya publicación de bienvenida ya se sembró |
+| `comunidadesCoach` | id, nombre, coach, coach_titulo, descripcion, tema, precio_mensual, moneda, autor, creadaEn |
+| `cursosCoach` | id (`c…`), comunidad, estado (borrador/publicado), origen (manual/ia), titulo, subtitulo, aprenderas[], requisitos, preguntas_sugeridas[], modulos[] → lecciones[] (id `K…`, titulo, duracion_min, gratis, resumen, contenido, transcripcion, repaso[]), examen[], autor, creadoEn, actualizadoEn |
 
 ## Cómo se guarda un cambio
 

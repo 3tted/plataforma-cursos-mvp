@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 // Matriz de la coach para un curso (?curso=id): el expediente de cada alumno
 // en ese curso y las preguntas que más se fallan.
 export const GET = manejar(async (req: Request) => {
-  const id = idCurso(new URL(req.url).searchParams.get("curso"));
+  const id = await idCurso(new URL(req.url).searchParams.get("curso"));
   const [curso, ev] = await Promise.all([cargarCurso(id), cargarEvaluaciones(id)]);
   return Response.json(await consultar((a) => construirMatriz(a, curso, ev)));
 });

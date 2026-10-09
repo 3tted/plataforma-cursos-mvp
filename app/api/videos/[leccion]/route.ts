@@ -21,7 +21,7 @@ type Contexto = { params: Promise<{ leccion: string }> };
 
 async function leccionExistente(contexto: Contexto): Promise<string | null> {
   const { leccion } = await contexto.params;
-  return (await cursoDeLeccion(leccion)) ? leccion : null;
+  return (await cursoDeLeccion(leccion, { borradores: true })) ? leccion : null;
 }
 
 async function videoDe(leccion: string): Promise<VideoLeccion | undefined> {

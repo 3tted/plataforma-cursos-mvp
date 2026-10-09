@@ -13,7 +13,7 @@ export const POST = manejar(async (req: Request) => {
   const datos = await leerJson(req);
   const autor = texto(datos.autor, "autor", 60);
   const vistaPrevia = rol(datos.rol) === "coach";
-  const id = idCurso(datos.curso);
+  const id = await idCurso(datos.curso, { borradores: true });
   const [ev, curso] = await Promise.all([cargarEvaluaciones(id), cargarCurso(id)]);
 
   const { aciertos, total, fallas } = calificar(ev.examenFinal.preguntas, datos.respuestas);

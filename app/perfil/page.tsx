@@ -9,7 +9,6 @@ import ExpedienteCurso from "@/components/ExpedienteCurso";
 import { IconoCalendario, IconoComentario, IconoEditar, IconoPregunta, IconoPublicacion } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
 import { api, hace } from "@/lib/cliente";
-import { COMUNIDADES } from "@/lib/comunidades";
 
 interface Perfil {
   publicaciones: { id: number; comunidad: string; titulo: string; categoria: string; creadaEn: string }[];
@@ -135,7 +134,7 @@ function Actividad({ fechas }: { fechas: string[] }) {
 }
 
 export default function PaginaPerfil() {
-  const { usuario, guardarUsuario, membresiaEn, completadas, lecciones, cursos, inscritoEn, enLaComunidad, cambiarComunidad } =
+  const { usuario, guardarUsuario, membresiaEn, completadas, lecciones, cursos, inscritoEn, enLaComunidad, cambiarComunidad, comunidades } =
     useApp();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [errorCarga, setErrorCarga] = useState(false);
@@ -189,7 +188,7 @@ export default function PaginaPerfil() {
   if (!usuario) return null;
 
   // Comunidades reales a las que pertenece (la coach, a todas).
-  const suyas = COMUNIDADES.filter((c) => c.estado === "activa" && enLaComunidad(c.id));
+  const suyas = comunidades.filter((c) => c.estado === "activa" && enLaComunidad(c.id));
   // Lecciones terminadas en todos los cursos de la comunidad.
   const idsCursos = cursos.length ? cursos.flatMap((c) => c.lecciones) : lecciones.filter((l) => !l.deCoach).map((l) => l.id);
   const hechas = idsCursos.filter((id) => completadas.includes(id)).length;

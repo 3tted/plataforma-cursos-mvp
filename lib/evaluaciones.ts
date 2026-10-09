@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import type { Almacen } from "./almacen";
+import { consultar, type Almacen } from "./almacen";
 import { CURSO_PRINCIPAL, idCurso } from "./curso";
 import { ErrorDeDatos } from "./http";
 import type {
@@ -40,8 +40,28 @@ const ARCHIVOS: Record<string, string> = {
 };
 const cache = new Map<string, Evaluaciones>();
 
+// Las de los cursos que crea la coach viven en el almacén, junto al curso:
+// el repaso en cada lección y el examen final en el curso.
+async function evaluacionesDeCursoCreado(id: string): Promise<Evaluaciones | null> {
+  const curso = await consultar((a) => (a.cursosCoach ?? []).find((c) => c.id === id) ?? null);
+  if (!curso) return null;
+  return {
+    aprobarCon: 70,
+    intentosExamen: 3,
+    repaso: Object.fromEntries(
+      curso.modulos.flatMap((m) => m.lecciones).filter((l) => l.repaso.length > 0).map((l) => [l.id, l.repaso]),
+    ),
+    examenFinal: { titulo: `Examen final: ${curso.titulo}`, preguntas: curso.examen },
+  };
+}
+
 export async function cargarEvaluaciones(curso: string = CURSO_PRINCIPAL): Promise<Evaluaciones> {
-  const id = idCurso(curso);
+  // Los borradores también: la coach los revisa antes de publicar.
+  const id = await idCurso(curso, { borradores: true });
+  if (!(id in ARCHIVOS)) {
+    const creadas = await evaluacionesDeCursoCreado(id);
+    if (creadas) return creadas;
+  }
   const guardado = cache.get(id);
   if (guardado && process.env.NODE_ENV === "production") return guardado;
   const crudo = JSON.parse(await fs.readFile(path.join(process.cwd(), "data", ARCHIVOS[id]), "utf8")) as {

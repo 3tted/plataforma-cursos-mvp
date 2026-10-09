@@ -50,7 +50,8 @@ export const POST = manejar(async (req: Request) => {
   const accion = datos.accion;
   if (accion !== "comunidad" && accion !== "curso") return error('La acción debe ser "comunidad" o "curso".');
   const cursos = await cargarCursos();
-  const curso = accion === "curso" ? cursos.find((c) => c.curso.id === idCurso(datos.curso))! : null;
+  const idPedido = accion === "curso" ? await idCurso(datos.curso) : null;
+  const curso = idPedido ? cursos.find((c) => c.curso.id === idPedido)! : null;
   const comunidad = curso ? curso.comunidad.id : await idComunidad(datos.comunidad);
 
   const resultado = await modificar((a): EstadoInscripcion | { mensaje: string } => {

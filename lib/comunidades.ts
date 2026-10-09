@@ -18,6 +18,9 @@ export interface ComunidadDirectorio {
   estado: "activa" | "proximamente";
 }
 
+/** Temas para elegir al crear una comunidad (cada uno tiene su portada ilustrada). */
+export const TEMAS = ["Finanzas", "Ventas", "Marketing", "Productividad", "Diseño", "Liderazgo", "Otro"];
+
 /** El tema de una comunidad (para su portada ilustrada). */
 export function temaDe(id: string): string {
   return COMUNIDADES.find((c) => c.id === id)?.tema ?? "Finanzas";

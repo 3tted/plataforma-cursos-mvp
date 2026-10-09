@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ESTADO_ALUMNO, api, hace } from "@/lib/cliente";
-import { temaDe } from "@/lib/comunidades";
 import { agrupar, sinResolver } from "@/lib/preguntas";
 import type { MatrizAlumnos, ResumenCoach } from "@/lib/tipos";
 import Avatar from "./Avatar";
@@ -19,7 +18,7 @@ const PRIORIDAD = { "requiere-apoyo": 0, "examen-pendiente": 1, "en-curso": 2, "
 // Inicio de la coach: sus cursos, sus alumnos y lo que le toca contestar.
 export default function InicioCoach() {
   const router = useRouter();
-  const { usuario, datos, setBorrador, cursos, cambiarCurso } = useApp();
+  const { usuario, datos, setBorrador, cursos, cambiarCurso, temaDe } = useApp();
   const [resumen, setResumen] = useState<ResumenCoach | null>(null);
   const [matrices, setMatrices] = useState<MatrizAlumnos[] | null>(null);
   const [error, setError] = useState(false);
@@ -100,6 +99,9 @@ export default function InicioCoach() {
       <section className="inicio-bloque" aria-labelledby="mis-cursos-titulo">
         <div className="inicio-bloque-cabecera">
           <h2 id="mis-cursos-titulo">Mis cursos</h2>
+          <Link href="/coach/comunidades" className="enlace inicio-ver-todo">
+            Mis comunidades <IconoFlechaDer width={15} height={15} />
+          </Link>
         </div>
         <ul className="inicio-cursos">
           {cursos.map((c) => {
@@ -120,15 +122,19 @@ export default function InicioCoach() {
               </li>
             );
           })}
-          <li className="inicio-curso inicio-curso-nuevo">
-            <span className="inicio-curso-cuerpo">
-              <span className="pastilla">Próximamente</span>
-              <span className="ficha-nombre">Crear un curso con IA</span>
-              <span className="texto-suave">
-                Sube tus documentos y la IA te propone módulos, lecciones y preguntas de repaso. Tú lo revisas antes de
-                publicarlo.
+          <li>
+            <Link href="/coach/comunidades" className="inicio-curso inicio-curso-nuevo">
+              <span className="inicio-curso-cuerpo">
+                <span className="ficha-nombre">Crear una comunidad o un curso</span>
+                <span className="texto-suave">
+                  Arma tu comunidad y agrégale cursos: a mano, con tus videos y preguntas, o con IA a partir de un
+                  documento.
+                </span>
+                <span className="enlace">
+                  Mis comunidades <IconoFlechaDer width={15} height={15} />
+                </span>
               </span>
-            </span>
+            </Link>
           </li>
         </ul>
       </section>

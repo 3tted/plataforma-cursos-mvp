@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { COMUNIDADES } from "@/lib/comunidades";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
 import { IconoAsistente, IconoAsistenteGeneral, IconoBillete, IconoComunidad, IconoCurso, IconoFlechaDer } from "./Iconos";
@@ -23,8 +22,8 @@ const FUNCIONES = [
 // entrada (sin contraseña).
 export default function PaginaVisitantes() {
   const router = useRouter();
-  const { pedirEntrada, cambiarComunidad } = useApp();
-  const abiertas = COMUNIDADES.filter((c) => c.estado === "activa");
+  const { pedirEntrada, cambiarComunidad, comunidades } = useApp();
+  const abiertas = comunidades.filter((c) => c.estado === "activa");
 
   // Elegir una comunidad: después de entrar, la persona llega a ella.
   const elegirComunidad = (id: string) => {

@@ -4,6 +4,8 @@ import path from "path";
 import type {
   Categoria,
   Comentario,
+  ComunidadCreada,
+  CursoCreado,
   Inscripcion,
   IntentoExamen,
   IntentoRepaso,
@@ -39,6 +41,9 @@ export interface Almacen {
   muestras?: string[];
   /** Comunidades cuyas publicaciones de bienvenida ya se sembraron. */
   semillas?: string[];
+  /** Comunidades y cursos que crean las coaches desde la plataforma. */
+  comunidadesCoach?: ComunidadCreada[];
+  cursosCoach?: CursoCreado[];
 }
 
 const DIRECTORIO =

@@ -1,14 +1,15 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { consultar } from "./almacen";
-import type { Curso, DatosCurso, Leccion, LeccionCoach, Modulo, ResumenCurso } from "./tipos";
+import { consultar, type Almacen } from "./almacen";
+import type { Comunidad, CursoCreado, Curso, DatosCurso, Leccion, LeccionCoach, Modulo, ResumenCurso } from "./tipos";
 
 const DATOS = path.join(process.cwd(), "data");
 const SEPARADOR_TRANSCRIPCION = "<!-- transcripcion -->";
 
-// Cursos de la comunidad. Todos son de la misma coach y entran en la misma
-// membresía; los ids de lección no se repiten entre cursos (L1…, P1…), así
-// que el avance de cada alumno sigue siendo una sola lista de lecciones.
+// Cursos de la plataforma. Unos viajan con el proyecto (data/*.json) y otros
+// los crea la coach desde su panel (se guardan en el almacén). Los ids de
+// lección no se repiten entre cursos (L1…, P1…, W1…, K1…), así que el avance
+// de cada alumno sigue siendo una sola lista de lecciones.
 export const CURSO_PRINCIPAL = "finanzas-negocio";
 export const COMUNIDAD_PRINCIPAL = "finanzas-claras";
 const ARCHIVOS: Record<string, string> = {
@@ -17,11 +18,21 @@ const ARCHIVOS: Record<string, string> = {
   // De otra comunidad (Vende por WhatsApp): su archivo trae su propia comunidad.
   "ventas-whatsapp": "cursos/ventas-whatsapp.json",
 };
-export const IDS_CURSOS = Object.keys(ARCHIVOS);
+const IDS_ARCHIVO = Object.keys(ARCHIVOS);
+
+/** Para leer también los borradores (el editor de la coach y su vista previa). */
+interface Opciones {
+  borradores?: boolean;
+}
+
+const visible = (c: CursoCreado, { borradores = false }: Opciones) => borradores || c.estado === "publicado";
 
 /** El curso que pide el navegador; si no llega o no existe, el principal. */
-export function idCurso(valor: unknown): string {
-  return typeof valor === "string" && valor in ARCHIVOS ? valor : CURSO_PRINCIPAL;
+export async function idCurso(valor: unknown, opciones: Opciones = {}): Promise<string> {
+  if (typeof valor !== "string") return CURSO_PRINCIPAL;
+  if (valor in ARCHIVOS) return valor;
+  const existe = await consultar((a) => (a.cursosCoach ?? []).some((c) => c.id === valor && visible(c, opciones)));
+  return existe ? valor : CURSO_PRINCIPAL;
 }
 
 interface LeccionArchivo extends Omit<Leccion, "contenido" | "transcripcion"> {
@@ -44,7 +55,7 @@ async function cargarLeccion({ archivo, ...meta }: LeccionArchivo): Promise<Lecc
   return { ...meta, contenido: contenido.trim(), transcripcion: transcripcion.trim() };
 }
 
-async function cargarCursoBase(id: string): Promise<DatosCurso> {
+async function cargarCursoDeArchivo(id: string): Promise<DatosCurso> {
   const guardado = cacheBase.get(id);
   if (guardado && process.env.NODE_ENV === "production") return guardado;
   // Un curso sin comunidad propia es de la principal (la de curso.json).
@@ -64,15 +75,76 @@ async function cargarCursoBase(id: string): Promise<DatosCurso> {
   return datos;
 }
 
+/** La comunidad que creó una coach, en la forma que usa el resto de la plataforma. */
+export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
+  const c = (a.comunidadesCoach ?? []).find((x) => x.id === id);
+  if (!c) return null;
+  return {
+    id: c.id,
+    nombre: c.nombre,
+    coach: c.coach,
+    coach_titulo: c.coach_titulo,
+    descripcion: c.descripcion,
+    precio_mensual: c.precio_mensual,
+    moneda: c.moneda,
+  };
+}
+
+/** Un curso creado por la coach, en la misma forma que los cursos de archivo. */
+export function datosDeCursoCreado(c: CursoCreado, comunidad: Comunidad): DatosCurso {
+  return {
+    comunidad,
+    curso: {
+      id: c.id,
+      titulo: c.titulo,
+      subtitulo: c.subtitulo,
+      aprenderas: c.aprenderas,
+      requisitos: c.requisitos,
+      preguntas_sugeridas: c.preguntas_sugeridas,
+      modulos: c.modulos.map((m) => ({
+        id: m.id,
+        titulo: m.titulo,
+        lecciones: m.lecciones.map((l) => ({
+          id: l.id,
+          titulo: l.titulo,
+          duracion_min: l.duracion_min,
+          gratis: l.gratis,
+          resumen: l.resumen,
+          preguntas_sugeridas: l.preguntas_sugeridas,
+          contenido: l.contenido,
+          transcripcion: l.transcripcion,
+        })),
+      })),
+    },
+  };
+}
+
+async function cargarCursosCreados(opciones: Opciones = {}): Promise<DatosCurso[]> {
+  return consultar((a) =>
+    (a.cursosCoach ?? [])
+      .filter((c) => visible(c, opciones))
+      .flatMap((c) => {
+        const comunidad = comunidadCreadaDe(a, c.comunidad);
+        return comunidad ? [datosDeCursoCreado(c, comunidad)] : [];
+      }),
+  );
+}
+
 export function idLeccionCoach(leccion: LeccionCoach): string {
   return `C${leccion.id}`;
 }
 
-// Un curso completo: las lecciones del archivo, más (en el curso principal)
-// las que la coach agrega desde su panel, y el video que la coach haya subido
-// a cada una. El asistente de IA responde con base en todas.
-export async function cargarCurso(id: string = CURSO_PRINCIPAL): Promise<DatosCurso> {
-  const base = await cargarCursoBase(idCurso(id));
+// Un curso completo: sus lecciones, más (en el curso principal) las que la
+// coach pega desde su panel, y el video que la coach haya subido a cada una.
+// El asistente de IA responde con base en todas.
+export async function cargarCurso(id: string = CURSO_PRINCIPAL, opciones: Opciones = {}): Promise<DatosCurso> {
+  let base: DatosCurso;
+  if (id in ARCHIVOS) {
+    base = await cargarCursoDeArchivo(id);
+  } else {
+    const creado = (await cargarCursosCreados(opciones)).find((c) => c.curso.id === id);
+    base = creado ?? (await cargarCursoDeArchivo(CURSO_PRINCIPAL));
+  }
   const { propias, videos } = await consultar((a) => ({ propias: a.leccionesCoach, videos: a.videos ?? [] }));
   const conPropias = base.curso.id === CURSO_PRINCIPAL && propias.length > 0;
   if (!conPropias && videos.length === 0) return base;
@@ -104,14 +176,21 @@ export async function cargarCurso(id: string = CURSO_PRINCIPAL): Promise<DatosCu
   };
 }
 
-export function cargarCursos(): Promise<DatosCurso[]> {
-  return Promise.all(IDS_CURSOS.map((id) => cargarCurso(id)));
+/** Todos los cursos: los de archivo y los publicados por las coaches (o también borradores). */
+export async function cargarCursos(opciones: Opciones = {}): Promise<DatosCurso[]> {
+  const deArchivo = await Promise.all(IDS_ARCHIVO.map((id) => cargarCurso(id)));
+  const creados = await cargarCursosCreados(opciones);
+  return [...deArchivo, ...(await Promise.all(creados.map((c) => cargarCurso(c.curso.id, opciones))))];
 }
 
 /** Las comunidades con cursos, en el orden de los cursos. */
 export async function cargarComunidades(): Promise<DatosCurso["comunidad"][]> {
   const vistas = new Map<string, DatosCurso["comunidad"]>();
   for (const { comunidad } of await cargarCursos()) if (!vistas.has(comunidad.id)) vistas.set(comunidad.id, comunidad);
+  // Las que creó una coach cuentan aunque todavía no publiquen un curso (para cobrar y publicar).
+  for (const c of await consultar((a) => (a.comunidadesCoach ?? []).map((x) => comunidadCreadaDe(a, x.id)!))) {
+    if (!vistas.has(c.id)) vistas.set(c.id, c);
+  }
   return [...vistas.values()];
 }
 
@@ -122,11 +201,16 @@ export async function idComunidad(valor: unknown): Promise<string> {
 }
 
 /** El curso al que pertenece una lección, o null si no existe. */
-export async function cursoDeLeccion(leccion: string): Promise<DatosCurso | null> {
-  for (const datos of await cargarCursos()) {
+export async function cursoDeLeccion(leccion: string, opciones: Opciones = {}): Promise<DatosCurso | null> {
+  for (const datos of await cargarCursos(opciones)) {
     if (datos.curso.modulos.some((m) => m.lecciones.some((l) => l.id === leccion))) return datos;
   }
   return null;
+}
+
+/** ¿Es un curso que viaja con el proyecto (y no uno creado por una coach)? */
+export function esCursoDeArchivo(id: string): boolean {
+  return id in ARCHIVOS;
 }
 
 export function resumenDe({ curso, comunidad }: DatosCurso): ResumenCurso {

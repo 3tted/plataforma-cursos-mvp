@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, moneda } from "@/lib/cliente";
-import { COMUNIDADES, temaDe } from "@/lib/comunidades";
 import type { Expediente, ResumenCurso } from "@/lib/tipos";
 import Arcos from "./Arcos";
 import BotonInscribirse from "./BotonInscribirse";
@@ -34,6 +33,8 @@ export default function InicioAlumno() {
     inscripcionLista,
     enLaComunidad,
     inscritoEn,
+    comunidades: COMUNIDADES,
+    temaDe,
   } = useApp();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
 

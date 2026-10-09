@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/cliente";
-import { COMUNIDADES, temaDe } from "@/lib/comunidades";
 import type { Tendencias } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
@@ -15,7 +14,7 @@ import TarjetaComunidad from "./TarjetaComunidad";
 // alumnos que la persona todavía no toma), una comunidad destacada (la de más
 // miembros a la que no pertenece) y, abajo, las demás comunidades.
 export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: string }) {
-  const { cursos, inscritoEn, enLaComunidad, cambiarCurso, cambiarComunidad } = useApp();
+  const { cursos, inscritoEn, enLaComunidad, cambiarCurso, cambiarComunidad, comunidades: COMUNIDADES, temaDe } = useApp();
   const [tendencias, setTendencias] = useState<Tendencias | null>(null);
 
   useEffect(() => {

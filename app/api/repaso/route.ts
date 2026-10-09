@@ -14,7 +14,7 @@ export const POST = manejar(async (req: Request) => {
   const autor = texto(datos.autor, "autor", 60);
   const leccion = texto(datos.leccion, "leccion", 10);
   // Los ids de lección no se repiten entre cursos: la lección dice de qué curso es.
-  const curso = await cursoDeLeccion(leccion);
+  const curso = await cursoDeLeccion(leccion, { borradores: true });
   const preguntas = curso ? (await cargarEvaluaciones(curso.curso.id)).repaso[leccion] : undefined;
   if (!preguntas) return error("Esta lección no tiene repaso.", 404);
 

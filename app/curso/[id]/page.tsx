@@ -22,7 +22,7 @@ import RepasoLeccion from "@/components/RepasoLeccion";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import VideoLeccion from "@/components/VideoLeccion";
-import { moneda } from "@/lib/cliente";
+import { moneda, parteGratis } from "@/lib/cliente";
 
 type Pestana = "resumen" | "transcripcion" | "repaso";
 
@@ -298,7 +298,7 @@ export default function PaginaLeccion() {
             <p className="texto-suave">{leccion.resumen}</p>
             <p>
               {enComunidad
-                ? `Inscribirte a «${datos.curso.titulo}» es gratis. El módulo 1 es gratis y el resto es con la membresía.`
+                ? `Inscribirte a «${datos.curso.titulo}» es gratis. ${parteGratis(datos.curso)}`
                 : `Este curso es de la comunidad ${datos.comunidad.nombre}. Unirte e inscribirte es gratis.`}
             </p>
             <div className="bloqueo-acciones">

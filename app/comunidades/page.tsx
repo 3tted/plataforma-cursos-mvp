@@ -4,18 +4,19 @@ import { useMemo, useState } from "react";
 import { IconoBuscar } from "@/components/Iconos";
 import TarjetaComunidad from "@/components/TarjetaComunidad";
 import { useTitulo } from "@/components/useTitulo";
-import { COMUNIDADES } from "@/lib/comunidades";
+import { useApp } from "@/components/Contexto";
 
 // Directorio: todas las comunidades, agrupadas por tema. Las reales (Finanzas
 // Claras, con dos cursos, y Vende por WhatsApp, con uno) se abren; las demás
 // son de ejemplo para ver cómo crece el directorio.
 export default function PaginaComunidades() {
+  const { comunidades: COMUNIDADES } = useApp();
   const [tema, setTema] = useState("Todos");
   const [busqueda, setBusqueda] = useState("");
   useTitulo("Comunidades");
 
   // Los temas en el orden en que aparecen; dentro de cada uno, primero las reales.
-  const temas = useMemo(() => [...new Set(COMUNIDADES.map((c) => c.tema))], []);
+  const temas = useMemo(() => [...new Set(COMUNIDADES.map((c) => c.tema))], [COMUNIDADES]);
   const visibles = useMemo(() => {
     const q = busqueda.trim().toLocaleLowerCase("es");
     return COMUNIDADES.filter(
@@ -23,7 +24,7 @@ export default function PaginaComunidades() {
         (tema === "Todos" || c.tema === tema) &&
         (!q || `${c.nombre} ${c.curso} ${c.coach} ${c.tema}`.toLocaleLowerCase("es").includes(q)),
     );
-  }, [tema, busqueda]);
+  }, [tema, busqueda, COMUNIDADES]);
   const grupos = temas
     .map((t) => ({
       tema: t,

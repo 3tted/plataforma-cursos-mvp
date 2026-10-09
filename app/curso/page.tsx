@@ -20,7 +20,7 @@ import SelectorCurso from "@/components/SelectorCurso";
 import UnirseComunidad from "@/components/UnirseComunidad";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
-import { api, moneda } from "@/lib/cliente";
+import { api, moneda, parteGratis } from "@/lib/cliente";
 import type { Expediente } from "@/lib/tipos";
 
 // Portada del curso: de qué trata, lo que aprenderás, el temario por módulos
@@ -186,8 +186,7 @@ export default function PaginaCurso() {
       {!tieneAcceso && (
         <div className="aviso">
           <p>
-            <strong>El módulo 1 es gratis.</strong> El resto del curso es para miembros; se paga con OXXO, SPEI o
-            Mercado Pago.
+            <strong>{parteGratis(datos.curso)}</strong> La membresía se paga con OXXO, SPEI o Mercado Pago.
           </p>
           <Link href="/membresia" className="boton boton-chico boton-secundario">
             {pagoPendiente ? "Ver mi ficha de pago" : `Unirme por ${moneda(comunidad.precio_mensual)} al mes`}

@@ -9,7 +9,7 @@ import { IconoAsistenteGeneral, IconoComunidad, IconoInicio, IconoPanel, IconoSa
 export default function Encabezado() {
   const ruta = usePathname();
   const router = useRouter();
-  const { usuario, membresia, pagoPendiente, cerrarSesion } = useApp();
+  const { usuario, cerrarSesion } = useApp();
 
   // El mismo menú para alumno y coach; la coach suma su panel.
   const enlaces = [
@@ -60,18 +60,8 @@ export default function Encabezado() {
         </nav>
 
         <div className="barra-acciones">
-          {/* La barra es de toda la plataforma: la invitación a unirse vive en la
-              comunidad, en el curso y en la lección bloqueada, que dicen a qué te unes. */}
-          {usuario?.rol === "alumno" &&
-            (membresia ? (
-              <span className="pastilla pastilla-ok">Miembro</span>
-            ) : (
-              pagoPendiente && (
-                <Link href="/membresia" className="pastilla pastilla-pendiente pendiente-cabecera">
-                  Pago pendiente
-                </Link>
-              )
-            ))}
+          {/* La barra es de toda la plataforma y la membresía es de cada comunidad:
+              unirse, el pago pendiente y "miembro" viven en la comunidad, el curso y el perfil. */}
           {usuario && (
             <span className="cuenta">
               <Link

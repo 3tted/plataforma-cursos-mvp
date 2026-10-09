@@ -100,7 +100,6 @@ export default function PaginaCurso() {
       <header className="curso-portada">
         <Arcos />
         <div className="curso-portada-textos">
-          <span className="pastilla pastilla-marca curso-comunidad">Comunidad {comunidad.nombre}</span>
           <h1>{curso.titulo}</h1>
           <p className="curso-subtitulo">{curso.subtitulo}</p>
           <ul className="curso-datos" aria-label="Datos del curso">

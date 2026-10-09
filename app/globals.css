@@ -394,10 +394,6 @@ main:focus {
   color: var(--acento-texto);
 }
 
-.pendiente-cabecera {
-  text-decoration: none;
-}
-
 .barra-acciones {
   display: flex;
   align-items: center;
@@ -4081,11 +4077,6 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
 }
 
 /* ---------- Portada del curso: lo que aprenderás, temario plegable, coach ---------- */
-
-.curso-comunidad {
-  justify-self: start;
-  margin-bottom: 12px;
-}
 
 .curso-portada-textos {
   display: grid;

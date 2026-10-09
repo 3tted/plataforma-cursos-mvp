@@ -10,8 +10,8 @@ import PreguntaOpciones from "./PreguntaOpciones";
 import { useEvaluaciones } from "./useEvaluaciones";
 
 // Repaso al final de la lección: preguntas que no cuentan para la calificación.
-// Muestra la respuesta correcta con su explicación y, si el alumno falla, el
-// asistente del curso le explica ahí mismo, debajo de la pregunta. La página lo monta con
+// Muestra la respuesta correcta con su explicación y, acierte o falle, el
+// asistente del curso puede explicarla a fondo ahí mismo, debajo de la pregunta. La página lo monta con
 // key={leccion.id} para que empiece de cero en cada lección. `alRevisar` avisa
 // cuando el alumno ya lo contestó (cuenta para completar la lección).
 export default function RepasoLeccion({
@@ -92,19 +92,24 @@ export default function RepasoLeccion({
                       <strong>{revision.acierto ? "Correcto." : `La respuesta es «${p.opciones[revision.correcta]}».`}</strong>{" "}
                       {revision.explicacion} <span className="cita-id">{leccion.id}</span>
                     </p>
-                    {!revision.acierto &&
-                      (consultas.includes(p.id) ? (
-                        <AsistenteEnLinea
-                          pregunta={`En el repaso fallé esta pregunta: «${p.enunciado}». ¿Me explicas por qué la respuesta es «${p.opciones[revision.correcta]}»?`}
-                          resumen={`¿Por qué la respuesta es «${p.opciones[revision.correcta]}»?`}
-                          leccion={leccion.id}
-                          alCerrar={() => cerrar(p.id)}
-                        />
-                      ) : (
-                        <button type="button" className="accion" onClick={() => abrir(p.id)}>
-                          <IconoAsistente width={15} height={15} /> Pregúntale al asistente
-                        </button>
-                      ))}
+                    {/* Acierte o falle, el asistente explica a fondo por qué esa es la respuesta correcta. */}
+                    {consultas.includes(p.id) ? (
+                      <AsistenteEnLinea
+                        pregunta={
+                          revision.acierto
+                            ? `En el repaso contesté bien esta pregunta: «${p.enunciado}». ¿Me explicas más a fondo por qué la respuesta correcta es «${p.opciones[revision.correcta]}» y por qué las otras opciones no?`
+                            : `En el repaso fallé esta pregunta: «${p.enunciado}». Elegí «${p.opciones[respuestas[i] ?? 0]}». ¿Me explicas por qué la respuesta correcta es «${p.opciones[revision.correcta]}» y por qué la mía no?`
+                        }
+                        resumen={`¿Por qué la respuesta correcta es «${p.opciones[revision.correcta]}»?`}
+                        leccion={leccion.id}
+                        alCerrar={() => cerrar(p.id)}
+                      />
+                    ) : (
+                      <button type="button" className="accion" onClick={() => abrir(p.id)}>
+                        <IconoAsistente width={15} height={15} />{" "}
+                        {revision.acierto ? "¿Por qué es la correcta? Pregúntale al asistente" : "Pregúntale al asistente"}
+                      </button>
+                    )}
                   </div>
                 )}
               </PreguntaOpciones>

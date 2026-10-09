@@ -119,7 +119,8 @@ export default function Bienvenida() {
             setError(null);
           }}
           maxLength={60}
-          autoComplete="name"
+          // Sin sugerencias del navegador: en el prototipo se prueban muchos nombres y no conviene que se recuerden.
+          autoComplete="off"
           enterKeyHint="go"
           aria-invalid={!!error}
           aria-describedby={error ? "bienvenida-error" : "bienvenida-nota"}

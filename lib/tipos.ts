@@ -47,6 +47,9 @@ export interface Curso {
   id: string;
   titulo: string;
   subtitulo: string;
+  /** Lo que el alumno sabrá hacer al terminar (portada del curso). */
+  aprenderas?: string[];
+  requisitos?: string;
   preguntas_sugeridas: string[];
   modulos: Modulo[];
 }

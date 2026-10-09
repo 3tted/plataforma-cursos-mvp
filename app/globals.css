@@ -4059,6 +4059,202 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
   margin: 0;
 }
 
+/* ---------- Portada del curso: lo que aprenderás, temario plegable, coach ---------- */
+
+.curso-comunidad {
+  justify-self: start;
+  margin-bottom: 12px;
+}
+
+.curso-portada-textos {
+  display: grid;
+  justify-items: start;
+}
+
+.curso-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(260px, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.curso-principal,
+.curso-lateral {
+  display: grid;
+  gap: 22px;
+}
+
+.curso-lateral {
+  position: sticky;
+  top: calc(var(--alto-barra) + 20px);
+}
+
+.curso-bloque {
+  display: grid;
+  gap: 12px;
+}
+
+.curso-bloque h2 {
+  font-size: var(--t-headline);
+}
+
+.aprenderas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 24px;
+}
+
+.aprenderas li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  color: var(--tinta-2);
+}
+
+.aprenderas li::before {
+  content: "";
+  width: 9px;
+  height: 5px;
+  margin: 8px 0 0 3px;
+  border: 2.5px solid var(--exito);
+  border-top: 0;
+  border-right: 0;
+  transform: rotate(-45deg);
+}
+
+/* Cada módulo se abre y se cierra; la cabecera es el resumen del módulo */
+details.modulo > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+details.modulo > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.modulo > .modulo-cabecera {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 14px;
+  border-radius: var(--radio-control);
+}
+
+details.modulo > .modulo-cabecera:hover .modulo-titulo {
+  color: var(--acento-texto);
+}
+
+details.modulo .modulo-titulo {
+  font-family: var(--fuente-display);
+  font-size: var(--t-title);
+  font-weight: 700;
+  transition: color 0.15s;
+}
+
+.modulo-resumen {
+  grid-column: 1;
+  font-size: var(--t-small);
+}
+
+details.modulo .modulo-avance {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Flecha que gira al abrir el módulo */
+details.modulo .modulo-avance::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s;
+}
+
+details.modulo[open] .modulo-avance::after {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+details.modulo[open] > .modulo-cabecera {
+  margin-bottom: 4px;
+}
+
+.curso-coach {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.curso-coach > span {
+  display: grid;
+  gap: 2px;
+  font-size: var(--t-small);
+}
+
+.curso-coach-nombre {
+  font-family: var(--fuente-display);
+  font-size: var(--t-title);
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.curso-al-terminar {
+  justify-items: start;
+}
+
+.curso-al-terminar h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.curso-al-terminar-icono {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--acento-suave);
+  color: var(--acento-texto);
+}
+
+.curso-al-terminar p {
+  margin: 0;
+}
+
+.curso-al-terminar-estado {
+  font-size: var(--t-small);
+}
+
+.curso-requisitos {
+  padding-top: 12px;
+  border-top: 1px solid var(--linea);
+  font-size: var(--t-small);
+  justify-self: stretch;
+}
+
+@media (max-width: 900px) {
+  .curso-columnas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .curso-lateral {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .aprenderas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* ---------- Cuenta en la barra ---------- */
 
 .cuenta {

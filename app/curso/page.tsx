@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Arcos from "@/components/Arcos";
+import Avatar from "@/components/Avatar";
 import { useApp } from "@/components/Contexto";
 import {
   IconoAprobado,
@@ -14,10 +15,13 @@ import {
   IconoVideo,
 } from "@/components/Iconos";
 import SelectorCurso from "@/components/SelectorCurso";
+import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
 import type { Expediente } from "@/lib/tipos";
 
+// Portada del curso: de qué trata, lo que aprenderás, el temario por módulos
+// (se abren y cierran), quién lo imparte y qué pasa al terminar.
 export default function PaginaCurso() {
   const {
     datos,
@@ -31,11 +35,15 @@ export default function PaginaCurso() {
     cursoId,
     cambiarCurso,
   } = useApp();
+  const evaluaciones = useEvaluaciones();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
-  useTitulo("Curso");
+  // Módulos que la persona abrió o cerró; los demás siguen la regla de abajo.
+  const [abiertos, setAbiertos] = useState<Record<string, boolean>>({});
+  useTitulo(datos?.curso.titulo ?? "Curso");
 
   useEffect(() => {
     setExpediente(null);
+    setAbiertos({});
     if (usuario?.rol !== "alumno") return;
     api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}&curso=${encodeURIComponent(cursoId)}`)
       .then(setExpediente)
@@ -75,6 +83,12 @@ export default function PaginaCurso() {
   const hechas = base.filter((l) => completadas.includes(l.id)).length;
   const siguiente = lecciones.find((l) => !completadas.includes(l.id) && (l.gratis || tieneAcceso));
   const terminado = base.length > 0 && hechas === base.length;
+  const modulosCurso = curso.modulos.filter((m) => m.id !== "MC");
+  const examen = expediente?.examen;
+  const preguntasExamen = evaluaciones?.examenFinal.preguntas.length;
+  // Abierto al entrar: el módulo de la lección que sigue (o el primero).
+  const moduloActual = siguiente?.modulo.id ?? curso.modulos[0]?.id;
+  const estaAbierto = (id: string) => abiertos[id] ?? id === moduloActual;
 
   return (
     <div className="pagina-curso">
@@ -82,19 +96,21 @@ export default function PaginaCurso() {
       <header className="curso-portada">
         <Arcos />
         <div className="curso-portada-textos">
+          <span className="pastilla pastilla-marca curso-comunidad">Comunidad {comunidad.nombre}</span>
           <h1>{curso.titulo}</h1>
           <p className="curso-subtitulo">{curso.subtitulo}</p>
           <ul className="curso-datos" aria-label="Datos del curso">
             <li>Con {comunidad.coach}</li>
             <li>
-              <span className="cifra">{curso.modulos.filter((m) => m.id !== "MC").length}</span> módulos
+              <span className="cifra">{modulosCurso.length}</span> módulos
             </li>
             <li>
               <span className="cifra">{base.length}</span> lecciones
             </li>
             <li>
-              <span className="cifra">{minutos}</span> min
+              <span className="cifra">{minutos}</span> min de video
             </li>
+            <li>Examen final</li>
           </ul>
         </div>
         <div className="curso-progreso">
@@ -107,7 +123,7 @@ export default function PaginaCurso() {
           <div className="progreso" aria-hidden="true">
             <span style={{ transform: `scaleX(${base.length ? hechas / base.length : 0})` }} />
           </div>
-          {siguiente && (
+          {siguiente ? (
             <>
               <p className="curso-siguiente">
                 {hechas === 0 ? "Primera lección" : "Sigue"}: <strong>{siguiente.titulo}</strong>
@@ -116,7 +132,16 @@ export default function PaginaCurso() {
                 {hechas === 0 ? "Empezar el curso" : "Continuar"}
               </Link>
             </>
-          )}
+          ) : terminado ? (
+            <>
+              <p className="curso-siguiente">
+                {examen?.aprobado ? "Aprobaste el curso." : "Terminaste las lecciones. Te falta el examen final."}
+              </p>
+              <Link href={examen?.aprobado ? "/perfil" : "/curso/examen"} className="boton">
+                {examen?.aprobado ? "Ver mi expediente" : "Presentar el examen"}
+              </Link>
+            </>
+          ) : null}
         </div>
       </header>
 
@@ -132,99 +157,160 @@ export default function PaginaCurso() {
         </div>
       )}
 
-      <ol className="modulos">
-        {curso.modulos.map((modulo, i) => {
-          const hechasModulo = modulo.lecciones.filter((l) => completadas.includes(l.id)).length;
-          return (
-            <li key={modulo.id} className="tarjeta modulo">
-              <div className="modulo-cabecera">
-                <h2 className="modulo-titulo">
-                  <span className="modulo-numero">{modulo.id === "MC" ? "Extra" : `Módulo ${i + 1}`}</span>
-                  {modulo.titulo}
-                </h2>
-                <span className="modulo-avance texto-suave">
-                  <span className="cifra">
-                    {hechasModulo}/{modulo.lecciones.length}
-                  </span>
-                  <span className="sr-only"> lecciones completadas</span>
-                </span>
-              </div>
-              <ul className="lista-lecciones">
-                {modulo.lecciones.map((l) => {
-                  const bloqueada = !l.gratis && !tieneAcceso;
-                  const hecha = completadas.includes(l.id);
-                  // Para el alumno, cada lección se abre al terminar la anterior.
-                  const i = base.findIndex((b) => b.id === l.id);
-                  const enEspera =
-                    usuario?.rol !== "coach" && !l.deCoach && !hecha && !bloqueada && i > 0 && !completadas.includes(base[i - 1].id);
-                  const estado = hecha ? "hecha" : bloqueada || enEspera ? "bloqueada" : "abierta";
-                  return (
-                    <li key={l.id}>
-                      <Link href={`/curso/${l.id}`} className="fila-leccion" data-bloqueada={bloqueada}>
-                        <span className="estado-leccion" data-estado={estado}>
-                          {hecha ? <IconoCheck /> : bloqueada || enEspera ? <IconoCandado /> : <IconoPlay />}
-                        </span>
-                        <span className="fila-leccion-textos">
-                          <span className="fila-leccion-titulo">{l.titulo}</span>
-                          <span className="sr-only">
-                            {hecha
-                              ? "Completada."
-                              : bloqueada
-                                ? "Para miembros."
-                                : enEspera
-                                  ? "Se abre al terminar la anterior."
-                                  : "Disponible."}
-                          </span>
-                          <span className="texto-suave">{l.resumen}</span>
-                        </span>
-                        <span className="fila-leccion-meta">
-                          {l.video && (
-                            <span className="pastilla" title="Esta lección tiene video">
-                              <IconoVideo width={13} height={13} /> Video
-                            </span>
-                          )}
-                          {l.gratis && !l.deCoach && <span className="pastilla">Gratis</span>}
-                          {l.deCoach && <span className="pastilla pastilla-marca">De la coach</span>}
-                          <span className="texto-suave cifra">{l.duracion_min} min</span>
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
+      <div className="curso-columnas">
+        <div className="curso-principal">
+          {curso.aprenderas && curso.aprenderas.length > 0 && (
+            <section className="tarjeta curso-bloque" aria-labelledby="aprenderas-titulo">
+              <h2 id="aprenderas-titulo">Lo que aprenderás</h2>
+              <ul className="aprenderas">
+                {curso.aprenderas.map((a) => (
+                  <li key={a}>{a}</li>
+                ))}
               </ul>
-            </li>
-          );
-        })}
-      </ol>
+            </section>
+          )}
 
-      <section className="tarjeta examen-tarjeta" aria-labelledby="examen-titulo">
-        <span className="examen-tarjeta-icono" aria-hidden="true">
-          {expediente?.examen.aprobado ? <IconoAprobado width={26} height={26} /> : <IconoExamen width={26} height={26} />}
-        </span>
-        <div className="examen-tarjeta-textos">
-          <h2 id="examen-titulo">Examen final</h2>
-          <p className="texto-suave">
-            {expediente?.examen.aprobado
-              ? `Aprobado con ${expediente.examen.mejorPuntaje}%. Ya está en tu expediente.`
-              : terminado
-                ? "Ya puedes presentarlo: preguntas de todo el curso y apruebas con 70%."
-                : `Se desbloquea al terminar las ${base.length} lecciones. Llevas ${hechas}.`}
-          </p>
+          <section className="curso-bloque" aria-labelledby="temario-titulo">
+            <h2 id="temario-titulo">Temario</h2>
+            <div className="modulos">
+              {curso.modulos.map((modulo, i) => {
+                const hechasModulo = modulo.lecciones.filter((l) => completadas.includes(l.id)).length;
+                const minutosModulo = modulo.lecciones.reduce((s, l) => s + l.duracion_min, 0);
+                const gratis = modulo.lecciones.every((l) => l.gratis);
+                return (
+                  <details
+                    key={modulo.id}
+                    className="tarjeta modulo"
+                    open={estaAbierto(modulo.id)}
+                    onToggle={(e) => {
+                      const abierto = e.currentTarget.open;
+                      if (abierto !== estaAbierto(modulo.id)) setAbiertos((a) => ({ ...a, [modulo.id]: abierto }));
+                    }}
+                  >
+                    <summary className="modulo-cabecera">
+                      <span className="modulo-titulo">
+                        <span className="modulo-numero">{modulo.id === "MC" ? "Extra" : `Módulo ${i + 1}`}</span>
+                        {modulo.titulo}
+                      </span>
+                      <span className="modulo-resumen texto-suave">
+                        <span className="cifra">{modulo.lecciones.length}</span> lecciones ·{" "}
+                        <span className="cifra">{minutosModulo}</span> min
+                        {modulo.id !== "MC" && (gratis ? " · Gratis" : !tieneAcceso ? " · Para miembros" : "")}
+                      </span>
+                      <span className="modulo-avance texto-suave">
+                        <span className="cifra">
+                          {hechasModulo}/{modulo.lecciones.length}
+                        </span>
+                        <span className="sr-only"> lecciones completadas</span>
+                      </span>
+                    </summary>
+                    <ul className="lista-lecciones">
+                      {modulo.lecciones.map((l) => {
+                        const bloqueada = !l.gratis && !tieneAcceso;
+                        const hecha = completadas.includes(l.id);
+                        // Para el alumno, cada lección se abre al terminar la anterior.
+                        const indice = base.findIndex((b) => b.id === l.id);
+                        const enEspera =
+                          usuario?.rol !== "coach" &&
+                          !l.deCoach &&
+                          !hecha &&
+                          !bloqueada &&
+                          indice > 0 &&
+                          !completadas.includes(base[indice - 1].id);
+                        const estado = hecha ? "hecha" : bloqueada || enEspera ? "bloqueada" : "abierta";
+                        return (
+                          <li key={l.id}>
+                            <Link href={`/curso/${l.id}`} className="fila-leccion" data-bloqueada={bloqueada}>
+                              <span className="estado-leccion" data-estado={estado}>
+                                {hecha ? <IconoCheck /> : bloqueada || enEspera ? <IconoCandado /> : <IconoPlay />}
+                              </span>
+                              <span className="fila-leccion-textos">
+                                <span className="fila-leccion-titulo">{l.titulo}</span>
+                                <span className="sr-only">
+                                  {hecha
+                                    ? "Completada."
+                                    : bloqueada
+                                      ? "Para miembros."
+                                      : enEspera
+                                        ? "Se abre al terminar la anterior."
+                                        : "Disponible."}
+                                </span>
+                                <span className="texto-suave">{l.resumen}</span>
+                              </span>
+                              <span className="fila-leccion-meta">
+                                {l.video && (
+                                  <span className="pastilla" title="Esta lección tiene video">
+                                    <IconoVideo width={13} height={13} /> Video
+                                  </span>
+                                )}
+                                {l.deCoach && <span className="pastilla pastilla-marca">De la coach</span>}
+                                <span className="texto-suave cifra">{l.duracion_min} min</span>
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </details>
+                );
+              })}
+            </div>
+          </section>
         </div>
-        {expediente?.examen.aprobado ? (
-          <Link href="/perfil" className="boton boton-secundario boton-chico">
-            Ver mi expediente
-          </Link>
-        ) : terminado || usuario?.rol === "coach" ? (
-          <Link href="/curso/examen" className="boton boton-chico">
-            {usuario?.rol === "coach" ? "Ver el examen" : "Presentar el examen"}
-          </Link>
-        ) : (
-          <span className="pastilla">
-            <IconoCandado width={13} height={13} /> Bloqueado
-          </span>
-        )}
-      </section>
+
+        <aside className="curso-lateral" aria-label="Sobre el curso">
+          <section className="tarjeta curso-bloque" aria-labelledby="imparte-titulo">
+            <h2 id="imparte-titulo">Quién lo imparte</h2>
+            <div className="curso-coach">
+              <Avatar nombre={comunidad.coach} tamaño={52} coach />
+              <span>
+                <span className="curso-coach-nombre">{comunidad.coach}</span>
+                <span className="texto-suave">{comunidad.coach_titulo}</span>
+              </span>
+            </div>
+          </section>
+
+          <section className="tarjeta curso-bloque curso-al-terminar" aria-labelledby="terminar-titulo">
+            <h2 id="terminar-titulo">
+              <span className="curso-al-terminar-icono" aria-hidden="true">
+                {examen?.aprobado ? <IconoAprobado width={20} height={20} /> : <IconoExamen width={20} height={20} />}
+              </span>
+              Al terminar
+            </h2>
+            <p>
+              Presentas un <strong>examen final</strong>
+              {preguntasExamen ? ` de ${preguntasExamen} preguntas` : ""}. Lo apruebas con{" "}
+              <span className="cifra">{evaluaciones?.aprobarCon ?? 70}%</span>, tienes{" "}
+              <span className="cifra">{evaluaciones?.intentosExamen ?? 3}</span> intentos y queda en tu expediente.
+            </p>
+            <p className="texto-suave curso-al-terminar-estado">
+              {examen?.aprobado
+                ? `Aprobado con ${examen.mejorPuntaje}%.`
+                : terminado
+                  ? "Ya puedes presentarlo."
+                  : `Se desbloquea al terminar las ${base.length} lecciones. Llevas ${hechas}.`}
+            </p>
+            {examen?.aprobado ? (
+              <Link href="/perfil" className="boton boton-secundario boton-chico">
+                Ver mi expediente
+              </Link>
+            ) : terminado || usuario?.rol === "coach" ? (
+              <Link href="/curso/examen" className="boton boton-chico">
+                {usuario?.rol === "coach" ? "Ver el examen" : "Presentar el examen"}
+              </Link>
+            ) : (
+              <span className="pastilla">
+                <IconoCandado width={13} height={13} /> Bloqueado
+              </span>
+            )}
+            {curso.requisitos && (
+              <p className="curso-requisitos texto-suave">
+                <strong>Requisitos:</strong> {curso.requisitos}
+              </p>
+            )}
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }

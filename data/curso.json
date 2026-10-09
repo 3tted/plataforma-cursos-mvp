@@ -11,6 +11,15 @@
     "id": "finanzas-negocio",
     "titulo": "Finanzas claras para tu negocio",
     "subtitulo": "De la caja de zapatos al control de tu dinero en 3 módulos.",
+    "aprenderas": [
+      "Separar el dinero del negocio del tuyo esta misma semana",
+      "Calcular un sueldo fijo a partir de la utilidad real",
+      "Llevar un registro de ingresos y gastos en 10 minutos a la semana",
+      "Distinguir costos fijos de costos variables",
+      "Poner un precio que cubra tus costos y deje ganancia",
+      "Proyectar tu flujo de efectivo a 13 semanas"
+    ],
+    "requisitos": "Ninguno. Solo tus números del último mes.",
     "preguntas_sugeridas": [
       "¿Qué diferencia hay entre margen y markup?",
       "Vendo servicios, no productos. ¿Cómo calculo mi punto de equilibrio?",

@@ -3,6 +3,15 @@
     "id": "precios-servicios",
     "titulo": "Precios para tus servicios",
     "subtitulo": "Calcula cuánto vale tu hora, cotiza con confianza y cobra sin pena, en 2 módulos.",
+    "aprenderas": [
+      "Calcular cuánto te cuesta cada hora de trabajo",
+      "Medir y cobrar el tiempo que hoy regalas",
+      "Elegir entre cobrar por hora, por proyecto o por paquete",
+      "Armar paquetes que ayudan al cliente a decidir",
+      "Escribir cotizaciones claras que se aceptan",
+      "Pedir anticipos y cobrar sin pena"
+    ],
+    "requisitos": "Ninguno. Ayuda haber tomado «Finanzas claras para tu negocio», pero no es obligatorio.",
     "preguntas_sugeridas": [
       "¿Cómo calculo cuánto cobrar por hora?",
       "¿Me conviene cobrar por hora o por proyecto?",

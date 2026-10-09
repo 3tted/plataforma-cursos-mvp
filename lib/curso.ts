@@ -85,6 +85,7 @@ export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
     coach: c.coach,
     coach_titulo: c.coach_titulo,
     descripcion: c.descripcion,
+    ...(c.acerca ? { acerca: c.acerca } : {}),
     precio_mensual: c.precio_mensual,
     moneda: c.moneda,
   };

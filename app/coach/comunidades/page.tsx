@@ -17,7 +17,7 @@ type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "esta
 };
 type Datos = { comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean };
 
-const COMUNIDAD_VACIA = { nombre: "", descripcion: "", tema: "Finanzas", coach_titulo: "", precio_mensual: "390" };
+const COMUNIDAD_VACIA = { nombre: "", descripcion: "", acerca: "", tema: "Finanzas", coach_titulo: "", precio_mensual: "390" };
 /** Clave de la sección de cursos que todavía no están en una comunidad. */
 const SUELTOS = "";
 
@@ -263,6 +263,16 @@ export default function PaginaMisComunidades() {
               rows={3}
               placeholder="Una o dos líneas: a quién ayudas y con qué."
               required
+            />
+          </label>
+          <label className="campo">
+            <span>Acerca de tu comunidad (opcional)</span>
+            <textarea
+              value={forma.acerca}
+              onChange={(e) => setForma({ ...forma, acerca: e.target.value })}
+              maxLength={1500}
+              rows={4}
+              placeholder="Lo que aparece en la presentación de tu comunidad: qué van a aprender, cómo trabajas con tus miembros, para quién no es."
             />
           </label>
           <div className="forma-fila">

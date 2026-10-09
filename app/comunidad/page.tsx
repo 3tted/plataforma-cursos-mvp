@@ -10,7 +10,7 @@ import { IconoAsistente, IconoFlechaIzq } from "@/components/Iconos";
 import PreguntaRapida from "@/components/PreguntaRapida";
 import CursosComunidad from "@/components/CursosComunidad";
 import TarjetaPublicacion from "@/components/TarjetaPublicacion";
-import UnirseComunidad from "@/components/UnirseComunidad";
+import PresentacionComunidad from "@/components/PresentacionComunidad";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
 import { COMUNIDADES } from "@/lib/comunidades";
@@ -124,7 +124,6 @@ export default function PaginaComunidad() {
 
   // Paso 1: quien no está en la comunidad primero se une.
   if (!inscripcionLista) return <p className="texto-suave">Cargando…</p>;
-  if (!enComunidad) return <UnirseComunidad />;
 
   return (
     <div className="rejilla-comunidad">
@@ -132,68 +131,70 @@ export default function PaginaComunidad() {
         <Link href="/comunidades" className="volver">
           <IconoFlechaIzq width={16} height={16} /> Todas las comunidades
         </Link>
-        <header className="portada">
-          <Arcos />
-          <h1 id="titulo-comunidad">{comunidad?.nombre ?? "Finanzas Claras"}</h1>
-          <p className="portada-texto">{comunidad?.descripcion}</p>
-          {esDuena && (
-            <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(comunidadId)}`} className="boton portada-accion">
-              + Agregar un curso
-            </Link>
-          )}
-        </header>
+        <PresentacionComunidad miembros={miembros} publicaciones={publicaciones} esDuena={esDuena} />
 
         {/* En celular los cursos van aquí, en una fila que se desliza de lado. */}
         <CursosComunidad fila />
 
-        <div className="pregunta-movil">
-          <p className="pregunta-movil-titulo">
-            <IconoAsistente width={16} height={16} /> Pregúntale al asistente del curso
-          </p>
-          <PreguntaRapida origen="movil" />
-        </div>
+        {enComunidad ? (
+          <>
+            <div className="pregunta-movil">
+              <p className="pregunta-movil-titulo">
+                <IconoAsistente width={16} height={16} /> Pregúntale al asistente del curso
+              </p>
+              <PreguntaRapida origen="movil" />
+            </div>
 
-        <Compositor alPublicar={agregar} primeraVez={primeraVez} />
+            <Compositor alPublicar={agregar} primeraVez={primeraVez} />
 
-        <div className="filtros" role="group" aria-label="Filtrar por categoría">
-          {(["Todas", ...CATEGORIAS] as const).map((c) => (
-            <button
-              key={c}
-              type="button"
-              aria-pressed={filtro === c}
-              className="filtro"
-              onClick={() => setFiltro(c)}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
+            <div className="filtros" role="group" aria-label="Filtrar por categoría">
+              {(["Todas", ...CATEGORIAS] as const).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  aria-pressed={filtro === c}
+                  className="filtro"
+                  onClick={() => setFiltro(c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
 
-        {error && (
-          <div className="error chat-aviso" role="alert">
-            <span>No pudimos cargar las publicaciones. Revisa tu conexión e inténtalo de nuevo.</span>
-            <button type="button" className="boton boton-chico boton-secundario" onClick={cargar}>
-              Reintentar
-            </button>
+            {error && (
+              <div className="error chat-aviso" role="alert">
+                <span>No pudimos cargar las publicaciones. Revisa tu conexión e inténtalo de nuevo.</span>
+                <button type="button" className="boton boton-chico boton-secundario" onClick={cargar}>
+                  Reintentar
+                </button>
+              </div>
+            )}
+            {!publicaciones && !error && <p className="texto-suave">Cargando publicaciones…</p>}
+            {publicaciones && visibles.length === 0 && (
+              <p className="vacio">
+                Todavía no hay publicaciones en {filtro === "Todas" ? "la comunidad" : `«${filtro}»`}. Sé la primera persona en
+                escribir.
+              </p>
+            )}
+            <div className="lista-publicaciones">
+              {visibles.map((p) => (
+                <TarjetaPublicacion
+                  key={p.id}
+                  publicacion={p}
+                  alCambiar={reemplazar}
+                  alBorrar={(id) => setPublicaciones((lista) => lista?.filter((x) => x.id !== id) ?? null)}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="aviso aviso-privada">
+            <p>
+              <strong>Las publicaciones son solo para miembros.</strong> Únete gratis para leer lo que comparte la
+              comunidad, hacer preguntas y presentarte.
+            </p>
           </div>
         )}
-        {!publicaciones && !error && <p className="texto-suave">Cargando publicaciones…</p>}
-        {publicaciones && visibles.length === 0 && (
-          <p className="vacio">
-            Todavía no hay publicaciones en {filtro === "Todas" ? "la comunidad" : `«${filtro}»`}. Sé la primera persona en
-            escribir.
-          </p>
-        )}
-        <div className="lista-publicaciones">
-          {visibles.map((p) => (
-            <TarjetaPublicacion
-              key={p.id}
-              publicacion={p}
-              alCambiar={reemplazar}
-              alBorrar={(id) => setPublicaciones((lista) => lista?.filter((x) => x.id !== id) ?? null)}
-            />
-          ))}
-        </div>
       </section>
 
       <aside className="columna-lateral" aria-label="Resumen">

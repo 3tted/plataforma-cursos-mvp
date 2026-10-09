@@ -10,6 +10,8 @@ export interface Comunidad {
   coach: string;
   coach_titulo: string;
   descripcion: string;
+  /** Texto más largo para la presentación de la comunidad (lo escribe la coach). */
+  acerca?: string;
   precio_mensual: number;
   moneda: string;
 }

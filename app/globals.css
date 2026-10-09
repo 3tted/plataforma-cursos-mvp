@@ -4844,6 +4844,21 @@ button.tarjeta-comunidad-enlace {
   margin-bottom: 0;
 }
 
+.mi-comunidad-ver {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-small);
+}
+
+.comunidad-vacia {
+  display: grid;
+  gap: 16px;
+  max-width: 880px;
+  margin-inline: auto;
+}
+
 .mis-comunidades-acciones {
   display: flex;
   flex-wrap: wrap;

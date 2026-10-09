@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
 import Compositor from "@/components/Compositor";
@@ -15,7 +15,7 @@ import UnirseComunidad from "@/components/UnirseComunidad";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
 import { COMUNIDADES } from "@/lib/comunidades";
-import { CATEGORIAS, type Categoria, type Publicacion, type ResumenComunidad } from "@/lib/tipos";
+import { CATEGORIAS, type Categoria, type ComunidadCreada, type Publicacion, type ResumenComunidad } from "@/lib/tipos";
 
 function Progreso({ hechas, total }: { hechas: number; total: number }) {
   return (
@@ -47,22 +47,48 @@ export default function PaginaComunidad() {
     inscritoEn,
     comunidadId,
     cursosComunidad,
+    cursos,
+    cambiarComunidad,
   } = useApp();
+  // ?id=<comunidad> abre esa comunidad. Si todavía no tiene cursos publicados,
+  // solo su coach la ve (vacía, con el botón para agregarle uno).
+  const [sinCursos, setSinCursos] = useState<ComunidadCreada | null>(null);
+  const pedida = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (pedida.current === undefined) pedida.current = new URLSearchParams(window.location.search).get("id");
+    const id = pedida.current;
+    if (!id || cursos.length === 0 || !usuario) return;
+    // Se aplica una sola vez, para no pisar el curso que la persona elija después.
+    pedida.current = null;
+    window.history.replaceState(null, "", "/comunidad");
+    if (cursos.some((c) => c.comunidad === id)) return cambiarComunidad(id);
+    if (usuario.rol !== "coach") return;
+    api<{ comunidades: ComunidadCreada[] }>(`/api/coach/comunidades?autor=${encodeURIComponent(usuario.nombre)}`, {
+      headers: { "X-Rol": "coach" },
+    })
+      .then((d) => setSinCursos(d.comunidades.find((c) => c.id === id) ?? null))
+      .catch(() => undefined);
+  }, [cursos, usuario, cambiarComunidad]);
   const [publicaciones, setPublicaciones] = useState<Publicacion[] | null>(null);
   const [miembros, setMiembros] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [filtro, setFiltro] = useState<Categoria | "Todas">("Todas");
   useTitulo(datos?.comunidad.nombre ?? "Comunidad");
 
+  // Cada carga lleva su número: si se cambia de comunidad antes de que llegue
+  // la respuesta anterior, esa respuesta ya no se muestra.
+  const carga = useRef(0);
   const cargar = useCallback(() => {
+    const esta = ++carga.current;
+    const vigente = () => esta === carga.current;
     setError(false);
     const consulta = `?comunidad=${encodeURIComponent(comunidadId)}`;
     api<Publicacion[]>(`/api/publicaciones${consulta}`)
-      .then(setPublicaciones)
-      .catch(() => setError(true));
+      .then((p) => vigente() && setPublicaciones(p))
+      .catch(() => vigente() && setError(true));
     api<ResumenComunidad>(`/api/comunidad${consulta}`)
-      .then((r) => setMiembros(r.miembros))
-      .catch(() => setMiembros(null));
+      .then((r) => vigente() && setMiembros(r.miembros))
+      .catch(() => vigente() && setMiembros(null));
     // Al unirse se vuelve a contar: la persona ya es miembro.
   }, [comunidadId, enComunidad]);
 
@@ -97,6 +123,30 @@ export default function PaginaComunidad() {
     usuario?.rol === "alumno" && !!publicaciones && !publicaciones.some((p) => p.autor === usuario.nombre);
   const inscrito = inscritoEn(cursoId);
 
+  if (sinCursos) {
+    return (
+      <div className="comunidad-vacia">
+        <Link href="/coach/comunidades" className="volver">
+          <IconoFlechaIzq width={16} height={16} /> Mis comunidades y cursos
+        </Link>
+        <header className="portada">
+          <Arcos />
+          <h1>{sinCursos.nombre}</h1>
+          <p className="portada-texto">{sinCursos.descripcion}</p>
+          <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(sinCursos.id)}`} className="boton portada-accion">
+            + Agregar un curso
+          </Link>
+        </header>
+        <div className="aviso">
+          <p>
+            <strong>Tu comunidad todavía no tiene cursos publicados.</strong> Por ahora solo tú la ves; aparece en el
+            directorio para los alumnos en cuanto publiques el primero.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Paso 1: quien no está en la comunidad primero se une.
   if (!inscripcionLista) return <p className="texto-suave">Cargando…</p>;
   if (!enComunidad) return <UnirseComunidad />;
@@ -111,6 +161,11 @@ export default function PaginaComunidad() {
           <Arcos />
           <h1 id="titulo-comunidad">{comunidad?.nombre ?? "Finanzas Claras"}</h1>
           <p className="portada-texto">{comunidad?.descripcion}</p>
+          {esDuena && (
+            <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(comunidadId)}`} className="boton portada-accion">
+              + Agregar un curso
+            </Link>
+          )}
         </header>
 
         {siguiente && inscrito && (
@@ -228,12 +283,6 @@ export default function PaginaComunidad() {
             )
           )}
         </section>
-
-        {esDuena && (
-          <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(comunidadId)}`} className="boton boton-secundario boton-bloque">
-            + Agregar un curso a esta comunidad
-          </Link>
-        )}
 
         <section className="tarjeta-asistente" aria-label="Asistente del curso">
           <h2>

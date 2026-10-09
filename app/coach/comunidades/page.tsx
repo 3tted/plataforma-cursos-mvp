@@ -26,7 +26,7 @@ const SUELTOS = "";
 // ponerlo en una comunidad (para publicarlo tiene que estar en una).
 export default function PaginaMisComunidades() {
   const router = useRouter();
-  const { usuario, cambiarComunidad, recargarCatalogo } = useApp();
+  const { usuario } = useApp();
   const [datos, setDatos] = useState<Datos | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creando, setCreando] = useState(false);
@@ -115,12 +115,6 @@ export default function PaginaMisComunidades() {
     } finally {
       setEnviando(null);
     }
-  };
-
-  const verEnPlataforma = async (comunidad: string) => {
-    await recargarCatalogo();
-    cambiarComunidad(comunidad);
-    router.push("/comunidad");
   };
 
   const sueltos = datos?.cursos.filter((x) => !x.comunidad) ?? [];
@@ -340,15 +334,12 @@ export default function PaginaMisComunidades() {
                 <h2 id={`comunidad-${c.id}`}>{c.nombre}</h2>
                 <p className="texto-suave">{c.descripcion}</p>
                 <p className="mi-comunidad-meta texto-suave">
-                  {c.tema} · {moneda(c.precio_mensual)} al mes ·{" "}
-                  {publicados > 0 ? (
-                    <button type="button" className="enlace" onClick={() => void verEnPlataforma(c.id)}>
-                      Ver en la plataforma
-                    </button>
-                  ) : (
-                    "Aparece en el directorio al publicar su primer curso"
-                  )}
+                  {c.tema} · {moneda(c.precio_mensual)} al mes
+                  {publicados === 0 && " · Aparece en el directorio al publicar su primer curso"}
                 </p>
+                <Link href={`/comunidad?id=${encodeURIComponent(c.id)}`} className="enlace mi-comunidad-ver">
+                  Ver la comunidad <IconoFlechaDer width={15} height={15} />
+                </Link>
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
@@ -17,7 +18,6 @@ import {
 } from "@/components/Iconos";
 import BotonInscribirse from "@/components/BotonInscribirse";
 import SelectorCurso from "@/components/SelectorCurso";
-import UnirseComunidad from "@/components/UnirseComunidad";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda, parteGratis } from "@/lib/cliente";
@@ -56,6 +56,14 @@ export default function PaginaCurso() {
       .catch(() => undefined);
   }, [usuario, cursoId]);
 
+  // Quien todavía no está en la comunidad del curso va a la comunidad: ahí ve
+  // de qué trata, sus cursos y el botón para unirse.
+  const router = useRouter();
+  const fuera = !!datos && inscripcionLista && !enComunidad;
+  useEffect(() => {
+    if (fuera) router.replace("/comunidad");
+  }, [fuera, router]);
+
   if (errorDatos && !datos) {
     return (
       <div className="error chat-aviso" role="alert">
@@ -74,7 +82,7 @@ export default function PaginaCurso() {
       <SelectorCurso activo={cursoId} alElegir={cambiarCurso} conAvance={usuario?.rol === "alumno"} />
     </>
   );
-  if (!datos || !inscripcionLista) {
+  if (!datos || !inscripcionLista || fuera) {
     return (
       <div className="pagina-curso">
         {volver}
@@ -82,8 +90,6 @@ export default function PaginaCurso() {
       </div>
     );
   }
-  // Paso 1: para tomar un curso primero hay que estar en su comunidad.
-  if (!enComunidad) return <UnirseComunidad motivo="Para tomar este curso, primero únete a su comunidad." />;
   const inscrito = inscritoEn(cursoId);
 
   const { curso, comunidad } = datos;

@@ -12,13 +12,14 @@ import { api, hace } from "@/lib/cliente";
 import { COMUNIDADES } from "@/lib/comunidades";
 
 interface Perfil {
-  publicaciones: { id: number; titulo: string; categoria: string; creadaEn: string }[];
-  comentarios: { id: number; publicacion: string; cuerpo: string; creadoEn: string }[];
-  preguntas: { id: number; pregunta: string; creadaEn: string }[];
+  publicaciones: { id: number; comunidad: string; titulo: string; categoria: string; creadaEn: string }[];
+  comentarios: { id: number; comunidad: string; publicacion: string; cuerpo: string; creadoEn: string }[];
+  preguntas: { id: number; comunidad: string; pregunta: string; creadaEn: string }[];
 }
 
 type Contribucion = {
   clave: string;
+  comunidad: string;
   tipo: "publicacion" | "comentario" | "pregunta";
   texto: string;
   contexto: string;
@@ -134,7 +135,8 @@ function Actividad({ fechas }: { fechas: string[] }) {
 }
 
 export default function PaginaPerfil() {
-  const { usuario, guardarUsuario, membresia, completadas, lecciones, cursos, inscritoEn } = useApp();
+  const { usuario, guardarUsuario, membresiaEn, completadas, lecciones, cursos, inscritoEn, enLaComunidad, cambiarComunidad } =
+    useApp();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [errorCarga, setErrorCarga] = useState(false);
   const [editando, setEditando] = useState(false);
@@ -156,6 +158,7 @@ export default function PaginaPerfil() {
     return [
       ...perfil.publicaciones.map((p) => ({
         clave: `p${p.id}`,
+        comunidad: p.comunidad,
         tipo: "publicacion" as const,
         texto: p.titulo,
         contexto: `Publicación en ${p.categoria}`,
@@ -164,6 +167,7 @@ export default function PaginaPerfil() {
       })),
       ...perfil.comentarios.map((c) => ({
         clave: `c${c.id}`,
+        comunidad: c.comunidad,
         tipo: "comentario" as const,
         texto: c.cuerpo,
         contexto: `Comentario en «${c.publicacion}»`,
@@ -172,6 +176,7 @@ export default function PaginaPerfil() {
       })),
       ...perfil.preguntas.map((q) => ({
         clave: `q${q.id}`,
+        comunidad: q.comunidad,
         tipo: "pregunta" as const,
         texto: q.pregunta,
         contexto: "Pregunta al asistente",
@@ -183,14 +188,15 @@ export default function PaginaPerfil() {
 
   if (!usuario) return null;
 
-  const activa = COMUNIDADES.find((c) => c.estado === "activa")!;
+  // Comunidades reales a las que pertenece (la coach, a todas).
+  const suyas = COMUNIDADES.filter((c) => c.estado === "activa" && enLaComunidad(c.id));
   // Lecciones terminadas en todos los cursos de la comunidad.
   const idsCursos = cursos.length ? cursos.flatMap((c) => c.lecciones) : lecciones.filter((l) => !l.deCoach).map((l) => l.id);
   const hechas = idsCursos.filter((id) => completadas.includes(id)).length;
   const desde = usuario.desde ? new Date(usuario.desde) : new Date();
-  const visibles = grupo === "todas" || grupo === activa.id ? contribuciones : [];
-  const estadoMembresia =
-    usuario.rol === "coach" ? "Coach de la comunidad" : membresia ? "Miembro" : "Acceso gratis al módulo 1";
+  const visibles = grupo === "todas" ? contribuciones : contribuciones.filter((c) => c.comunidad === grupo);
+  const estadoMembresia = (comunidad: string) =>
+    usuario.rol === "coach" ? "Coach de la comunidad" : membresiaEn(comunidad) ? "Miembro" : "Acceso gratis al módulo 1";
 
   const abrirEdicion = () => {
     setNombre(usuario.nombre);
@@ -222,21 +228,33 @@ export default function PaginaPerfil() {
 
         <section aria-labelledby="membresias-titulo" className="perfil-seccion">
           <h2 id="membresias-titulo">Membresías</h2>
+          {suyas.length === 0 && (
+            <p className="vacio">
+              Todavía no eres parte de ninguna comunidad. <Link href="/comunidades">Ve el directorio</Link> para unirte a una.
+            </p>
+          )}
           <ul className="perfil-membresias">
-            <li>
-              <Link href="/comunidad" className="perfil-membresia">
-                <span className="perfil-membresia-sello" aria-hidden="true">
-                  FC
-                </span>
-                <span className="perfil-membresia-textos">
-                  <span className="perfil-membresia-nombre">{activa.nombre}</span>
-                  <span className="texto-suave">con {activa.coach}</span>
-                </span>
-                <span className={membresia || usuario.rol === "coach" ? "pastilla pastilla-ok" : "pastilla"}>
-                  {estadoMembresia}
-                </span>
-              </Link>
-            </li>
+            {suyas.map((c) => (
+              <li key={c.id}>
+                <Link href="/comunidad" className="perfil-membresia" onClick={() => cambiarComunidad(c.id)}>
+                  <span className="perfil-membresia-sello" aria-hidden="true">
+                    {c.nombre
+                      .split(" ")
+                      .filter((p) => p.length > 2)
+                      .map((p) => p[0])
+                      .slice(0, 2)
+                      .join("")}
+                  </span>
+                  <span className="perfil-membresia-textos">
+                    <span className="perfil-membresia-nombre">{c.nombre}</span>
+                    <span className="texto-suave">con {c.coach}</span>
+                  </span>
+                  <span className={membresiaEn(c.id) || usuario.rol === "coach" ? "pastilla pastilla-ok" : "pastilla"}>
+                    {estadoMembresia(c.id)}
+                  </span>
+                </Link>
+              </li>
+            ))}
           </ul>
         </section>
 
@@ -262,7 +280,11 @@ export default function PaginaPerfil() {
               <span className="sr-only">Comunidad</span>
               <select value={grupo} onChange={(e) => setGrupo(e.target.value)}>
                 <option value="todas">Todas las comunidades</option>
-                <option value={activa.id}>{activa.nombre}</option>
+                {suyas.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
               </select>
             </label>
           </div>

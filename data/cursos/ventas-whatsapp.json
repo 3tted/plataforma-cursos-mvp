@@ -1,0 +1,97 @@
+{
+  "comunidad": {
+    "id": "vende-por-whatsapp",
+    "nombre": "Vende por WhatsApp",
+    "coach": "Mariana Ibarra",
+    "coach_titulo": "Asesora de ventas para negocios locales",
+    "descripcion": "Catálogo, mensajes y seguimiento para vender más desde el teléfono, sin perseguir a tus clientes.",
+    "precio_mensual": 390,
+    "moneda": "MXN"
+  },
+  "curso": {
+    "id": "ventas-whatsapp",
+    "titulo": "De la conversación a la venta",
+    "subtitulo": "Tu catálogo, tus mensajes y tu seguimiento en WhatsApp Business, en 2 módulos.",
+    "aprenderas": [
+      "Armar un catálogo de WhatsApp Business que se entiende solo",
+      "Tener respuestas rápidas para las preguntas de siempre",
+      "Contestar en minutos sin vivir pegada al teléfono",
+      "Dar seguimiento a quien preguntó y no compró, sin perseguir",
+      "Usar etiquetas para no perder a ningún cliente",
+      "Cerrar la venta y cobrar por transferencia o liga de pago"
+    ],
+    "requisitos": "Ninguno. Solo WhatsApp Business en tu teléfono (es gratis).",
+    "preguntas_sugeridas": [
+      "¿Qué pongo en mi catálogo?",
+      "¿Cada cuánto le escribo a un cliente que no contestó?",
+      "¿Cómo pido el pago sin que se oiga feo?",
+      "¿Qué son las etiquetas de WhatsApp Business?"
+    ],
+    "modulos": [
+      {
+        "id": "V1",
+        "titulo": "Tu catálogo y tus mensajes",
+        "lecciones": [
+          {
+            "id": "W1",
+            "titulo": "Arma tu catálogo de WhatsApp Business",
+            "duracion_min": 8,
+            "gratis": true,
+            "resumen": "Fotos, precio y una descripción corta por producto para que el cliente decida sin preguntar todo.",
+            "preguntas_sugeridas": [
+              "¿Pongo el precio en el catálogo?",
+              "¿Cuántos productos subo?",
+              "¿Qué escribo en la descripción?"
+            ],
+            "archivo": "lecciones/W1.md"
+          },
+          {
+            "id": "W2",
+            "titulo": "Mensajes que responden rápido",
+            "duracion_min": 7,
+            "gratis": true,
+            "resumen": "Respuestas rápidas, mensaje de bienvenida y de ausencia para contestar en minutos sin vivir en el teléfono.",
+            "preguntas_sugeridas": [
+              "¿Qué respuestas rápidas me conviene tener?",
+              "¿Qué digo en el mensaje de ausencia?",
+              "¿En cuánto tiempo debo contestar?"
+            ],
+            "archivo": "lecciones/W2.md"
+          }
+        ]
+      },
+      {
+        "id": "V2",
+        "titulo": "Del interés a la venta",
+        "lecciones": [
+          {
+            "id": "W3",
+            "titulo": "Seguimiento sin perseguir",
+            "duracion_min": 9,
+            "gratis": false,
+            "resumen": "Etiquetas para ordenar tus chats y la regla de los dos seguimientos para quien preguntó y no compró.",
+            "preguntas_sugeridas": [
+              "¿Cada cuánto le escribo a quien no contestó?",
+              "¿Qué etiquetas uso?",
+              "¿Qué le digo en el segundo seguimiento?"
+            ],
+            "archivo": "lecciones/W3.md"
+          },
+          {
+            "id": "W4",
+            "titulo": "Cierra la venta y cobra",
+            "duracion_min": 8,
+            "gratis": false,
+            "resumen": "Cómo pasar de «me interesa» a «ya pagué»: resumen del pedido, formas de pago y confirmación.",
+            "preguntas_sugeridas": [
+              "¿Cómo pido el pago?",
+              "¿Qué pongo en el resumen del pedido?",
+              "¿Acepto pago contra entrega?"
+            ],
+            "archivo": "lecciones/W4.md"
+          }
+        ]
+      }
+    ]
+  }
+}

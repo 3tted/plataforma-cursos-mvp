@@ -11,7 +11,7 @@ Cubre el criterio del MVP de la ficha: *comunidad con feed simple + un curso de 
 | Pieza | Qué hace | Estado |
 |---|---|---|
 | **Comunidad** | Feed con categorías; publicar, comentar y marcar "Me sirve". Los anuncios son solo para la coach. | Funciona (datos en un archivo JSON) |
-| **Cursos** | Dos cursos de la misma coach en la misma membresía: "Finanzas claras para tu negocio" (3 módulos, 8 lecciones) y "Precios para tus servicios" (2 módulos, 5 lecciones), con texto y transcripción. Se cambia de curso desde la página del curso o la comunidad. Progreso por alumno. El módulo 1 de cada curso es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
+| **Comunidades y cursos** | Dos comunidades reales, cada una con su coach, su feed y su membresía: **Finanzas Claras** (Daniela Ortega, $490/mes) con dos cursos, "Finanzas claras para tu negocio" (8 lecciones) y "Precios para tus servicios" (5), y **Vende por WhatsApp** (Mariana Ibarra, $390/mes) con un curso, "De la conversación a la venta" (4). El alumno se une a una comunidad y luego se inscribe a sus cursos. El directorio agrupa todas las comunidades por tema; las demás son de ejemplo. Textos y transcripciones en `data/`. Progreso por alumno. El módulo 1 de cada curso es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
 | **Asistente del curso** | En cada lección, en la comunidad y en `/curso/asistente`. Responde dudas usando el contenido de las lecciones y **cita la lección** de donde sale cada idea ([L4], [L5]…). Si algo no está en el curso, lo dice y ofrece llevar la pregunta a la comunidad. | Real con clave de API · modo demo sin ella |
 | **Asistente Merkatics** | El de "Asistente" en el menú (`/asistente`): IA de uso general (ideas, mensajes, explicaciones). No usa los cursos y sus preguntas no aparecen en el panel de la coach. | Solo con clave de API |
 | **Repaso y examen final** | Cada lección cierra con un repaso de 2 preguntas (no cuenta para la calificación; explica la respuesta y ofrece preguntarle al asistente). Al terminar las lecciones de un curso se desbloquea su examen final (12 preguntas en Finanzas claras, 8 en Precios), se aprueba con 70% y hay 3 intentos. Las respuestas correctas solo viven en el servidor (`data/evaluaciones*.json`). | Funciona |
@@ -101,9 +101,9 @@ lib/
   tipos.ts                 Modelo de datos compartido
 data/
   curso.json               Comunidad y curso principal (módulos y lecciones)
-  cursos/*.json            Los demás cursos de la comunidad
+  cursos/*.json            Los demás cursos (un curso de otra comunidad trae su "comunidad")
   evaluaciones*.json       Repaso y examen final de cada curso
-  lecciones/L*.md, P*.md   Contenido y transcripciones (L = Finanzas claras, P = Precios)
+  lecciones/L*, P*, W*.md  Contenido y transcripciones (L = Finanzas claras, P = Precios, W = WhatsApp)
   comunidad-seed.json      Publicaciones de ejemplo
 ```
 

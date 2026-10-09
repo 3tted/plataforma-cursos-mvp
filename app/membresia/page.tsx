@@ -52,6 +52,7 @@ export default function PaginaMembresia() {
     setPidiendoUsuario,
     leccionDeseada,
     guardarLeccionDeseada,
+    comunidadId,
   } = useApp();
   const [metodo, setMetodo] = useState<MetodoPago>("oxxo");
   const [procesando, setProcesando] = useState(false);
@@ -66,7 +67,7 @@ export default function PaginaMembresia() {
   // regresarla a ella cuando el pago se confirme, aunque vaya antes a la tienda.
   useEffect(() => {
     const desde = new URLSearchParams(window.location.search).get("leccion");
-    if (desde && /^[LPC]\d+$/.test(desde)) guardarLeccionDeseada(desde);
+    if (desde && /^[LPWC]\d+$/.test(desde)) guardarLeccionDeseada(desde);
   }, [guardarLeccionDeseada]);
 
   // Al generar la ficha, el foco pasa a su título para que se anuncie.
@@ -101,7 +102,10 @@ export default function PaginaMembresia() {
     setProcesando(true);
     setError(null);
     try {
-      const nuevo = await api<Pago>("/api/pagos", { method: "POST", json: { metodo, autor: usuario.nombre } });
+      const nuevo = await api<Pago>("/api/pagos", {
+        method: "POST",
+        json: { metodo, autor: usuario.nombre, comunidad: comunidadId },
+      });
       if (metodo === "mercadopago") {
         // Simula el viaje de ida y vuelta al checkout de Mercado Pago.
         await new Promise((r) => setTimeout(r, 1400));

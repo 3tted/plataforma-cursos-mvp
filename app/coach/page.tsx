@@ -219,7 +219,7 @@ export default function PaginaCoach() {
 
       <section className="tarjeta" aria-labelledby="videos-titulo">
         <h2 id="videos-titulo">Videos de tus lecciones</h2>
-        <SelectorCurso activo={cursoId} alElegir={cambiarCurso} etiqueta="Curso de los videos" />
+        <SelectorCurso activo={cursoId} alElegir={cambiarCurso} etiqueta="Curso de los videos" todos />
         <p className="texto-suave">
           <span className="cifra">{conVideo}</span> de <span className="cifra">{lecciones.length}</span> lecciones
           tienen video. Para subir o cambiar uno, abre la lección.

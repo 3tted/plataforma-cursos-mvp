@@ -11,7 +11,7 @@ import { IconoAsistente, IconoComunidad, IconoCurso, IconoFlechaIzq } from "./Ic
 // Paso 1 de la inscripción: el alumno ve qué hay en la comunidad y se une
 // (gratis). Después elige a qué cursos inscribirse.
 export default function UnirseComunidad({ motivo }: { motivo?: string }) {
-  const { datos, cursos, unirmeAComunidad } = useApp();
+  const { datos, cursosComunidad: cursos, unirmeAComunidad } = useApp();
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const comunidad = datos?.comunidad;

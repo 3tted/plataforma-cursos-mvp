@@ -5,18 +5,20 @@ import { useEffect, useState } from "react";
 import { api, hace } from "@/lib/cliente";
 import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
+import { useApp } from "./Contexto";
 import { IconoComentario, IconoFlechaDer } from "./Iconos";
 
 // Lo último que se publicó en la comunidad, para el inicio de alumno y coach.
 export default function PublicacionesRecientes({ titulo, cuantas = 3 }: { titulo: string; cuantas?: number }) {
+  const { comunidadId } = useApp();
   const [publicaciones, setPublicaciones] = useState<Publicacion[] | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    api<Publicacion[]>("/api/publicaciones")
+    api<Publicacion[]>(`/api/publicaciones?comunidad=${encodeURIComponent(comunidadId)}`)
       .then((p) => setPublicaciones([...p].sort((x, y) => y.creadaEn.localeCompare(x.creadaEn)).slice(0, cuantas)))
       .catch(() => setError(true));
-  }, [cuantas]);
+  }, [cuantas, comunidadId]);
 
   return (
     <section className="tarjeta inicio-bloque" aria-labelledby="recientes-titulo">

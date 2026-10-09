@@ -5,6 +5,7 @@
 export type Rol = "alumno" | "coach";
 
 export interface Comunidad {
+  id: string;
   nombre: string;
   coach: string;
   coach_titulo: string;
@@ -62,6 +63,8 @@ export interface DatosCurso {
 /** Ficha corta de cada curso de la comunidad, para elegir cuál tomar. */
 export interface ResumenCurso {
   id: string;
+  /** Comunidad a la que pertenece el curso. */
+  comunidad: string;
   titulo: string;
   subtitulo: string;
   modulos: number;
@@ -84,6 +87,8 @@ export interface Comentario {
 
 export interface Publicacion {
   id: number;
+  /** Sin este dato, la publicación es de la comunidad principal (las de antes de que hubiera dos). */
+  comunidad?: string;
   autor: string;
   rol: Rol;
   categoria: Categoria;
@@ -104,6 +109,8 @@ export interface LeccionCoach {
 
 export interface PreguntaIA {
   id: number;
+  /** Curso del asistente; sin este dato, el principal. */
+  curso?: string;
   autor: string;
   pregunta: string;
   leccionActual: string | null;
@@ -122,6 +129,8 @@ export type MetodoPago = "oxxo" | "spei" | "mercadopago";
 
 export interface Pago {
   id: number;
+  /** Comunidad de la membresía; sin este dato, la principal. */
+  comunidad?: string;
   autor: string;
   metodo: MetodoPago;
   monto: number;
@@ -196,14 +205,16 @@ export interface ResultadoExamen {
 /** Inscripción de un alumno: primero se une a la comunidad (gratis) y luego a cada curso. */
 export interface Inscripcion {
   autor: string;
-  comunidad: boolean;
+  /** Inscripciones de antes de que hubiera dos comunidades: true = la principal. */
+  comunidad?: boolean;
+  comunidades?: string[];
   cursos: string[];
   desde: string;
 }
 
 /** Lo que el navegador necesita saber de la inscripción de un alumno. */
 export interface EstadoInscripcion {
-  comunidad: boolean;
+  comunidades: string[];
   cursos: string[];
 }
 

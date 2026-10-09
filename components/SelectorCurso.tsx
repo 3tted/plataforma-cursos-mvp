@@ -10,14 +10,18 @@ export default function SelectorCurso({
   alElegir,
   conAvance = false,
   etiqueta = "Cursos de la comunidad",
+  todos = false,
 }: {
   activo: string;
   alElegir: (id: string) => void;
   /** Muestra cuántas lecciones lleva la persona en cada curso. */
   conAvance?: boolean;
   etiqueta?: string;
+  /** Todos los cursos de la plataforma (panel de la coach), no solo los de esta comunidad. */
+  todos?: boolean;
 }) {
-  const { cursos, completadas, inscritoEn } = useApp();
+  const { cursos: todosLosCursos, cursosComunidad, completadas, inscritoEn } = useApp();
+  const cursos = todos ? todosLosCursos : cursosComunidad;
   if (cursos.length < 2) return null;
 
   return (

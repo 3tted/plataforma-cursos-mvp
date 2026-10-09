@@ -10,9 +10,12 @@ const SEPARADOR_TRANSCRIPCION = "<!-- transcripcion -->";
 // membresía; los ids de lección no se repiten entre cursos (L1…, P1…), así
 // que el avance de cada alumno sigue siendo una sola lista de lecciones.
 export const CURSO_PRINCIPAL = "finanzas-negocio";
+export const COMUNIDAD_PRINCIPAL = "finanzas-claras";
 const ARCHIVOS: Record<string, string> = {
   [CURSO_PRINCIPAL]: "curso.json",
   "precios-servicios": "cursos/precios-servicios.json",
+  // De otra comunidad (Vende por WhatsApp): su archivo trae su propia comunidad.
+  "ventas-whatsapp": "cursos/ventas-whatsapp.json",
 };
 export const IDS_CURSOS = Object.keys(ARCHIVOS);
 
@@ -44,16 +47,19 @@ async function cargarLeccion({ archivo, ...meta }: LeccionArchivo): Promise<Lecc
 async function cargarCursoBase(id: string): Promise<DatosCurso> {
   const guardado = cacheBase.get(id);
   if (guardado && process.env.NODE_ENV === "production") return guardado;
-  // La comunidad se describe una sola vez, en el archivo del curso principal.
+  // Un curso sin comunidad propia es de la principal (la de curso.json).
   const principal = await leerJson<{ comunidad: DatosCurso["comunidad"]; curso: CursoArchivo }>(ARCHIVOS[CURSO_PRINCIPAL]);
-  const archivo = id === CURSO_PRINCIPAL ? principal : await leerJson<{ curso: CursoArchivo }>(ARCHIVOS[id]);
+  const archivo =
+    id === CURSO_PRINCIPAL
+      ? principal
+      : await leerJson<{ comunidad?: DatosCurso["comunidad"]; curso: CursoArchivo }>(ARCHIVOS[id]);
   const modulos = await Promise.all(
     archivo.curso.modulos.map(async (m) => ({
       ...m,
       lecciones: await Promise.all(m.lecciones.map(cargarLeccion)),
     })),
   );
-  const datos = { comunidad: principal.comunidad, curso: { ...archivo.curso, modulos } };
+  const datos = { comunidad: archivo.comunidad ?? principal.comunidad, curso: { ...archivo.curso, modulos } };
   cacheBase.set(id, datos);
   return datos;
 }
@@ -102,6 +108,19 @@ export function cargarCursos(): Promise<DatosCurso[]> {
   return Promise.all(IDS_CURSOS.map((id) => cargarCurso(id)));
 }
 
+/** Las comunidades con cursos, en el orden de los cursos. */
+export async function cargarComunidades(): Promise<DatosCurso["comunidad"][]> {
+  const vistas = new Map<string, DatosCurso["comunidad"]>();
+  for (const { comunidad } of await cargarCursos()) if (!vistas.has(comunidad.id)) vistas.set(comunidad.id, comunidad);
+  return [...vistas.values()];
+}
+
+/** El id de comunidad que pide el navegador; si no llega o no existe, la principal. */
+export async function idComunidad(valor: unknown): Promise<string> {
+  const ids = (await cargarComunidades()).map((c) => c.id);
+  return typeof valor === "string" && ids.includes(valor) ? valor : COMUNIDAD_PRINCIPAL;
+}
+
 /** El curso al que pertenece una lección, o null si no existe. */
 export async function cursoDeLeccion(leccion: string): Promise<DatosCurso | null> {
   for (const datos of await cargarCursos()) {
@@ -110,11 +129,12 @@ export async function cursoDeLeccion(leccion: string): Promise<DatosCurso | null
   return null;
 }
 
-export function resumenDe({ curso }: DatosCurso): ResumenCurso {
+export function resumenDe({ curso, comunidad }: DatosCurso): ResumenCurso {
   const modulos = curso.modulos.filter((m) => m.id !== "MC");
   const lecciones = modulos.flatMap((m) => m.lecciones);
   return {
     id: curso.id,
+    comunidad: comunidad.id,
     titulo: curso.titulo,
     subtitulo: curso.subtitulo,
     modulos: modulos.length,

@@ -49,6 +49,7 @@ function limpiarHistorial(valor: unknown): TurnoChat[] {
 }
 
 async function registrarPregunta(
+  curso: string,
   autor: string,
   pregunta: string,
   leccionActual: string | null,
@@ -59,6 +60,7 @@ async function registrarPregunta(
     await modificar((a) => {
       a.preguntas.push({
         id: nuevoId(a),
+        curso,
         autor,
         pregunta,
         leccionActual,
@@ -212,11 +214,11 @@ export const POST = manejar(async (req: Request) => {
 
   if (!iaDisponible()) {
     const respuesta = responderEnModoDemo(curso, pregunta, leccionActual, miembro);
-    await registrarPregunta(autor, pregunta, leccionActual, respuesta, "demo");
+    await registrarPregunta(curso.curso.id, autor, pregunta, leccionActual, respuesta, "demo");
     return respuestaFija(respuesta);
   }
 
-  const registrar = (respuesta: string) => registrarPregunta(autor, pregunta, leccionActual, respuesta, "ia");
+  const registrar = (respuesta: string) => registrarPregunta(curso.curso.id, autor, pregunta, leccionActual, respuesta, "ia");
   return proveedorIA() === "gemini"
     ? respuestaGemini(
         (senal) => responderConGemini(curso, pregunta, historial, leccionActual, miembro, senal),

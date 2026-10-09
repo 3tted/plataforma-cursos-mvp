@@ -1,5 +1,5 @@
 {
-  "_nota": "Publicaciones de ejemplo para la demo. 'haceHoras' se convierte en fecha real la primera vez que arranca la app.",
+  "_nota": "Publicaciones de ejemplo para la demo. 'haceHoras' se convierte en fecha real la primera vez que arranca la app. Sin 'comunidad', la publicación es de Finanzas Claras.",
   "publicaciones": [
     {
       "autor": "Daniela Ortega",
@@ -19,6 +19,17 @@
       "haceHoras": 3,
       "titulo": "Nueva: lección 7 sobre flujo de efectivo a 13 semanas",
       "cuerpo": "Ya está disponible la lección 7. Si tienes pedidos grandes para fin de año, esta es para ti: cómo ver venir los meses sin efectivo y qué hacer antes de que lleguen.",
+      "comentarios": []
+    },
+    {
+      "comunidad": "vende-por-whatsapp",
+      "autor": "Mariana Ibarra",
+      "rol": "coach",
+      "categoria": "Anuncios",
+      "fijada": true,
+      "haceHoras": 48,
+      "titulo": "Bienvenida a Vende por WhatsApp",
+      "cuerpo": "¡Qué bueno que estás aquí! Para arrancar:\n\n1. Preséntate en Presentaciones: qué vendes y por dónde te escriben tus clientes.\n2. El módulo 1 del curso es gratis: empieza por armar tu catálogo.\n3. Si tienes una duda sobre una lección, pregúntale al asistente del curso. Si no lo resuelve, publícala aquí y yo te contesto.",
       "comentarios": []
     }
   ]

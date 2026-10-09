@@ -1,0 +1,181 @@
+{
+  "aprobar_con": 70,
+  "intentos_examen": 3,
+  "repaso": {
+    "W1": [
+      {
+        "id": "RW1-1",
+        "enunciado": "¿Conviene poner el precio en el catálogo?",
+        "opciones": [
+          "No, así el cliente tiene que escribir",
+          "Sí, siempre: quien te escribe ya está listo para comprar",
+          "Solo en los productos más baratos",
+          "Solo los fines de semana"
+        ],
+        "correcta": 1,
+        "explicacion": "Esconder el precio solo hace que te pregunten y que muchos no lo hagan. Con el precio a la vista llegan clientes decididos."
+      },
+      {
+        "id": "RW1-2",
+        "enunciado": "Para empezar, ¿cuántos productos subes al catálogo?",
+        "opciones": ["Todos los que tengas", "Tus 10 más vendidos", "Solo uno", "Ninguno, mejor mandas fotos por chat"],
+        "correcta": 1,
+        "explicacion": "Empieza con tus 10 más vendidos, agrupados en colecciones. Un catálogo enorme sin orden confunde."
+      }
+    ],
+    "W2": [
+      {
+        "id": "RW2-1",
+        "enunciado": "¿Cuándo se envía el mensaje de bienvenida?",
+        "opciones": [
+          "En cada mensaje que recibes",
+          "La primera vez que alguien te escribe",
+          "Solo fuera de tu horario",
+          "Cuando el cliente paga"
+        ],
+        "correcta": 1,
+        "explicacion": "El de bienvenida va la primera vez; el de ausencia, fuera de tu horario."
+      },
+      {
+        "id": "RW2-2",
+        "enunciado": "¿Cuál es una buena meta de tiempo de respuesta en tu horario?",
+        "opciones": ["Menos de una hora", "Al día siguiente", "Una semana", "Solo cuando tengas tiempo"],
+        "correcta": 0,
+        "explicacion": "Contestar en menos de una hora, revisando WhatsApp en bloques y con respuestas rápidas, evita que el cliente le pregunte a otro."
+      }
+    ],
+    "W3": [
+      {
+        "id": "RW3-1",
+        "enunciado": "¿Para qué sirve la etiqueta «Interesado»?",
+        "opciones": [
+          "Para quien ya compró",
+          "Para quien pidió precio o detalles pero no ha comprado",
+          "Para clientes que no te caen bien",
+          "Para tus proveedores"
+        ],
+        "correcta": 1,
+        "explicacion": "Al final del día filtras por «Interesado» y sabes a quién darle seguimiento."
+      },
+      {
+        "id": "RW3-2",
+        "enunciado": "Según la regla de los dos seguimientos, ¿qué haces después del segundo?",
+        "opciones": ["Escribes cada día", "Le llamas por teléfono", "Ya no escribes más", "Le mandas un descuento"],
+        "correcta": 2,
+        "explicacion": "Dos seguimientos y te despides con amabilidad: el segundo es el de «última vez»."
+      }
+    ],
+    "W4": [
+      {
+        "id": "RW4-1",
+        "enunciado": "¿Qué mandas antes de pedir el pago?",
+        "opciones": [
+          "Un descuento",
+          "El resumen del pedido para que el cliente lo confirme",
+          "Una encuesta",
+          "Nada, cobras directo"
+        ],
+        "correcta": 1,
+        "explicacion": "El resumen (producto, total, fecha y entrega) confirmado con un «sí» evita malentendidos el día de la entrega."
+      },
+      {
+        "id": "RW4-2",
+        "enunciado": "¿Con quién aceptas pago contra entrega?",
+        "opciones": [
+          "Con cualquier cliente nuevo",
+          "Solo con clientes que ya te han comprado",
+          "Con nadie, nunca",
+          "Solo con pedidos grandes"
+        ],
+        "correcta": 1,
+        "explicacion": "Con clientes nuevos pide al menos el anticipo: es lo que confirma que el pedido va en serio."
+      }
+    ]
+  },
+  "examen_final": {
+    "titulo": "Examen final: De la conversación a la venta",
+    "preguntas": [
+      {
+        "id": "FW1",
+        "leccion": "W1",
+        "enunciado": "¿Qué cuatro cosas lleva cada producto del catálogo?",
+        "opciones": [
+          "Foto clara, precio, descripción corta y el nombre que usa tu cliente",
+          "Solo una foto",
+          "Precio y código del proveedor",
+          "Un video largo"
+        ],
+        "correcta": 0
+      },
+      {
+        "id": "FW2",
+        "leccion": "W1",
+        "enunciado": "¿Cómo conviene organizar el catálogo?",
+        "opciones": ["En colecciones", "Por orden alfabético del proveedor", "Sin orden", "Por fecha de compra"],
+        "correcta": 0
+      },
+      {
+        "id": "FW3",
+        "leccion": "W2",
+        "enunciado": "Un cliente escribe a las 11 de la noche. ¿Qué le llega?",
+        "opciones": [
+          "Nada hasta el otro día",
+          "El mensaje de ausencia con tu horario y el catálogo",
+          "Una llamada",
+          "El mensaje de bienvenida cada vez"
+        ],
+        "correcta": 1
+      },
+      {
+        "id": "FW4",
+        "leccion": "W2",
+        "enunciado": "¿Para qué sirven las respuestas rápidas?",
+        "opciones": [
+          "Para mandar textos guardados, como tus datos de pago, sin escribirlos cada vez",
+          "Para bloquear clientes",
+          "Para borrar chats",
+          "Para cambiar tu foto de perfil"
+        ],
+        "correcta": 0
+      },
+      {
+        "id": "FW5",
+        "leccion": "W3",
+        "enunciado": "¿Cuándo va el primer seguimiento a un interesado?",
+        "opciones": ["El mismo minuto", "Al día siguiente", "Al mes", "Nunca"],
+        "correcta": 1
+      },
+      {
+        "id": "FW6",
+        "leccion": "W3",
+        "enunciado": "¿Qué debe tener el primer seguimiento?",
+        "opciones": [
+          "Presión para que compre ya",
+          "Algo útil, como una foto o una fecha",
+          "Solo «¿Y entonces?»",
+          "Un audio de cinco minutos"
+        ],
+        "correcta": 1
+      },
+      {
+        "id": "FW7",
+        "leccion": "W4",
+        "enunciado": "En un pedido especial con un cliente nuevo, ¿qué pides para apartar la fecha?",
+        "opciones": ["Nada", "Un anticipo de 50%", "El pago al mes", "Una reseña"],
+        "correcta": 1
+      },
+      {
+        "id": "FW8",
+        "leccion": "W4",
+        "enunciado": "¿Cuál es la mejor forma de pedir el pago?",
+        "opciones": [
+          "«Si gustas, cuando puedas, me depositas»",
+          "No pedirlo y esperar",
+          "Una pregunta concreta: «¿Te paso los datos por transferencia o prefieres liga de pago?»",
+          "Mandar solo la CLABE sin explicar"
+        ],
+        "correcta": 2
+      }
+    ]
+  }
+}

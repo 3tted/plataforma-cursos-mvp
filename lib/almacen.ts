@@ -37,6 +37,8 @@ export interface Almacen {
   inscripciones?: Inscripcion[];
   /** Videos de muestra que ya se sembraron (para no volver a poner uno que la coach quitó). */
   muestras?: string[];
+  /** Comunidades cuyas publicaciones de bienvenida ya se sembraron. */
+  semillas?: string[];
 }
 
 const DIRECTORIO =
@@ -59,6 +61,7 @@ interface ComentarioSemilla {
 }
 
 interface PublicacionSemilla extends ComentarioSemilla {
+  comunidad?: string;
   categoria: Categoria;
   fijada: boolean;
   titulo: string;
@@ -69,13 +72,17 @@ function haceHoras(horas: number): string {
   return new Date(Date.now() - horas * 3_600_000).toISOString();
 }
 
-async function sembrar(): Promise<Almacen> {
-  const semilla = JSON.parse(await fs.readFile(SEMILLA, "utf8")) as {
-    publicaciones: PublicacionSemilla[];
-  };
-  let id = 1;
-  const publicaciones: Publicacion[] = semilla.publicaciones.map((p) => ({
+async function leerSemilla(): Promise<PublicacionSemilla[]> {
+  return (JSON.parse(await fs.readFile(SEMILLA, "utf8")) as { publicaciones: PublicacionSemilla[] }).publicaciones;
+}
+const comunidadDeSemilla = (p: PublicacionSemilla) => p.comunidad ?? "finanzas-claras";
+
+// Convierte las publicaciones de la semilla en publicaciones del almacén.
+function publicacionesDeSemilla(semilla: PublicacionSemilla[], primerId: number): { publicaciones: Publicacion[]; siguienteId: number } {
+  let id = primerId;
+  const publicaciones: Publicacion[] = semilla.map((p) => ({
     id: id++,
+    ...(p.comunidad ? { comunidad: p.comunidad } : {}),
     autor: p.autor,
     rol: p.rol,
     categoria: p.categoria,
@@ -94,9 +101,16 @@ async function sembrar(): Promise<Almacen> {
       }),
     ),
   }));
+  return { publicaciones, siguienteId: id };
+}
+
+async function sembrar(): Promise<Almacen> {
+  const semilla = await leerSemilla();
+  const { publicaciones, siguienteId } = publicacionesDeSemilla(semilla, 1);
   const almacen: Almacen = {
-    siguienteId: id,
+    siguienteId,
     publicaciones,
+    semillas: [...new Set(semilla.map(comunidadDeSemilla))],
     leccionesCoach: [],
     preguntas: [],
     pagos: [],
@@ -232,7 +246,23 @@ async function cargar(): Promise<{ almacen: Almacen; version: string | null; cam
     cambiado = true;
   }
   if (await sumarMuestrasNuevas(almacen)) cambiado = true;
+  if (await sumarSemillasNuevas(almacen)) cambiado = true;
   return { almacen, version, cambiado };
+}
+
+// Las comunidades que llegan después (por ejemplo, Vende por WhatsApp)
+// reciben su publicación de bienvenida una sola vez en los almacenes que ya
+// existían. Los de antes solo tenían sembrada Finanzas Claras.
+async function sumarSemillasNuevas(almacen: Almacen): Promise<boolean> {
+  const sembradas = new Set(almacen.semillas ?? ["finanzas-claras"]);
+  const semilla = await leerSemilla();
+  const nuevas = semilla.filter((p) => !sembradas.has(comunidadDeSemilla(p)));
+  if (nuevas.length === 0 && almacen.semillas) return false;
+  const { publicaciones, siguienteId } = publicacionesDeSemilla(nuevas, almacen.siguienteId);
+  almacen.publicaciones.push(...publicaciones);
+  almacen.siguienteId = siguienteId;
+  almacen.semillas = [...new Set([...sembradas, ...semilla.map(comunidadDeSemilla)])];
+  return true;
 }
 
 // Los almacenes que ya existían (por ejemplo, el de Redis en Vercel) se

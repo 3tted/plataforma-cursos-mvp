@@ -111,7 +111,7 @@ export default function MatrizAlumnos() {
         )}
       </div>
 
-      <SelectorCurso activo={curso} alElegir={elegirCurso} etiqueta="Curso de la matriz" />
+      <SelectorCurso activo={curso} alElegir={elegirCurso} etiqueta="Curso de la matriz" todos />
 
       {error && <p className="error">No pudimos cargar el avance de tus alumnos. Recarga la página.</p>}
       {!matriz && !error && <p className="texto-suave">Cargando…</p>}

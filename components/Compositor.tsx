@@ -14,7 +14,7 @@ export default function Compositor({
   /** Alumno sin publicaciones propias todavía: se propone presentarse primero. */
   primeraVez?: boolean;
 }) {
-  const { usuario, borrador, setBorrador, setPidiendoUsuario } = useApp();
+  const { usuario, borrador, setBorrador, setPidiendoUsuario, comunidadId } = useApp();
   const [abierto, setAbierto] = useState(false);
   const [categoria, setCategoria] = useState<Categoria>("Dudas");
   const [titulo, setTitulo] = useState("");
@@ -53,6 +53,7 @@ export default function Compositor({
       const nueva = await api<Publicacion>("/api/publicaciones", {
         method: "POST",
         json: {
+          comunidad: comunidadId,
           autor: usuario.nombre,
           rol: usuario.rol,
           categoria,

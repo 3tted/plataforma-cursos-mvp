@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, moneda } from "@/lib/cliente";
-import { COMUNIDADES } from "@/lib/comunidades";
+import { COMUNIDADES, temaDe } from "@/lib/comunidades";
 import type { Expediente, ResumenCurso } from "@/lib/tipos";
 import Arcos from "./Arcos";
 import BotonInscribirse from "./BotonInscribirse";
@@ -16,7 +16,7 @@ import PublicacionesRecientes from "./PublicacionesRecientes";
 import TarjetaComunidad from "./TarjetaComunidad";
 
 // Inicio del alumno: seguir su curso, resolver dudas y ver qué pasa en la
-// comunidad. Quien es nuevo primero se une a la comunidad y luego elige sus
+// comunidad. Quien es nuevo primero se une a una comunidad y luego elige sus
 // cursos; el inicio lo lleva paso a paso.
 export default function InicioAlumno() {
   const router = useRouter();
@@ -32,13 +32,18 @@ export default function InicioAlumno() {
     cursoId,
     cambiarCurso,
     inscripcionLista,
-    enComunidad,
+    enLaComunidad,
     inscritoEn,
   } = useApp();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
 
-  const inscritos = cursos.filter((c) => inscritoEn(c.id));
-  const porInscribir = cursos.filter((c) => !inscritoEn(c.id));
+  // Comunidades reales y a cuáles pertenece; sus cursos son los que puede tomar.
+  const reales = COMUNIDADES.filter((c) => c.estado === "activa");
+  const unidas = reales.filter((c) => enLaComunidad(c.id));
+  const cursosSuyos = cursos.filter((c) => enLaComunidad(c.comunidad));
+  const inscritos = cursosSuyos.filter((c) => inscritoEn(c.id));
+  const porInscribir = cursosSuyos.filter((c) => !inscritoEn(c.id));
+  const nombreComunidad = (id: string) => reales.find((c) => c.id === id)?.nombre ?? "";
   const enCurso = inscritoEn(cursoId);
 
   useEffect(() => {
@@ -70,7 +75,11 @@ export default function InicioAlumno() {
     router.push("/curso/asistente");
   };
 
-  const tendencia = COMUNIDADES.filter((c) => c.estado === "proximamente").slice(0, 3);
+  // Primero las comunidades abiertas a las que todavía no pertenece; luego las de ejemplo.
+  const tendencia = [
+    ...reales.filter((c) => !enLaComunidad(c.id)),
+    ...COMUNIDADES.filter((c) => c.estado === "proximamente"),
+  ].slice(0, 3);
   const nombre = usuario?.nombre.split(" ")[0] ?? "";
 
   if (!inscripcionLista) return <p className="texto-suave">Cargando…</p>;
@@ -80,7 +89,7 @@ export default function InicioAlumno() {
       <div className="inicio-bloque-cabecera">
         <div>
           <h2 id="tendencia-titulo">Comunidades en tendencia</h2>
-          <p className="texto-suave">Comunidades de ejemplo que abren pronto.</p>
+          <p className="texto-suave">Otras comunidades de la plataforma.</p>
         </div>
         <Link href="/comunidades" className="enlace inicio-ver-todo">
           Ver todas <IconoFlechaDer width={15} height={15} />
@@ -95,21 +104,25 @@ export default function InicioAlumno() {
   );
 
   // ---------------------------------------------------------------- paso 1: unirse a una comunidad
-  if (!enComunidad) {
+  if (unidas.length === 0) {
     return (
       <div className="inicio">
         <header className="inicio-saludo">
           <h1>Hola{nombre && `, ${nombre}`}</h1>
           <p className="texto-suave">Empieza por unirte a una comunidad. Unirte es gratis.</p>
         </header>
-        <section className="inicio-continuar" aria-labelledby="unirse-inicio-titulo">
-          <Arcos />
-          <p className="inicio-etiqueta">Primer paso</p>
-          <h2 id="unirse-inicio-titulo">{comunidad?.nombre ?? "Finanzas Claras"}</h2>
-          <p className="texto-suave">{comunidad?.descripcion}</p>
-          <Link href="/comunidad" className="boton">
-            Ver la comunidad y unirme <IconoFlechaDer width={16} height={16} />
-          </Link>
+        <section className="proximas" aria-labelledby="unirse-inicio-titulo">
+          <div className="inicio-bloque-cabecera">
+            <div>
+              <h2 id="unirse-inicio-titulo">Primer paso: elige tu comunidad</h2>
+              <p className="texto-suave">Entra a una para ver sus cursos y unirte.</p>
+            </div>
+          </div>
+          <ul className="proximas-lista">
+            {reales.map((c) => (
+              <TarjetaComunidad key={c.id} comunidad={c} />
+            ))}
+          </ul>
         </section>
         {enTendencia}
       </div>
@@ -118,9 +131,10 @@ export default function InicioAlumno() {
 
   const tarjetaCurso = (c: ResumenCurso) => {
     const hechasCurso = c.lecciones.filter((id) => completadas.includes(id)).length;
-    const portada = <PortadaTema tema="Finanzas" clave={c.id} />;
+    const portada = <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} />;
     const datosCurso = (
       <span className="texto-suave inicio-meta">
+        {unidas.length > 1 && `${nombreComunidad(c.comunidad)} · `}
         <span className="cifra">{c.lecciones.length}</span> lecciones · <span className="cifra">{c.minutos}</span> min
       </span>
     );
@@ -162,7 +176,9 @@ export default function InicioAlumno() {
     <section className="inicio-bloque" aria-labelledby="tus-cursos-titulo">
       <div className="inicio-bloque-cabecera">
         <div>
-          <h2 id="tus-cursos-titulo">{inscritos.length ? "Tus cursos" : `Cursos de ${comunidad?.nombre ?? "la comunidad"}`}</h2>
+          <h2 id="tus-cursos-titulo">
+            {inscritos.length ? "Tus cursos" : unidas.length > 1 ? "Cursos de tus comunidades" : `Cursos de ${unidas[0].nombre}`}
+          </h2>
           {porInscribir.length > 0 && (
             <p className="texto-suave">Inscribirte es gratis; el módulo 1 de cada curso también.</p>
           )}
@@ -178,7 +194,9 @@ export default function InicioAlumno() {
       <div className="inicio">
         <header className="inicio-saludo">
           <h1>Hola{nombre && `, ${nombre}`}</h1>
-          <p className="texto-suave">Ya eres parte de {comunidad?.nombre ?? "la comunidad"}. Ahora elige tu primer curso.</p>
+          <p className="texto-suave">
+            Ya eres parte de {unidas.map((c) => c.nombre).join(" y ")}. Ahora elige tu primer curso.
+          </p>
         </header>
         {listaCursos}
         <PublicacionesRecientes titulo="Conversaciones recientes" />
@@ -243,7 +261,7 @@ export default function InicioAlumno() {
 
         <section className="tarjeta inicio-bloque inicio-avance" aria-labelledby="avance-titulo">
           <h2 id="avance-titulo">Tu avance</h2>
-          {cursos.length > 1 && <p className="texto-suave inicio-meta">{datos?.curso.titulo}</p>}
+          {cursosSuyos.length > 1 && <p className="texto-suave inicio-meta">{datos?.curso.titulo}</p>}
           <p className="inicio-avance-cifra">
             <span className="cifra">{hechas}</span>
             <span className="texto-suave">
@@ -289,7 +307,7 @@ export default function InicioAlumno() {
         </section>
       </div>
 
-      {(cursos.length > 1 || porInscribir.length > 0) && listaCursos}
+      {(cursosSuyos.length > 1 || porInscribir.length > 0) && listaCursos}
 
       <div className="inicio-fila">
         <section className="tarjeta-asistente inicio-asistente" aria-labelledby="asistente-inicio-titulo">

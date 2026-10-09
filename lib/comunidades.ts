@@ -1,8 +1,9 @@
-// Directorio de comunidades de la plataforma. En el MVP solo Finanzas Claras
-// funciona (sus datos viven en data/curso.json); las demás son ejemplos que se
-// muestran como "Próximamente" para enseñar cómo crece el panel cuando haya
-// más coaches. Son ficticias, igual que Finanzas Claras, y no se puede entrar
-// a ellas. En la Fase 2 este listado sale de la base de datos multiempresa.
+// Directorio de comunidades de la plataforma. Finanzas Claras (dos cursos) y
+// Vende por WhatsApp (un curso) funcionan: sus datos viven en data/curso.json
+// y data/cursos/*.json. Las demás son ejemplos para enseñar cómo crece el
+// directorio cuando haya más coaches; son ficticias, igual que las reales, y
+// no se puede entrar a ellas. En la Fase 2 este listado sale de la base de
+// datos multiempresa.
 
 export interface ComunidadDirectorio {
   id: string;
@@ -15,6 +16,11 @@ export interface ComunidadDirectorio {
   lecciones?: number;
   minutos?: number;
   estado: "activa" | "proximamente";
+}
+
+/** El tema de una comunidad (para su portada ilustrada). */
+export function temaDe(id: string): string {
+  return COMUNIDADES.find((c) => c.id === id)?.tema ?? "Finanzas";
 }
 
 export const COMUNIDADES: ComunidadDirectorio[] = [
@@ -34,9 +40,7 @@ export const COMUNIDADES: ComunidadDirectorio[] = [
     tema: "Ventas",
     descripcion: "Catálogo, mensajes y seguimiento para vender más desde el teléfono, sin perseguir a tus clientes.",
     curso: "De la conversación a la venta",
-    lecciones: 6,
-    minutos: 52,
-    estado: "proximamente",
+    estado: "activa",
   },
   {
     id: "marca-que-se-recuerda",

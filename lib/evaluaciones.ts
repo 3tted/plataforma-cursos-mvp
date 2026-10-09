@@ -36,6 +36,7 @@ export interface Evaluaciones {
 const ARCHIVOS: Record<string, string> = {
   [CURSO_PRINCIPAL]: "evaluaciones.json",
   "precios-servicios": "evaluaciones-precios-servicios.json",
+  "ventas-whatsapp": "evaluaciones-ventas-whatsapp.json",
 };
 const cache = new Map<string, Evaluaciones>();
 

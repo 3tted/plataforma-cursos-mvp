@@ -3212,6 +3212,8 @@ main:focus {
 
 .directorio {
   display: grid;
+  /* Una columna que no crece con su contenido (la fila de filtros es más ancha que el celular) */
+  grid-template-columns: minmax(0, 1fr);
   gap: 28px;
 }
 
@@ -4344,6 +4346,59 @@ details.modulo[open] > .modulo-cabecera {
 
 .inicio-curso-alumno .boton {
   margin-top: 6px;
+}
+
+/* Directorio agrupado por tema; las comunidades reales se abren */
+/* Los filtros se deslizan dentro de la cabecera sin ensanchar la página en el celular */
+.proximas-cabecera > .filtros {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.directorio-grupos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 28px 18px;
+  align-items: start;
+}
+
+.directorio-grupo {
+  display: grid;
+  gap: 12px;
+}
+
+.directorio-grupo-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.directorio-grupo h2 {
+  font-size: var(--t-title);
+  color: var(--tinta-2);
+}
+
+.tarjeta-comunidad-enlace {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.tarjeta-comunidad[data-real="true"] {
+  transition: border-color 0.15s;
+}
+
+.tarjeta-comunidad[data-real="true"]:hover {
+  border-color: var(--acento);
+}
+
+.tarjeta-comunidad[data-real="true"]:hover .ficha-nombre {
+  color: var(--acento-texto);
 }
 
 /* ---------- Cuenta en la barra ---------- */

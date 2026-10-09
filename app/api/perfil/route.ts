@@ -1,4 +1,5 @@
 import { consultar } from "@/lib/almacen";
+import { COMUNIDAD_PRINCIPAL, CURSO_PRINCIPAL, cargarCursos } from "@/lib/curso";
 import { error, manejar } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
@@ -10,18 +11,37 @@ export const GET = manejar(async (req: Request) => {
   const autor = new URL(req.url).searchParams.get("autor")?.trim();
   if (!autor) return error("Falta el nombre de la persona.");
 
+  // Cada aporte dice de qué comunidad es, para filtrarlos en el perfil.
+  const comunidadDeCurso = new Map((await cargarCursos()).map((c) => [c.curso.id, c.comunidad.id]));
   const perfil = await consultar((a) => ({
     publicaciones: a.publicaciones
       .filter((p) => p.autor === autor)
-      .map((p) => ({ id: p.id, titulo: p.titulo, categoria: p.categoria, creadaEn: p.creadaEn })),
+      .map((p) => ({
+        id: p.id,
+        comunidad: p.comunidad ?? COMUNIDAD_PRINCIPAL,
+        titulo: p.titulo,
+        categoria: p.categoria,
+        creadaEn: p.creadaEn,
+      })),
     comentarios: a.publicaciones.flatMap((p) =>
       p.comentarios
         .filter((c) => c.autor === autor)
-        .map((c) => ({ id: c.id, publicacion: p.titulo, cuerpo: c.cuerpo, creadoEn: c.creadoEn })),
+        .map((c) => ({
+          id: c.id,
+          comunidad: p.comunidad ?? COMUNIDAD_PRINCIPAL,
+          publicacion: p.titulo,
+          cuerpo: c.cuerpo,
+          creadoEn: c.creadoEn,
+        })),
     ),
     preguntas: a.preguntas
       .filter((q) => q.autor === autor)
-      .map((q) => ({ id: q.id, pregunta: q.pregunta, creadaEn: q.creadaEn })),
+      .map((q) => ({
+        id: q.id,
+        comunidad: comunidadDeCurso.get(q.curso ?? CURSO_PRINCIPAL) ?? COMUNIDAD_PRINCIPAL,
+        pregunta: q.pregunta,
+        creadaEn: q.creadaEn,
+      })),
   }));
   return Response.json(perfil);
 });

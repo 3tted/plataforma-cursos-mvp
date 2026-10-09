@@ -39,12 +39,13 @@ export default function PaginaComunidad() {
     tieneAcceso,
     usuario,
     pagoPendiente,
-    cursos,
     cursoId,
     cambiarCurso,
     inscripcionLista,
     enComunidad,
     inscritoEn,
+    comunidadId,
+    cursosComunidad,
   } = useApp();
   const [publicaciones, setPublicaciones] = useState<Publicacion[] | null>(null);
   const [miembros, setMiembros] = useState<number | null>(null);
@@ -54,13 +55,15 @@ export default function PaginaComunidad() {
 
   const cargar = useCallback(() => {
     setError(false);
-    api<Publicacion[]>("/api/publicaciones")
+    const consulta = `?comunidad=${encodeURIComponent(comunidadId)}`;
+    api<Publicacion[]>(`/api/publicaciones${consulta}`)
       .then(setPublicaciones)
       .catch(() => setError(true));
-    api<ResumenComunidad>("/api/comunidad")
+    api<ResumenComunidad>(`/api/comunidad${consulta}`)
       .then((r) => setMiembros(r.miembros))
       .catch(() => setMiembros(null));
-  }, []);
+    // Al unirse se vuelve a contar: la persona ya es miembro.
+  }, [comunidadId, enComunidad]);
 
   useEffect(cargar, [cargar]);
 
@@ -186,8 +189,8 @@ export default function PaginaComunidad() {
               <dd>{miembros ?? "…"}</dd>
             </div>
             <div>
-              <dt>{cursos.length > 1 ? "Cursos" : "Lecciones"}</dt>
-              <dd>{cursos.length > 1 ? cursos.length : baseCurso.length || "…"}</dd>
+              <dt>{cursosComunidad.length > 1 ? "Cursos" : "Lecciones"}</dt>
+              <dd>{cursosComunidad.length > 1 ? cursosComunidad.length : baseCurso.length || "…"}</dd>
             </div>
           </dl>
         </section>
@@ -195,7 +198,7 @@ export default function PaginaComunidad() {
         <section className="lateral-bloque tarjeta-curso" aria-label="Tu avance">
           <SelectorCurso activo={cursoId} alElegir={cambiarCurso} conAvance={usuario?.rol === "alumno"} />
           {/* Con varios cursos, el selector ya dice cuál es. */}
-          {cursos.length < 2 && <h2 className="lateral-titulo">{datos?.curso.titulo}</h2>}
+          {cursosComunidad.length < 2 && <h2 className="lateral-titulo">{datos?.curso.titulo}</h2>}
           <Progreso hechas={hechas} total={baseCurso.length} />
           <p className="texto-suave">
             <span className="cifra">

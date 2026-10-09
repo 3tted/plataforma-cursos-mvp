@@ -36,7 +36,8 @@ El alumno no tiene tabla propia: cada registro guarda el nombre con el que la pe
 | `repasos` | autor, leccion, aciertos, total, fallas[], creadoEn |
 | `examenes` | id, autor, curso, aciertos, total, puntaje, aprobado, fallas[], creadoEn (sin `curso`, es del curso principal) |
 | `muestras` | lecciones cuyos videos de muestra ya se sembraron |
-| `inscripciones` | autor, comunidad (se unió), cursos[] (a los que se inscribió), desde |
+| `inscripciones` | autor, comunidades[] (a las que se unió), cursos[] (a los que se inscribió), desde |
+| `semillas` | comunidades cuya publicación de bienvenida ya se sembró |
 
 ## Cómo se guarda un cambio
 

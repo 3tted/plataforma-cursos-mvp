@@ -1,6 +1,6 @@
 import { randomInt } from "crypto";
 import { modificar, nuevoId } from "@/lib/almacen";
-import { cargarCurso } from "@/lib/curso";
+import { cargarComunidades, idComunidad } from "@/lib/curso";
 import { ErrorDeDatos, leerJson, manejar, texto } from "@/lib/http";
 import type { MetodoPago, Pago } from "@/lib/tipos";
 
@@ -20,11 +20,13 @@ export const POST = manejar(async (req: Request) => {
   const metodo = datos.metodo as MetodoPago;
   if (!METODOS.includes(metodo)) throw new ErrorDeDatos("Método de pago no válido.");
   const autor = texto(datos.autor, "autor", 60);
-  const { comunidad } = await cargarCurso();
+  const id = await idComunidad(datos.comunidad);
+  const comunidad = (await cargarComunidades()).find((c) => c.id === id)!;
 
   const pago = await modificar((a) => {
     const nuevo: Pago = {
       id: nuevoId(a),
+      comunidad: comunidad.id,
       autor,
       metodo,
       monto: comunidad.precio_mensual,

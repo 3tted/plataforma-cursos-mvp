@@ -1,30 +1,59 @@
+"use client";
+
+import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import PortadaTema from "@/components/PortadaTema";
 import type { ComunidadDirectorio } from "@/lib/comunidades";
+import { useApp } from "./Contexto";
 
-// Tarjeta de una comunidad de ejemplo ("Próximamente"): portada por tema,
-// curso, coach y tamaño del curso. Se usa en el directorio y en el inicio.
+// Tarjeta de una comunidad en el directorio y en el inicio: portada por tema,
+// curso(s), coach y tamaño. Las comunidades reales se abren; las de ejemplo
+// solo se muestran.
 export default function TarjetaComunidad({ comunidad: c }: { comunidad: ComunidadDirectorio }) {
-  return (
-    <li className="tarjeta-comunidad">
+  const { cursos, enLaComunidad, cambiarComunidad } = useApp();
+  const real = c.estado === "activa";
+  const suyos = cursos.filter((x) => x.comunidad === c.id);
+  const lecciones = real ? suyos.reduce((s, x) => s + x.lecciones.length, 0) : c.lecciones;
+  const minutos = real ? suyos.reduce((s, x) => s + x.minutos, 0) : c.minutos;
+  const cursoTexto =
+    real && suyos.length > 1 ? `${suyos.length} cursos: ${suyos.map((x) => x.titulo).join(" · ")}` : (suyos[0]?.titulo ?? c.curso);
+
+  const cuerpo = (
+    <>
       <PortadaTema tema={c.tema} clave={c.id} />
       <span className="tarjeta-comunidad-cuerpo">
         <span className="ficha-nombre">{c.nombre}</span>
-        <span className="tarjeta-comunidad-curso">{c.curso}</span>
+        <span className="tarjeta-comunidad-curso">{cursoTexto}</span>
         <span className="ficha-coach">
           <Avatar nombre={c.coach} tamaño={24} /> {c.coach}
         </span>
         <span className="tarjeta-comunidad-pie">
-          {c.lecciones && c.minutos ? (
+          {lecciones && minutos ? (
             <span className="cifra">
-              {c.lecciones} lecciones · {c.minutos} min
+              {lecciones} lecciones · {minutos} min
             </span>
           ) : (
             <span />
           )}
-          <span className="pastilla">Próximamente</span>
+          {real && (
+            <span className={enLaComunidad(c.id) ? "pastilla pastilla-ok" : "pastilla pastilla-marca"}>
+              {enLaComunidad(c.id) ? "Eres parte" : "Abierta"}
+            </span>
+          )}
         </span>
       </span>
+    </>
+  );
+
+  return (
+    <li className="tarjeta-comunidad" data-real={real}>
+      {real ? (
+        <Link href="/comunidad" className="tarjeta-comunidad-enlace" onClick={() => cambiarComunidad(c.id)}>
+          {cuerpo}
+        </Link>
+      ) : (
+        cuerpo
+      )}
     </li>
   );
 }

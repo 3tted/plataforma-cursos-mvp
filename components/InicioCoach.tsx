@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ESTADO_ALUMNO, api, hace } from "@/lib/cliente";
-import { COMUNIDADES } from "@/lib/comunidades";
+import { temaDe } from "@/lib/comunidades";
 import { agrupar, sinResolver } from "@/lib/preguntas";
 import type { MatrizAlumnos, ResumenCoach } from "@/lib/tipos";
 import Avatar from "./Avatar";
@@ -54,7 +54,6 @@ export default function InicioCoach() {
     [filas],
   );
   const apoyo = matrices ? filas.filter((a) => a.estado === "requiere-apoyo").length : undefined;
-  const activa = COMUNIDADES.find((c) => c.estado === "activa")!;
   const nombre = usuario?.nombre.split(" ")[0] ?? "";
 
   const responder = (pregunta: string, veces: number) => {
@@ -108,7 +107,7 @@ export default function InicioCoach() {
             return (
               <li key={c.id}>
                 <Link href="/curso" className="inicio-curso" onClick={() => cambiarCurso(c.id)}>
-                  <PortadaTema tema={activa.tema} clave={c.id} />
+                  <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} />
                   <span className="inicio-curso-cuerpo">
                     <span className="pastilla pastilla-ok">Publicado</span>
                     <span className="ficha-nombre">{c.titulo}</span>

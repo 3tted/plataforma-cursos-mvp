@@ -65,23 +65,34 @@ interface ContextoApp {
   datos: DatosCurso | null;
   errorDatos: string | null;
   recargarCurso: () => Promise<void>;
-  /** Todos los cursos de la comunidad, en ficha corta. */
+  /** Todos los cursos de la plataforma, en ficha corta (cada uno dice su comunidad). */
   cursos: ResumenCurso[];
+  /** Los cursos de la comunidad que se está viendo. */
+  cursosComunidad: ResumenCurso[];
   cursoId: string;
   /** Cambia el curso activo: las páginas del curso, el examen y el asistente pasan a ese curso. */
   cambiarCurso: (id: string) => void;
+  /** La comunidad que se está viendo: la del curso activo. */
+  comunidadId: string;
+  /** Pasa a otra comunidad (a su curso inscrito o, si no, al primero). */
+  cambiarComunidad: (id: string) => void;
   /** Ya se sabe si el alumno está unido a la comunidad y a qué cursos (la coach siempre lo está). */
   inscripcionLista: boolean;
+  /** Unido a la comunidad que se está viendo. */
   enComunidad: boolean;
+  enLaComunidad: (comunidad: string) => boolean;
   inscritoEn: (curso: string) => boolean;
-  /** Paso 1: unirse a la comunidad (gratis). */
-  unirmeAComunidad: () => Promise<void>;
+  /** Paso 1: unirse a una comunidad (gratis); sin id, a la que se está viendo. */
+  unirmeAComunidad: (comunidad?: string) => Promise<void>;
   /** Paso 2: inscribirse a un curso de la comunidad (gratis; lo de pago sigue con la membresía). */
   inscribirmeACurso: (curso: string) => Promise<void>;
   estado: EstadoPlataforma | null;
   lecciones: (Leccion & { modulo: Modulo })[];
+  /** Membresía de la comunidad que se está viendo (cada comunidad cobra la suya). */
   membresia: Membresia | null;
+  /** Activa o quita la membresía de la comunidad que se está viendo. */
   activarMembresia: (m: Membresia | null) => void;
+  membresiaEn: (comunidad: string) => Membresia | null;
   /** Ficha OXXO o SPEI generada y todavía sin pagar: sobrevive a recargas. */
   pagoPendiente: Pago | null;
   guardarPagoPendiente: (p: Pago | null) => void;
@@ -126,6 +137,7 @@ const CLAVES = {
 };
 
 const CURSO_PRINCIPAL = "finanzas-negocio";
+const COMUNIDAD_PRINCIPAL = "finanzas-claras";
 
 export function ProveedorApp({ children }: { children: ReactNode }) {
   const [listo, setListo] = useState(false);
@@ -137,7 +149,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   const [cursoId, setCursoId] = useState(CURSO_PRINCIPAL);
   const [inscripcion, setInscripcion] = useState<EstadoInscripcion | null>(null);
   const [estado, setEstado] = useState<EstadoPlataforma | null>(null);
-  const [membresia, setMembresia] = useState<Membresia | null>(null);
+  const [membresias, setMembresias] = useState<Record<string, Membresia>>({});
   const [pagoPendiente, setPagoPendiente] = useState<Pago | null>(null);
   const [completadas, setCompletadas] = useState<string[]>([]);
   const [vistos, setVistos] = useState<string[]>([]);
@@ -184,7 +196,11 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
       guardarLocal(CLAVES.usuario, guardadoUsuario);
     }
     setUsuario(guardadoUsuario);
-    setMembresia(leerLocal<Membresia>(CLAVES.membresia));
+    // Antes había una sola membresía (de Finanzas Claras); ahora hay una por comunidad.
+    const guardadas = leerLocal<Membresia | Record<string, Membresia>>(CLAVES.membresia);
+    setMembresias(
+      !guardadas ? {} : "metodo" in guardadas ? { [COMUNIDAD_PRINCIPAL]: guardadas as Membresia } : (guardadas as Record<string, Membresia>),
+    );
     const pendiente = leerLocal<Pago>(CLAVES.pagoPendiente);
     // Una ficha vencida ya no sirve para pagar: se descarta.
     if (pendiente && (!pendiente.venceEn || Date.parse(pendiente.venceEn) > Date.now())) {
@@ -238,7 +254,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     guardarSesion(CLAVES.chat, null);
     guardarSesion(CLAVES.chatGeneral, null);
     setUsuario(null);
-    setMembresia(null);
+    setMembresias({});
     setCompletadas([]);
     setVistos([]);
     setRepasados([]);
@@ -259,37 +275,59 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     let vigente = true;
     api<EstadoInscripcion>(`/api/inscripcion?autor=${encodeURIComponent(usuario.nombre)}`)
       .then((e) => vigente && setInscripcion(e))
-      .catch(() => vigente && setInscripcion({ comunidad: false, cursos: [] }));
+      .catch(() => vigente && setInscripcion({ comunidades: [], cursos: [] }));
     return () => {
       vigente = false;
     };
   }, [listo, usuario?.nombre, usuario?.rol]);
 
+  // La comunidad que se está viendo es la del curso activo.
+  const comunidadId =
+    datos?.comunidad.id ?? cursos.find((c) => c.id === cursoId)?.comunidad ?? COMUNIDAD_PRINCIPAL;
+
   const inscribir = useCallback(
-    async (accion: "comunidad" | "curso", curso?: string) => {
+    async (accion: "comunidad" | "curso", extra: { curso?: string; comunidad?: string }) => {
       if (!usuario) return;
       setInscripcion(
         await api<EstadoInscripcion>("/api/inscripcion", {
           method: "POST",
-          json: { autor: usuario.nombre, accion, curso },
+          json: { autor: usuario.nombre, accion, ...extra },
         }),
       );
     },
     [usuario],
   );
-  const unirmeAComunidad = useCallback(() => inscribir("comunidad"), [inscribir]);
-  const inscribirmeACurso = useCallback((curso: string) => inscribir("curso", curso), [inscribir]);
+  const unirmeAComunidad = useCallback(
+    (comunidad?: string) => inscribir("comunidad", { comunidad: comunidad ?? comunidadId }),
+    [inscribir, comunidadId],
+  );
+  const inscribirmeACurso = useCallback((curso: string) => inscribir("curso", { curso }), [inscribir]);
 
   const activarMembresia = useCallback(
     (m: Membresia | null) => {
-      setMembresia(m);
-      guardarLocal(CLAVES.membresia, m);
-      // Quien paga la membresía queda unido a la comunidad.
-      if (m && usuario?.rol === "alumno" && inscripcion && !inscripcion.comunidad) {
-        void inscribir("comunidad").catch(() => undefined);
+      setMembresias((todas) => {
+        const nuevas = { ...todas };
+        if (m) nuevas[comunidadId] = m;
+        else delete nuevas[comunidadId];
+        guardarLocal(CLAVES.membresia, nuevas);
+        return nuevas;
+      });
+      // Quien paga la membresía queda unido a esa comunidad.
+      if (m && usuario?.rol === "alumno" && inscripcion && !inscripcion.comunidades.includes(comunidadId)) {
+        void inscribir("comunidad", { comunidad: comunidadId }).catch(() => undefined);
       }
     },
-    [usuario?.rol, inscripcion, inscribir],
+    [usuario?.rol, inscripcion, inscribir, comunidadId],
+  );
+
+  // Pasar a una comunidad es pasar a uno de sus cursos: el inscrito o el primero.
+  const cambiarComunidad = useCallback(
+    (comunidad: string) => {
+      const suyos = cursos.filter((c) => c.comunidad === comunidad);
+      const elegido = suyos.find((c) => inscripcion?.cursos.includes(c.id)) ?? suyos[0];
+      if (elegido) cambiarCurso(elegido.id);
+    },
+    [cursos, inscripcion, cambiarCurso],
   );
 
   const guardarPagoPendiente = useCallback((p: Pago | null) => {
@@ -379,6 +417,13 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     (curso: string) => esCoach || Boolean(inscripcion?.cursos.includes(curso)),
     [esCoach, inscripcion],
   );
+  const enLaComunidad = useCallback(
+    (comunidad: string) => esCoach || Boolean(inscripcion?.comunidades.includes(comunidad)),
+    [esCoach, inscripcion],
+  );
+  const membresiaEn = useCallback((comunidad: string) => membresias[comunidad] ?? null, [membresias]);
+  const membresia = membresias[comunidadId] ?? null;
+  const cursosComunidad = useMemo(() => cursos.filter((c) => c.comunidad === comunidadId), [cursos, comunidadId]);
 
   const valor: ContextoApp = {
     listo,
@@ -391,10 +436,14 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     errorDatos,
     recargarCurso,
     cursos,
+    cursosComunidad,
     cursoId,
     cambiarCurso,
+    comunidadId,
+    cambiarComunidad,
     inscripcionLista: !usuario || esCoach || inscripcion !== null,
-    enComunidad: esCoach || Boolean(inscripcion?.comunidad),
+    enComunidad: enLaComunidad(comunidadId),
+    enLaComunidad,
     inscritoEn,
     unirmeAComunidad,
     inscribirmeACurso,
@@ -402,6 +451,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     lecciones,
     membresia,
     activarMembresia,
+    membresiaEn,
     pagoPendiente,
     guardarPagoPendiente,
     tieneAcceso: usuario?.rol === "coach" || membresia !== null,

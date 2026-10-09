@@ -1,14 +1,14 @@
 import { consultar, modificar, type Almacen } from "@/lib/almacen";
-import { cargarCursos, idCurso } from "@/lib/curso";
+import { COMUNIDAD_PRINCIPAL, cargarCursos, idComunidad, idCurso } from "@/lib/curso";
 import { completadasDe, examenesDelCurso, leccionesDelCurso } from "@/lib/evaluaciones";
 import { error, leerJson, manejar, texto } from "@/lib/http";
 import type { DatosCurso, EstadoInscripcion } from "@/lib/tipos";
 
 export const dynamic = "force-dynamic";
 
-// Inscripción del alumno en dos pasos: primero se une a la comunidad (gratis)
-// y después se inscribe a los cursos que quiera. La membresía de pago es
-// aparte: abre los módulos de pago. Como el resto del MVP, el alumno se
+// Inscripción del alumno en dos pasos: primero se une a una comunidad (gratis)
+// y después se inscribe a los cursos que quiera de ella. La membresía de pago
+// es aparte y es de cada comunidad. Como el resto del MVP, el alumno se
 // identifica por nombre; en la Fase 2 sale de la sesión.
 
 // Quien ya avanzó, publicó o pagó antes de que existiera la inscripción
@@ -16,21 +16,25 @@ export const dynamic = "force-dynamic";
 function estadoDe(a: Almacen, cursos: DatosCurso[], autor: string): EstadoInscripcion {
   const propia = a.inscripciones?.find((i) => i.autor === autor);
   const completadas = completadasDe(a, autor);
-  const conAvance = cursos
-    .filter((c) => {
-      const ids = new Set(leccionesDelCurso(c).flatMap((m) => m.lecciones.map((l) => l.id)));
-      return (
-        completadas.some((id) => ids.has(id)) ||
-        (a.repasos ?? []).some((r) => r.autor === autor && ids.has(r.leccion)) ||
-        examenesDelCurso(a, c.curso.id).some((x) => x.autor === autor)
-      );
-    })
-    .map((c) => c.curso.id);
-  const cursosInscritos = [...new Set([...(propia?.cursos ?? []), ...conAvance])];
-  const participa =
-    a.pagos.some((p) => p.autor === autor) ||
-    a.publicaciones.some((p) => (p.autor === autor && p.rol === "alumno") || p.comentarios.some((c) => c.autor === autor));
-  return { comunidad: Boolean(propia?.comunidad) || participa || cursosInscritos.length > 0, cursos: cursosInscritos };
+  const conAvance = cursos.filter((c) => {
+    const ids = new Set(leccionesDelCurso(c).flatMap((m) => m.lecciones.map((l) => l.id)));
+    return (
+      completadas.some((id) => ids.has(id)) ||
+      (a.repasos ?? []).some((r) => r.autor === autor && ids.has(r.leccion)) ||
+      examenesDelCurso(a, c.curso.id).some((x) => x.autor === autor)
+    );
+  });
+  const cursosInscritos = [...new Set([...(propia?.cursos ?? []), ...conAvance.map((c) => c.curso.id)])];
+
+  const comunidades = new Set<string>(propia?.comunidades ?? (propia?.comunidad ? [COMUNIDAD_PRINCIPAL] : []));
+  for (const c of cursos) if (cursosInscritos.includes(c.curso.id)) comunidades.add(c.comunidad.id);
+  for (const p of a.pagos) if (p.autor === autor) comunidades.add(p.comunidad ?? COMUNIDAD_PRINCIPAL);
+  for (const p of a.publicaciones) {
+    if ((p.autor === autor && p.rol === "alumno") || p.comentarios.some((c) => c.autor === autor)) {
+      comunidades.add(p.comunidad ?? COMUNIDAD_PRINCIPAL);
+    }
+  }
+  return { comunidades: [...comunidades], cursos: cursosInscritos };
 }
 
 export const GET = manejar(async (req: Request) => {
@@ -45,20 +49,25 @@ export const POST = manejar(async (req: Request) => {
   const autor = texto(datos.autor, "autor", 60);
   const accion = datos.accion;
   if (accion !== "comunidad" && accion !== "curso") return error('La acción debe ser "comunidad" o "curso".');
-  const curso = accion === "curso" ? idCurso(datos.curso) : null;
   const cursos = await cargarCursos();
+  const curso = accion === "curso" ? cursos.find((c) => c.curso.id === idCurso(datos.curso))! : null;
+  const comunidad = curso ? curso.comunidad.id : await idComunidad(datos.comunidad);
 
   const resultado = await modificar((a): EstadoInscripcion | { mensaje: string } => {
     const actual = estadoDe(a, cursos, autor);
-    if (curso && !actual.comunidad) return { mensaje: "Primero únete a la comunidad para inscribirte a sus cursos." };
+    if (curso && !actual.comunidades.includes(comunidad)) {
+      return { mensaje: "Primero únete a la comunidad para inscribirte a sus cursos." };
+    }
     a.inscripciones ??= [];
     let propia = a.inscripciones.find((i) => i.autor === autor);
     if (!propia) {
-      propia = { autor, comunidad: false, cursos: [], desde: new Date().toISOString() };
+      propia = { autor, comunidades: [], cursos: [], desde: new Date().toISOString() };
       a.inscripciones.push(propia);
     }
-    propia.comunidad = true;
-    if (curso && !propia.cursos.includes(curso)) propia.cursos.push(curso);
+    // Las inscripciones de antes guardaban comunidad: true (la principal).
+    propia.comunidades = [...new Set([...(propia.comunidades ?? (propia.comunidad ? [COMUNIDAD_PRINCIPAL] : [])), comunidad])];
+    delete propia.comunidad;
+    if (curso && !propia.cursos.includes(curso.curso.id)) propia.cursos.push(curso.curso.id);
     return estadoDe(a, cursos, autor);
   });
   if ("mensaje" in resultado) return error(resultado.mensaje, 409);

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { moneda } from "@/lib/cliente";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
 import { IconoAsistenteGeneral, IconoComunidad, IconoInicio, IconoPanel, IconoSalir } from "./Iconos";
@@ -10,8 +9,7 @@ import { IconoAsistenteGeneral, IconoComunidad, IconoInicio, IconoPanel, IconoSa
 export default function Encabezado() {
   const ruta = usePathname();
   const router = useRouter();
-  const { datos, usuario, membresia, pagoPendiente, cerrarSesion } = useApp();
-  const comunidad = datos?.comunidad;
+  const { usuario, membresia, pagoPendiente, cerrarSesion } = useApp();
 
   // El mismo menú para alumno y coach; la coach suma su panel.
   const enlaces = [
@@ -29,11 +27,6 @@ export default function Encabezado() {
       ? [{ href: "/coach", texto: "Panel de la coach", corto: "Panel", Icono: IconoPanel, activo: ruta === "/coach" }]
       : []),
   ];
-
-  // En la membresía el botón de la barra sobra. En el celular la barra no lo
-  // muestra (no cabe junto a la marca y la cuenta): ahí la invitación vive en
-  // el bloque de membresía de la comunidad, en la lección bloqueada y en el curso.
-  const ocultarUnirse = ruta === "/membresia";
 
   return (
     <header className="barra" data-app-fondo>
@@ -67,17 +60,15 @@ export default function Encabezado() {
         </nav>
 
         <div className="barra-acciones">
+          {/* La barra es de toda la plataforma: la invitación a unirse vive en la
+              comunidad, en el curso y en la lección bloqueada, que dicen a qué te unes. */}
           {usuario?.rol === "alumno" &&
             (membresia ? (
               <span className="pastilla pastilla-ok">Miembro</span>
-            ) : pagoPendiente ? (
-              <Link href="/membresia" className="pastilla pastilla-pendiente pendiente-cabecera">
-                Pago pendiente
-              </Link>
             ) : (
-              !ocultarUnirse && (
-                <Link href="/membresia" className="boton boton-chico boton-unirse">
-                  {`Unirme por ${moneda(comunidad?.precio_mensual ?? 490)} al mes`}
+              pagoPendiente && (
+                <Link href="/membresia" className="pastilla pastilla-pendiente pendiente-cabecera">
+                  Pago pendiente
                 </Link>
               )
             ))}

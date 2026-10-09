@@ -12,7 +12,17 @@ type Estado = "inactivo" | "subiendo" | "error";
 
 // Video de la lección. El alumno ve el reproductor (o, si todavía no hay
 // video, un aviso honesto). La coach, además, sube, cambia o quita el video.
-export default function VideoLeccion({ leccion }: { leccion: Leccion }) {
+// Con `sinAdelantar`, el alumno puede regresar pero no brincar hacia adelante,
+// y `alTerminar` avisa cuando llegó al final.
+export default function VideoLeccion({
+  leccion,
+  sinAdelantar = false,
+  alTerminar,
+}: {
+  leccion: Leccion;
+  sinAdelantar?: boolean;
+  alTerminar?: () => void;
+}) {
   const { usuario, recargarCurso } = useApp();
   const esCoach = usuario?.rol === "coach";
   const [estado, setEstado] = useState<Estado>("inactivo");
@@ -23,6 +33,10 @@ export default function VideoLeccion({ leccion }: { leccion: Leccion }) {
   const [arrastrando, setArrastrando] = useState(false);
   const [confirmandoQuitar, setConfirmandoQuitar] = useState(false);
   const entrada = useRef<HTMLInputElement>(null);
+  // Hasta dónde llegó viéndolo de corrido; adelantar más allá regresa aquí.
+  const visto = useRef(0);
+  const terminado = useRef(false);
+  const [avisoAdelantar, setAvisoAdelantar] = useState(false);
   const subida = useRef<XMLHttpRequest | null>(null);
 
   const fallo = (texto: string) => {
@@ -164,9 +178,48 @@ export default function VideoLeccion({ leccion }: { leccion: Leccion }) {
           playsInline
           src={leccion.video.url}
           aria-label={`Video de la lección «${leccion.titulo}»`}
+          onLoadedMetadata={() => {
+            visto.current = 0;
+            terminado.current = false;
+            setAvisoAdelantar(false);
+          }}
+          onTimeUpdate={(e) => {
+            const v = e.currentTarget;
+            // Solo cuenta lo que avanzó reproduciéndose, no un salto.
+            const paso = Math.max(2, v.playbackRate * 0.75);
+            if (!v.seeking && v.currentTime <= visto.current + paso) visto.current = Math.max(visto.current, v.currentTime);
+            if (!terminado.current && v.duration && visto.current >= v.duration - 1) {
+              terminado.current = true;
+              alTerminar?.();
+            }
+          }}
+          onSeeking={(e) => {
+            const v = e.currentTarget;
+            if (sinAdelantar && v.currentTime > visto.current + 1) {
+              v.currentTime = visto.current;
+              setAvisoAdelantar(true);
+            }
+          }}
+          onRateChange={(e) => {
+            // Hasta 2x: más rápido ya no es ver el video.
+            if (sinAdelantar && e.currentTarget.playbackRate > 2) e.currentTarget.playbackRate = 2;
+          }}
+          onEnded={(e) => {
+            if (!terminado.current && (!sinAdelantar || visto.current >= e.currentTarget.duration - 2)) {
+              terminado.current = true;
+              alTerminar?.();
+            }
+          }}
         >
           Tu navegador no puede reproducir este video. La transcripción está al final de la lección.
         </video>
+        {sinAdelantar && (
+          <p className="video-aviso texto-suave" role="status">
+            {avisoAdelantar
+              ? "Este video no se puede adelantar: sigue desde donde te quedaste."
+              : "Mira el video completo para desbloquear el repaso de esta lección."}
+          </p>
+        )}
         {esCoach && (
           <figcaption className="video-coach">
             {selector}

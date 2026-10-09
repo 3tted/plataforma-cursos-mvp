@@ -12,8 +12,15 @@ import { useEvaluaciones } from "./useEvaluaciones";
 // Repaso al final de la lección: preguntas que no cuentan para la calificación.
 // Muestra la respuesta correcta con su explicación y, si el alumno falla, le
 // ofrece preguntarle al asistente del curso. La página lo monta con
-// key={leccion.id} para que empiece de cero en cada lección.
-export default function RepasoLeccion({ leccion }: { leccion: { id: string; titulo: string } }) {
+// key={leccion.id} para que empiece de cero en cada lección. `alRevisar` avisa
+// cuando el alumno ya lo contestó (cuenta para completar la lección).
+export default function RepasoLeccion({
+  leccion,
+  alRevisar,
+}: {
+  leccion: { id: string; titulo: string };
+  alRevisar?: () => void;
+}) {
   const router = useRouter();
   const evaluaciones = useEvaluaciones();
   const { usuario, setLeccionContexto, setPreguntaPendiente } = useApp();
@@ -37,6 +44,7 @@ export default function RepasoLeccion({ leccion }: { leccion: { id: string; titu
           json: { autor: usuario.nombre, rol: usuario.rol, leccion: leccion.id, respuestas },
         }),
       );
+      alRevisar?.();
     } catch (e) {
       setError(e instanceof TypeError ? "No pudimos revisar tus respuestas. Revisa tu conexión." : (e as Error).message);
     } finally {

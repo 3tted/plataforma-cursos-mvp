@@ -40,6 +40,11 @@ export default function PaginaLeccion() {
     cursos,
     cursoId,
     cambiarCurso,
+    usuario,
+    vistos,
+    marcarVisto,
+    repasados,
+    marcarRepasado,
   } = useApp();
   const evaluaciones = useEvaluaciones();
   // El sello se anima solo cuando la alumna marca la lección, no al volver a abrirla.
@@ -123,6 +128,44 @@ export default function PaginaLeccion() {
     document.getElementById(`pestana-${pestanas[destino].id}`)?.focus();
   };
 
+  // Ruta del alumno en cada lección: el video completo, luego el repaso, y con
+  // eso la lección se completa sola. Las lecciones se abren en orden. La coach
+  // revisa todo libremente y lo ya completado no se vuelve a pedir.
+  const esAlumno = usuario?.rol !== "coach";
+  const guiado = esAlumno && !leccion.deCoach && !hecha;
+  const enOrdenLeccion = (idLeccion: string) => {
+    const i = base.findIndex((l) => l.id === idLeccion);
+    return !esAlumno || i <= 0 || completadas.includes(idLeccion) || completadas.includes(base[i - 1].id);
+  };
+  const previa = base[base.findIndex((l) => l.id === leccion.id) - 1];
+  const enOrden = !!leccion.deCoach || enOrdenLeccion(leccion.id);
+  const videoListo = !guiado || !leccion.video || vistos.includes(leccion.id);
+  const repasoListo = !guiado || preguntasRepaso === 0 || repasados.includes(leccion.id);
+  const pendiente = !videoListo ? "Mira el video completo" : !repasoListo ? "Responde el repaso" : null;
+
+  const completar = () => {
+    if (hecha) return;
+    setRecienMarcada(true);
+    alternarCompletada(leccion.id);
+  };
+
+  const alTerminarVideo = () => {
+    marcarVisto(leccion.id);
+    if (!guiado) return;
+    if (preguntasRepaso > 0 && !repasados.includes(leccion.id)) {
+      // A continuación, las preguntas de esta lección.
+      elegir("repaso");
+      document.getElementById("pestana-repaso")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      completar();
+    }
+  };
+
+  const alRevisarRepaso = () => {
+    marcarRepasado(leccion.id);
+    if (guiado && videoListo) completar();
+  };
+
   const preguntar = (pregunta: string) => {
     setLeccionContexto(leccion.id);
     setPreguntaPendiente(pregunta);
@@ -158,20 +201,26 @@ export default function PaginaLeccion() {
                 {m.lecciones.map((l) => {
                   const lHecha = completadas.includes(l.id);
                   const lBloqueada = !l.gratis && !tieneAcceso;
+                  const lEnEspera = !lBloqueada && !l.deCoach && !enOrdenLeccion(l.id);
                   return (
                     <li key={l.id}>
                       <Link href={`/curso/${l.id}`} aria-current={l.id === leccion.id ? "page" : undefined}>
-                        <span className="indice-marca" data-estado={lHecha ? "hecha" : lBloqueada ? "bloqueada" : "abierta"}>
+                        <span
+                          className="indice-marca"
+                          data-estado={lHecha ? "hecha" : lBloqueada || lEnEspera ? "bloqueada" : "abierta"}
+                        >
                           {lHecha ? (
                             <IconoCheck width={12} height={12} />
-                          ) : lBloqueada ? (
+                          ) : lBloqueada || lEnEspera ? (
                             <IconoCandado width={12} height={12} />
                           ) : null}
                         </span>
                         <span className="indice-titulo">
                           {l.titulo}
-                          {(lHecha || lBloqueada) && (
-                            <span className="sr-only">{lHecha ? " (completada)" : " (para miembros)"}</span>
+                          {(lHecha || lBloqueada || lEnEspera) && (
+                            <span className="sr-only">
+                              {lHecha ? " (completada)" : lBloqueada ? " (para miembros)" : " (se abre al terminar la anterior)"}
+                            </span>
                           )}
                         </span>
                         <span className="indice-min cifra">{l.duracion_min} min</span>
@@ -226,9 +275,26 @@ export default function PaginaLeccion() {
               </button>
             </div>
           </div>
+        ) : !enOrden ? (
+          <div className="tarjeta bloqueo">
+            <span className="bloqueo-icono">
+              <IconoCandado width={22} height={22} />
+            </span>
+            <h2>Primero termina la lección anterior</h2>
+            <p className="texto-suave">
+              Las lecciones se abren en orden: mira el video y contesta el repaso de cada una para pasar a la siguiente.
+            </p>
+            {previa && (
+              <div className="bloqueo-acciones">
+                <Link href={`/curso/${previa.id}`} className="boton">
+                  <IconoFlechaIzq width={16} height={16} /> Ir a «{previa.titulo}»
+                </Link>
+              </div>
+            )}
+          </div>
         ) : (
           <>
-            <VideoLeccion leccion={leccion} />
+            <VideoLeccion leccion={leccion} sinAdelantar={guiado && !videoListo} alTerminar={alTerminarVideo} />
 
             {pestanas.length > 1 && (
               <div className="pestanas" role="tablist" aria-label="Contenido de la lección" onKeyDown={alTeclear}>
@@ -244,7 +310,9 @@ export default function PaginaLeccion() {
                     className="pestana"
                     onClick={() => elegir(p.id)}
                   >
+                    {p.id === "repaso" && !videoListo && <IconoCandado width={14} height={14} />}
                     {p.texto}
+                    {p.id === "repaso" && !videoListo && <span className="sr-only"> (se abre al terminar el video)</span>}
                     {p.conteo !== undefined && <span className="pestana-conteo cifra">{p.conteo}</span>}
                   </button>
                 ))}
@@ -273,7 +341,20 @@ export default function PaginaLeccion() {
             )}
             {preguntasRepaso > 0 && (
               <div role="tabpanel" id="panel-repaso" aria-labelledby="pestana-repaso" hidden={pestana !== "repaso"}>
-                <RepasoLeccion key={leccion.id} leccion={leccion} />
+                {videoListo ? (
+                  <RepasoLeccion key={leccion.id} leccion={leccion} alRevisar={alRevisarRepaso} />
+                ) : (
+                  <div className="repaso-bloqueado">
+                    <IconoCandado width={20} height={20} />
+                    <p>
+                      <strong>El repaso se abre al terminar el video.</strong>
+                      <span className="texto-suave">
+                        {" "}
+                        Son {preguntasRepaso} preguntas y al contestarlas la lección queda completada.
+                      </span>
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -336,7 +417,14 @@ export default function PaginaLeccion() {
           ) : (
             <span />
           )}
-          {siguiente && (
+          {siguiente && guiado && enOrden && !bloqueada ? (
+            <span className="leccion-vecina leccion-vecina-der leccion-vecina-espera">
+              <span className="texto-suave">
+                Siguiente <IconoCandado width={13} height={13} />
+              </span>
+              Termina esta lección para seguir
+            </span>
+          ) : siguiente && (
             <Link href={`/curso/${siguiente.id}`} className="leccion-vecina leccion-vecina-der">
               <span className="texto-suave">
                 Siguiente
@@ -372,11 +460,16 @@ export default function PaginaLeccion() {
       </aside>
 
       {/* Barra fija: marcar la lección y pasar a lo que sigue sin buscar el botón. */}
-      {!bloqueada && (
+      {!bloqueada && enOrden && (
         <div className="barra-siguiente" role="region" aria-label="Avance de la lección">
           <div className="envoltura barra-siguiente-interior">
             <p className="barra-siguiente-texto">
-              {cursoTerminado ? (
+              {pendiente ? (
+                <>
+                  <small>Para continuar</small>
+                  <strong>{pendiente}</strong>
+                </>
+              ) : cursoTerminado ? (
                 <>
                   <small>Último paso</small>
                   <strong>Examen final</strong>
@@ -404,6 +497,7 @@ export default function PaginaLeccion() {
                 className="boton boton-secundario barra-marcar"
                 aria-pressed={hecha}
                 onClick={marcar}
+                disabled={!!pendiente}
                 title={hecha ? "Toca para desmarcarla" : undefined}
               >
                 <IconoCheck width={16} height={16} />
@@ -416,7 +510,11 @@ export default function PaginaLeccion() {
                   </>
                 )}
               </button>
-              {cursoTerminado ? (
+              {guiado ? (
+                <button type="button" className="boton" disabled title={pendiente ?? "Marca la lección como completada"}>
+                  Siguiente lección <IconoFlechaDer width={16} height={16} />
+                </button>
+              ) : cursoTerminado ? (
                 <Link href="/curso/examen" className="boton">
                   Presentar el examen <IconoFlechaDer width={16} height={16} />
                 </Link>

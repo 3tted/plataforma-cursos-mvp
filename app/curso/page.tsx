@@ -153,17 +153,27 @@ export default function PaginaCurso() {
                 {modulo.lecciones.map((l) => {
                   const bloqueada = !l.gratis && !tieneAcceso;
                   const hecha = completadas.includes(l.id);
-                  const estado = hecha ? "hecha" : bloqueada ? "bloqueada" : "abierta";
+                  // Para el alumno, cada lección se abre al terminar la anterior.
+                  const i = base.findIndex((b) => b.id === l.id);
+                  const enEspera =
+                    usuario?.rol !== "coach" && !l.deCoach && !hecha && !bloqueada && i > 0 && !completadas.includes(base[i - 1].id);
+                  const estado = hecha ? "hecha" : bloqueada || enEspera ? "bloqueada" : "abierta";
                   return (
                     <li key={l.id}>
                       <Link href={`/curso/${l.id}`} className="fila-leccion" data-bloqueada={bloqueada}>
                         <span className="estado-leccion" data-estado={estado}>
-                          {hecha ? <IconoCheck /> : bloqueada ? <IconoCandado /> : <IconoPlay />}
+                          {hecha ? <IconoCheck /> : bloqueada || enEspera ? <IconoCandado /> : <IconoPlay />}
                         </span>
                         <span className="fila-leccion-textos">
                           <span className="fila-leccion-titulo">{l.titulo}</span>
                           <span className="sr-only">
-                            {hecha ? "Completada." : bloqueada ? "Para miembros." : "Disponible."}
+                            {hecha
+                              ? "Completada."
+                              : bloqueada
+                                ? "Para miembros."
+                                : enEspera
+                                  ? "Se abre al terminar la anterior."
+                                  : "Disponible."}
                           </span>
                           <span className="texto-suave">{l.resumen}</span>
                         </span>

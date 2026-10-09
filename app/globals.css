@@ -3957,6 +3957,46 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
   }
 }
 
+/* Ruta obligatoria del alumno: video completo → repaso → lección completada */
+.video-aviso {
+  margin: 8px 0 0;
+  font-size: var(--t-caption);
+}
+
+.repaso-bloqueado {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 20px;
+  border: 1px dashed var(--linea-fuerte);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+}
+
+.repaso-bloqueado svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.repaso-bloqueado p {
+  margin: 0;
+}
+
+.repaso-bloqueado strong {
+  color: var(--tinta);
+}
+
+.leccion-vecina-espera {
+  color: var(--tinta-3);
+  border-style: dashed;
+  cursor: default;
+}
+
+.leccion-vecina-espera:hover {
+  border-color: var(--linea);
+}
+
 /* ---------- Cuenta en la barra ---------- */
 
 .cuenta {

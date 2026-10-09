@@ -79,6 +79,12 @@ interface ContextoApp {
   tieneAcceso: boolean;
   completadas: string[];
   alternarCompletada: (id: string) => void;
+  /** Lecciones cuyo video ya vio completo (sin adelantarlo). */
+  vistos: string[];
+  marcarVisto: (id: string) => void;
+  /** Lecciones cuyo repaso ya contestó. */
+  repasados: string[];
+  marcarRepasado: (id: string) => void;
   chat: MensajeChat[];
   setChat: Dispatch<SetStateAction<MensajeChat[]>>;
   /** Conversación con el asistente general (no usa los cursos). */
@@ -106,6 +112,8 @@ const CLAVES = {
   chat: "fc.chat",
   chatGeneral: "fc.chatGeneral",
   curso: "fc.curso",
+  vistos: "fc.vistos",
+  repasados: "fc.repasados",
 };
 
 const CURSO_PRINCIPAL = "finanzas-negocio";
@@ -122,6 +130,8 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   const [membresia, setMembresia] = useState<Membresia | null>(null);
   const [pagoPendiente, setPagoPendiente] = useState<Pago | null>(null);
   const [completadas, setCompletadas] = useState<string[]>([]);
+  const [vistos, setVistos] = useState<string[]>([]);
+  const [repasados, setRepasados] = useState<string[]>([]);
   const [chat, setChat] = useState<MensajeChat[]>([]);
   const [chatGeneral, setChatGeneral] = useState<MensajeChat[]>([]);
   const [leccionContexto, setLeccionContexto] = useState<string | null>(null);
@@ -173,6 +183,8 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
       guardarLocal(CLAVES.pagoPendiente, null);
     }
     setCompletadas(leerLocal<string[]>(CLAVES.completadas) ?? []);
+    setVistos(leerLocal<string[]>(CLAVES.vistos) ?? []);
+    setRepasados(leerLocal<string[]>(CLAVES.repasados) ?? []);
     setLeccionDeseada(leerLocal<string>(CLAVES.leccionDeseada));
     // La conversación sobrevive a una recarga o a cambiar de app. Una respuesta
     // que se estaba escribiendo cuando se cerró la página queda como detenida.
@@ -202,7 +214,15 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   // En el prototipo todo vive en el navegador: al salir se borra lo de esa
   // persona para que quien entre después no herede su avance ni su membresía.
   const cerrarSesion = useCallback(() => {
-    for (const clave of [CLAVES.usuario, CLAVES.membresia, CLAVES.completadas, CLAVES.pagoPendiente, CLAVES.leccionDeseada]) {
+    for (const clave of [
+      CLAVES.usuario,
+      CLAVES.membresia,
+      CLAVES.completadas,
+      CLAVES.vistos,
+      CLAVES.repasados,
+      CLAVES.pagoPendiente,
+      CLAVES.leccionDeseada,
+    ]) {
       guardarLocal(clave, null);
     }
     guardarSesion(CLAVES.chat, null);
@@ -210,6 +230,8 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     setUsuario(null);
     setMembresia(null);
     setCompletadas([]);
+    setVistos([]);
+    setRepasados([]);
     setPagoPendiente(null);
     setLeccionDeseada(null);
     setChat([]);
@@ -281,6 +303,26 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     [completadas, usuario, enviarProgreso],
   );
 
+  // Pasos de cada lección para el alumno: ver el video completo y contestar
+  // el repaso. Se recuerdan en el navegador, como las lecciones completadas.
+  const marcarVisto = useCallback((id: string) => {
+    setVistos((lista) => {
+      if (lista.includes(id)) return lista;
+      const nueva = [...lista, id];
+      guardarLocal(CLAVES.vistos, nueva);
+      return nueva;
+    });
+  }, []);
+
+  const marcarRepasado = useCallback((id: string) => {
+    setRepasados((lista) => {
+      if (lista.includes(id)) return lista;
+      const nueva = [...lista, id];
+      guardarLocal(CLAVES.repasados, nueva);
+      return nueva;
+    });
+  }, []);
+
   const lecciones = useMemo(
     () =>
       datos?.curso.modulos.flatMap((modulo) => modulo.lecciones.map((l) => ({ ...l, modulo }))) ?? [],
@@ -309,6 +351,10 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     tieneAcceso: usuario?.rol === "coach" || membresia !== null,
     completadas,
     alternarCompletada,
+    vistos,
+    marcarVisto,
+    repasados,
+    marcarRepasado,
     chat,
     setChat,
     chatGeneral,

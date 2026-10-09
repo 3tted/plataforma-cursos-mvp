@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useApp } from "@/components/Contexto";
 import { IconoBorrar, IconoComunidad } from "@/components/Iconos";
 import Arcos from "@/components/Arcos";
@@ -14,11 +14,26 @@ import { api, fechaCorta, hace, moneda } from "@/lib/cliente";
 import { agrupar } from "@/lib/preguntas";
 import type { LeccionCoach, ResumenCoach } from "@/lib/tipos";
 
+// Las lecciones pegadas en el panel se agregan a este curso.
+const CURSO_PRINCIPAL = "finanzas-negocio";
 const NOMBRE_METODO = { oxxo: "OXXO", spei: "SPEI", mercadopago: "Mercado Pago" } as const;
 
 export default function PaginaCoach() {
   const router = useRouter();
-  const { usuario, lecciones, recargarCurso, setBorrador, cursoId, cambiarCurso } = useApp();
+  const {
+    usuario,
+    datos,
+    lecciones,
+    recargarCurso,
+    setBorrador,
+    cursoId,
+    cambiarCurso,
+    cursos,
+    comunidades,
+    comunidadId,
+    cambiarComunidad,
+    cursosComunidad,
+  } = useApp();
   const [resumen, setResumen] = useState<ResumenCoach | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [titulo, setTitulo] = useState("");
@@ -28,14 +43,19 @@ export default function PaginaCoach() {
   const [porBorrar, setPorBorrar] = useState<number | null>(null);
   useTitulo("Panel de la coach");
 
+  // Todo el panel es del curso elegido arriba (y de su comunidad). Si cambia
+  // antes de que llegue el resumen anterior, ese ya no se muestra.
+  const vigente = useRef(cursoId);
   const cargar = useCallback(() => {
+    vigente.current = cursoId;
     setError(null);
-    api<ResumenCoach>("/api/coach/resumen")
-      .then(setResumen)
-      .catch(() => setError("No pudimos cargar el resumen. Revisa tu conexión e inténtalo de nuevo."));
-  }, []);
+    api<ResumenCoach>(`/api/coach/resumen?curso=${encodeURIComponent(cursoId)}`)
+      .then((r) => vigente.current === cursoId && setResumen(r))
+      .catch(() => vigente.current === cursoId && setError("No pudimos cargar el resumen. Revisa tu conexión e inténtalo de nuevo."));
+  }, [cursoId]);
 
   useEffect(() => {
+    setResumen(null);
     if (usuario?.rol === "coach") cargar();
   }, [usuario, cargar]);
 
@@ -111,6 +131,45 @@ export default function PaginaCoach() {
         </Link>
       </header>
 
+      <section className="tarjeta panel-alcance" aria-label="Comunidad y curso del panel">
+        <div className="panel-alcance-fila">
+          <p className="panel-alcance-etiqueta">Comunidad</p>
+          <div className="selector-curso" role="group" aria-label="Comunidad">
+            {comunidades
+              .filter((c) => cursos.some((x) => x.comunidad === c.id))
+              .map((c) => {
+                const suyos = cursos.filter((x) => x.comunidad === c.id).length;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className="selector-curso-opcion"
+                    aria-pressed={c.id === comunidadId}
+                    onClick={() => cambiarComunidad(c.id)}
+                  >
+                    <span className="selector-curso-titulo">{c.nombre}</span>
+                    <span className="selector-curso-meta">
+                      <span className="cifra">{suyos}</span> {suyos === 1 ? "curso" : "cursos"}
+                    </span>
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+        <div className="panel-alcance-fila">
+          <p className="panel-alcance-etiqueta">Curso</p>
+          {cursosComunidad.length > 1 ? (
+            <SelectorCurso activo={cursoId} alElegir={cambiarCurso} etiqueta="Curso" />
+          ) : (
+            <p className="panel-alcance-unico">{datos?.curso.titulo ?? "…"}</p>
+          )}
+        </div>
+        <p className="nota">
+          Todo lo de abajo es de lo que elijas aquí: el avance, las preguntas y los videos, del curso; los miembros, las
+          publicaciones y los pagos, de su comunidad.
+        </p>
+      </section>
+
       {error && (
         <div className="error chat-aviso" role="alert">
           <span>{error}</span>
@@ -145,7 +204,7 @@ export default function PaginaCoach() {
         </dl>
       </section>
 
-      <MatrizAlumnos />
+      <MatrizAlumnos curso={cursoId} />
 
       <div className="rejilla-coach">
         <section className="tarjeta" aria-labelledby="preguntas-titulo">
@@ -222,7 +281,6 @@ export default function PaginaCoach() {
 
       <section className="tarjeta" aria-labelledby="videos-titulo">
         <h2 id="videos-titulo">Videos de tus lecciones</h2>
-        <SelectorCurso activo={cursoId} alElegir={cambiarCurso} etiqueta="Curso de los videos" todos />
         <p className="texto-suave">
           <span className="cifra">{conVideo}</span> de <span className="cifra">{lecciones.length}</span> lecciones
           tienen video. Para subir o cambiar uno, abre la lección.
@@ -241,82 +299,91 @@ export default function PaginaCoach() {
 
       <section className="tarjeta" aria-labelledby="propia-titulo">
         <h2 id="propia-titulo">Prueba el asistente con tu propio contenido</h2>
-        <p className="texto-suave">
-          Pega el texto o la transcripción de una lección tuya. Se agrega al curso y el asistente empieza a responder
-          con ella al momento.
-        </p>
-        <form className="formulario-leccion" onSubmit={agregarLeccion}>
-          <label className="campo">
-            <span>Título de la lección</span>
-            <input
-              id="leccion-titulo"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              maxLength={120}
-              placeholder="Por ejemplo: Cómo negociar con proveedores"
-              required
-            />
-          </label>
-          <label className="campo">
-            <span>Contenido o transcripción</span>
-            <textarea
-              id="leccion-contenido"
-              value={contenido}
-              onChange={(e) => setContenido(e.target.value)}
-              maxLength={20000}
-              rows={8}
-              placeholder="Pega aquí el texto de tu lección…"
-              required
-            />
-          </label>
-          <div className="fila-acciones">
-            <span className="nota cifra">{contenido.length.toLocaleString("es-MX")} / 20,000 caracteres</span>
-            <button type="submit" className="boton" disabled={guardando}>
-              {guardando ? "Agregando…" : "Agregar al curso"}
-            </button>
-          </div>
-        </form>
-        {agregada && (
-          <p className="aviso aviso-ok" role="status">
-            <span>
-              Listo: la lección ya está en el curso como <span className="cita-id">{agregada}</span>.{" "}
-              <Link href={`/curso/${agregada}`}>Ábrela</Link> o <Link href="/curso/asistente">pregúntale al asistente</Link>{" "}
-              sobre ella.
-            </span>
+        {cursoId === CURSO_PRINCIPAL ? (
+          <>
+            <p className="texto-suave">
+              Pega el texto o la transcripción de una lección tuya. Se agrega al curso y el asistente empieza a responder
+              con ella al momento.
+            </p>
+            <form className="formulario-leccion" onSubmit={agregarLeccion}>
+              <label className="campo">
+                <span>Título de la lección</span>
+                <input
+                  id="leccion-titulo"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  maxLength={120}
+                  placeholder="Por ejemplo: Cómo negociar con proveedores"
+                  required
+                />
+              </label>
+              <label className="campo">
+                <span>Contenido o transcripción</span>
+                <textarea
+                  id="leccion-contenido"
+                  value={contenido}
+                  onChange={(e) => setContenido(e.target.value)}
+                  maxLength={20000}
+                  rows={8}
+                  placeholder="Pega aquí el texto de tu lección…"
+                  required
+                />
+              </label>
+              <div className="fila-acciones">
+                <span className="nota cifra">{contenido.length.toLocaleString("es-MX")} / 20,000 caracteres</span>
+                <button type="submit" className="boton" disabled={guardando}>
+                  {guardando ? "Agregando…" : "Agregar al curso"}
+                </button>
+              </div>
+            </form>
+            {agregada && (
+              <p className="aviso aviso-ok" role="status">
+                <span>
+                  Listo: la lección ya está en el curso como <span className="cita-id">{agregada}</span>.{" "}
+                  <Link href={`/curso/${agregada}`}>Ábrela</Link> o <Link href="/curso/asistente">pregúntale al asistente</Link>{" "}
+                  sobre ella.
+                </span>
+              </p>
+            )}
+            {resumen && resumen.leccionesCoach.length > 0 && (
+              <ul className="lecciones-propias">
+                {resumen.leccionesCoach.map((l) => (
+                  <li key={l.id}>
+                    <Link href={`/curso/C${l.id}`}>
+                      <span className="cita-id">C{l.id}</span> {l.titulo}
+                    </Link>
+                    <span className="texto-suave">{fechaCorta(l.creadaEn)}</span>
+                    {porBorrar === l.id ? (
+                      <span className="confirmacion" role="group" aria-label={`Confirmar que quitas ${l.titulo}`}>
+                        ¿Quitarla del curso?
+                        <button type="button" className="boton boton-chico" onClick={() => borrarLeccion(l.id)}>
+                          Sí, quitar
+                        </button>
+                        <button type="button" className="boton boton-chico boton-fantasma" onClick={() => setPorBorrar(null)}>
+                          Cancelar
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="boton-icono boton-icono-chico"
+                        onClick={() => setPorBorrar(l.id)}
+                        aria-label={`Quitar la lección ${l.titulo}`}
+                        title="Quitar del curso"
+                      >
+                        <IconoBorrar width={15} height={15} />
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        ) : (
+          <p className="texto-suave">
+            Las lecciones que pegas aquí se agregan a «Finanzas claras para tu negocio». Elige ese curso arriba para
+            probarlo.
           </p>
-        )}
-        {resumen && resumen.leccionesCoach.length > 0 && (
-          <ul className="lecciones-propias">
-            {resumen.leccionesCoach.map((l) => (
-              <li key={l.id}>
-                <Link href={`/curso/C${l.id}`}>
-                  <span className="cita-id">C{l.id}</span> {l.titulo}
-                </Link>
-                <span className="texto-suave">{fechaCorta(l.creadaEn)}</span>
-                {porBorrar === l.id ? (
-                  <span className="confirmacion" role="group" aria-label={`Confirmar que quitas ${l.titulo}`}>
-                    ¿Quitarla del curso?
-                    <button type="button" className="boton boton-chico" onClick={() => borrarLeccion(l.id)}>
-                      Sí, quitar
-                    </button>
-                    <button type="button" className="boton boton-chico boton-fantasma" onClick={() => setPorBorrar(null)}>
-                      Cancelar
-                    </button>
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    className="boton-icono boton-icono-chico"
-                    onClick={() => setPorBorrar(l.id)}
-                    aria-label={`Quitar la lección ${l.titulo}`}
-                    title="Quitar del curso"
-                  >
-                    <IconoBorrar width={15} height={15} />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
         )}
       </section>
 

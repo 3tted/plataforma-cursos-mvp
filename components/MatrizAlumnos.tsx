@@ -1,12 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ESTADO_ALUMNO, api, hace } from "@/lib/cliente";
 import type { EstadoAlumno, Expediente, MatrizAlumnos as Matriz } from "@/lib/tipos";
-import { useApp } from "./Contexto";
 import { IconoBorrar, IconoDescargar } from "./Iconos";
-import SelectorCurso from "./SelectorCurso";
 
 const ESTADOS: EstadoAlumno[] = ["aprobado", "examen-pendiente", "en-curso", "requiere-apoyo"];
 
@@ -45,31 +43,31 @@ function descargarCsv(matriz: Matriz, alumnos: Expediente[]) {
   URL.revokeObjectURL(enlace.href);
 }
 
-// Una matriz por curso: la coach elige cuál ver.
-export default function MatrizAlumnos() {
-  const { cursoId } = useApp();
-  const [curso, setCurso] = useState(cursoId);
+// La matriz del curso que la coach eligió arriba en su panel.
+export default function MatrizAlumnos({ curso }: { curso: string }) {
   const [matriz, setMatriz] = useState<Matriz | null>(null);
   const [error, setError] = useState(false);
   const [filtro, setFiltro] = useState<EstadoAlumno | "todos">("todos");
   const [porQuitar, setPorQuitar] = useState<string | null>(null);
   const [errorQuitar, setErrorQuitar] = useState<string | null>(null);
 
+  // Si la coach cambia de curso antes de que llegue la matriz anterior, esa ya no se muestra.
+  const vigente = useRef(curso);
   const cargar = useCallback(() => {
+    vigente.current = curso;
     setError(false);
     api<Matriz>(`/api/coach/alumnos?curso=${encodeURIComponent(curso)}`)
-      .then(setMatriz)
-      .catch(() => setError(true));
+      .then((m) => vigente.current === curso && setMatriz(m))
+      .catch(() => vigente.current === curso && setError(true));
   }, [curso]);
 
-  const elegirCurso = (id: string) => {
-    setCurso(id);
+  // Al cambiar de curso, la matriz y los filtros empiezan de cero.
+  useEffect(() => {
     setMatriz(null);
     setFiltro("todos");
     setPorQuitar(null);
-  };
-
-  useEffect(cargar, [cargar]);
+    cargar();
+  }, [cargar]);
 
   const quitar = async (autor: string) => {
     setErrorQuitar(null);
@@ -100,7 +98,7 @@ export default function MatrizAlumnos() {
         <div>
           <h2 id="matriz-titulo">Avance de tus alumnos</h2>
           <p className="texto-suave">
-            Lecciones por módulo, repaso y examen final de cada alumno en el curso que elijas.
+            Lecciones por módulo, repaso y examen final de cada alumno en este curso.
             {matriz && ` Se aprueba con ${matriz.aprobarCon}%.`}
           </p>
         </div>
@@ -110,8 +108,6 @@ export default function MatrizAlumnos() {
           </button>
         )}
       </div>
-
-      <SelectorCurso activo={curso} alElegir={elegirCurso} etiqueta="Curso de la matriz" todos />
 
       {error && <p className="error">No pudimos cargar el avance de tus alumnos. Recarga la página.</p>}
       {!matriz && !error && <p className="texto-suave">Cargando…</p>}

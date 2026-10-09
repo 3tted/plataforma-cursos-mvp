@@ -1,0 +1,92 @@
+{
+  "curso": {
+    "id": "precios-servicios",
+    "titulo": "Precios para tus servicios",
+    "subtitulo": "Calcula cuánto vale tu hora, cotiza con confianza y cobra sin pena, en 2 módulos.",
+    "preguntas_sugeridas": [
+      "¿Cómo calculo cuánto cobrar por hora?",
+      "¿Me conviene cobrar por hora o por proyecto?",
+      "¿Cuánto anticipo debo pedir?",
+      "Un cliente me pide descuento. ¿Qué hago?"
+    ],
+    "modulos": [
+      {
+        "id": "S1",
+        "titulo": "Cuánto vale tu hora",
+        "lecciones": [
+          {
+            "id": "P1",
+            "titulo": "Calcula el costo de tu hora",
+            "duracion_min": 9,
+            "gratis": true,
+            "resumen": "La fórmula para saber cuánto te cuesta cada hora de trabajo y cuánto cobrar para que te deje ganancia.",
+            "preguntas_sugeridas": [
+              "¿Por qué no divido entre 160 horas al mes?",
+              "¿Qué entra en mis costos fijos si trabajo desde casa?",
+              "¿Qué margen le pongo a mi hora?"
+            ],
+            "archivo": "lecciones/P1.md"
+          },
+          {
+            "id": "P2",
+            "titulo": "El tiempo que no cobras",
+            "duracion_min": 7,
+            "gratis": true,
+            "resumen": "Cotizar, contestar mensajes y hacer correcciones también es trabajo: cómo medirlo y cobrarlo.",
+            "preguntas_sugeridas": [
+              "¿Cuántas rondas de cambios incluyo?",
+              "¿Cómo registro mi tiempo sin complicarme?",
+              "¿Cobro las juntas con el cliente?"
+            ],
+            "archivo": "lecciones/P2.md"
+          }
+        ]
+      },
+      {
+        "id": "S2",
+        "titulo": "Cotiza y cobra",
+        "lecciones": [
+          {
+            "id": "P3",
+            "titulo": "Por hora, por proyecto o por paquete",
+            "duracion_min": 8,
+            "gratis": false,
+            "resumen": "Cuándo conviene cada forma de cobrar y cómo pasar de tu tarifa por hora a un precio por proyecto.",
+            "preguntas_sugeridas": [
+              "¿Cómo calculo el precio de un proyecto?",
+              "¿Cuántos paquetes conviene ofrecer?",
+              "¿Para qué sirve el colchón de imprevistos?"
+            ],
+            "archivo": "lecciones/P3.md"
+          },
+          {
+            "id": "P4",
+            "titulo": "Cotizaciones que se aceptan",
+            "duracion_min": 9,
+            "gratis": false,
+            "resumen": "Las cinco partes de una cotización clara, cuánto tiempo darle de vigencia y cómo responder a un descuento.",
+            "preguntas_sugeridas": [
+              "¿Qué debe decir mi cotización?",
+              "Un cliente me pide descuento. ¿Qué hago?",
+              "¿Cuándo le doy seguimiento a una cotización?"
+            ],
+            "archivo": "lecciones/P4.md"
+          },
+          {
+            "id": "P5",
+            "titulo": "Anticipos y cobranza sin pena",
+            "duracion_min": 7,
+            "gratis": false,
+            "resumen": "Cuánto anticipo pedir, cómo dividir los pagos de un proyecto largo y qué hacer cuando un cliente no paga.",
+            "preguntas_sugeridas": [
+              "¿Cuánto anticipo debo pedir?",
+              "¿Qué le escribo a un cliente que no me ha pagado?",
+              "¿Entrego los archivos antes de que me paguen?"
+            ],
+            "archivo": "lecciones/P5.md"
+          }
+        ]
+      }
+    ]
+  }
+}

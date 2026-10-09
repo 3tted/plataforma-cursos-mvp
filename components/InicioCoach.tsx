@@ -19,36 +19,41 @@ const PRIORIDAD = { "requiere-apoyo": 0, "examen-pendiente": 1, "en-curso": 2, "
 // Inicio de la coach: sus cursos, sus alumnos y lo que le toca contestar.
 export default function InicioCoach() {
   const router = useRouter();
-  const { usuario, datos, lecciones, setBorrador } = useApp();
+  const { usuario, datos, setBorrador, cursos, cambiarCurso } = useApp();
   const [resumen, setResumen] = useState<ResumenCoach | null>(null);
-  const [matriz, setMatriz] = useState<MatrizAlumnos | null>(null);
+  const [matrices, setMatrices] = useState<MatrizAlumnos[] | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    Promise.all([api<ResumenCoach>("/api/coach/resumen"), api<MatrizAlumnos>("/api/coach/alumnos")])
-      .then(([r, m]) => {
-        setResumen(r);
-        setMatriz(m);
-      })
+    api<ResumenCoach>("/api/coach/resumen")
+      .then(setResumen)
       .catch(() => setError(true));
   }, []);
 
+  // Una matriz por curso; aquí se juntan para ver de un vistazo quién necesita apoyo.
+  useEffect(() => {
+    if (cursos.length === 0) return;
+    Promise.all(cursos.map((c) => api<MatrizAlumnos>(`/api/coach/alumnos?curso=${encodeURIComponent(c.id)}`)))
+      .then(setMatrices)
+      .catch(() => setError(true));
+  }, [cursos]);
+
   const pendientes = useMemo(() => sinResolver(agrupar(resumen?.preguntas ?? [])).slice(0, 4), [resumen]);
+  const filas = useMemo(
+    () => matrices?.flatMap((m) => m.alumnos.map((a) => ({ ...a, curso: m.curso }))) ?? [],
+    [matrices],
+  );
   const alumnos = useMemo(
     () =>
-      [...(matriz?.alumnos ?? [])]
+      [...filas]
         .sort(
           (a, b) =>
             PRIORIDAD[a.estado] - PRIORIDAD[b.estado] || (b.ultimaActividad ?? "").localeCompare(a.ultimaActividad ?? ""),
         )
         .slice(0, 5),
-    [matriz],
+    [filas],
   );
-  const apoyo = matriz?.alumnos.filter((a) => a.estado === "requiere-apoyo").length;
-
-  const base = lecciones.filter((l) => !l.deCoach);
-  const minutos = base.reduce((s, l) => s + l.duracion_min, 0);
-  const conVideo = lecciones.filter((l) => l.video).length;
+  const apoyo = matrices ? filas.filter((a) => a.estado === "requiere-apoyo").length : undefined;
   const activa = COMUNIDADES.find((c) => c.estado === "activa")!;
   const nombre = usuario?.nombre.split(" ")[0] ?? "";
 
@@ -98,19 +103,24 @@ export default function InicioCoach() {
           <h2 id="mis-cursos-titulo">Mis cursos</h2>
         </div>
         <ul className="inicio-cursos">
-          <li>
-            <Link href="/curso" className="inicio-curso">
-              <PortadaTema tema={activa.tema} clave={activa.id} />
-              <span className="inicio-curso-cuerpo">
-                <span className="pastilla pastilla-ok">Publicado</span>
-                <span className="ficha-nombre">{datos?.curso.titulo ?? activa.curso}</span>
-                <span className="texto-suave inicio-meta">
-                  <span className="cifra">{base.length}</span> lecciones · <span className="cifra">{minutos}</span> min ·{" "}
-                  <span className="cifra">{conVideo}</span> con video
-                </span>
-              </span>
-            </Link>
-          </li>
+          {cursos.map((c) => {
+            const enMatriz = matrices?.find((m) => m.curso.id === c.id)?.alumnos.length;
+            return (
+              <li key={c.id}>
+                <Link href="/curso" className="inicio-curso" onClick={() => cambiarCurso(c.id)}>
+                  <PortadaTema tema={activa.tema} clave={c.id} />
+                  <span className="inicio-curso-cuerpo">
+                    <span className="pastilla pastilla-ok">Publicado</span>
+                    <span className="ficha-nombre">{c.titulo}</span>
+                    <span className="texto-suave inicio-meta">
+                      <span className="cifra">{c.lecciones.length}</span> lecciones · <span className="cifra">{c.minutos}</span>{" "}
+                      min · <span className="cifra">{enMatriz ?? "…"}</span> {enMatriz === 1 ? "alumno" : "alumnos"}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
           <li className="inicio-curso inicio-curso-nuevo">
             <span className="inicio-curso-cuerpo">
               <span className="pastilla">Próximamente</span>
@@ -132,12 +142,12 @@ export default function InicioCoach() {
               Ver la matriz <IconoFlechaDer width={15} height={15} />
             </Link>
           </div>
-          {matriz && alumnos.length === 0 && (
+          {matrices && alumnos.length === 0 && (
             <p className="vacio">Todavía no hay avance. Cuando un alumno complete una lección, aparece aquí.</p>
           )}
           <ul className="inicio-lista">
             {alumnos.map((a) => (
-              <li key={a.autor} className="inicio-alumno">
+              <li key={`${a.curso.id}-${a.autor}`} className="inicio-alumno">
                 <Avatar nombre={a.autor} tamaño={34} />
                 <span className="inicio-publicacion-texto">
                   <span className="inicio-publicacion-titulo">{a.autor}</span>
@@ -145,7 +155,8 @@ export default function InicioCoach() {
                     <span className="cifra">
                       {a.leccionesHechas} de {a.leccionesTotal}
                     </span>{" "}
-                    lecciones{a.ultimaActividad && ` · ${hace(a.ultimaActividad)}`}
+                    lecciones de {a.curso.titulo}
+                    {a.ultimaActividad && ` · ${hace(a.ultimaActividad)}`}
                   </span>
                 </span>
                 <span className={ESTADO_ALUMNO[a.estado].clase}>{ESTADO_ALUMNO[a.estado].texto}</span>

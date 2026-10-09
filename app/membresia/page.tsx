@@ -66,7 +66,7 @@ export default function PaginaMembresia() {
   // regresarla a ella cuando el pago se confirme, aunque vaya antes a la tienda.
   useEffect(() => {
     const desde = new URLSearchParams(window.location.search).get("leccion");
-    if (desde && /^[LC]\d+$/.test(desde)) guardarLeccionDeseada(desde);
+    if (desde && /^[LPC]\d+$/.test(desde)) guardarLeccionDeseada(desde);
   }, [guardarLeccionDeseada]);
 
   // Al generar la ficha, el foco pasa a su título para que se anuncie.

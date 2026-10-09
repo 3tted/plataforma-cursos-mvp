@@ -1,8 +1,8 @@
-// Las respuestas del asistente citan lecciones como [L4], [L5, L6] o [C1]
-// (C = lección agregada por la coach). Este módulo lo usan el servidor, para
+// Las respuestas del asistente citan lecciones como [L4], [L5, L6], [P2] o [C1]
+// (L y P = cada curso; C = lección agregada por la coach). Este módulo lo usan el servidor, para
 // registrar qué lecciones se consultan, y la interfaz, para volverlas enlaces.
 
-export const PATRON_CITA = /\[((?:[LC]\d+)(?:\s*,\s*[LC]\d+)*)\]/g;
+export const PATRON_CITA = /\[((?:[LPC]\d+)(?:\s*,\s*[LPC]\d+)*)\]/g;
 
 export function extraerCitas(texto: string): string[] {
   const ids = new Set<string>();

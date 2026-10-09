@@ -1,5 +1,5 @@
 import { consultar, modificar } from "@/lib/almacen";
-import { cargarCurso } from "@/lib/curso";
+import { cargarCursos } from "@/lib/curso";
 import { completadasDe, leccionesDelCurso } from "@/lib/evaluaciones";
 import { ErrorDeDatos, error, leerJson, manejar, texto } from "@/lib/http";
 
@@ -18,7 +18,9 @@ export const POST = manejar(async (req: Request) => {
   const datos = await leerJson(req);
   const autor = texto(datos.autor, "autor", 60);
   if (!Array.isArray(datos.completadas)) throw new ErrorDeDatos('Falta el campo "completadas".');
-  const validas = new Set(leccionesDelCurso(await cargarCurso()).flatMap((m) => m.lecciones.map((l) => l.id)));
+  const validas = new Set(
+    (await cargarCursos()).flatMap((c) => leccionesDelCurso(c).flatMap((m) => m.lecciones.map((l) => l.id))),
+  );
   const completadas = [...new Set(datos.completadas.filter((id): id is string => typeof id === "string" && validas.has(id)))];
 
   await modificar((a) => {

@@ -2,7 +2,7 @@ import { createReadStream, promises as fs } from "fs";
 import path from "path";
 import { Readable } from "stream";
 import { DIRECTORIO_VIDEOS, consultar, modificar, rutaDelVideo } from "@/lib/almacen";
-import { cargarCurso, todasLasLecciones } from "@/lib/curso";
+import { cursoDeLeccion } from "@/lib/curso";
 import { error, manejar } from "@/lib/http";
 import { MAX_BYTES_VIDEO, TIPOS_VIDEO, tamañoLegible } from "@/lib/reglas-video";
 import type { VideoLeccion } from "@/lib/tipos";
@@ -21,8 +21,7 @@ type Contexto = { params: Promise<{ leccion: string }> };
 
 async function leccionExistente(contexto: Contexto): Promise<string | null> {
   const { leccion } = await contexto.params;
-  const { curso } = await cargarCurso();
-  return todasLasLecciones(curso).some((l) => l.id === leccion) ? leccion : null;
+  return (await cursoDeLeccion(leccion)) ? leccion : null;
 }
 
 async function videoDe(leccion: string): Promise<VideoLeccion | undefined> {

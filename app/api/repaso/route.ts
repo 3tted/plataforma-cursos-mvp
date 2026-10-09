@@ -1,4 +1,5 @@
 import { modificar } from "@/lib/almacen";
+import { cursoDeLeccion } from "@/lib/curso";
 import { calificar, cargarEvaluaciones } from "@/lib/evaluaciones";
 import { error, leerJson, manejar, rol, texto } from "@/lib/http";
 import type { ResultadoRepaso } from "@/lib/tipos";
@@ -12,7 +13,9 @@ export const POST = manejar(async (req: Request) => {
   const datos = await leerJson(req);
   const autor = texto(datos.autor, "autor", 60);
   const leccion = texto(datos.leccion, "leccion", 10);
-  const preguntas = (await cargarEvaluaciones()).repaso[leccion];
+  // Los ids de lección no se repiten entre cursos: la lección dice de qué curso es.
+  const curso = await cursoDeLeccion(leccion);
+  const preguntas = curso ? (await cargarEvaluaciones(curso.curso.id)).repaso[leccion] : undefined;
   if (!preguntas) return error("Esta lección no tiene repaso.", 404);
 
   const { detalle, aciertos, total, fallas } = calificar(preguntas, datos.respuestas);

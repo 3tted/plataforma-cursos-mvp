@@ -11,11 +11,11 @@ Cubre el criterio del MVP de la ficha: *comunidad con feed simple + un curso de 
 | Pieza | Qué hace | Estado |
 |---|---|---|
 | **Comunidad** | Feed con categorías; publicar, comentar y marcar "Me sirve". Los anuncios son solo para la coach. | Funciona (datos en un archivo JSON) |
-| **Curso** | "Finanzas claras para tu negocio": 3 módulos, 8 lecciones con texto y transcripción. Progreso por alumno. El módulo 1 es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
+| **Cursos** | Dos cursos de la misma coach en la misma membresía: "Finanzas claras para tu negocio" (3 módulos, 8 lecciones) y "Precios para tus servicios" (2 módulos, 5 lecciones), con texto y transcripción. Se cambia de curso desde la página del curso o la comunidad. Progreso por alumno. El módulo 1 de cada curso es gratis. La coach **sube el video de cada lección** (MP4, WebM o MOV, hasta 250 MB) desde la propia lección. | Funciona (videos guardados en `.data/videos`; trae videos de muestra en `data/videos`) |
 | **Asistente del curso** | En cada lección, en la comunidad y en `/curso/asistente`. Responde dudas usando el contenido de las lecciones y **cita la lección** de donde sale cada idea ([L4], [L5]…). Si algo no está en el curso, lo dice y ofrece llevar la pregunta a la comunidad. | Real con clave de API · modo demo sin ella |
 | **Asistente Merkatics** | El de "Asistente" en el menú (`/asistente`): IA de uso general (ideas, mensajes, explicaciones). No usa los cursos y sus preguntas no aparecen en el panel de la coach. | Solo con clave de API |
-| **Repaso y examen final** | Cada lección cierra con un repaso de 2 preguntas (no cuenta para la calificación; explica la respuesta y ofrece preguntarle al asistente). Al terminar las 8 lecciones se desbloquea el examen final: 12 preguntas, se aprueba con 70% y hay 3 intentos. Las respuestas correctas solo viven en el servidor (`data/evaluaciones.json`). | Funciona |
-| **Expediente y matriz** | El alumno ve su expediente en su perfil; la coach ve en su panel la matriz de alumnos (avance por módulo, repaso, examen y estado), las preguntas que más se fallan y puede descargarla en CSV. Empieza vacía: solo aparecen los alumnos que de verdad avanzan. | Funciona (alumnos identificados por nombre) |
+| **Repaso y examen final** | Cada lección cierra con un repaso de 2 preguntas (no cuenta para la calificación; explica la respuesta y ofrece preguntarle al asistente). Al terminar las lecciones de un curso se desbloquea su examen final (12 preguntas en Finanzas claras, 8 en Precios), se aprueba con 70% y hay 3 intentos. Las respuestas correctas solo viven en el servidor (`data/evaluaciones*.json`). | Funciona |
+| **Expediente y matriz** | El alumno ve su expediente en su perfil; la coach ve en su panel una matriz de alumnos por curso (avance por módulo, repaso, examen y estado), las preguntas que más se fallan y puede descargarla en CSV. Empieza vacía: solo aparecen los alumnos que de verdad avanzan. | Funciona (alumnos identificados por nombre) |
 | **Pagos locales** | Membresía de $490 MXN/mes con OXXO (ficha con referencia), SPEI (CLABE) o Mercado Pago. | **Simulado**: no se cobra nada |
 | **Panel de la coach** | Qué preguntan los alumnos al asistente, lecciones más consultadas, pagos y un formulario para **pegar una lección propia** y que la IA responda con ella. | Funciona |
 
@@ -100,8 +100,10 @@ lib/
   curso.ts                 Carga del curso desde /data
   tipos.ts                 Modelo de datos compartido
 data/
-  curso.json               Comunidad, módulos y lecciones
-  lecciones/L1..L8.md      Contenido y transcripciones
+  curso.json               Comunidad y curso principal (módulos y lecciones)
+  cursos/*.json            Los demás cursos de la comunidad
+  evaluaciones*.json       Repaso y examen final de cada curso
+  lecciones/L*.md, P*.md   Contenido y transcripciones (L = Finanzas claras, P = Precios)
   comunidad-seed.json      Publicaciones de ejemplo
 ```
 

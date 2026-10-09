@@ -9,6 +9,7 @@ import type { Expediente } from "@/lib/tipos";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
 import { IconoAsistente, IconoFlechaDer } from "./Iconos";
+import PortadaTema from "./PortadaTema";
 import PreguntaRapida from "./PreguntaRapida";
 import PublicacionesRecientes from "./PublicacionesRecientes";
 import TarjetaComunidad from "./TarjetaComunidad";
@@ -16,15 +17,26 @@ import TarjetaComunidad from "./TarjetaComunidad";
 // Inicio del alumno: seguir su curso, resolver dudas y ver qué pasa en la comunidad.
 export default function InicioAlumno() {
   const router = useRouter();
-  const { usuario, datos, lecciones, completadas, tieneAcceso, setPreguntaPendiente, setLeccionContexto } = useApp();
+  const {
+    usuario,
+    datos,
+    lecciones,
+    completadas,
+    tieneAcceso,
+    setPreguntaPendiente,
+    setLeccionContexto,
+    cursos,
+    cursoId,
+    cambiarCurso,
+  } = useApp();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
 
   useEffect(() => {
     if (!usuario) return;
-    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}`)
+    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}&curso=${encodeURIComponent(cursoId)}`)
       .then(setExpediente)
       .catch(() => setExpediente(null));
-  }, [usuario, completadas]);
+  }, [usuario, completadas, cursoId]);
 
   const base = lecciones.filter((l) => !l.deCoach);
   const hechas = base.filter((l) => completadas.includes(l.id)).length;
@@ -99,6 +111,7 @@ export default function InicioAlumno() {
 
         <section className="tarjeta inicio-bloque inicio-avance" aria-labelledby="avance-titulo">
           <h2 id="avance-titulo">Tu avance</h2>
+          {cursos.length > 1 && <p className="texto-suave inicio-meta">{datos?.curso.titulo}</p>}
           <p className="inicio-avance-cifra">
             <span className="cifra">{hechas}</span>
             <span className="texto-suave">
@@ -143,6 +156,41 @@ export default function InicioAlumno() {
           </Link>
         </section>
       </div>
+
+      {cursos.length > 1 && (
+        <section className="inicio-bloque" aria-labelledby="tus-cursos-titulo">
+          <div className="inicio-bloque-cabecera">
+            <h2 id="tus-cursos-titulo">Tus cursos</h2>
+          </div>
+          <ul className="inicio-cursos">
+            {cursos.map((c) => {
+              const hechasCurso = c.lecciones.filter((id) => completadas.includes(id)).length;
+              const actual = c.id === cursoId;
+              return (
+                <li key={c.id}>
+                  <Link href="/curso" className="inicio-curso inicio-curso-alumno" onClick={() => cambiarCurso(c.id)}>
+                    <PortadaTema tema="Finanzas" clave={c.id} />
+                    <span className="inicio-curso-cuerpo">
+                      {actual && <span className="pastilla pastilla-marca">Lo estás viendo</span>}
+                      <span className="ficha-nombre">{c.titulo}</span>
+                      <span className="texto-suave inicio-meta">
+                        <span className="cifra">{c.lecciones.length}</span> lecciones · <span className="cifra">{c.minutos}</span>{" "}
+                        min
+                      </span>
+                      <span className="progreso" aria-hidden="true">
+                        <span style={{ transform: `scaleX(${c.lecciones.length ? hechasCurso / c.lecciones.length : 0})` }} />
+                      </span>
+                      <span className="texto-suave inicio-meta">
+                        {hechasCurso === 0 ? "Sin empezar" : `${hechasCurso} de ${c.lecciones.length} lecciones completadas`}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <div className="inicio-fila">
         <section className="tarjeta-asistente inicio-asistente" aria-labelledby="asistente-inicio-titulo">

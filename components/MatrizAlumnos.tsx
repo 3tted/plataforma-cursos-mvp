@@ -6,6 +6,7 @@ import { ESTADO_ALUMNO, api, hace } from "@/lib/cliente";
 import type { EstadoAlumno, Expediente, MatrizAlumnos as Matriz } from "@/lib/tipos";
 import { useApp } from "./Contexto";
 import { IconoBorrar, IconoDescargar } from "./Iconos";
+import SelectorCurso from "./SelectorCurso";
 
 const ESTADOS: EstadoAlumno[] = ["aprobado", "examen-pendiente", "en-curso", "requiere-apoyo"];
 
@@ -39,13 +40,15 @@ function descargarCsv(matriz: Matriz, alumnos: Expediente[]) {
   const csv = "﻿" + [encabezado, ...filas].map((f) => f.map(celda).join(",")).join("\r\n");
   const enlace = document.createElement("a");
   enlace.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-  enlace.download = `alumnos-${new Date().toISOString().slice(0, 10)}.csv`;
+  enlace.download = `alumnos-${matriz.curso.id}-${new Date().toISOString().slice(0, 10)}.csv`;
   enlace.click();
   URL.revokeObjectURL(enlace.href);
 }
 
+// Una matriz por curso: la coach elige cuál ver.
 export default function MatrizAlumnos() {
-  const { lecciones } = useApp();
+  const { cursoId } = useApp();
+  const [curso, setCurso] = useState(cursoId);
   const [matriz, setMatriz] = useState<Matriz | null>(null);
   const [error, setError] = useState(false);
   const [filtro, setFiltro] = useState<EstadoAlumno | "todos">("todos");
@@ -53,10 +56,18 @@ export default function MatrizAlumnos() {
   const [errorQuitar, setErrorQuitar] = useState<string | null>(null);
 
   const cargar = useCallback(() => {
-    api<Matriz>("/api/coach/alumnos")
+    setError(false);
+    api<Matriz>(`/api/coach/alumnos?curso=${encodeURIComponent(curso)}`)
       .then(setMatriz)
       .catch(() => setError(true));
-  }, []);
+  }, [curso]);
+
+  const elegirCurso = (id: string) => {
+    setCurso(id);
+    setMatriz(null);
+    setFiltro("todos");
+    setPorQuitar(null);
+  };
 
   useEffect(cargar, [cargar]);
 
@@ -81,7 +92,7 @@ export default function MatrizAlumnos() {
   }, [matriz]);
 
   const visibles = matriz?.alumnos.filter((a) => filtro === "todos" || a.estado === filtro) ?? [];
-  const tituloDe = (id: string) => lecciones.find((l) => l.id === id)?.titulo ?? id;
+  const tituloDe = (id: string) => matriz?.titulos[id] ?? id;
 
   return (
     <section className="tarjeta matriz" aria-labelledby="matriz-titulo">
@@ -89,7 +100,7 @@ export default function MatrizAlumnos() {
         <div>
           <h2 id="matriz-titulo">Avance de tus alumnos</h2>
           <p className="texto-suave">
-            Lecciones por módulo, repaso y examen final de cada alumno.
+            Lecciones por módulo, repaso y examen final de cada alumno en el curso que elijas.
             {matriz && ` Se aprueba con ${matriz.aprobarCon}%.`}
           </p>
         </div>
@@ -99,6 +110,8 @@ export default function MatrizAlumnos() {
           </button>
         )}
       </div>
+
+      <SelectorCurso activo={curso} alElegir={elegirCurso} etiqueta="Curso de la matriz" />
 
       {error && <p className="error">No pudimos cargar el avance de tus alumnos. Recarga la página.</p>}
       {!matriz && !error && <p className="texto-suave">Cargando…</p>}
@@ -166,7 +179,7 @@ export default function MatrizAlumnos() {
                     <td className="matriz-acciones">
                       {porQuitar === a.autor ? (
                         <span className="confirmacion" role="group" aria-label={`Confirmar que quitas a ${a.autor}`}>
-                          ¿Quitar su avance?
+                          ¿Quitar su avance de todos los cursos?
                           <button type="button" className="boton boton-chico" onClick={() => quitar(a.autor)}>
                             Sí, quitar
                           </button>

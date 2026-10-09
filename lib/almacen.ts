@@ -32,6 +32,8 @@ export interface Almacen {
   progreso?: ProgresoAlumno[];
   repasos?: IntentoRepaso[];
   examenes?: IntentoExamen[];
+  /** Videos de muestra que ya se sembraron (para no volver a poner uno que la coach quitó). */
+  muestras?: string[];
 }
 
 const DIRECTORIO =
@@ -96,6 +98,7 @@ async function sembrar(): Promise<Almacen> {
     preguntas: [],
     pagos: [],
     videos: await sembrarVideos(),
+    muestras: (await archivosDeMuestra()).map(leccionDeMuestra),
     // La matriz de la coach empieza vacía: solo muestra a quien de verdad avance.
     progreso: [],
     repasos: [],
@@ -107,18 +110,26 @@ async function sembrar(): Promise<Almacen> {
 // Videos de muestra que viajan con el proyecto (data/videos/L1.webm…). Se
 // copian junto al almacén para que la coach pueda reemplazarlos o quitarlos
 // como cualquier video subido.
-async function sembrarVideos(): Promise<VideoLeccion[]> {
-  let archivos: string[];
+let listaMuestras: string[] | null = null;
+async function archivosDeMuestra(): Promise<string[]> {
+  if (listaMuestras) return listaMuestras;
   try {
-    archivos = (await fs.readdir(VIDEOS_MUESTRA)).filter((a) => /^[A-Za-z0-9]+\.webm$/.test(a));
+    listaMuestras = (await fs.readdir(VIDEOS_MUESTRA)).filter((a) => /^[A-Za-z0-9]+\.webm$/.test(a));
   } catch {
-    return [];
+    listaMuestras = [];
   }
+  return listaMuestras;
+}
+const leccionDeMuestra = (archivo: string) => archivo.replace(/\.webm$/, "");
+
+async function sembrarVideos(): Promise<VideoLeccion[]> {
+  const archivos = await archivosDeMuestra();
+  if (archivos.length === 0) return [];
   await fs.mkdir(DIRECTORIO_VIDEOS, { recursive: true });
   const subidoEn = new Date().toISOString();
   return Promise.all(
     archivos.map(async (a) => {
-      const leccion = a.replace(/\.webm$/, "");
+      const leccion = leccionDeMuestra(a);
       const archivo = `${leccion}-muestra.webm`;
       await fs.copyFile(path.join(VIDEOS_MUESTRA, a), path.join(DIRECTORIO_VIDEOS, archivo));
       const { size } = await fs.stat(path.join(DIRECTORIO_VIDEOS, archivo));
@@ -211,12 +222,43 @@ async function cargar(): Promise<{ almacen: Almacen; version: string | null; cam
   const { texto, version } = await leerCrudo();
   if (texto === null) return { almacen: await sembrar(), version, cambiado: true };
   const almacen = JSON.parse(texto) as Almacen;
+  let cambiado = false;
   // Los almacenes creados antes del repaso y el examen no traen estas listas.
   if (almacen.progreso === undefined) {
     Object.assign(almacen, { progreso: [], repasos: [], examenes: [] });
-    return { almacen, version, cambiado: true };
+    cambiado = true;
   }
-  return { almacen, version, cambiado: false };
+  if (await sumarMuestrasNuevas(almacen)) cambiado = true;
+  return { almacen, version, cambiado };
+}
+
+// Los almacenes que ya existían (por ejemplo, el de Redis en Vercel) se
+// sembraron con los videos de L1 a L8. Si después llegan videos de muestra
+// nuevos (los de otro curso), se agregan una sola vez. La copia en disco no
+// hace falta: rutaDelVideo sirve el archivo original de data/videos.
+const MUESTRAS_ORIGINALES = ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"];
+async function sumarMuestrasNuevas(almacen: Almacen): Promise<boolean> {
+  const sembradas = new Set(almacen.muestras ?? MUESTRAS_ORIGINALES);
+  const nuevas = (await archivosDeMuestra()).filter((a) => !sembradas.has(leccionDeMuestra(a)));
+  if (nuevas.length === 0 && almacen.muestras) return false;
+  almacen.videos ??= [];
+  const subidoEn = new Date().toISOString();
+  for (const archivo of nuevas) {
+    const leccion = leccionDeMuestra(archivo);
+    sembradas.add(leccion);
+    if (almacen.videos.some((v) => v.leccion === leccion)) continue;
+    const { size } = await fs.stat(path.join(VIDEOS_MUESTRA, archivo));
+    almacen.videos.push({
+      leccion,
+      archivo: `${leccion}-muestra.webm`,
+      tipo: "video/webm",
+      bytes: size,
+      nombreOriginal: `video-de-muestra-${leccion}.webm`,
+      subidoEn,
+    });
+  }
+  almacen.muestras = [...sembradas];
+  return true;
 }
 
 // Dentro de una misma copia del servidor, las escrituras se encadenan; entre

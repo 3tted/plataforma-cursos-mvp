@@ -12,7 +12,7 @@ import { IconoCandado } from "./Iconos";
 // escriben en letra monoespaciada, como en una libreta de cuentas.
 
 const PATRON_EN_LINEA =
-  /(\*\*[^*]+\*\*)|(\[(?:[LC]\d+)(?:\s*,\s*[LC]\d+)*\])|((?<=^|[\s(])_[^_\n]+_(?=$|[\s.,;:!?)]))|(\$\d[\d,]*(?:\.\d+)?|(?<![\w$.,])\d+(?:\.\d+)?\s?%)/g;
+  /(\*\*[^*]+\*\*)|(\[(?:[LPC]\d+)(?:\s*,\s*[LPC]\d+)*\])|((?<=^|[\s(])_[^_\n]+_(?=$|[\s.,;:!?)]))|(\$\d[\d,]*(?:\.\d+)?|(?<![\w$.,])\d+(?:\.\d+)?\s?%)/g;
 
 function Cita({ id }: { id: string }) {
   const { lecciones, tieneAcceso } = useApp();

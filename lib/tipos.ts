@@ -56,6 +56,17 @@ export interface DatosCurso {
   curso: Curso;
 }
 
+/** Ficha corta de cada curso de la comunidad, para elegir cuál tomar. */
+export interface ResumenCurso {
+  id: string;
+  titulo: string;
+  subtitulo: string;
+  modulos: number;
+  /** Ids de las lecciones del curso (sin las que agrega la coach desde su panel). */
+  lecciones: string[];
+  minutos: number;
+}
+
 export type Categoria = "Anuncios" | "Dudas" | "Logros" | "Presentaciones" | "General";
 
 export const CATEGORIAS: Categoria[] = ["Anuncios", "Dudas", "Logros", "Presentaciones", "General"];
@@ -198,6 +209,8 @@ export interface IntentoRepaso {
 export interface IntentoExamen {
   id: number;
   autor: string;
+  /** Curso del examen. Los intentos guardados antes de que hubiera dos cursos no lo traen: son del curso principal. */
+  curso?: string;
   aciertos: number;
   total: number;
   puntaje: number;
@@ -228,6 +241,9 @@ export interface Expediente {
 }
 
 export interface MatrizAlumnos {
+  curso: { id: string; titulo: string };
+  /** Título de cada lección del curso, para nombrar las preguntas más falladas. */
+  titulos: Record<string, string>;
   aprobarCon: number;
   modulos: { id: string; titulo: string; total: number }[];
   alumnos: Expediente[];

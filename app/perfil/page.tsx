@@ -134,7 +134,7 @@ function Actividad({ fechas }: { fechas: string[] }) {
 }
 
 export default function PaginaPerfil() {
-  const { usuario, guardarUsuario, membresia, completadas, lecciones } = useApp();
+  const { usuario, guardarUsuario, membresia, completadas, lecciones, cursos } = useApp();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [errorCarga, setErrorCarga] = useState(false);
   const [editando, setEditando] = useState(false);
@@ -184,8 +184,9 @@ export default function PaginaPerfil() {
   if (!usuario) return null;
 
   const activa = COMUNIDADES.find((c) => c.estado === "activa")!;
-  const base = lecciones.filter((l) => !l.deCoach);
-  const hechas = base.filter((l) => completadas.includes(l.id)).length;
+  // Lecciones terminadas en todos los cursos de la comunidad.
+  const idsCursos = cursos.length ? cursos.flatMap((c) => c.lecciones) : lecciones.filter((l) => !l.deCoach).map((l) => l.id);
+  const hechas = idsCursos.filter((id) => completadas.includes(id)).length;
   const desde = usuario.desde ? new Date(usuario.desde) : new Date();
   const visibles = grupo === "todas" || grupo === activa.id ? contribuciones : [];
   const estadoMembresia =
@@ -241,8 +242,10 @@ export default function PaginaPerfil() {
 
         {usuario.rol === "alumno" && (
           <section aria-labelledby="expediente-titulo" className="perfil-seccion">
-            <h2 id="expediente-titulo">Expediente del curso</h2>
-            <ExpedienteCurso autor={usuario.nombre} />
+            <h2 id="expediente-titulo">{cursos.length > 1 ? "Expediente de tus cursos" : "Expediente del curso"}</h2>
+            {cursos.map((c) => (
+              <ExpedienteCurso key={c.id} autor={usuario.nombre} curso={c} />
+            ))}
           </section>
         )}
 

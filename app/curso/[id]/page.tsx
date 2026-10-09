@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "@/components/Contexto";
 import {
   IconoAsistente,
@@ -34,11 +34,22 @@ export default function PaginaLeccion() {
     setLeccionContexto,
     setPreguntaPendiente,
     pagoPendiente,
+    cursos,
+    cursoId,
+    cambiarCurso,
   } = useApp();
   // El sello se anima solo cuando la alumna marca la lección, no al volver a abrirla.
   const [recienMarcada, setRecienMarcada] = useState(false);
   const leccion = lecciones.find((l) => l.id === id);
   useTitulo(leccion?.titulo ?? (datos ? "Lección" : null));
+
+  // Un enlace a una lección de otro curso cambia el curso activo. Las
+  // lecciones que agrega la coach (C1, C2…) son del curso principal.
+  const cursoDeLeccion =
+    cursos.find((c) => c.lecciones.includes(id))?.id ?? (/^C\d+$/.test(id) ? cursos[0]?.id : undefined);
+  useEffect(() => {
+    if (cursoDeLeccion && cursoDeLeccion !== cursoId) cambiarCurso(cursoDeLeccion);
+  }, [cursoDeLeccion, cursoId, cambiarCurso]);
 
   if (!datos) {
     return errorDatos ? (

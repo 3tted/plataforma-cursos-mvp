@@ -25,6 +25,7 @@ export default function PaginaAsistenteCurso() {
     setPreguntaPendiente,
     setBorrador,
     tieneAcceso,
+    cursoId,
   } = useApp();
   const [entrada, setEntrada] = useState("");
   const [enCurso, setEnCurso] = useState(false);
@@ -69,7 +70,7 @@ export default function PaginaAsistenteCurso() {
       let texto = "";
       try {
         const { modo } = await preguntarAlAsistente(
-          { pregunta: limpia, historial, leccion: leccionContexto, autor: usuario?.nombre, miembro: tieneAcceso },
+          { pregunta: limpia, historial, leccion: leccionContexto, autor: usuario?.nombre, miembro: tieneAcceso, curso: cursoId },
           abortar.signal,
           (parcial, modoParcial) => {
             texto = parcial;
@@ -96,7 +97,7 @@ export default function PaginaAsistenteCurso() {
         control.current = null;
       }
     },
-    [chat, enCurso, leccionContexto, usuario, tieneAcceso, setChat, actualizarUltimo],
+    [chat, enCurso, leccionContexto, usuario, tieneAcceso, cursoId, setChat, actualizarUltimo],
   );
 
   // Pregunta que llega desde otra página (una lección o la comunidad).

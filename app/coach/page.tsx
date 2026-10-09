@@ -8,6 +8,7 @@ import { IconoBorrar, IconoComunidad } from "@/components/Iconos";
 import Arcos from "@/components/Arcos";
 import Markdown from "@/components/Markdown";
 import MatrizAlumnos from "@/components/MatrizAlumnos";
+import SelectorCurso from "@/components/SelectorCurso";
 import { useTitulo } from "@/components/useTitulo";
 import { api, fechaCorta, hace, moneda } from "@/lib/cliente";
 import { agrupar } from "@/lib/preguntas";
@@ -17,7 +18,7 @@ const NOMBRE_METODO = { oxxo: "OXXO", spei: "SPEI", mercadopago: "Mercado Pago" 
 
 export default function PaginaCoach() {
   const router = useRouter();
-  const { usuario, lecciones, recargarCurso, setBorrador } = useApp();
+  const { usuario, lecciones, recargarCurso, setBorrador, cursoId, cambiarCurso } = useApp();
   const [resumen, setResumen] = useState<ResumenCoach | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [titulo, setTitulo] = useState("");
@@ -218,6 +219,7 @@ export default function PaginaCoach() {
 
       <section className="tarjeta" aria-labelledby="videos-titulo">
         <h2 id="videos-titulo">Videos de tus lecciones</h2>
+        <SelectorCurso activo={cursoId} alElegir={cambiarCurso} etiqueta="Curso de los videos" />
         <p className="texto-suave">
           <span className="cifra">{conVideo}</span> de <span className="cifra">{lecciones.length}</span> lecciones
           tienen video. Para subir o cambiar uno, abre la lección.

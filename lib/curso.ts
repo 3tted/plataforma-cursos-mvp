@@ -1,10 +1,25 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { consultar } from "./almacen";
-import type { Curso, DatosCurso, Leccion, LeccionCoach, Modulo } from "./tipos";
+import type { Curso, DatosCurso, Leccion, LeccionCoach, Modulo, ResumenCurso } from "./tipos";
 
 const DATOS = path.join(process.cwd(), "data");
 const SEPARADOR_TRANSCRIPCION = "<!-- transcripcion -->";
+
+// Cursos de la comunidad. Todos son de la misma coach y entran en la misma
+// membresía; los ids de lección no se repiten entre cursos (L1…, P1…), así
+// que el avance de cada alumno sigue siendo una sola lista de lecciones.
+export const CURSO_PRINCIPAL = "finanzas-negocio";
+const ARCHIVOS: Record<string, string> = {
+  [CURSO_PRINCIPAL]: "curso.json",
+  "precios-servicios": "cursos/precios-servicios.json",
+};
+export const IDS_CURSOS = Object.keys(ARCHIVOS);
+
+/** El curso que pide el navegador; si no llega o no existe, el principal. */
+export function idCurso(valor: unknown): string {
+  return typeof valor === "string" && valor in ARCHIVOS ? valor : CURSO_PRINCIPAL;
+}
 
 interface LeccionArchivo extends Omit<Leccion, "contenido" | "transcripcion"> {
   archivo: string;
@@ -14,7 +29,11 @@ interface CursoArchivo extends Omit<Curso, "modulos"> {
   modulos: (Omit<Modulo, "lecciones"> & { lecciones: LeccionArchivo[] })[];
 }
 
-let cacheBase: DatosCurso | null = null;
+const cacheBase = new Map<string, DatosCurso>();
+
+async function leerJson<T>(archivo: string): Promise<T> {
+  return JSON.parse(await fs.readFile(path.join(DATOS, archivo), "utf8")) as T;
+}
 
 async function cargarLeccion({ archivo, ...meta }: LeccionArchivo): Promise<Leccion> {
   const texto = await fs.readFile(path.join(DATOS, archivo), "utf8");
@@ -22,35 +41,37 @@ async function cargarLeccion({ archivo, ...meta }: LeccionArchivo): Promise<Lecc
   return { ...meta, contenido: contenido.trim(), transcripcion: transcripcion.trim() };
 }
 
-async function cargarCursoBase(): Promise<DatosCurso> {
-  if (cacheBase && process.env.NODE_ENV === "production") return cacheBase;
-  const archivo = JSON.parse(await fs.readFile(path.join(DATOS, "curso.json"), "utf8")) as {
-    comunidad: DatosCurso["comunidad"];
-    curso: CursoArchivo;
-  };
+async function cargarCursoBase(id: string): Promise<DatosCurso> {
+  const guardado = cacheBase.get(id);
+  if (guardado && process.env.NODE_ENV === "production") return guardado;
+  // La comunidad se describe una sola vez, en el archivo del curso principal.
+  const principal = await leerJson<{ comunidad: DatosCurso["comunidad"]; curso: CursoArchivo }>(ARCHIVOS[CURSO_PRINCIPAL]);
+  const archivo = id === CURSO_PRINCIPAL ? principal : await leerJson<{ curso: CursoArchivo }>(ARCHIVOS[id]);
   const modulos = await Promise.all(
     archivo.curso.modulos.map(async (m) => ({
       ...m,
       lecciones: await Promise.all(m.lecciones.map(cargarLeccion)),
     })),
   );
-  cacheBase = { comunidad: archivo.comunidad, curso: { ...archivo.curso, modulos } };
-  return cacheBase;
+  const datos = { comunidad: principal.comunidad, curso: { ...archivo.curso, modulos } };
+  cacheBase.set(id, datos);
+  return datos;
 }
 
 export function idLeccionCoach(leccion: LeccionCoach): string {
   return `C${leccion.id}`;
 }
 
-// El curso completo: las lecciones del archivo más las que la coach agrega
-// desde su panel, y el video que la coach haya subido a cada una. El
-// asistente de IA responde con base en todas (con su texto y transcripción).
-export async function cargarCurso(): Promise<DatosCurso> {
-  const base = await cargarCursoBase();
+// Un curso completo: las lecciones del archivo, más (en el curso principal)
+// las que la coach agrega desde su panel, y el video que la coach haya subido
+// a cada una. El asistente de IA responde con base en todas.
+export async function cargarCurso(id: string = CURSO_PRINCIPAL): Promise<DatosCurso> {
+  const base = await cargarCursoBase(idCurso(id));
   const { propias, videos } = await consultar((a) => ({ propias: a.leccionesCoach, videos: a.videos ?? [] }));
-  if (propias.length === 0 && videos.length === 0) return base;
+  const conPropias = base.curso.id === CURSO_PRINCIPAL && propias.length > 0;
+  if (!conPropias && videos.length === 0) return base;
 
-  const modulos = propias.length ? [...base.curso.modulos, moduloDeCoach(base, propias)] : base.curso.modulos;
+  const modulos = conPropias ? [...base.curso.modulos, moduloDeCoach(base, propias)] : base.curso.modulos;
   const porLeccion = new Map(videos.map((v) => [v.leccion, v]));
   return {
     ...base,
@@ -74,6 +95,31 @@ export async function cargarCurso(): Promise<DatosCurso> {
         }),
       })),
     },
+  };
+}
+
+export function cargarCursos(): Promise<DatosCurso[]> {
+  return Promise.all(IDS_CURSOS.map((id) => cargarCurso(id)));
+}
+
+/** El curso al que pertenece una lección, o null si no existe. */
+export async function cursoDeLeccion(leccion: string): Promise<DatosCurso | null> {
+  for (const datos of await cargarCursos()) {
+    if (datos.curso.modulos.some((m) => m.lecciones.some((l) => l.id === leccion))) return datos;
+  }
+  return null;
+}
+
+export function resumenDe({ curso }: DatosCurso): ResumenCurso {
+  const modulos = curso.modulos.filter((m) => m.id !== "MC");
+  const lecciones = modulos.flatMap((m) => m.lecciones);
+  return {
+    id: curso.id,
+    titulo: curso.titulo,
+    subtitulo: curso.subtitulo,
+    modulos: modulos.length,
+    lecciones: lecciones.map((l) => l.id),
+    minutos: lecciones.reduce((s, l) => s + l.duracion_min, 0),
   };
 }
 

@@ -15,7 +15,7 @@ import type { ResumenComunidad } from "@/lib/tipos";
 // Directorio: la alumna elige a qué comunidad entrar. Cada comunidad trae su
 // curso, así que aquí también se ve el avance del curso.
 export default function PaginaComunidades() {
-  const { datos, lecciones, completadas } = useApp();
+  const { cursos, completadas } = useApp();
   const [miembros, setMiembros] = useState<number | null>(null);
   const [tema, setTema] = useState("Todos");
   const [busqueda, setBusqueda] = useState("");
@@ -31,9 +31,10 @@ export default function PaginaComunidades() {
   const proximas = COMUNIDADES.filter((c) => c.estado === "proximamente");
   const temas = ["Todos", ...new Set(proximas.map((c) => c.tema))];
 
-  const base = lecciones.filter((l) => !l.deCoach);
-  const hechas = base.filter((l) => completadas.includes(l.id)).length;
-  const minutos = base.reduce((s, l) => s + l.duracion_min, 0);
+  // La comunidad abierta suma todos sus cursos.
+  const ids = cursos.flatMap((c) => c.lecciones);
+  const hechas = ids.filter((id) => completadas.includes(id)).length;
+  const minutos = cursos.reduce((s, c) => s + c.minutos, 0);
 
   const visibles = useMemo(() => {
     const q = busqueda.trim().toLocaleLowerCase("es");
@@ -61,14 +62,15 @@ export default function PaginaComunidades() {
           </span>
           <span className="ficha-descripcion">{activa.descripcion}</span>
           <span className="ficha-curso">
-            Curso: <strong>{datos?.curso.titulo ?? activa.curso}</strong>
+            {cursos.length > 1 ? "Cursos" : "Curso"}:{" "}
+            <strong>{cursos.length ? cursos.map((c) => c.titulo).join(" · ") : activa.curso}</strong>
           </span>
           <span className="dir-datos">
             <span>
               <strong className="cifra">{miembros ?? "…"}</strong> miembros activos
             </span>
             <span>
-              <strong className="cifra">{base.length || "…"}</strong> lecciones
+              <strong className="cifra">{ids.length || "…"}</strong> lecciones
             </span>
             <span>
               <strong className="cifra">{minutos || "…"}</strong> min
@@ -77,10 +79,10 @@ export default function PaginaComunidades() {
           {hechas > 0 && (
             <span className="ficha-avance">
               <span className="progreso" aria-hidden="true">
-                <span style={{ transform: `scaleX(${hechas / base.length})` }} />
+                <span style={{ transform: `scaleX(${hechas / ids.length})` }} />
               </span>
               <span className="texto-suave">
-                <span className="cifra">{hechas}</span> de <span className="cifra">{base.length}</span> lecciones completadas
+                <span className="cifra">{hechas}</span> de <span className="cifra">{ids.length}</span> lecciones completadas
               </span>
             </span>
           )}

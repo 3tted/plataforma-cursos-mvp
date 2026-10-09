@@ -3,26 +3,26 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ESTADO_ALUMNO, api } from "@/lib/cliente";
-import type { Expediente } from "@/lib/tipos";
+import type { Expediente, ResumenCurso } from "@/lib/tipos";
 import { useApp } from "./Contexto";
 import { IconoAprobado, IconoExamen } from "./Iconos";
 
-// Expediente del alumno en su perfil: avance por módulo, repaso, examen
-// final y estado, con el siguiente paso que le toca.
-export default function ExpedienteCurso({ autor }: { autor: string }) {
-  const { datos, completadas } = useApp();
+// Expediente del alumno en un curso, en su perfil: avance por módulo, repaso,
+// examen final y estado, con el siguiente paso que le toca.
+export default function ExpedienteCurso({ autor, curso }: { autor: string; curso: ResumenCurso }) {
+  const { completadas, cambiarCurso } = useApp();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
   const [error, setError] = useState(false);
 
   // Se vuelve a pedir cuando cambian las lecciones completadas en este navegador.
   useEffect(() => {
-    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(autor)}`)
+    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(autor)}&curso=${encodeURIComponent(curso.id)}`)
       .then((e) => {
         setExpediente(e);
         setError(false);
       })
       .catch(() => setError(true));
-  }, [autor, completadas]);
+  }, [autor, curso.id, completadas]);
 
   if (error) return <p className="error">No pudimos cargar tu expediente. Revisa tu conexión y recarga la página.</p>;
   if (!expediente) return <p className="texto-suave">Cargando tu expediente…</p>;
@@ -34,7 +34,7 @@ export default function ExpedienteCurso({ autor }: { autor: string }) {
     <div className="tarjeta expediente">
       <div className="expediente-cabecera">
         <div>
-          <p className="expediente-curso">{datos?.curso.titulo ?? "Curso"}</p>
+          <p className="expediente-curso">{curso.titulo}</p>
           <p className="texto-suave">
             <span className="cifra">
               {leccionesHechas} de {leccionesTotal}
@@ -104,7 +104,7 @@ export default function ExpedienteCurso({ autor }: { autor: string }) {
             <IconoAprobado width={18} height={18} /> Aprobaste el curso el {fecha(examen.aprobadoEn)}.
           </p>
         ) : estado === "examen-pendiente" ? (
-          <Link href="/curso/examen" className="boton boton-chico">
+          <Link href="/curso/examen" className="boton boton-chico" onClick={() => cambiarCurso(curso.id)}>
             <IconoExamen width={15} height={15} /> Presentar el examen final
           </Link>
         ) : estado === "requiere-apoyo" ? (
@@ -115,7 +115,7 @@ export default function ExpedienteCurso({ autor }: { autor: string }) {
             </Link>
           </>
         ) : (
-          <Link href="/curso" className="boton boton-chico boton-secundario">
+          <Link href="/curso" className="boton boton-chico boton-secundario" onClick={() => cambiarCurso(curso.id)}>
             {leccionesHechas ? "Continuar el curso" : "Empezar el curso"}
           </Link>
         )}

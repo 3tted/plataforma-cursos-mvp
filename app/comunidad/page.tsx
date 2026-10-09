@@ -8,6 +8,7 @@ import Compositor from "@/components/Compositor";
 import { useApp } from "@/components/Contexto";
 import { IconoAsistente, IconoFlechaDer, IconoFlechaIzq } from "@/components/Iconos";
 import PreguntaRapida from "@/components/PreguntaRapida";
+import SelectorCurso from "@/components/SelectorCurso";
 import TarjetaPublicacion from "@/components/TarjetaPublicacion";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
@@ -29,7 +30,7 @@ function Progreso({ hechas, total }: { hechas: number; total: number }) {
 }
 
 export default function PaginaComunidad() {
-  const { datos, lecciones, completadas, tieneAcceso, usuario, pagoPendiente } = useApp();
+  const { datos, lecciones, completadas, tieneAcceso, usuario, pagoPendiente, cursos, cursoId, cambiarCurso } = useApp();
   const [publicaciones, setPublicaciones] = useState<Publicacion[] | null>(null);
   const [miembros, setMiembros] = useState<number | null>(null);
   const [error, setError] = useState(false);
@@ -165,14 +166,16 @@ export default function PaginaComunidad() {
               <dd>{miembros ?? "…"}</dd>
             </div>
             <div>
-              <dt>Lecciones</dt>
-              <dd>{baseCurso.length || "…"}</dd>
+              <dt>{cursos.length > 1 ? "Cursos" : "Lecciones"}</dt>
+              <dd>{cursos.length > 1 ? cursos.length : baseCurso.length || "…"}</dd>
             </div>
           </dl>
         </section>
 
         <section className="lateral-bloque tarjeta-curso" aria-label="Tu avance">
-          <h2 className="lateral-titulo">{datos?.curso.titulo}</h2>
+          <SelectorCurso activo={cursoId} alElegir={cambiarCurso} conAvance={usuario?.rol === "alumno"} />
+          {/* Con varios cursos, el selector ya dice cuál es. */}
+          {cursos.length < 2 && <h2 className="lateral-titulo">{datos?.curso.titulo}</h2>}
           <Progreso hechas={hechas} total={baseCurso.length} />
           <p className="texto-suave">
             <span className="cifra">

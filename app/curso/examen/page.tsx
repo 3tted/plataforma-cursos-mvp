@@ -14,7 +14,7 @@ import type { Expediente, ResultadoExamen } from "@/lib/tipos";
 
 export default function PaginaExamen() {
   const router = useRouter();
-  const { usuario, datos, lecciones, completadas, tieneAcceso, setBorrador } = useApp();
+  const { usuario, datos, lecciones, completadas, tieneAcceso, setBorrador, cursoId } = useApp();
   const evaluaciones = useEvaluaciones();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
   const [respuestas, setRespuestas] = useState<(number | null)[]>([]);
@@ -26,12 +26,19 @@ export default function PaginaExamen() {
   const esCoach = usuario?.rol === "coach";
   const cargarExpediente = useCallback(() => {
     if (!usuario || usuario.rol !== "alumno") return;
-    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}`)
+    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}&curso=${encodeURIComponent(cursoId)}`)
       .then(setExpediente)
       .catch(() => setError("No pudimos cargar tu avance. Revisa tu conexión y recarga la página."));
-  }, [usuario]);
+  }, [usuario, cursoId]);
 
   useEffect(cargarExpediente, [cargarExpediente]);
+
+  // Cada curso tiene su examen: al cambiar de curso se empieza en blanco.
+  useEffect(() => {
+    setExpediente(null);
+    setRespuestas([]);
+    setResultado(null);
+  }, [cursoId]);
 
   if (!usuario) return null;
   if (!evaluaciones || !datos || (!esCoach && !expediente && !error)) {
@@ -53,7 +60,7 @@ export default function PaginaExamen() {
     try {
       const r = await api<ResultadoExamen>("/api/examen", {
         method: "POST",
-        json: { autor: usuario.nombre, rol: usuario.rol, respuestas },
+        json: { autor: usuario.nombre, rol: usuario.rol, respuestas, curso: cursoId },
       });
       setResultado(r);
       cargarExpediente();

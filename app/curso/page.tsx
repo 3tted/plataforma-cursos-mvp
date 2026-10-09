@@ -13,21 +13,34 @@ import {
   IconoPlay,
   IconoVideo,
 } from "@/components/Iconos";
+import SelectorCurso from "@/components/SelectorCurso";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
 import type { Expediente } from "@/lib/tipos";
 
 export default function PaginaCurso() {
-  const { datos, lecciones, completadas, tieneAcceso, errorDatos, recargarCurso, pagoPendiente, usuario } = useApp();
+  const {
+    datos,
+    lecciones,
+    completadas,
+    tieneAcceso,
+    errorDatos,
+    recargarCurso,
+    pagoPendiente,
+    usuario,
+    cursoId,
+    cambiarCurso,
+  } = useApp();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
   useTitulo("Curso");
 
   useEffect(() => {
+    setExpediente(null);
     if (usuario?.rol !== "alumno") return;
-    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}`)
+    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}&curso=${encodeURIComponent(cursoId)}`)
       .then(setExpediente)
       .catch(() => undefined);
-  }, [usuario]);
+  }, [usuario, cursoId]);
 
   if (errorDatos && !datos) {
     return (
@@ -39,7 +52,22 @@ export default function PaginaCurso() {
       </div>
     );
   }
-  if (!datos) return <p className="texto-suave">Cargando curso…</p>;
+  const volver = (
+    <>
+      <Link href="/comunidad" className="volver">
+        <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
+      </Link>
+      <SelectorCurso activo={cursoId} alElegir={cambiarCurso} conAvance={usuario?.rol === "alumno"} />
+    </>
+  );
+  if (!datos) {
+    return (
+      <div className="pagina-curso">
+        {volver}
+        <p className="texto-suave">Cargando curso…</p>
+      </div>
+    );
+  }
 
   const { curso, comunidad } = datos;
   const base = lecciones.filter((l) => !l.deCoach);
@@ -50,9 +78,7 @@ export default function PaginaCurso() {
 
   return (
     <div className="pagina-curso">
-      <Link href="/comunidad" className="volver">
-        <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
-      </Link>
+      {volver}
       <header className="curso-portada">
         <Arcos />
         <div className="curso-portada-textos">

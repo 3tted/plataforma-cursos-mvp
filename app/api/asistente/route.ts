@@ -9,7 +9,7 @@ import {
 } from "@/lib/asistente";
 import { mensajeDeErrorGemini, responderConGemini, responderGeneralConGemini } from "@/lib/asistente-gemini";
 import { extraerCitas } from "@/lib/citas";
-import { cargarCurso } from "@/lib/curso";
+import { cargarCurso, idCurso } from "@/lib/curso";
 import { error, leerJson, manejar, texto } from "@/lib/http";
 import type { TurnoChat } from "@/lib/tipos";
 
@@ -203,7 +203,7 @@ export const POST = manejar(async (req: Request) => {
   // En el prototipo la membresía vive en el navegador y llega con la pregunta.
   // En la Fase 2 se valida con la sesión, del lado del servidor.
   const miembro = datos.miembro === true;
-  const curso = await cargarCurso();
+  const curso = await cargarCurso(idCurso(datos.curso));
   const leccionActual =
     typeof datos.leccion === "string" &&
     curso.curso.modulos.some((m) => m.lecciones.some((l) => l.id === datos.leccion))

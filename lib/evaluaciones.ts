@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import type { Almacen } from "./almacen";
+import { CURSO_PRINCIPAL, idCurso } from "./curso";
 import { ErrorDeDatos } from "./http";
 import type {
   DatosCurso,
@@ -11,8 +12,8 @@ import type {
   PreguntaPublica,
 } from "./tipos";
 
-// Repaso por lección y examen final del curso. Las respuestas correctas viven
-// solo en el servidor (data/evaluaciones.json): el navegador recibe las
+// Repaso por lección y examen final de cada curso. Las respuestas correctas
+// viven solo en el servidor (data/evaluaciones*.json): el navegador recibe las
 // preguntas sin ellas y el servidor califica. En la Fase 2 pasan a los
 // modelos Examen, Pregunta, Opcion e Intento de Django.
 
@@ -32,24 +33,35 @@ export interface Evaluaciones {
   examenFinal: { titulo: string; preguntas: PreguntaArchivo[] };
 }
 
-const ARCHIVO = path.join(process.cwd(), "data", "evaluaciones.json");
-let cache: Evaluaciones | null = null;
+const ARCHIVOS: Record<string, string> = {
+  [CURSO_PRINCIPAL]: "evaluaciones.json",
+  "precios-servicios": "evaluaciones-precios-servicios.json",
+};
+const cache = new Map<string, Evaluaciones>();
 
-export async function cargarEvaluaciones(): Promise<Evaluaciones> {
-  if (cache && process.env.NODE_ENV === "production") return cache;
-  const crudo = JSON.parse(await fs.readFile(ARCHIVO, "utf8")) as {
+export async function cargarEvaluaciones(curso: string = CURSO_PRINCIPAL): Promise<Evaluaciones> {
+  const id = idCurso(curso);
+  const guardado = cache.get(id);
+  if (guardado && process.env.NODE_ENV === "production") return guardado;
+  const crudo = JSON.parse(await fs.readFile(path.join(process.cwd(), "data", ARCHIVOS[id]), "utf8")) as {
     aprobar_con: number;
     intentos_examen: number;
     repaso: Record<string, PreguntaArchivo[]>;
     examen_final: { titulo: string; preguntas: PreguntaArchivo[] };
   };
-  cache = {
+  const ev: Evaluaciones = {
     aprobarCon: crudo.aprobar_con,
     intentosExamen: crudo.intentos_examen,
     repaso: crudo.repaso,
     examenFinal: crudo.examen_final,
   };
-  return cache;
+  cache.set(id, ev);
+  return ev;
+}
+
+/** Intentos de examen de un curso (los guardados antes de que hubiera dos cursos son del principal). */
+export function examenesDelCurso(a: Almacen, curso: string) {
+  return (a.examenes ?? []).filter((x) => (x.curso ?? CURSO_PRINCIPAL) === curso);
 }
 
 function publica({ id, enunciado, opciones, leccion }: PreguntaArchivo): PreguntaPublica {
@@ -93,9 +105,16 @@ export function completadasDe(a: Almacen, autor: string): string[] {
   return a.progreso?.find((p) => p.autor === autor)?.completadas ?? [];
 }
 
+function idsDelCurso(curso: DatosCurso): Set<string> {
+  return new Set(leccionesDelCurso(curso).flatMap((m) => m.lecciones.map((l) => l.id)));
+}
+
+// Expediente de un alumno en un curso: solo cuentan las lecciones, repasos y
+// exámenes de ese curso.
 export function expedienteDe(a: Almacen, curso: DatosCurso, ev: Evaluaciones, autor: string): Expediente {
   const modulos = leccionesDelCurso(curso);
-  const completadas = completadasDe(a, autor);
+  const ids = idsDelCurso(curso);
+  const completadas = completadasDe(a, autor).filter((id) => ids.has(id));
   const porModulo = modulos.map((m) => ({
     id: m.id,
     titulo: m.titulo,
@@ -107,13 +126,13 @@ export function expedienteDe(a: Almacen, curso: DatosCurso, ev: Evaluaciones, au
 
   // Del repaso cuenta el último intento de cada lección.
   const ultimos = new Map<string, { aciertos: number; total: number }>();
-  for (const r of a.repasos ?? []) if (r.autor === autor) ultimos.set(r.leccion, r);
+  for (const r of a.repasos ?? []) if (r.autor === autor && ids.has(r.leccion)) ultimos.set(r.leccion, r);
   const repaso = [...ultimos.values()].reduce<Expediente["repaso"]>(
     (s, r) => ({ aciertos: s.aciertos + r.aciertos, total: s.total + r.total, lecciones: s.lecciones + 1 }),
     { aciertos: 0, total: 0, lecciones: 0 },
   );
 
-  const intentos = (a.examenes ?? []).filter((x) => x.autor === autor);
+  const intentos = examenesDelCurso(a, curso.curso.id).filter((x) => x.autor === autor);
   const aprobadoEn = intentos.find((x) => x.aprobado)?.creadoEn ?? null;
   const examen = {
     mejorPuntaje: intentos.length ? Math.max(...intentos.map((x) => x.puntaje)) : null,
@@ -135,7 +154,7 @@ export function expedienteDe(a: Almacen, curso: DatosCurso, ev: Evaluaciones, au
 
   const fechas = [
     a.progreso?.find((p) => p.autor === autor)?.actualizado,
-    ...(a.repasos ?? []).filter((r) => r.autor === autor).map((r) => r.creadoEn),
+    ...(a.repasos ?? []).filter((r) => r.autor === autor && ids.has(r.leccion)).map((r) => r.creadoEn),
     ...intentos.map((x) => x.creadoEn),
   ].filter((f): f is string => Boolean(f));
 
@@ -160,11 +179,15 @@ const ORDEN_ESTADO: Record<EstadoAlumno, number> = {
   "sin-iniciar": 4,
 };
 
+// Matriz de un curso: solo aparece quien avanzó en ese curso.
 export function construirMatriz(a: Almacen, curso: DatosCurso, ev: Evaluaciones): MatrizAlumnos {
+  const ids = idsDelCurso(curso);
+  const repasos = (a.repasos ?? []).filter((r) => ids.has(r.leccion));
+  const examenes = examenesDelCurso(a, curso.curso.id);
   const autores = new Set<string>([
-    ...(a.progreso ?? []).filter((p) => p.completadas.length > 0).map((p) => p.autor),
-    ...(a.repasos ?? []).map((r) => r.autor),
-    ...(a.examenes ?? []).map((x) => x.autor),
+    ...(a.progreso ?? []).filter((p) => p.completadas.some((id) => ids.has(id))).map((p) => p.autor),
+    ...repasos.map((r) => r.autor),
+    ...examenes.map((x) => x.autor),
   ]);
   const alumnos = [...autores]
     .map((autor) => expedienteDe(a, curso, ev, autor))
@@ -182,10 +205,10 @@ export function construirMatriz(a: Almacen, curso: DatosCurso, ev: Evaluaciones)
     if (fallo) c.fallas++;
     conteo.set(id, c);
   };
-  for (const r of a.repasos ?? []) {
+  for (const r of repasos) {
     for (const p of ev.repaso[r.leccion] ?? []) sumar(p.id, r.fallas.includes(p.id));
   }
-  for (const x of a.examenes ?? []) {
+  for (const x of examenes) {
     for (const p of ev.examenFinal.preguntas) sumar(p.id, x.fallas.includes(p.id));
   }
   const preguntas = [
@@ -206,6 +229,8 @@ export function construirMatriz(a: Almacen, curso: DatosCurso, ev: Evaluaciones)
     .slice(0, 6);
 
   return {
+    curso: { id: curso.curso.id, titulo: curso.curso.titulo },
+    titulos: Object.fromEntries(curso.curso.modulos.flatMap((m) => m.lecciones.map((l) => [l.id, l.titulo]))),
     aprobarCon: ev.aprobarCon,
     modulos: leccionesDelCurso(curso).map((m) => ({ id: m.id, titulo: m.titulo, total: m.lecciones.length })),
     alumnos,

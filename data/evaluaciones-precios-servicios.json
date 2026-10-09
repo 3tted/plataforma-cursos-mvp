@@ -1,0 +1,197 @@
+{
+  "aprobar_con": 70,
+  "intentos_examen": 3,
+  "repaso": {
+    "P1": [
+      {
+        "id": "RP1-1",
+        "enunciado": "¿Con qué fórmula calculas el costo de tu hora?",
+        "opciones": [
+          "Lo que cobra la competencia entre 2",
+          "(Tu sueldo + costos fijos) ÷ horas que sí cobras al mes",
+          "Tu sueldo ÷ 160 horas",
+          "Costos fijos × 1.3"
+        ],
+        "correcta": 1,
+        "explicacion": "Tu hora tiene que cubrir tu sueldo y los costos fijos del negocio, repartidos entre las horas que de verdad le cobras a un cliente."
+      },
+      {
+        "id": "RP1-2",
+        "enunciado": "Para empezar, ¿qué parte de tus horas de trabajo conviene contar como cobrables?",
+        "opciones": ["El 100%", "Cerca de 60%", "Cerca de 20%", "Solo las horas de fin de semana"],
+        "correcta": 1,
+        "explicacion": "Una parte de tu tiempo se va en vender y administrar. Empezar con 60% evita que tu hora salga barata."
+      }
+    ],
+    "P2": [
+      {
+        "id": "RP2-1",
+        "enunciado": "¿Cuál de estas actividades es tiempo que normalmente no cobras?",
+        "opciones": [
+          "Diseñar el logotipo que te encargaron",
+          "Preparar cotizaciones y contestar mensajes",
+          "Dar la clase que el alumno pagó",
+          "Hacer la instalación eléctrica contratada"
+        ],
+        "correcta": 1,
+        "explicacion": "Vender, cotizar y administrar es trabajo real, pero ningún cliente lo paga directamente: por eso se incluye en tu tarifa."
+      },
+      {
+        "id": "RP2-2",
+        "enunciado": "¿Qué conviene hacer con las rondas de cambios?",
+        "opciones": [
+          "Aceptar todas las que pida el cliente",
+          "No aceptar ningún cambio",
+          "Incluir dos rondas en el precio y cobrar las extras",
+          "Cobrar cada cambio aparte desde el primero"
+        ],
+        "correcta": 2,
+        "explicacion": "Dos rondas incluidas y las extras a tu tarifa por hora, escrito en la cotización, evita que un proyecto de diez horas termine tomando veinte."
+      }
+    ],
+    "P3": [
+      {
+        "id": "RP3-1",
+        "enunciado": "¿Cuándo conviene cobrar por hora?",
+        "opciones": [
+          "Cuando el alcance está muy claro",
+          "Cuando haces el mismo trabajo una y otra vez",
+          "Cuando no sabes cuánto va a durar el trabajo",
+          "Nunca, siempre es mejor por proyecto"
+        ],
+        "correcta": 2,
+        "explicacion": "Asesorías, soporte y mantenimiento no tienen una duración clara: ahí la tarifa por hora es lo más justo."
+      },
+      {
+        "id": "RP3-2",
+        "enunciado": "Un proyecto toma 10 horas y tu tarifa es $300. Con el colchón de imprevistos, ¿cuánto cotizas?",
+        "opciones": ["$3,000", "$3,300", "$3,600", "$6,000"],
+        "correcta": 2,
+        "explicacion": "10 × $300 = $3,000, y con el colchón de 20%: $3,000 × 1.2 = $3,600."
+      }
+    ],
+    "P4": [
+      {
+        "id": "RP4-1",
+        "enunciado": "¿Qué parte de la cotización te protege de que el cliente pida más de lo acordado?",
+        "opciones": ["El saludo", "Qué incluye y qué no incluye", "El logotipo de tu negocio", "La fecha de hoy"],
+        "correcta": 1,
+        "explicacion": "Escribir qué no incluye (por ejemplo, más de dos rondas de cambios) evita sorpresas y discusiones."
+      },
+      {
+        "id": "RP4-2",
+        "enunciado": "Un cliente te pide descuento. ¿Qué es lo más recomendable?",
+        "opciones": [
+          "Bajar el precio y hacer exactamente lo mismo",
+          "Negarte a hablar del tema",
+          "Ofrecer un precio menor quitando alcance",
+          "Duplicar el precio"
+        ],
+        "correcta": 2,
+        "explicacion": "Si bajas el precio sin cambiar nada, le enseñas al cliente que tu primer precio no era en serio. Negocia el alcance."
+      }
+    ],
+    "P5": [
+      {
+        "id": "RP5-1",
+        "enunciado": "¿Cuánto anticipo conviene pedir antes de empezar un proyecto?",
+        "opciones": ["Nada", "10%", "50%", "100%"],
+        "correcta": 2,
+        "explicacion": "Un anticipo de 50% confirma el compromiso del cliente y cubre tus primeras horas si el proyecto se cancela."
+      },
+      {
+        "id": "RP5-2",
+        "enunciado": "¿Cuándo entregas los archivos finales?",
+        "opciones": [
+          "En cuanto los terminas",
+          "Cuando recibes el pago completo",
+          "Antes de pedir el anticipo",
+          "Cuando el cliente los pida, pague o no"
+        ],
+        "correcta": 1,
+        "explicacion": "Puedes mostrar avances con marca de agua; los archivos finales se entregan al recibir el pago acordado."
+      }
+    ]
+  },
+  "examen_final": {
+    "titulo": "Examen final: Precios para tus servicios",
+    "preguntas": [
+      {
+        "id": "FP1",
+        "leccion": "P1",
+        "enunciado": "Marta quiere un sueldo de $18,000, tiene $6,000 de costos fijos y cobra 96 horas al mes. ¿Cuánto le cuesta cada hora?",
+        "opciones": ["$150", "$188", "$250", "$360"],
+        "correcta": 2
+      },
+      {
+        "id": "FP2",
+        "leccion": "P1",
+        "enunciado": "Si el costo de tu hora es $250 y quieres 30% de margen, ¿cuál es tu tarifa aproximada?",
+        "opciones": ["$280", "$325", "$357", "$500"],
+        "correcta": 2
+      },
+      {
+        "id": "FP3",
+        "leccion": "P2",
+        "enunciado": "Trabajaste 90 horas y 48 fueron para clientes. ¿Qué significa?",
+        "opciones": [
+          "Tu tiempo cobrable es de 53%: debes subir tu tarifa o bajar el tiempo no cobrable",
+          "Todo está bien, cobras más de 80%",
+          "Debes trabajar más horas",
+          "Debes bajar tu tarifa"
+        ],
+        "correcta": 0
+      },
+      {
+        "id": "FP4",
+        "leccion": "P2",
+        "enunciado": "Un cliente pide una cuarta ronda de cambios y tu cotización incluía dos. ¿Qué haces?",
+        "opciones": [
+          "La haces gratis para no perderlo",
+          "Le explicas que es una ronda extra y tiene un costo",
+          "Te niegas y cancelas el proyecto",
+          "Le devuelves el anticipo"
+        ],
+        "correcta": 1
+      },
+      {
+        "id": "FP5",
+        "leccion": "P3",
+        "enunciado": "Un logotipo te toma 14 horas y tu tarifa es $360. Con el colchón de imprevistos, ¿cuánto lo cotizas aproximadamente?",
+        "opciones": ["$5,040", "$6,000", "$7,200", "$4,320"],
+        "correcta": 1
+      },
+      {
+        "id": "FP6",
+        "leccion": "P3",
+        "enunciado": "¿Por qué conviene ofrecer tres paquetes?",
+        "opciones": [
+          "Porque así cobras siempre el más caro",
+          "Porque el cliente compara opciones y suele elegir la de en medio",
+          "Porque es obligatorio",
+          "Porque así no necesitas cotizar"
+        ],
+        "correcta": 1
+      },
+      {
+        "id": "FP7",
+        "leccion": "P4",
+        "enunciado": "¿Cuántos días de vigencia es un buen plazo para una cotización?",
+        "opciones": ["1 día", "15 días", "6 meses", "Sin vigencia"],
+        "correcta": 1
+      },
+      {
+        "id": "FP8",
+        "leccion": "P5",
+        "enunciado": "Un proyecto durará tres meses. ¿Cómo conviene dividir los pagos?",
+        "opciones": [
+          "Todo al final",
+          "40% al empezar, 30% a la mitad y 30% al entregar",
+          "10% al empezar y 90% al final",
+          "Todo por adelantado"
+        ],
+        "correcta": 1
+      }
+    ]
+  }
+}

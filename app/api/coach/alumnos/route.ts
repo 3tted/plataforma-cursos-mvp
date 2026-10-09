@@ -1,13 +1,15 @@
 import { consultar, modificar } from "@/lib/almacen";
-import { cargarCurso } from "@/lib/curso";
+import { cargarCurso, idCurso } from "@/lib/curso";
 import { cargarEvaluaciones, construirMatriz } from "@/lib/evaluaciones";
 import { error, manejar } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
-// Matriz de la coach: el expediente de cada alumno y las preguntas que más se fallan.
-export const GET = manejar(async () => {
-  const [curso, ev] = await Promise.all([cargarCurso(), cargarEvaluaciones()]);
+// Matriz de la coach para un curso (?curso=id): el expediente de cada alumno
+// en ese curso y las preguntas que más se fallan.
+export const GET = manejar(async (req: Request) => {
+  const id = idCurso(new URL(req.url).searchParams.get("curso"));
+  const [curso, ev] = await Promise.all([cargarCurso(id), cargarEvaluaciones(id)]);
   return Response.json(await consultar((a) => construirMatriz(a, curso, ev)));
 });
 

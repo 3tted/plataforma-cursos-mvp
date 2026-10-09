@@ -1742,6 +1742,12 @@ main:focus {
   font-size: var(--t-body);
 }
 
+.fila-leccion-espera {
+  justify-self: start;
+  margin-top: 2px;
+  color: var(--tinta-2);
+}
+
 .fila-leccion-meta {
   display: flex;
   align-items: center;

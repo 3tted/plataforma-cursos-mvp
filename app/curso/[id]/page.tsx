@@ -204,7 +204,11 @@ export default function PaginaLeccion() {
                   const lEnEspera = !lBloqueada && !l.deCoach && !enOrdenLeccion(l.id);
                   return (
                     <li key={l.id}>
-                      <Link href={`/curso/${l.id}`} aria-current={l.id === leccion.id ? "page" : undefined}>
+                      <Link
+                        href={`/curso/${l.id}`}
+                        aria-current={l.id === leccion.id ? "page" : undefined}
+                        title={lEnEspera ? "Se abre al terminar la anterior" : lBloqueada ? "Para miembros" : undefined}
+                      >
                         <span
                           className="indice-marca"
                           data-estado={lHecha ? "hecha" : lBloqueada || lEnEspera ? "bloqueada" : "abierta"}

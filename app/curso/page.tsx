@@ -251,15 +251,14 @@ export default function PaginaCurso() {
                               </span>
                               <span className="fila-leccion-textos">
                                 <span className="fila-leccion-titulo">{l.titulo}</span>
-                                <span className="sr-only">
-                                  {hecha
-                                    ? "Completada."
-                                    : bloqueada
-                                      ? "Para miembros."
-                                      : enEspera
-                                        ? "Se abre al terminar la anterior."
-                                        : "Disponible."}
-                                </span>
+                                {/* El candado también marca las lecciones de pago: la etiqueta dice que esta solo espera su turno. */}
+                                {enEspera ? (
+                                  <span className="pastilla fila-leccion-espera">Después de la anterior</span>
+                                ) : (
+                                  <span className="sr-only">
+                                    {hecha ? "Completada." : bloqueada ? "Para miembros." : "Disponible."}
+                                  </span>
+                                )}
                                 <span className="texto-suave">{l.resumen}</span>
                               </span>
                               <span className="fila-leccion-meta">

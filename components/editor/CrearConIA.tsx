@@ -21,6 +21,8 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
   const [pegar, setPegar] = useState(false);
   const [texto, setTexto] = useState("");
   const [indicaciones, setIndicaciones] = useState("");
+  // Vacío = que la IA lo decida según el documento.
+  const [cantidades, setCantidades] = useState({ lecciones: "", repaso: "", examen: "" });
   const [trabajando, setTrabajando] = useState(false);
   const [paso, setPaso] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +57,7 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
     forma.set("autor", autor);
     forma.set("comunidad", comunidad);
     forma.set("indicaciones", indicaciones);
+    for (const [k, v] of Object.entries(cantidades)) if (v.trim()) forma.set(k, v.trim());
     if (pegar) forma.set("texto", texto);
     else if (archivo) forma.set("archivo", archivo);
 
@@ -87,7 +90,7 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
         <div className="progreso progreso-indeterminado" aria-hidden="true">
           <span />
         </div>
-        <p className="nota">Suele tardar menos de un minuto. No cierres esta página.</p>
+        <p className="nota">Suele tardar menos de un minuto; un curso largo puede tardar un poco más. No cierres esta página.</p>
       </div>
     );
   }
@@ -134,13 +137,37 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
         {pegar ? "Mejor subo un documento" : "Prefiero pegar el texto"}
       </button>
 
+      <fieldset className="crear-ia-cantidades">
+        <legend>¿Cuántas quieres? Déjalo vacío para que la IA lo decida según tu material.</legend>
+        {(
+          [
+            ["lecciones", "Lecciones", 1, 30, "Auto"],
+            ["repaso", "Preguntas de repaso por lección", 0, 5, "2"],
+            ["examen", "Preguntas del examen", 1, 30, "Auto"],
+          ] as const
+        ).map(([clave, etiqueta, min, max, ejemplo]) => (
+          <label key={clave} className="campo">
+            <span>{etiqueta}</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={min}
+              max={max}
+              value={cantidades[clave]}
+              onChange={(e) => setCantidades({ ...cantidades, [clave]: e.target.value })}
+              placeholder={ejemplo}
+            />
+          </label>
+        ))}
+      </fieldset>
+
       <label className="campo">
-        <span>Indicaciones para la IA (opcional)</span>
+        <span>Otras indicaciones para la IA (opcional)</span>
         <input
           value={indicaciones}
           onChange={(e) => setIndicaciones(e.target.value)}
           maxLength={500}
-          placeholder="Por ejemplo: que sean 5 lecciones cortas, para quien apenas empieza"
+          placeholder="Por ejemplo: para quien apenas empieza, con ejemplos de tiendas pequeñas"
         />
       </label>
 

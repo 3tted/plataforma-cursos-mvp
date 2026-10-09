@@ -1,12 +1,21 @@
 import { consultar, modificar } from "@/lib/almacen";
 import { aplicarEdicion, nuevoCurso } from "@/lib/creacion";
-import { comoEdicion, conTexto, leerDocumento, proponerCurso, type Documento } from "@/lib/curso-ia";
+import {
+  comoEdicion,
+  conTexto,
+  juntarMedidas,
+  leerDocumento,
+  medidasDelTexto,
+  proponerCurso,
+  type Documento,
+} from "@/lib/curso-ia";
 import { ErrorDeDatos, manejar } from "@/lib/http";
 import { coachDe, comunidadDeCoach, conPermiso } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
-// Armar un curso con IA tarda de 10 a 60 segundos; 60 es el máximo del plan gratuito de Vercel.
-export const maxDuration = 60;
+// Armar un curso con IA suele tardar menos de un minuto, pero si el modelo
+// principal está saturado y hay que pedir una corrección puede llegar a varios.
+export const maxDuration = 300;
 
 // La coach sube un documento (o pega el texto) y la IA lo convierte en un
 // borrador de curso de su comunidad. Se abre en el editor para revisarlo.
@@ -28,7 +37,16 @@ export const POST = manejar((req: Request) =>
     else throw new ErrorDeDatos("Sube un documento o pega el texto de tu material.");
 
     const indicaciones = String(forma.get("indicaciones") ?? "").trim().slice(0, 500);
-    const propuesta = await proponerCurso(doc, indicaciones);
+    // Cantidades: las de los campos mandan; si no, las que escribió en sus indicaciones.
+    const campo = (k: string) => {
+      const v = String(forma.get(k) ?? "").trim();
+      return v === "" ? undefined : Number(v);
+    };
+    const medidas = juntarMedidas(
+      { lecciones: campo("lecciones"), repaso: campo("repaso"), examen: campo("examen") },
+      medidasDelTexto(indicaciones),
+    );
+    const propuesta = await proponerCurso(doc, indicaciones, medidas);
 
     const curso = await modificar((a) => {
       comunidadDeCoach(a, comunidad, autor);

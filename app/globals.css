@@ -5040,6 +5040,24 @@ button.tarjeta-comunidad-enlace {
   overflow-wrap: anywhere;
 }
 
+.crear-ia-cantidades {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+  gap: 10px 14px;
+  align-items: end;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.crear-ia-cantidades legend {
+  grid-column: 1 / -1;
+  margin-bottom: 8px;
+  font-size: var(--t-small);
+  font-weight: 700;
+  color: var(--tinta-2);
+}
+
 .crear-ia-alternar {
   justify-self: start;
   font-size: var(--t-small);

@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, moneda } from "@/lib/cliente";
 import { COMUNIDADES } from "@/lib/comunidades";
-import type { Expediente } from "@/lib/tipos";
+import type { Expediente, ResumenCurso } from "@/lib/tipos";
 import Arcos from "./Arcos";
+import BotonInscribirse from "./BotonInscribirse";
 import { useApp } from "./Contexto";
 import { IconoAsistente, IconoFlechaDer } from "./Iconos";
 import PortadaTema from "./PortadaTema";
@@ -14,7 +15,9 @@ import PreguntaRapida from "./PreguntaRapida";
 import PublicacionesRecientes from "./PublicacionesRecientes";
 import TarjetaComunidad from "./TarjetaComunidad";
 
-// Inicio del alumno: seguir su curso, resolver dudas y ver qué pasa en la comunidad.
+// Inicio del alumno: seguir su curso, resolver dudas y ver qué pasa en la
+// comunidad. Quien es nuevo primero se une a la comunidad y luego elige sus
+// cursos; el inicio lo lleva paso a paso.
 export default function InicioAlumno() {
   const router = useRouter();
   const {
@@ -28,15 +31,28 @@ export default function InicioAlumno() {
     cursos,
     cursoId,
     cambiarCurso,
+    inscripcionLista,
+    enComunidad,
+    inscritoEn,
   } = useApp();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
 
+  const inscritos = cursos.filter((c) => inscritoEn(c.id));
+  const porInscribir = cursos.filter((c) => !inscritoEn(c.id));
+  const enCurso = inscritoEn(cursoId);
+
   useEffect(() => {
-    if (!usuario) return;
+    if (!usuario || !enCurso) return;
     api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}&curso=${encodeURIComponent(cursoId)}`)
       .then(setExpediente)
       .catch(() => setExpediente(null));
-  }, [usuario, completadas, cursoId]);
+  }, [usuario, completadas, cursoId, enCurso]);
+
+  // El inicio sigue un curso en el que la persona está inscrita.
+  const primerInscrito = inscritos[0]?.id;
+  useEffect(() => {
+    if (inscripcionLista && primerInscrito && !enCurso) cambiarCurso(primerInscrito);
+  }, [inscripcionLista, primerInscrito, enCurso, cambiarCurso]);
 
   const base = lecciones.filter((l) => !l.deCoach);
   const hechas = base.filter((l) => completadas.includes(l.id)).length;
@@ -46,6 +62,7 @@ export default function InicioAlumno() {
   const numero = pendiente ? base.indexOf(pendiente) + 1 : base.length;
   const examen = expediente?.examen;
   const precio = moneda(datos?.comunidad.precio_mensual ?? 490);
+  const comunidad = datos?.comunidad;
 
   const preguntar = (pregunta: string) => {
     setLeccionContexto(null);
@@ -56,6 +73,121 @@ export default function InicioAlumno() {
   const tendencia = COMUNIDADES.filter((c) => c.estado === "proximamente").slice(0, 3);
   const nombre = usuario?.nombre.split(" ")[0] ?? "";
 
+  if (!inscripcionLista) return <p className="texto-suave">Cargando…</p>;
+
+  const enTendencia = (
+    <section className="proximas" aria-labelledby="tendencia-titulo">
+      <div className="inicio-bloque-cabecera">
+        <div>
+          <h2 id="tendencia-titulo">Comunidades en tendencia</h2>
+          <p className="texto-suave">Comunidades de ejemplo que abren pronto.</p>
+        </div>
+        <Link href="/comunidades" className="enlace inicio-ver-todo">
+          Ver todas <IconoFlechaDer width={15} height={15} />
+        </Link>
+      </div>
+      <ul className="proximas-lista">
+        {tendencia.map((c) => (
+          <TarjetaComunidad key={c.id} comunidad={c} />
+        ))}
+      </ul>
+    </section>
+  );
+
+  // ---------------------------------------------------------------- paso 1: unirse a una comunidad
+  if (!enComunidad) {
+    return (
+      <div className="inicio">
+        <header className="inicio-saludo">
+          <h1>Hola{nombre && `, ${nombre}`}</h1>
+          <p className="texto-suave">Empieza por unirte a una comunidad. Unirte es gratis.</p>
+        </header>
+        <section className="inicio-continuar" aria-labelledby="unirse-inicio-titulo">
+          <Arcos />
+          <p className="inicio-etiqueta">Primer paso</p>
+          <h2 id="unirse-inicio-titulo">{comunidad?.nombre ?? "Finanzas Claras"}</h2>
+          <p className="texto-suave">{comunidad?.descripcion}</p>
+          <Link href="/comunidad" className="boton">
+            Ver la comunidad y unirme <IconoFlechaDer width={16} height={16} />
+          </Link>
+        </section>
+        {enTendencia}
+      </div>
+    );
+  }
+
+  const tarjetaCurso = (c: ResumenCurso) => {
+    const hechasCurso = c.lecciones.filter((id) => completadas.includes(id)).length;
+    const portada = <PortadaTema tema="Finanzas" clave={c.id} />;
+    const datosCurso = (
+      <span className="texto-suave inicio-meta">
+        <span className="cifra">{c.lecciones.length}</span> lecciones · <span className="cifra">{c.minutos}</span> min
+      </span>
+    );
+    if (!inscritoEn(c.id)) {
+      return (
+        <li key={c.id} className="inicio-curso inicio-curso-alumno">
+          {portada}
+          <span className="inicio-curso-cuerpo">
+            <span className="pastilla">Sin inscribir</span>
+            <span className="ficha-nombre">{c.titulo}</span>
+            {datosCurso}
+            <span className="texto-suave inicio-meta">{c.subtitulo}</span>
+            <BotonInscribirse curso={c.id} className="boton boton-chico" />
+          </span>
+        </li>
+      );
+    }
+    return (
+      <li key={c.id}>
+        <Link href="/curso" className="inicio-curso inicio-curso-alumno" onClick={() => cambiarCurso(c.id)}>
+          {portada}
+          <span className="inicio-curso-cuerpo">
+            {c.id === cursoId && inscritos.length > 1 && <span className="pastilla pastilla-marca">Lo estás viendo</span>}
+            <span className="ficha-nombre">{c.titulo}</span>
+            {datosCurso}
+            <span className="progreso" aria-hidden="true">
+              <span style={{ transform: `scaleX(${c.lecciones.length ? hechasCurso / c.lecciones.length : 0})` }} />
+            </span>
+            <span className="texto-suave inicio-meta">
+              {hechasCurso === 0 ? "Sin empezar" : `${hechasCurso} de ${c.lecciones.length} lecciones completadas`}
+            </span>
+          </span>
+        </Link>
+      </li>
+    );
+  };
+
+  const listaCursos = (
+    <section className="inicio-bloque" aria-labelledby="tus-cursos-titulo">
+      <div className="inicio-bloque-cabecera">
+        <div>
+          <h2 id="tus-cursos-titulo">{inscritos.length ? "Tus cursos" : `Cursos de ${comunidad?.nombre ?? "la comunidad"}`}</h2>
+          {porInscribir.length > 0 && (
+            <p className="texto-suave">Inscribirte es gratis; el módulo 1 de cada curso también.</p>
+          )}
+        </div>
+      </div>
+      <ul className="inicio-cursos">{[...inscritos, ...porInscribir].map(tarjetaCurso)}</ul>
+    </section>
+  );
+
+  // ---------------------------------------------------------------- paso 2: elegir el primer curso
+  if (inscritos.length === 0) {
+    return (
+      <div className="inicio">
+        <header className="inicio-saludo">
+          <h1>Hola{nombre && `, ${nombre}`}</h1>
+          <p className="texto-suave">Ya eres parte de {comunidad?.nombre ?? "la comunidad"}. Ahora elige tu primer curso.</p>
+        </header>
+        {listaCursos}
+        <PublicacionesRecientes titulo="Conversaciones recientes" />
+        {enTendencia}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------- inscrito: seguir aprendiendo
   return (
     <div className="inicio">
       <header className="inicio-saludo">
@@ -81,13 +213,13 @@ export default function InicioAlumno() {
               <p className="texto-suave">
                 {examen?.aprobado
                   ? `Tu mejor resultado: ${examen.mejorPuntaje}%. Queda en tu expediente.`
-                  : "12 preguntas. Lo apruebas con 70%."}
+                  : "Preguntas de todo el curso. Lo apruebas con 70%."}
               </p>
               <Link href={examen?.aprobado ? "/perfil" : "/curso/examen"} className="boton">
                 {examen?.aprobado ? "Ver mi expediente" : "Presentar el examen"} <IconoFlechaDer width={16} height={16} />
               </Link>
             </>
-          ) : pendiente ? (
+          ) : pendiente && enCurso ? (
             <>
               <h2 id="continuar-titulo">{pendiente.titulo}</h2>
               <p className="texto-suave">
@@ -157,40 +289,7 @@ export default function InicioAlumno() {
         </section>
       </div>
 
-      {cursos.length > 1 && (
-        <section className="inicio-bloque" aria-labelledby="tus-cursos-titulo">
-          <div className="inicio-bloque-cabecera">
-            <h2 id="tus-cursos-titulo">Tus cursos</h2>
-          </div>
-          <ul className="inicio-cursos">
-            {cursos.map((c) => {
-              const hechasCurso = c.lecciones.filter((id) => completadas.includes(id)).length;
-              const actual = c.id === cursoId;
-              return (
-                <li key={c.id}>
-                  <Link href="/curso" className="inicio-curso inicio-curso-alumno" onClick={() => cambiarCurso(c.id)}>
-                    <PortadaTema tema="Finanzas" clave={c.id} />
-                    <span className="inicio-curso-cuerpo">
-                      {actual && <span className="pastilla pastilla-marca">Lo estás viendo</span>}
-                      <span className="ficha-nombre">{c.titulo}</span>
-                      <span className="texto-suave inicio-meta">
-                        <span className="cifra">{c.lecciones.length}</span> lecciones · <span className="cifra">{c.minutos}</span>{" "}
-                        min
-                      </span>
-                      <span className="progreso" aria-hidden="true">
-                        <span style={{ transform: `scaleX(${c.lecciones.length ? hechasCurso / c.lecciones.length : 0})` }} />
-                      </span>
-                      <span className="texto-suave inicio-meta">
-                        {hechasCurso === 0 ? "Sin empezar" : `${hechasCurso} de ${c.lecciones.length} lecciones completadas`}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
+      {(cursos.length > 1 || porInscribir.length > 0) && listaCursos}
 
       <div className="inicio-fila">
         <section className="tarjeta-asistente inicio-asistente" aria-labelledby="asistente-inicio-titulo">
@@ -211,22 +310,7 @@ export default function InicioAlumno() {
         <PublicacionesRecientes titulo="Conversaciones recientes" />
       </div>
 
-      <section className="proximas" aria-labelledby="tendencia-titulo">
-        <div className="inicio-bloque-cabecera">
-          <div>
-            <h2 id="tendencia-titulo">Comunidades en tendencia</h2>
-            <p className="texto-suave">Comunidades de ejemplo que abren pronto.</p>
-          </div>
-          <Link href="/comunidades" className="enlace inicio-ver-todo">
-            Ver todas <IconoFlechaDer width={15} height={15} />
-          </Link>
-        </div>
-        <ul className="proximas-lista">
-          {tendencia.map((c) => (
-            <TarjetaComunidad key={c.id} comunidad={c} />
-          ))}
-        </ul>
-      </section>
+      {enTendencia}
     </div>
   );
 }

@@ -15,7 +15,9 @@ import {
   IconoPlay,
   IconoVideo,
 } from "@/components/Iconos";
+import BotonInscribirse from "@/components/BotonInscribirse";
 import SelectorCurso from "@/components/SelectorCurso";
+import UnirseComunidad from "@/components/UnirseComunidad";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
@@ -35,6 +37,9 @@ export default function PaginaCurso() {
     usuario,
     cursoId,
     cambiarCurso,
+    inscripcionLista,
+    enComunidad,
+    inscritoEn,
   } = useApp();
   const evaluaciones = useEvaluaciones();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
@@ -69,7 +74,7 @@ export default function PaginaCurso() {
       <SelectorCurso activo={cursoId} alElegir={cambiarCurso} conAvance={usuario?.rol === "alumno"} />
     </>
   );
-  if (!datos) {
+  if (!datos || !inscripcionLista) {
     return (
       <div className="pagina-curso">
         {volver}
@@ -77,6 +82,9 @@ export default function PaginaCurso() {
       </div>
     );
   }
+  // Paso 1: para tomar un curso primero hay que estar en su comunidad.
+  if (!enComunidad) return <UnirseComunidad motivo="Para tomar este curso, primero únete a su comunidad." />;
+  const inscrito = inscritoEn(cursoId);
 
   const { curso, comunidad } = datos;
   const base = lecciones.filter((l) => !l.deCoach);
@@ -130,6 +138,15 @@ export default function PaginaCurso() {
                   Ver la primera lección
                 </Link>
               )}
+            </>
+          ) : !inscrito ? (
+            <>
+              <p className="curso-progreso-cifra">
+                <span className="cifra">{base.length}</span>
+                <span className="curso-progreso-total">lecciones · {minutos} min</span>
+              </p>
+              <p className="curso-siguiente">Todavía no estás inscrito. Inscribirte es gratis y el módulo 1 también.</p>
+              <BotonInscribirse curso={cursoId} />
             </>
           ) : (
             <>

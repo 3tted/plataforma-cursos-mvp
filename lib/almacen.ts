@@ -4,6 +4,7 @@ import path from "path";
 import type {
   Categoria,
   Comentario,
+  Inscripcion,
   IntentoExamen,
   IntentoRepaso,
   LeccionCoach,
@@ -32,6 +33,8 @@ export interface Almacen {
   progreso?: ProgresoAlumno[];
   repasos?: IntentoRepaso[];
   examenes?: IntentoExamen[];
+  /** Alumnos unidos a la comunidad y a cada curso. Opcional: llegó después. */
+  inscripciones?: Inscripcion[];
   /** Videos de muestra que ya se sembraron (para no volver a poner uno que la coach quitó). */
   muestras?: string[];
 }

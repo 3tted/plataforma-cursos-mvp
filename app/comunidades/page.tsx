@@ -15,7 +15,7 @@ import type { ResumenComunidad } from "@/lib/tipos";
 // Directorio: la alumna elige a qué comunidad entrar. Cada comunidad trae su
 // curso, así que aquí también se ve el avance del curso.
 export default function PaginaComunidades() {
-  const { cursos, completadas } = useApp();
+  const { cursos, completadas, enComunidad } = useApp();
   const [miembros, setMiembros] = useState<number | null>(null);
   const [tema, setTema] = useState("Todos");
   const [busqueda, setBusqueda] = useState("");
@@ -87,7 +87,7 @@ export default function PaginaComunidades() {
             </span>
           )}
           <span className="boton ficha-boton">
-            Entrar a la comunidad <IconoFlechaDer width={16} height={16} />
+            {enComunidad ? "Entrar a la comunidad" : "Unirme a la comunidad"} <IconoFlechaDer width={16} height={16} />
           </span>
         </span>
       </Link>

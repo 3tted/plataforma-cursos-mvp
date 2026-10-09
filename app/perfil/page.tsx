@@ -134,7 +134,7 @@ function Actividad({ fechas }: { fechas: string[] }) {
 }
 
 export default function PaginaPerfil() {
-  const { usuario, guardarUsuario, membresia, completadas, lecciones, cursos } = useApp();
+  const { usuario, guardarUsuario, membresia, completadas, lecciones, cursos, inscritoEn } = useApp();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [errorCarga, setErrorCarga] = useState(false);
   const [editando, setEditando] = useState(false);
@@ -243,9 +243,15 @@ export default function PaginaPerfil() {
         {usuario.rol === "alumno" && (
           <section aria-labelledby="expediente-titulo" className="perfil-seccion">
             <h2 id="expediente-titulo">{cursos.length > 1 ? "Expediente de tus cursos" : "Expediente del curso"}</h2>
-            {cursos.map((c) => (
-              <ExpedienteCurso key={c.id} autor={usuario.nombre} curso={c} />
-            ))}
+            {cursos.some((c) => inscritoEn(c.id)) ? (
+              cursos
+                .filter((c) => inscritoEn(c.id))
+                .map((c) => <ExpedienteCurso key={c.id} autor={usuario.nombre} curso={c} />)
+            ) : (
+              <p className="vacio">
+                Todavía no estás inscrito en ningún curso. <Link href="/comunidad">Ve a la comunidad</Link> para elegir uno.
+              </p>
+            )}
           </section>
         )}
 

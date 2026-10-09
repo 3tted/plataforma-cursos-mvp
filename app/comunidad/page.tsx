@@ -8,8 +8,10 @@ import Compositor from "@/components/Compositor";
 import { useApp } from "@/components/Contexto";
 import { IconoAsistente, IconoFlechaDer, IconoFlechaIzq } from "@/components/Iconos";
 import PreguntaRapida from "@/components/PreguntaRapida";
+import BotonInscribirse from "@/components/BotonInscribirse";
 import SelectorCurso from "@/components/SelectorCurso";
 import TarjetaPublicacion from "@/components/TarjetaPublicacion";
+import UnirseComunidad from "@/components/UnirseComunidad";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
 import { CATEGORIAS, type Categoria, type Publicacion, type ResumenComunidad } from "@/lib/tipos";
@@ -30,7 +32,20 @@ function Progreso({ hechas, total }: { hechas: number; total: number }) {
 }
 
 export default function PaginaComunidad() {
-  const { datos, lecciones, completadas, tieneAcceso, usuario, pagoPendiente, cursos, cursoId, cambiarCurso } = useApp();
+  const {
+    datos,
+    lecciones,
+    completadas,
+    tieneAcceso,
+    usuario,
+    pagoPendiente,
+    cursos,
+    cursoId,
+    cambiarCurso,
+    inscripcionLista,
+    enComunidad,
+    inscritoEn,
+  } = useApp();
   const [publicaciones, setPublicaciones] = useState<Publicacion[] | null>(null);
   const [miembros, setMiembros] = useState<number | null>(null);
   const [error, setError] = useState(false);
@@ -73,6 +88,11 @@ export default function PaginaComunidad() {
   // Un alumno que todavía no publica nada empieza presentándose, como pide el anuncio fijado.
   const primeraVez =
     usuario?.rol === "alumno" && !!publicaciones && !publicaciones.some((p) => p.autor === usuario.nombre);
+  const inscrito = inscritoEn(cursoId);
+
+  // Paso 1: quien no está en la comunidad primero se une.
+  if (!inscripcionLista) return <p className="texto-suave">Cargando…</p>;
+  if (!enComunidad) return <UnirseComunidad />;
 
   return (
     <div className="rejilla-comunidad">
@@ -86,7 +106,7 @@ export default function PaginaComunidad() {
           <p className="portada-texto">{comunidad?.descripcion}</p>
         </header>
 
-        {siguiente && (
+        {siguiente && inscrito && (
           <Link
             href={`/curso/${siguiente.id}`}
             className="continuar-movil"
@@ -183,15 +203,22 @@ export default function PaginaComunidad() {
             </span>{" "}
             lecciones completadas
           </p>
-          {siguiente && (
+          {!inscrito ? (
             <>
-              <p className="lateral-siguiente">
-                {hechas === 0 ? "Primera lección" : "Sigue"}: <strong>{siguiente.titulo}</strong>
-              </p>
-              <Link href={`/curso/${siguiente.id}`} className="boton boton-bloque">
-                {hechas === 0 ? "Empezar el curso" : "Continuar"}
-              </Link>
+              <p className="lateral-siguiente">Todavía no estás inscrito en este curso. Inscribirte es gratis.</p>
+              <BotonInscribirse curso={cursoId} className="boton boton-bloque" />
             </>
+          ) : (
+            siguiente && (
+              <>
+                <p className="lateral-siguiente">
+                  {hechas === 0 ? "Primera lección" : "Sigue"}: <strong>{siguiente.titulo}</strong>
+                </p>
+                <Link href={`/curso/${siguiente.id}`} className="boton boton-bloque">
+                  {hechas === 0 ? "Empezar el curso" : "Continuar"}
+                </Link>
+              </>
+            )
           )}
         </section>
 

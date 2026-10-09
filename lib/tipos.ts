@@ -193,6 +193,20 @@ export interface ResultadoExamen {
   vistaPrevia: boolean;
 }
 
+/** Inscripción de un alumno: primero se une a la comunidad (gratis) y luego a cada curso. */
+export interface Inscripcion {
+  autor: string;
+  comunidad: boolean;
+  cursos: string[];
+  desde: string;
+}
+
+/** Lo que el navegador necesita saber de la inscripción de un alumno. */
+export interface EstadoInscripcion {
+  comunidad: boolean;
+  cursos: string[];
+}
+
 /** Lecciones completadas por alumno, guardadas en el servidor para la matriz de la coach. */
 export interface ProgresoAlumno {
   autor: string;

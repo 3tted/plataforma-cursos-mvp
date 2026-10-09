@@ -179,7 +179,7 @@ const ORDEN_ESTADO: Record<EstadoAlumno, number> = {
   "sin-iniciar": 4,
 };
 
-// Matriz de un curso: solo aparece quien avanzó en ese curso.
+// Matriz de un curso: aparece quien se inscribió o avanzó en ese curso.
 export function construirMatriz(a: Almacen, curso: DatosCurso, ev: Evaluaciones): MatrizAlumnos {
   const ids = idsDelCurso(curso);
   const repasos = (a.repasos ?? []).filter((r) => ids.has(r.leccion));
@@ -188,6 +188,7 @@ export function construirMatriz(a: Almacen, curso: DatosCurso, ev: Evaluaciones)
     ...(a.progreso ?? []).filter((p) => p.completadas.some((id) => ids.has(id))).map((p) => p.autor),
     ...repasos.map((r) => r.autor),
     ...examenes.map((x) => x.autor),
+    ...(a.inscripciones ?? []).filter((i) => i.cursos.includes(curso.curso.id)).map((i) => i.autor),
   ]);
   const alumnos = [...autores]
     .map((autor) => expedienteDe(a, curso, ev, autor))

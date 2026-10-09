@@ -9,11 +9,13 @@ import {
   IconoBillete,
   IconoCandado,
   IconoCheck,
+  IconoCurso,
   IconoExamen,
   IconoFlechaDer,
   IconoFlechaIzq,
   IconoSello,
 } from "@/components/Iconos";
+import BotonInscribirse from "@/components/BotonInscribirse";
 import Markdown from "@/components/Markdown";
 import PreguntaRapida from "@/components/PreguntaRapida";
 import RepasoLeccion from "@/components/RepasoLeccion";
@@ -46,6 +48,9 @@ export default function PaginaLeccion() {
     marcarVisto,
     repasados,
     marcarRepasado,
+    inscripcionLista,
+    enComunidad,
+    inscritoEn,
   } = useApp();
   const evaluaciones = useEvaluaciones();
   // El sello se anima solo cuando la alumna marca la lección, no al volver a abrirla.
@@ -140,6 +145,8 @@ export default function PaginaLeccion() {
   };
   const previa = base[base.findIndex((l) => l.id === leccion.id) - 1];
   const enOrden = !!leccion.deCoach || enOrdenLeccion(leccion.id);
+  // Para ver la lección hay que estar en la comunidad e inscrito en su curso.
+  const inscrito = !esAlumno || !inscripcionLista || (enComunidad && inscritoEn(cursoId));
   const videoListo = !guiado || !leccion.video || vistos.includes(leccion.id);
   const repasoListo = !guiado || preguntasRepaso === 0 || repasados.includes(leccion.id);
   const pendiente = !videoListo ? "Mira el video completo" : !repasoListo ? "Responde el repaso" : null;
@@ -179,7 +186,7 @@ export default function PaginaLeccion() {
   };
 
   return (
-    <div className="rejilla-leccion" data-con-barra={!bloqueada}>
+    <div className="rejilla-leccion" data-con-barra={!bloqueada && enOrden && inscrito}>
       <nav className="indice-lecciones" aria-label="Lecciones del curso">
         <Link href="/curso" className="volver">
           <IconoFlechaIzq width={16} height={16} /> Todo el curso
@@ -280,6 +287,25 @@ export default function PaginaLeccion() {
               <button type="button" className="enlace" onClick={() => preguntar(`¿De qué trata «${leccion.titulo}»?`)}>
                 Pregúntale al asistente de qué trata
               </button>
+            </div>
+          </div>
+        ) : !inscrito ? (
+          <div className="tarjeta bloqueo">
+            <span className="bloqueo-icono">
+              <IconoCurso width={22} height={22} />
+            </span>
+            <h2>{enComunidad ? "Inscríbete al curso para empezar" : "Únete a la comunidad para empezar"}</h2>
+            <p className="texto-suave">{leccion.resumen}</p>
+            <p>
+              {enComunidad
+                ? `Inscribirte a «${datos.curso.titulo}» es gratis. El módulo 1 es gratis y el resto es con la membresía.`
+                : `Este curso es de la comunidad ${datos.comunidad.nombre}. Unirte e inscribirte es gratis.`}
+            </p>
+            <div className="bloqueo-acciones">
+              <BotonInscribirse
+                curso={cursoId}
+                texto={enComunidad ? "Inscribirme al curso" : "Unirme e inscribirme al curso"}
+              />
             </div>
           </div>
         ) : !enOrden ? (
@@ -467,7 +493,7 @@ export default function PaginaLeccion() {
       </aside>
 
       {/* Barra fija: marcar la lección y pasar a lo que sigue sin buscar el botón. */}
-      {!bloqueada && enOrden && (
+      {!bloqueada && enOrden && inscrito && (
         <div className="barra-siguiente" role="region" aria-label="Avance de la lección">
           <div className="envoltura barra-siguiente-interior">
             <p className="barra-siguiente-texto">

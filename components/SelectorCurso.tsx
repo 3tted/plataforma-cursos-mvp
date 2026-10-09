@@ -17,7 +17,7 @@ export default function SelectorCurso({
   conAvance?: boolean;
   etiqueta?: string;
 }) {
-  const { cursos, completadas } = useApp();
+  const { cursos, completadas, inscritoEn } = useApp();
   if (cursos.length < 2) return null;
 
   return (
@@ -34,7 +34,9 @@ export default function SelectorCurso({
           >
             <span className="selector-curso-titulo">{c.titulo}</span>
             <span className="selector-curso-meta">
-              {conAvance ? (
+              {conAvance && !inscritoEn(c.id) ? (
+                "Sin inscribir"
+              ) : conAvance ? (
                 <>
                   <span className="cifra">
                     {hechas} de {c.lecciones.length}

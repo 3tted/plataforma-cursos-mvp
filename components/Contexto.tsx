@@ -15,6 +15,7 @@ import { api, guardarLocal, guardarSesion, leerLocal, leerSesion } from "@/lib/c
 import type {
   Categoria,
   DatosCurso,
+  EstadoInscripcion,
   EstadoPlataforma,
   Leccion,
   MetodoPago,
@@ -69,6 +70,14 @@ interface ContextoApp {
   cursoId: string;
   /** Cambia el curso activo: las páginas del curso, el examen y el asistente pasan a ese curso. */
   cambiarCurso: (id: string) => void;
+  /** Ya se sabe si el alumno está unido a la comunidad y a qué cursos (la coach siempre lo está). */
+  inscripcionLista: boolean;
+  enComunidad: boolean;
+  inscritoEn: (curso: string) => boolean;
+  /** Paso 1: unirse a la comunidad (gratis). */
+  unirmeAComunidad: () => Promise<void>;
+  /** Paso 2: inscribirse a un curso de la comunidad (gratis; lo de pago sigue con la membresía). */
+  inscribirmeACurso: (curso: string) => Promise<void>;
   estado: EstadoPlataforma | null;
   lecciones: (Leccion & { modulo: Modulo })[];
   membresia: Membresia | null;
@@ -126,6 +135,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   const [errorDatos, setErrorDatos] = useState<string | null>(null);
   const [cursos, setCursos] = useState<ResumenCurso[]>([]);
   const [cursoId, setCursoId] = useState(CURSO_PRINCIPAL);
+  const [inscripcion, setInscripcion] = useState<EstadoInscripcion | null>(null);
   const [estado, setEstado] = useState<EstadoPlataforma | null>(null);
   const [membresia, setMembresia] = useState<Membresia | null>(null);
   const [pagoPendiente, setPagoPendiente] = useState<Pago | null>(null);
@@ -242,10 +252,45 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     setPidiendoUsuario(false);
   }, []);
 
-  const activarMembresia = useCallback((m: Membresia | null) => {
-    setMembresia(m);
-    guardarLocal(CLAVES.membresia, m);
-  }, []);
+  // Inscripción del alumno (comunidad y cursos), guardada en el servidor.
+  useEffect(() => {
+    setInscripcion(null);
+    if (!listo || usuario?.rol !== "alumno") return;
+    let vigente = true;
+    api<EstadoInscripcion>(`/api/inscripcion?autor=${encodeURIComponent(usuario.nombre)}`)
+      .then((e) => vigente && setInscripcion(e))
+      .catch(() => vigente && setInscripcion({ comunidad: false, cursos: [] }));
+    return () => {
+      vigente = false;
+    };
+  }, [listo, usuario?.nombre, usuario?.rol]);
+
+  const inscribir = useCallback(
+    async (accion: "comunidad" | "curso", curso?: string) => {
+      if (!usuario) return;
+      setInscripcion(
+        await api<EstadoInscripcion>("/api/inscripcion", {
+          method: "POST",
+          json: { autor: usuario.nombre, accion, curso },
+        }),
+      );
+    },
+    [usuario],
+  );
+  const unirmeAComunidad = useCallback(() => inscribir("comunidad"), [inscribir]);
+  const inscribirmeACurso = useCallback((curso: string) => inscribir("curso", curso), [inscribir]);
+
+  const activarMembresia = useCallback(
+    (m: Membresia | null) => {
+      setMembresia(m);
+      guardarLocal(CLAVES.membresia, m);
+      // Quien paga la membresía queda unido a la comunidad.
+      if (m && usuario?.rol === "alumno" && inscripcion && !inscripcion.comunidad) {
+        void inscribir("comunidad").catch(() => undefined);
+      }
+    },
+    [usuario?.rol, inscripcion, inscribir],
+  );
 
   const guardarPagoPendiente = useCallback((p: Pago | null) => {
     setPagoPendiente(p);
@@ -329,6 +374,12 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     [datos],
   );
 
+  const esCoach = usuario?.rol === "coach";
+  const inscritoEn = useCallback(
+    (curso: string) => esCoach || Boolean(inscripcion?.cursos.includes(curso)),
+    [esCoach, inscripcion],
+  );
+
   const valor: ContextoApp = {
     listo,
     usuario,
@@ -342,6 +393,11 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     cursos,
     cursoId,
     cambiarCurso,
+    inscripcionLista: !usuario || esCoach || inscripcion !== null,
+    enComunidad: esCoach || Boolean(inscripcion?.comunidad),
+    inscritoEn,
+    unirmeAComunidad,
+    inscribirmeACurso,
     estado,
     lecciones,
     membresia,

@@ -61,6 +61,9 @@ interface ContextoApp {
   cerrarSesion: () => void;
   pidiendoUsuario: boolean;
   setPidiendoUsuario: (v: boolean) => void;
+  /** Abre la pantalla de entrada; con rol, ya viene elegido (por ejemplo, "Soy coach"). */
+  pedirEntrada: (rol?: Rol) => void;
+  rolSugerido: Rol | null;
   /** El curso que la persona está tomando (o revisando, si es la coach). */
   datos: DatosCurso | null;
   errorDatos: string | null;
@@ -143,6 +146,11 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   const [listo, setListo] = useState(false);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [pidiendoUsuario, setPidiendoUsuario] = useState(false);
+  const [rolSugerido, setRolSugerido] = useState<Rol | null>(null);
+  const pedirEntrada = useCallback((rol?: Rol) => {
+    setRolSugerido(rol ?? null);
+    setPidiendoUsuario(true);
+  }, []);
   const [datos, setDatos] = useState<DatosCurso | null>(null);
   const [errorDatos, setErrorDatos] = useState<string | null>(null);
   const [cursos, setCursos] = useState<ResumenCurso[]>([]);
@@ -430,8 +438,11 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     usuario,
     guardarUsuario,
     cerrarSesion,
-    pidiendoUsuario: pidiendoUsuario || (listo && !usuario),
+    // Sin sesión se ve la página para visitantes; la entrada se abre desde sus botones.
+    pidiendoUsuario,
     setPidiendoUsuario,
+    pedirEntrada,
+    rolSugerido,
     datos,
     errorDatos,
     recargarCurso,

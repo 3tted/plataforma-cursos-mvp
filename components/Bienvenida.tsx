@@ -4,29 +4,30 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import type { Rol } from "@/lib/tipos";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
-import { IconoAlumno, IconoCoach } from "./Iconos";
+import { IconoAlumno, IconoCoach, IconoFlechaIzq } from "./Iconos";
 
 // Entrada sin contraseña: en el MVP solo necesitamos un nombre para firmar
 // publicaciones y saber si la persona entra como alumno o como coach.
-// Sin sesión se muestra la pantalla de entrada completa; con sesión, el mismo
-// formulario aparece en una ventana para cambiar de usuario o de rol.
+// Sin sesión, los botones de la página para visitantes abren la pantalla de
+// entrada completa; con sesión, el mismo formulario aparece en una ventana
+// para cambiar de usuario o de rol.
 export default function Bienvenida() {
-  const { listo, pidiendoUsuario, setPidiendoUsuario, usuario, guardarUsuario } = useApp();
+  const { listo, pidiendoUsuario, setPidiendoUsuario, usuario, guardarUsuario, rolSugerido } = useApp();
   const [nombre, setNombre] = useState("");
   const [rol, setRol] = useState<Rol>("alumno");
   const [error, setError] = useState<string | null>(null);
   const formulario = useRef<HTMLFormElement>(null);
   const campoNombre = useRef<HTMLInputElement>(null);
-  const pantallaCompleta = listo && !usuario;
-  const visible = pantallaCompleta || pidiendoUsuario;
+  const visible = listo && pidiendoUsuario;
+  const pantallaCompleta = visible && !usuario;
 
   useEffect(() => {
     if (visible) {
       setNombre(usuario?.nombre ?? "");
-      setRol(usuario?.rol ?? "alumno");
+      setRol(usuario?.rol ?? rolSugerido ?? "alumno");
       setError(null);
     }
-  }, [visible, usuario]);
+  }, [visible, usuario, rolSugerido]);
 
   // Mientras se muestra, lo de atrás no recibe foco ni clics.
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function Bienvenida() {
   };
 
   const alTeclear = (e: KeyboardEvent<HTMLFormElement>) => {
-    if (e.key === "Escape" && usuario) {
+    if (e.key === "Escape") {
       e.preventDefault();
       setPidiendoUsuario(false);
       return;
@@ -148,6 +149,9 @@ export default function Bienvenida() {
         </div>
         <div className="entrada-panel">
           <form className="entrada-formulario" onSubmit={enviar} onKeyDown={alTeclear} ref={formulario} noValidate>
+            <button type="button" className="volver entrada-volver" onClick={() => setPidiendoUsuario(false)}>
+              <IconoFlechaIzq width={16} height={16} /> Volver
+            </button>
             <h1 id="entrada-titulo">Cursos en línea</h1>
             <p className="texto-suave">
               Toma los cursos de tu coach, resuelve tus dudas con un asistente que responde con las lecciones y participa

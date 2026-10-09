@@ -4401,6 +4401,336 @@ details.modulo[open] > .modulo-cabecera {
   color: var(--acento-texto);
 }
 
+/* ---------- Página para visitantes (sin sesión) ---------- */
+
+.visitantes {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.visitantes-barra {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--linea);
+}
+
+.visitantes-barra-interior {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  min-height: var(--alto-barra);
+}
+
+.visitantes-nav {
+  display: flex;
+  gap: 22px;
+}
+
+.visitantes-nav a {
+  color: var(--tinta-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.visitantes-nav a:hover {
+  color: var(--tinta);
+}
+
+.visitantes-cuenta {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.visitantes-contenido {
+  display: grid;
+  gap: 64px;
+  padding-block: 40px 72px;
+}
+
+.visitantes-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 48px;
+  align-items: center;
+}
+
+.visitantes-hero-texto {
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+}
+
+.visitantes-hero h1 {
+  font-size: var(--t-display);
+  letter-spacing: -0.03em;
+  max-width: 14ch;
+}
+
+.visitantes-hero-texto > p {
+  font-size: var(--t-title);
+  color: var(--tinta-2);
+  max-width: 48ch;
+}
+
+.visitantes-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.visitantes-hero-visual {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  min-height: 380px;
+  padding: 72px 28px 28px;
+  border-radius: var(--radio-ventana);
+  background: var(--rubor);
+}
+
+.visitantes-hero-visual .arcos {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 220px;
+}
+
+.visitantes-chat {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 18px;
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+  box-shadow: 0 12px 32px rgb(30 30 30 / 8%);
+}
+
+.visitantes-chat-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  color: var(--acento-texto);
+}
+
+.visitantes-burbuja {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: var(--t-small);
+}
+
+.visitantes-burbuja p {
+  margin: 0;
+}
+
+.visitantes-burbuja-yo {
+  justify-self: end;
+  max-width: 85%;
+  background: var(--rubor-2);
+  font-weight: 600;
+}
+
+.visitantes-burbuja-ia {
+  display: grid;
+  gap: 6px;
+  background: var(--superficie-2);
+}
+
+.visitantes-fuente {
+  font-size: var(--t-caption);
+  color: var(--tinta-2);
+}
+
+.visitantes-seccion {
+  display: grid;
+  gap: 18px;
+}
+
+.visitantes-seccion h2,
+.visitantes-coach h2 {
+  font-size: var(--t-headline);
+}
+
+.visitantes-seccion-cabecera p {
+  margin-top: 4px;
+}
+
+.visitantes-funciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.visitantes-funciones li {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+}
+
+.visitantes-funciones h3 {
+  font-size: var(--t-title);
+}
+
+.visitantes-funcion-icono {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radio-control);
+  background: var(--acento-suave);
+  color: var(--acento-texto);
+}
+
+.visitantes-coach {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: center;
+  padding: 34px;
+  border-radius: var(--radio-ventana);
+  background: var(--rubor);
+}
+
+.visitantes-coach p {
+  margin-top: 8px;
+  color: var(--tinta-rubor);
+}
+
+.visitantes-coach-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.visitantes-coach-lista li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  font-weight: 600;
+}
+
+.visitantes-coach-lista li::before {
+  content: "";
+  width: 9px;
+  height: 5px;
+  margin: 7px 0 0 3px;
+  border: 2.5px solid var(--exito);
+  border-top: 0;
+  border-right: 0;
+  transform: rotate(-45deg);
+}
+
+.visitantes-pie {
+  border-top: 1px solid var(--linea);
+  background: var(--superficie);
+}
+
+.visitantes-pie-interior {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 22px;
+  font-size: var(--t-small);
+}
+
+.visitantes-pie .marca-logo {
+  height: 32px;
+}
+
+/* La tarjeta de comunidad como botón (en esta página, elegir pide entrar) */
+/* Sin menú inferior: no hace falta el espacio que se le deja abajo en el celular */
+body:has(.visitantes) {
+  padding-bottom: 0;
+}
+
+button.tarjeta-comunidad-enlace {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.entrada-volver {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--acento-texto);
+  cursor: pointer;
+}
+
+@media (max-width: 1000px) {
+  .visitantes-funciones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .visitantes-coach {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+}
+
+@media (max-width: 860px) {
+  .visitantes-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .visitantes-hero-visual {
+    min-height: 0;
+    padding-top: 64px;
+  }
+  .visitantes-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .visitantes-funciones {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .visitantes-barra-interior {
+    gap: 12px;
+  }
+  .visitantes-barra .marca-logo {
+    height: 30px;
+  }
+  .visitantes-cuenta .boton-fantasma {
+    display: none;
+  }
+  .visitantes-contenido {
+    gap: 44px;
+    padding-block: 24px 48px;
+  }
+  .visitantes-coach {
+    padding: 24px 20px;
+  }
+}
+
 /* ---------- Cuenta en la barra ---------- */
 
 .cuenta {

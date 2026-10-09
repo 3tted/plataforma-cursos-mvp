@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Red_Hat_Display, Red_Hat_Text } from "next/font/google";
 import Bienvenida from "@/components/Bienvenida";
 import { ProveedorApp } from "@/components/Contexto";
-import Encabezado from "@/components/Encabezado";
+import Marco from "@/components/Marco";
 import "./globals.css";
 
 // Hoja de tipografía "Cursos en línea" de Merkatics: Red Hat Display para
@@ -36,18 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es-MX" className={`${display.variable} ${cuerpo.variable} ${mono.variable}`}>
       <body>
         <ProveedorApp>
-          <a href="#contenido" className="saltar" data-app-fondo>
-            Saltar al contenido
-          </a>
-          <Encabezado />
-          <main id="contenido" tabIndex={-1} className="envoltura contenido" data-app-fondo>
-            {children}
-          </main>
-          <footer className="envoltura pie" data-app-fondo>
-            <span>
-              <strong>Merkatics</strong> Growth Operating System
-            </span>
-          </footer>
+          <Marco>{children}</Marco>
           <Bienvenida />
         </ProveedorApp>
       </body>

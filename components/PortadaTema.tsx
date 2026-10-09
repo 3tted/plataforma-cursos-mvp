@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { fotoDePortada } from "@/lib/portadas";
 
 // Portada ilustrada de una comunidad según su tema: figuras simples con los
 // rojos y la tinta de la marca, sin fotos de banco. Cada comunidad varía un
@@ -121,7 +122,9 @@ function figura(tema: string, clave: string): ReactNode {
   }
 }
 
-// "encajar" dibuja la figura completa aunque la caja sea más alta que la ilustración.
+// Si el curso o la comunidad tiene foto de portada, se muestra la foto; si no,
+// la ilustración de su tema. "encajar" dibuja la figura completa aunque la caja
+// sea más alta que la ilustración.
 export default function PortadaTema({
   tema,
   clave,
@@ -133,6 +136,23 @@ export default function PortadaTema({
   className?: string;
   encajar?: boolean;
 }) {
+  const foto = fotoDePortada(clave);
+  if (foto) {
+    return (
+      <span className={`portada-tema portada-tema-con-foto ${className}`} data-tema={tema}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- fotos estáticas ya ligeras */}
+        <img
+          src={foto.src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="portada-tema-foto"
+          style={{ objectPosition: foto.foco }}
+        />
+        <span className="portada-tema-etiqueta">{tema}</span>
+      </span>
+    );
+  }
   return (
     <span className={`portada-tema ${className}`} data-tema={tema}>
       <svg viewBox="0 0 320 160" preserveAspectRatio={encajar ? "xMidYMid meet" : "xMidYMid slice"} aria-hidden="true" focusable="false">

@@ -21,6 +21,7 @@ import SelectorCurso from "@/components/SelectorCurso";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda, parteGratis } from "@/lib/cliente";
+import { fotoDePortada } from "@/lib/portadas";
 import type { Expediente } from "@/lib/tipos";
 
 // Portada del curso: de qué trata, lo que aprenderás, el temario por módulos
@@ -114,6 +115,15 @@ export default function PaginaCurso() {
       <header className="curso-portada">
         <Arcos />
         <div className="curso-portada-textos">
+          {fotoDePortada(curso.id) && (
+            // eslint-disable-next-line @next/next/no-img-element -- foto estática ya ligera
+            <img
+              src={fotoDePortada(curso.id)!.src}
+              alt=""
+              className="curso-portada-foto"
+              style={{ objectPosition: fotoDePortada(curso.id)!.foco }}
+            />
+          )}
           <h1>{curso.titulo}</h1>
           <p className="curso-subtitulo">{curso.subtitulo}</p>
           <ul className="curso-datos" aria-label="Datos del curso">

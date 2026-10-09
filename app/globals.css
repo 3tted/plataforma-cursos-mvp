@@ -1018,8 +1018,131 @@ main:focus {
   top: calc(var(--alto-barra) + 20px);
 }
 
-/* "Continúa" y la pregunta al asistente suben arriba del feed solo cuando la
-   columna lateral pasa abajo */
+/* Cursos de la comunidad (components/CursosComunidad.tsx): en la columna
+   lateral, en lista; en celular, en una fila que se desliza arriba del feed. */
+.cursos-comunidad {
+  display: grid;
+  gap: 12px;
+}
+
+.cursos-comunidad-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--t-title);
+}
+
+.cursos-comunidad-titulo .cifra {
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.cursos-comunidad > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.curso-comunidad {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  transition: border-color 0.15s;
+}
+
+.curso-comunidad:hover {
+  border-color: var(--linea-fuerte);
+}
+
+.curso-comunidad[aria-current="true"] {
+  border-color: var(--acento);
+}
+
+.curso-comunidad-portada {
+  align-self: start;
+  display: block;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.curso-comunidad-portada .portada-tema {
+  aspect-ratio: 1;
+}
+
+.curso-comunidad-portada .portada-tema-etiqueta {
+  display: none;
+}
+
+.curso-comunidad-cuerpo {
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  min-width: 0;
+}
+
+.curso-comunidad-nombre {
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.curso-comunidad-nombre:hover {
+  text-decoration: underline;
+}
+
+.curso-comunidad-meta {
+  font-size: var(--t-caption);
+}
+
+.curso-comunidad .progreso {
+  height: 6px;
+  margin-block: 6px 2px;
+}
+
+.curso-comunidad-boton,
+.curso-comunidad-accion {
+  justify-self: start;
+  margin-top: 8px;
+}
+
+.curso-comunidad-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-small);
+}
+
+.cursos-comunidad-fila {
+  display: none;
+}
+
+@media (max-width: 920px) {
+  .cursos-comunidad-fila {
+    display: grid;
+  }
+  .cursos-comunidad-fila > ul {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(260px, 82%);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+  }
+  .cursos-comunidad-fila .curso-comunidad {
+    scroll-snap-align: start;
+  }
+}
+
+/* La pregunta al asistente sube arriba del feed solo cuando la columna
+   lateral pasa abajo */
 .continuar-movil,
 .pregunta-movil {
   display: none;
@@ -1033,7 +1156,7 @@ main:focus {
     position: static;
   }
   .columna-lateral .lateral-coach,
-  .columna-lateral .tarjeta-curso,
+  .columna-lateral .lateral-cursos,
   .columna-lateral .tarjeta-asistente {
     display: none;
   }

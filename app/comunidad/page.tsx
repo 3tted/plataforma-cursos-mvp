@@ -6,10 +6,9 @@ import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
 import Compositor from "@/components/Compositor";
 import { useApp } from "@/components/Contexto";
-import { IconoAsistente, IconoFlechaDer, IconoFlechaIzq } from "@/components/Iconos";
+import { IconoAsistente, IconoFlechaIzq } from "@/components/Iconos";
 import PreguntaRapida from "@/components/PreguntaRapida";
-import BotonInscribirse from "@/components/BotonInscribirse";
-import SelectorCurso from "@/components/SelectorCurso";
+import CursosComunidad from "@/components/CursosComunidad";
 import TarjetaPublicacion from "@/components/TarjetaPublicacion";
 import UnirseComunidad from "@/components/UnirseComunidad";
 import { useTitulo } from "@/components/useTitulo";
@@ -17,34 +16,14 @@ import { api, moneda } from "@/lib/cliente";
 import { COMUNIDADES } from "@/lib/comunidades";
 import { CATEGORIAS, type Categoria, type ComunidadCreada, type Publicacion, type ResumenComunidad } from "@/lib/tipos";
 
-function Progreso({ hechas, total }: { hechas: number; total: number }) {
-  return (
-    <div
-      className="progreso"
-      role="progressbar"
-      aria-valuemin={0}
-      aria-valuemax={total}
-      aria-valuenow={hechas}
-      aria-label="Lecciones completadas"
-    >
-      <span style={{ transform: `scaleX(${total ? hechas / total : 0})` }} />
-    </div>
-  );
-}
-
 export default function PaginaComunidad() {
   const {
     datos,
-    lecciones,
-    completadas,
     tieneAcceso,
     usuario,
     pagoPendiente,
-    cursoId,
-    cambiarCurso,
     inscripcionLista,
     enComunidad,
-    inscritoEn,
     comunidadId,
     cursosComunidad,
     cursos,
@@ -110,9 +89,6 @@ export default function PaginaComunidad() {
       return [...fijadas, nueva, ...resto];
     });
 
-  const baseCurso = lecciones.filter((l) => !l.deCoach);
-  const hechas = baseCurso.filter((l) => completadas.includes(l.id)).length;
-  const siguiente = baseCurso.find((l) => !completadas.includes(l.id));
   const comunidad = datos?.comunidad;
   // La coach que creó esta comunidad desde la plataforma puede agregarle cursos desde aquí.
   const esDuena =
@@ -121,7 +97,6 @@ export default function PaginaComunidad() {
   // Un alumno que todavía no publica nada empieza presentándose, como pide el anuncio fijado.
   const primeraVez =
     usuario?.rol === "alumno" && !!publicaciones && !publicaciones.some((p) => p.autor === usuario.nombre);
-  const inscrito = inscritoEn(cursoId);
 
   if (sinCursos) {
     return (
@@ -168,22 +143,8 @@ export default function PaginaComunidad() {
           )}
         </header>
 
-        {siguiente && inscrito && (
-          <Link
-            href={`/curso/${siguiente.id}`}
-            className="continuar-movil"
-            aria-label={`${hechas === 0 ? "Empezar" : "Continuar"}: ${siguiente.titulo}, ${hechas} de ${baseCurso.length} lecciones completadas`}
-          >
-            <span className="continuar-movil-titulo">{siguiente.titulo}</span>
-            <span className="continuar-movil-flecha" aria-hidden="true">
-              <IconoFlechaDer />
-            </span>
-            <Progreso hechas={hechas} total={baseCurso.length} />
-            <span className="continuar-movil-avance texto-suave" aria-hidden="true">
-              <span className="cifra">{hechas}</span> de <span className="cifra">{baseCurso.length}</span> lecciones
-            </span>
-          </Link>
-        )}
+        {/* En celular los cursos van aquí, en una fila que se desliza de lado. */}
+        <CursosComunidad fila />
 
         <div className="pregunta-movil">
           <p className="pregunta-movil-titulo">
@@ -248,47 +209,24 @@ export default function PaginaComunidad() {
               <dd>{miembros ?? "…"}</dd>
             </div>
             <div>
-              <dt>{cursosComunidad.length > 1 ? "Cursos" : "Lecciones"}</dt>
-              <dd>{cursosComunidad.length > 1 ? cursosComunidad.length : baseCurso.length || "…"}</dd>
+              <dt>Cursos</dt>
+              <dd>{cursosComunidad.length || "…"}</dd>
             </div>
           </dl>
         </section>
 
-        <section className="lateral-bloque tarjeta-curso" aria-label="Tu avance">
-          <SelectorCurso activo={cursoId} alElegir={cambiarCurso} conAvance={usuario?.rol === "alumno"} />
-          {/* Con varios cursos, el selector ya dice cuál es. */}
-          {cursosComunidad.length < 2 && <h2 className="lateral-titulo">{datos?.curso.titulo}</h2>}
-          <Progreso hechas={hechas} total={baseCurso.length} />
-          <p className="texto-suave">
-            <span className="cifra">
-              {hechas} de {baseCurso.length}
-            </span>{" "}
-            lecciones completadas
-          </p>
-          {!inscrito ? (
-            <>
-              <p className="lateral-siguiente">Todavía no estás inscrito en este curso. Inscribirte es gratis.</p>
-              <BotonInscribirse curso={cursoId} className="boton boton-bloque" />
-            </>
-          ) : (
-            siguiente && (
-              <>
-                <p className="lateral-siguiente">
-                  {hechas === 0 ? "Primera lección" : "Sigue"}: <strong>{siguiente.titulo}</strong>
-                </p>
-                <Link href={`/curso/${siguiente.id}`} className="boton boton-bloque">
-                  {hechas === 0 ? "Empezar el curso" : "Continuar"}
-                </Link>
-              </>
-            )
-          )}
-        </section>
+        <div className="lateral-bloque lateral-cursos">
+          <CursosComunidad />
+        </div>
 
         <section className="tarjeta-asistente" aria-label="Asistente del curso">
           <h2>
             <IconoAsistente width={18} height={18} /> Asistente del curso
           </h2>
-          <p>Pregunta lo que quieras sobre las lecciones. Te responde al momento y te dice de qué lección sale.</p>
+          <p>
+            Pregunta lo que quieras sobre las lecciones. Te responde al momento y te dice de qué lección sale.
+            {cursosComunidad.length > 1 && datos && <> Ahora responde con «{datos.curso.titulo}».</>}
+          </p>
           <PreguntaRapida />
         </section>
 

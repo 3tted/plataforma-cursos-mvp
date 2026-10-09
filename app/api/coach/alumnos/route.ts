@@ -14,12 +14,17 @@ export const GET = manejar(async (req: Request) => {
 });
 
 // Quita a un alumno de la matriz: su avance, sus repasos, sus intentos de
-// examen y sus inscripciones (sirve para limpiar alumnos de prueba). Como el resto del MVP, el
-// permiso se simula con el encabezado X-Rol; en la Fase 2 lo valida la sesión.
+// examen y sus inscripciones (sirve para limpiar alumnos de prueba). Con
+// &todo=1 también borra lo que escribió o hizo en la plataforma: sus
+// preguntas al asistente, sus pagos, sus publicaciones, sus comentarios y sus
+// "Me sirve". Como el resto del MVP, el permiso se simula con el encabezado
+// X-Rol; en la Fase 2 lo valida la sesión.
 export const DELETE = manejar(async (req: Request) => {
   if (req.headers.get("x-rol") !== "coach") return error("Solo la coach puede quitar alumnos.", 403);
-  const autor = new URL(req.url).searchParams.get("autor");
+  const parametros = new URL(req.url).searchParams;
+  const autor = parametros.get("autor");
   if (!autor) return error("Falta el nombre del alumno.");
+  const todo = parametros.get("todo") === "1";
   const borrados = await modificar((a) => {
     const total = () =>
       (a.progreso?.length ?? 0) + (a.repasos?.length ?? 0) + (a.examenes?.length ?? 0) + (a.inscripciones?.length ?? 0);
@@ -28,7 +33,22 @@ export const DELETE = manejar(async (req: Request) => {
     a.repasos = (a.repasos ?? []).filter((r) => r.autor !== autor);
     a.examenes = (a.examenes ?? []).filter((x) => x.autor !== autor);
     a.inscripciones = (a.inscripciones ?? []).filter((i) => i.autor !== autor);
-    return antes - total();
+    let otros = 0;
+    if (todo) {
+      const contar = <T,>(lista: T[], queda: (x: T) => boolean) => {
+        const filtrada = lista.filter(queda);
+        otros += lista.length - filtrada.length;
+        return filtrada;
+      };
+      a.preguntas = contar(a.preguntas, (p) => p.autor !== autor);
+      a.pagos = contar(a.pagos, (p) => p.autor !== autor);
+      a.publicaciones = contar(a.publicaciones, (p) => p.autor !== autor).map((p) => ({
+        ...p,
+        comentarios: contar(p.comentarios, (c) => c.autor !== autor),
+        reacciones: contar(p.reacciones, (r) => r !== autor),
+      }));
+    }
+    return antes - total() + otros;
   });
   if (borrados === 0) return error("No encontramos a ese alumno en la matriz.", 404);
   return Response.json({ borrados });

@@ -4844,6 +4844,30 @@ button.tarjeta-comunidad-enlace {
   margin-bottom: 0;
 }
 
+.mis-comunidades-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mis-sueltos {
+  border-style: dashed;
+  border-color: var(--linea-fuerte);
+}
+
+.poner-curso {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .poner-curso {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .forma-comunidad {
   display: grid;
   gap: 14px;

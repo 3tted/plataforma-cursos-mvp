@@ -1,18 +1,18 @@
 import { modificar } from "@/lib/almacen";
 import { nuevoCurso } from "@/lib/creacion";
 import { leerJson, manejar } from "@/lib/http";
-import { coachDe, comunidadDeCoach, conPermiso } from "@/lib/permisos";
+import { coachDe, conPermiso, destinoDeCurso } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
-// Crea un borrador de curso en una comunidad de la coach.
+// Crea un borrador de curso: en una comunidad de la coach o, si no manda
+// comunidad, suelto (lo pone en una comunidad después).
 export const POST = manejar((req: Request) =>
   conPermiso(async () => {
     const datos = await leerJson(req);
     const autor = coachDe(req, datos.autor);
     const curso = await modificar((a) => {
-      const comunidad = comunidadDeCoach(a, datos.comunidad, autor);
-      const nuevo = nuevoCurso(a, autor, comunidad.id);
+      const nuevo = nuevoCurso(a, autor, destinoDeCurso(a, datos.comunidad, autor));
       (a.cursosCoach ??= []).push(nuevo);
       return nuevo;
     });

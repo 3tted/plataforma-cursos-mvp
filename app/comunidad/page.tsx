@@ -14,6 +14,7 @@ import TarjetaPublicacion from "@/components/TarjetaPublicacion";
 import UnirseComunidad from "@/components/UnirseComunidad";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
+import { COMUNIDADES } from "@/lib/comunidades";
 import { CATEGORIAS, type Categoria, type Publicacion, type ResumenComunidad } from "@/lib/tipos";
 
 function Progreso({ hechas, total }: { hechas: number; total: number }) {
@@ -87,6 +88,9 @@ export default function PaginaComunidad() {
   const hechas = baseCurso.filter((l) => completadas.includes(l.id)).length;
   const siguiente = baseCurso.find((l) => !completadas.includes(l.id));
   const comunidad = datos?.comunidad;
+  // La coach que creó esta comunidad desde la plataforma puede agregarle cursos desde aquí.
+  const esDuena =
+    usuario?.rol === "coach" && comunidad?.coach === usuario.nombre && !COMUNIDADES.some((c) => c.id === comunidadId);
   const precio = moneda(comunidad?.precio_mensual ?? 490);
   // Un alumno que todavía no publica nada empieza presentándose, como pide el anuncio fijado.
   const primeraVez =
@@ -224,6 +228,12 @@ export default function PaginaComunidad() {
             )
           )}
         </section>
+
+        {esDuena && (
+          <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(comunidadId)}`} className="boton boton-secundario boton-bloque">
+            + Agregar un curso a esta comunidad
+          </Link>
+        )}
 
         <section className="tarjeta-asistente" aria-label="Asistente del curso">
           <h2>

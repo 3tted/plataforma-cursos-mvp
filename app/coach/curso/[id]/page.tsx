@@ -39,6 +39,7 @@ export default function EditorCurso() {
   const [aviso, setAviso] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [faltan, setFaltan] = useState<string[]>([]);
+  const [comunidades, setComunidades] = useState<{ id: string; nombre: string }[] | null>(null);
   useTitulo(curso?.titulo || "Editar curso");
 
   const autor = usuario?.nombre ?? "";
@@ -60,6 +61,11 @@ export default function EditorCurso() {
         setCurso(c);
       })
       .catch((e) => setError((e as Error).message));
+    api<{ comunidades: { id: string; nombre: string }[] }>(`/api/coach/comunidades?autor=${encodeURIComponent(autor)}`, {
+      headers: { "X-Rol": "coach" },
+    })
+      .then((d) => setComunidades(d.comunidades.map((c) => ({ id: c.id, nombre: c.nombre }))))
+      .catch(() => setComunidades([]));
     void cargarVideos();
   }, [id, autor, cargarVideos]);
 
@@ -157,6 +163,20 @@ export default function EditorCurso() {
     }
   };
 
+  // La comunidad se cambia al momento (no espera a «Guardar»).
+  const moverA = async (destino: string) => {
+    setError(null);
+    try {
+      await api(`/api/coach/cursos/${id}/comunidad`, { method: "POST", headers: cabeceras, json: { autor, comunidad: destino } });
+      setCurso((c) => (c ? { ...c, comunidad: destino } : c));
+      setGuardado((g) => (g ? { ...g, comunidad: destino } : g));
+      setAviso(destino ? "Curso puesto en la comunidad." : "El curso quedó sin comunidad.");
+      void recargarCatalogo();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+
   const vistaPrevia = async () => {
     if (sinGuardar && !(await guardar())) return;
     cambiarCurso(id);
@@ -181,7 +201,7 @@ export default function EditorCurso() {
     <div className="editor-curso">
       <div className="editor-barra">
         <Link href="/coach/comunidades" className="volver">
-          <IconoFlechaIzq width={16} height={16} /> Mis comunidades
+          <IconoFlechaIzq width={16} height={16} /> Mis comunidades y cursos
         </Link>
         <span className={curso.estado === "publicado" ? "pastilla pastilla-ok" : "pastilla"}>
           {curso.estado === "publicado" ? "Publicado" : "Borrador"}
@@ -190,7 +210,13 @@ export default function EditorCurso() {
           {ocupado === "guardar" ? "Guardando…" : sinGuardar ? "Cambios sin guardar" : aviso}
         </span>
         <div className="editor-acciones">
-          <button type="button" className="boton boton-chico boton-fantasma" onClick={() => void vistaPrevia()}>
+          <button
+            type="button"
+            className="boton boton-chico boton-fantasma"
+            onClick={() => void vistaPrevia()}
+            disabled={!curso.comunidad}
+            title={curso.comunidad ? undefined : "Ponlo primero en una comunidad"}
+          >
             Ver como alumno
           </button>
           <button
@@ -239,6 +265,32 @@ export default function EditorCurso() {
 
       <section className="tarjeta editor-seccion" aria-labelledby="datos-titulo">
         <h2 id="datos-titulo">Datos del curso</h2>
+        <label className="campo">
+          <span>Comunidad</span>
+          <select
+            id="comunidad-curso"
+            value={curso.comunidad}
+            onChange={(e) => void moverA(e.target.value)}
+            disabled={curso.estado === "publicado" || comunidades === null}
+          >
+            <option value="">Sin comunidad por ahora</option>
+            {comunidades?.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre}
+              </option>
+            ))}
+          </select>
+          {curso.estado === "publicado" ? (
+            <p className="nota">Para cambiarlo de comunidad, primero despublícalo.</p>
+          ) : comunidades?.length === 0 ? (
+            <p className="nota">
+              Todavía no tienes comunidades. <Link href="/coach/comunidades">Crea una</Link> y luego elígela aquí; para
+              publicar el curso tiene que estar en una.
+            </p>
+          ) : (
+            !curso.comunidad && <p className="nota">Para publicar el curso, elige en qué comunidad va.</p>
+          )}
+        </label>
         <label className="campo">
           <span>Título</span>
           <input

@@ -10,7 +10,7 @@ import {
   type Documento,
 } from "@/lib/curso-ia";
 import { ErrorDeDatos, manejar } from "@/lib/http";
-import { coachDe, comunidadDeCoach, conPermiso } from "@/lib/permisos";
+import { coachDe, conPermiso, destinoDeCurso } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 // Armar un curso con IA suele tardar menos de un minuto, pero si el modelo
@@ -26,8 +26,8 @@ export const POST = manejar((req: Request) =>
     });
     const autor = coachDe(req, forma.get("autor"));
     const comunidad = String(forma.get("comunidad") ?? "");
-    // Antes de gastar en la IA, que la comunidad sea de esta coach.
-    await consultar((a) => comunidadDeCoach(a, comunidad, autor));
+    // Antes de gastar en la IA, que la comunidad (si eligió una) sea de esta coach.
+    await consultar((a) => destinoDeCurso(a, comunidad, autor));
 
     const archivo = forma.get("archivo");
     const pegado = String(forma.get("texto") ?? "");
@@ -49,8 +49,7 @@ export const POST = manejar((req: Request) =>
     const propuesta = await proponerCurso(doc, indicaciones, medidas);
 
     const curso = await modificar((a) => {
-      comunidadDeCoach(a, comunidad, autor);
-      const borrador = aplicarEdicion(a, nuevoCurso(a, autor, comunidad, "ia"), comoEdicion(propuesta));
+      const borrador = aplicarEdicion(a, nuevoCurso(a, autor, destinoDeCurso(a, comunidad, autor), "ia"), comoEdicion(propuesta));
       (a.cursosCoach ??= []).push(borrador);
       return borrador;
     });

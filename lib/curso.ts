@@ -119,12 +119,23 @@ export function datosDeCursoCreado(c: CursoCreado, comunidad: Comunidad): DatosC
   };
 }
 
+const sinComunidad = (c: CursoCreado): Comunidad => ({
+  id: "",
+  nombre: "Sin comunidad",
+  coach: c.autor,
+  coach_titulo: "Coach",
+  descripcion: "",
+  precio_mensual: 0,
+  moneda: "MXN",
+});
+
 async function cargarCursosCreados(opciones: Opciones = {}): Promise<DatosCurso[]> {
   return consultar((a) =>
     (a.cursosCoach ?? [])
       .filter((c) => visible(c, opciones))
       .flatMap((c) => {
-        const comunidad = comunidadCreadaDe(a, c.comunidad);
+        // Un borrador sin comunidad todavía: la coach lo edita y le sube videos.
+        const comunidad = c.comunidad ? comunidadCreadaDe(a, c.comunidad) : sinComunidad(c);
         return comunidad ? [datosDeCursoCreado(c, comunidad)] : [];
       }),
   );

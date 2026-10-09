@@ -12,9 +12,9 @@ export const GET = manejar((req: Request) =>
     const autor = coachDe(req, new URL(req.url).searchParams.get("autor"));
     const datos = await consultar((a) => {
       const comunidades = (a.comunidadesCoach ?? []).filter((c) => c.autor === autor);
-      const ids = new Set(comunidades.map((c) => c.id));
+      // Sus cursos: los que están en sus comunidades y los que todavía no tienen una.
       const cursos = (a.cursosCoach ?? [])
-        .filter((c) => ids.has(c.comunidad))
+        .filter((c) => c.autor === autor)
         .map((c) => ({
           id: c.id,
           comunidad: c.comunidad,

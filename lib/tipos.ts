@@ -93,6 +93,7 @@ export interface ModuloCreado {
 
 export interface CursoCreado {
   id: string;
+  /** "" mientras la coach no lo pone en una comunidad (así no se puede publicar). */
   comunidad: string;
   /** Los alumnos solo ven los publicados. */
   estado: "borrador" | "publicado";

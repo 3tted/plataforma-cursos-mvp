@@ -59,7 +59,7 @@ export function nuevaComunidad(a: Almacen, autor: string, datos: Record<string, 
   };
 }
 
-/** Un borrador nuevo con un módulo y una lección vacíos, listo para editar. */
+/** Un borrador nuevo con un módulo y una lección vacíos, listo para editar. Puede nacer sin comunidad (""). */
 export function nuevoCurso(a: Almacen, autor: string, comunidad: string, origen: CursoCreado["origen"] = "manual"): CursoCreado {
   const ahora = new Date().toISOString();
   return {
@@ -166,6 +166,7 @@ export function aplicarEdicion(a: Almacen, actual: CursoCreado, entrada: Record<
 /** Lo que falta para que el curso se pueda publicar (vacío: listo). */
 export function pendientesParaPublicar(c: CursoCreado): string[] {
   const faltan: string[] = [];
+  if (!c.comunidad) faltan.push("Elige en qué comunidad va el curso (arriba, en «Comunidad»).");
   if (!c.titulo) faltan.push("El curso necesita un título.");
   const lecciones = c.modulos.flatMap((m) => m.lecciones);
   if (lecciones.length === 0) faltan.push("Agrega al menos una lección.");

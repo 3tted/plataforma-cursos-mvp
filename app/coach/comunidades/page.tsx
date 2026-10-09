@@ -15,45 +15,55 @@ import type { ComunidadCreada, CursoCreado } from "@/lib/tipos";
 type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "estado" | "origen" | "actualizadoEn"> & {
   lecciones: number;
 };
+type Datos = { comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean };
 
 const COMUNIDAD_VACIA = { nombre: "", descripcion: "", tema: "Finanzas", coach_titulo: "", precio_mensual: "390" };
+/** Clave de la sección de cursos que todavía no están en una comunidad. */
+const SUELTOS = "";
 
-// Las comunidades de la coach: crear una nueva y, dentro de cada una, ver y
-// agregar cursos (a mano o con IA a partir de un documento).
+// Las comunidades y los cursos de la coach. Son cosas aparte: puede crear
+// primero la comunidad y luego sus cursos, o primero un curso y después
+// ponerlo en una comunidad (para publicarlo tiene que estar en una).
 export default function PaginaMisComunidades() {
   const router = useRouter();
   const { usuario, cambiarComunidad, recargarCatalogo } = useApp();
-  const [datos, setDatos] = useState<{ comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean } | null>(null);
-  const [conIA, setConIA] = useState<string | null>(null);
+  const [datos, setDatos] = useState<Datos | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creando, setCreando] = useState(false);
+  const [verSueltos, setVerSueltos] = useState(false);
   const [forma, setForma] = useState(COMUNIDAD_VACIA);
   const [enviando, setEnviando] = useState<string | null>(null);
-  useTitulo("Mis comunidades");
+  // Dónde está abierto el formulario de IA (una comunidad o SUELTOS).
+  const [conIA, setConIA] = useState<string | null>(null);
+  useTitulo("Mis comunidades y cursos");
 
   const autor = usuario?.nombre ?? "";
   const cabeceras = { "X-Rol": "coach" };
 
   const cargar = useCallback(() => {
     if (!autor) return;
-    api<{ comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean }>(
-      `/api/coach/comunidades?autor=${encodeURIComponent(autor)}`,
-      { headers: { "X-Rol": "coach" } },
-    )
+    api<Datos>(`/api/coach/comunidades?autor=${encodeURIComponent(autor)}`, { headers: { "X-Rol": "coach" } })
       .then((d) => {
         setDatos(d);
-        if (d.comunidades.length === 0) setCreando(true);
+        if (d.comunidades.length === 0 && d.cursos.length === 0) setCreando(true);
       })
       .catch((e) => setError((e as Error).message));
   }, [autor]);
 
   useEffect(cargar, [cargar]);
 
+  // Desde la página de una comunidad (?comunidad=id) se llega directo a su tarjeta.
+  useEffect(() => {
+    if (!datos) return;
+    const id = new URLSearchParams(window.location.search).get("comunidad");
+    if (id) document.getElementById(`tarjeta-${id}`)?.scrollIntoView({ block: "start" });
+  }, [datos]);
+
   if (usuario?.rol !== "coach") {
     return (
       <div className="pagina-estrecha">
         <h1>Esta página es para coaches</h1>
-        <p className="texto-suave">Aquí la coach crea su comunidad y sus cursos. Para verla, entra con el rol de coach.</p>
+        <p className="texto-suave">Aquí la coach crea sus comunidades y sus cursos. Para verla, entra con el rol de coach.</p>
       </div>
     );
   }
@@ -79,7 +89,7 @@ export default function PaginaMisComunidades() {
   };
 
   const agregarCursoManual = async (comunidad: string) => {
-    setEnviando(comunidad);
+    setEnviando(`curso:${comunidad}`);
     setError(null);
     try {
       const curso = await api<CursoCreado>("/api/coach/cursos", {
@@ -94,26 +104,141 @@ export default function PaginaMisComunidades() {
     }
   };
 
+  const ponerEnComunidad = async (curso: string, comunidad: string) => {
+    setEnviando(`mover:${curso}`);
+    setError(null);
+    try {
+      await api(`/api/coach/cursos/${curso}/comunidad`, { method: "POST", headers: cabeceras, json: { autor, comunidad } });
+      cargar();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setEnviando(null);
+    }
+  };
+
   const verEnPlataforma = async (comunidad: string) => {
     await recargarCatalogo();
     cambiarComunidad(comunidad);
     router.push("/comunidad");
   };
 
+  const sueltos = datos?.cursos.filter((x) => !x.comunidad) ?? [];
+  const mostrarSueltos = verSueltos || sueltos.length > 0;
+
+  const listaCursos = (cursos: ResumenCursoCoach[]) => (
+    <ul className="mis-cursos">
+      {cursos.map((x) => (
+        <li key={x.id}>
+          <Link href={`/coach/curso/${x.id}`} className="mi-curso">
+            <span className="mi-curso-titulo">{x.titulo || "Curso sin título"}</span>
+            <span className="texto-suave mi-curso-meta">
+              <span className="cifra">{x.lecciones}</span> {x.lecciones === 1 ? "lección" : "lecciones"}
+              {x.origen === "ia" && " · hecho con IA"} · editado {hace(x.actualizadoEn)}
+            </span>
+            <span className={x.estado === "publicado" ? "pastilla pastilla-ok" : "pastilla"}>
+              {x.estado === "publicado" ? "Publicado" : "Borrador"}
+            </span>
+            <span className="mi-curso-editar" aria-hidden="true">
+              <IconoEditar width={16} height={16} />
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+
+  // "Agregar un curso": a mano, con IA y, en una comunidad, uno que ya hizo.
+  const agregarCurso = (comunidad: string) =>
+    conIA === comunidad ? (
+      <CrearConIA autor={autor} comunidad={comunidad} alCerrar={() => setConIA(null)} />
+    ) : (
+      <div className="agregar-curso">
+        <p className="agregar-curso-titulo">{comunidad ? "Agregar un curso a esta comunidad" : "Crear un curso"}</p>
+        <div className="agregar-curso-opciones">
+          <button
+            type="button"
+            className="opcion-agregar"
+            onClick={() => void agregarCursoManual(comunidad)}
+            disabled={enviando === `curso:${comunidad}`}
+          >
+            <IconoEditar width={22} height={22} />
+            <span>
+              <strong>{enviando === `curso:${comunidad}` ? "Creando…" : "A mano"}</strong>
+              <span className="texto-suave">Escribe tus lecciones, sube los videos y arma las preguntas.</span>
+            </span>
+            <IconoFlechaDer width={16} height={16} />
+          </button>
+          <button type="button" className="opcion-agregar" onClick={() => setConIA(comunidad)} disabled={!datos?.ia}>
+            <IconoAsistenteGeneral width={22} height={22} />
+            <span>
+              <strong>Con IA, a partir de un documento</strong>
+              <span className="texto-suave">
+                {datos?.ia
+                  ? "Sube un PDF o Word con tu material y la IA te propone el curso para que lo revises."
+                  : "Necesita una IA conectada (clave de Gemini o de Claude en el servidor)."}
+              </span>
+            </span>
+            <IconoFlechaDer width={16} height={16} />
+          </button>
+        </div>
+        {comunidad && sueltos.length > 0 && (
+          <form
+            className="poner-curso"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const curso = new FormData(e.currentTarget).get("curso");
+              if (typeof curso === "string" && curso) void ponerEnComunidad(curso, comunidad);
+            }}
+          >
+            <label className="campo">
+              <span>O agrega uno que ya hiciste</span>
+              <select name="curso" defaultValue="">
+                <option value="" disabled>
+                  Elige un curso sin comunidad
+                </option>
+                {sueltos.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.titulo || "Curso sin título"}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" className="boton boton-secundario" disabled={enviando?.startsWith("mover:")}>
+              Agregar aquí
+            </button>
+          </form>
+        )}
+      </div>
+    );
+
   return (
     <div className="mis-comunidades">
       <header className="cabecera-pagina mis-comunidades-cabecera">
         <div>
-          <h1>Mis comunidades</h1>
+          <h1>Mis comunidades y cursos</h1>
           <p className="texto-suave">
-            Crea tu comunidad y agrégale cursos. Un curso se queda como borrador hasta que lo publicas.
+            Crea primero tu comunidad y luego sus cursos, o al revés. Un curso se queda como borrador hasta que lo
+            publicas, y para publicarlo tiene que estar en una comunidad.
           </p>
         </div>
-        {!creando && (
-          <button type="button" className="boton" onClick={() => setCreando(true)}>
-            Crear comunidad
+        <div className="mis-comunidades-acciones">
+          {!creando && (
+            <button type="button" className="boton" onClick={() => setCreando(true)}>
+              Crear comunidad
+            </button>
+          )}
+          <button
+            type="button"
+            className="boton boton-secundario"
+            onClick={() => {
+              setVerSueltos(true);
+              requestAnimationFrame(() => document.getElementById("tarjeta-sueltos")?.scrollIntoView({ block: "start" }));
+            }}
+          >
+            Crear curso
           </button>
-        )}
+        </div>
       </header>
 
       {error && (
@@ -181,22 +306,34 @@ export default function PaginaMisComunidades() {
             <button type="submit" className="boton" disabled={enviando === "comunidad"}>
               {enviando === "comunidad" ? "Creando…" : "Crear comunidad"}
             </button>
-            {datos && datos.comunidades.length > 0 && (
-              <button type="button" className="boton boton-fantasma" onClick={() => setCreando(false)}>
-                Cancelar
-              </button>
-            )}
+            <button type="button" className="boton boton-fantasma" onClick={() => setCreando(false)}>
+              Cancelar
+            </button>
           </div>
         </form>
       )}
 
-      {!datos && !error && <p className="texto-suave">Cargando tus comunidades…</p>}
+      {!datos && !error && <p className="texto-suave">Cargando tus comunidades y cursos…</p>}
+
+      {datos && mostrarSueltos && (
+        <section id="tarjeta-sueltos" className="tarjeta mi-comunidad mis-sueltos" aria-labelledby="sueltos-titulo">
+          <div>
+            <h2 id="sueltos-titulo">Cursos sin comunidad</h2>
+            <p className="texto-suave">
+              Puedes armarlos desde ahora. Cuando tengas tu comunidad, ponlos en ella desde el editor del curso o desde
+              la comunidad.
+            </p>
+          </div>
+          {sueltos.length > 0 ? listaCursos(sueltos) : <p className="vacio">Todavía no tienes cursos sueltos.</p>}
+          {agregarCurso(SUELTOS)}
+        </section>
+      )}
 
       {datos?.comunidades.map((c) => {
         const suyos = datos.cursos.filter((x) => x.comunidad === c.id);
         const publicados = suyos.filter((x) => x.estado === "publicado").length;
         return (
-          <section key={c.id} className="tarjeta mi-comunidad" aria-labelledby={`comunidad-${c.id}`}>
+          <section key={c.id} id={`tarjeta-${c.id}`} className="tarjeta mi-comunidad" aria-labelledby={`comunidad-${c.id}`}>
             <div className="mi-comunidad-cabecera">
               <PortadaTema tema={c.tema} clave={c.id} className="mi-comunidad-portada" />
               <div className="mi-comunidad-datos">
@@ -216,61 +353,8 @@ export default function PaginaMisComunidades() {
             </div>
 
             <h3>Cursos</h3>
-            {suyos.length === 0 && <p className="vacio">Todavía no tiene cursos.</p>}
-            <ul className="mis-cursos">
-              {suyos.map((x) => (
-                <li key={x.id}>
-                  <Link href={`/coach/curso/${x.id}`} className="mi-curso">
-                    <span className="mi-curso-titulo">{x.titulo || "Curso sin título"}</span>
-                    <span className="texto-suave mi-curso-meta">
-                      <span className="cifra">{x.lecciones}</span> {x.lecciones === 1 ? "lección" : "lecciones"}
-                      {x.origen === "ia" && " · hecho con IA"} · editado {hace(x.actualizadoEn)}
-                    </span>
-                    <span className={x.estado === "publicado" ? "pastilla pastilla-ok" : "pastilla"}>
-                      {x.estado === "publicado" ? "Publicado" : "Borrador"}
-                    </span>
-                    <span className="mi-curso-editar" aria-hidden="true">
-                      <IconoEditar width={16} height={16} />
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
-            {conIA === c.id ? (
-              <CrearConIA autor={autor} comunidad={c.id} alCerrar={() => setConIA(null)} />
-            ) : (
-            <div className="agregar-curso">
-              <p className="agregar-curso-titulo">Agregar un curso</p>
-              <div className="agregar-curso-opciones">
-                <button
-                  type="button"
-                  className="opcion-agregar"
-                  onClick={() => void agregarCursoManual(c.id)}
-                  disabled={enviando === c.id}
-                >
-                  <IconoEditar width={22} height={22} />
-                  <span>
-                    <strong>{enviando === c.id ? "Creando…" : "A mano"}</strong>
-                    <span className="texto-suave">Escribe tus lecciones, sube los videos y arma las preguntas.</span>
-                  </span>
-                  <IconoFlechaDer width={16} height={16} />
-                </button>
-                <button type="button" className="opcion-agregar" onClick={() => setConIA(c.id)} disabled={!datos.ia}>
-                  <IconoAsistenteGeneral width={22} height={22} />
-                  <span>
-                    <strong>Con IA, a partir de un documento</strong>
-                    <span className="texto-suave">
-                      {datos.ia
-                        ? "Sube un PDF o Word con tu material y la IA te propone el curso para que lo revises."
-                        : "Necesita una IA conectada (clave de Gemini o de Claude en el servidor)."}
-                    </span>
-                  </span>
-                  <IconoFlechaDer width={16} height={16} />
-                </button>
-              </div>
-            </div>
-            )}
+            {suyos.length === 0 ? <p className="vacio">Todavía no tiene cursos.</p> : listaCursos(suyos)}
+            {agregarCurso(c.id)}
           </section>
         );
       })}

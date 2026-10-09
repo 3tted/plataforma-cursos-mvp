@@ -25,8 +25,15 @@ export function comunidadDeCoach(a: Almacen, id: unknown, autor: string): Comuni
 export function cursoDeCoach(a: Almacen, id: unknown, autor: string): CursoCreado {
   const c = (a.cursosCoach ?? []).find((x) => x.id === id);
   if (!c) throw new ErrorDeDatos("No encontramos ese curso.");
-  comunidadDeCoach(a, c.comunidad, autor);
+  if (c.autor !== autor) throw new SinPermiso("Este curso es de otra coach.");
+  if (c.comunidad) comunidadDeCoach(a, c.comunidad, autor);
   return c;
+}
+
+/** La comunidad a la que va un curso nuevo o movido: "" (ninguna todavía) o una de la coach. */
+export function destinoDeCurso(a: Almacen, id: unknown, autor: string): string {
+  if (id === undefined || id === null || id === "") return "";
+  return comunidadDeCoach(a, id, autor).id;
 }
 
 /** Convierte los errores de permiso en 403 para quien llama. */

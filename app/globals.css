@@ -5006,6 +5006,100 @@ button.tarjeta-comunidad-enlace {
   opacity: 0.6;
 }
 
+/* Crear curso con IA */
+.crear-ia {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--acento);
+  border-radius: var(--radio-hoja);
+  background: var(--rubor);
+}
+
+.crear-ia-cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.crear-ia .campo textarea,
+.crear-ia .campo input {
+  background: var(--superficie);
+}
+
+.crear-ia-archivo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.crear-ia-nombre {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.crear-ia-alternar {
+  justify-self: start;
+  font-size: var(--t-small);
+}
+
+.crear-ia-trabajando {
+  justify-items: center;
+  text-align: center;
+  padding: 28px 20px;
+}
+
+.crear-ia-trabajando > svg {
+  color: var(--acento-texto);
+}
+
+.crear-ia-paso {
+  font-family: var(--fuente-display);
+  font-size: var(--t-title);
+  font-weight: 600;
+}
+
+.crear-ia-trabajando .progreso {
+  width: min(320px, 100%);
+}
+
+.progreso-indeterminado > span {
+  width: 40%;
+  animation: progreso-ir-venir 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes progreso-ir-venir {
+  from {
+    transform: translateX(-10%);
+  }
+  to {
+    transform: translateX(160%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progreso-indeterminado > span {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}
+
+.editor-aviso-ia {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  background: var(--rubor);
+  border-color: transparent;
+}
+
+.editor-aviso-ia > svg {
+  flex-shrink: 0;
+  color: var(--acento-texto);
+  margin-top: 2px;
+}
+
 /* ---------- Editor de curso (coach) ---------- */
 
 .editor-curso {

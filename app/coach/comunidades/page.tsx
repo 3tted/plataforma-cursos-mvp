@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useApp } from "@/components/Contexto";
+import CrearConIA from "@/components/editor/CrearConIA";
 import { IconoAsistenteGeneral, IconoEditar, IconoFlechaDer } from "@/components/Iconos";
 import PortadaTema from "@/components/PortadaTema";
 import { useTitulo } from "@/components/useTitulo";
@@ -18,11 +19,12 @@ type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "esta
 const COMUNIDAD_VACIA = { nombre: "", descripcion: "", tema: "Finanzas", coach_titulo: "", precio_mensual: "390" };
 
 // Las comunidades de la coach: crear una nueva y, dentro de cada una, ver y
-// agregar cursos (a mano o, en la siguiente entrega, con IA a partir de un documento).
+// agregar cursos (a mano o con IA a partir de un documento).
 export default function PaginaMisComunidades() {
   const router = useRouter();
   const { usuario, cambiarComunidad, recargarCatalogo } = useApp();
-  const [datos, setDatos] = useState<{ comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[] } | null>(null);
+  const [datos, setDatos] = useState<{ comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean } | null>(null);
+  const [conIA, setConIA] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creando, setCreando] = useState(false);
   const [forma, setForma] = useState(COMUNIDAD_VACIA);
@@ -34,7 +36,7 @@ export default function PaginaMisComunidades() {
 
   const cargar = useCallback(() => {
     if (!autor) return;
-    api<{ comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[] }>(
+    api<{ comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean }>(
       `/api/coach/comunidades?autor=${encodeURIComponent(autor)}`,
       { headers: { "X-Rol": "coach" } },
     )
@@ -221,8 +223,8 @@ export default function PaginaMisComunidades() {
                   <Link href={`/coach/curso/${x.id}`} className="mi-curso">
                     <span className="mi-curso-titulo">{x.titulo || "Curso sin título"}</span>
                     <span className="texto-suave mi-curso-meta">
-                      <span className="cifra">{x.lecciones}</span> {x.lecciones === 1 ? "lección" : "lecciones"} · editado{" "}
-                      {hace(x.actualizadoEn)}
+                      <span className="cifra">{x.lecciones}</span> {x.lecciones === 1 ? "lección" : "lecciones"}
+                      {x.origen === "ia" && " · hecho con IA"} · editado {hace(x.actualizadoEn)}
                     </span>
                     <span className={x.estado === "publicado" ? "pastilla pastilla-ok" : "pastilla"}>
                       {x.estado === "publicado" ? "Publicado" : "Borrador"}
@@ -235,6 +237,9 @@ export default function PaginaMisComunidades() {
               ))}
             </ul>
 
+            {conIA === c.id ? (
+              <CrearConIA autor={autor} comunidad={c.id} alCerrar={() => setConIA(null)} />
+            ) : (
             <div className="agregar-curso">
               <p className="agregar-curso-titulo">Agregar un curso</p>
               <div className="agregar-curso-opciones">
@@ -251,15 +256,21 @@ export default function PaginaMisComunidades() {
                   </span>
                   <IconoFlechaDer width={16} height={16} />
                 </button>
-                <button type="button" className="opcion-agregar" disabled>
+                <button type="button" className="opcion-agregar" onClick={() => setConIA(c.id)} disabled={!datos.ia}>
                   <IconoAsistenteGeneral width={22} height={22} />
                   <span>
                     <strong>Con IA, a partir de un documento</strong>
-                    <span className="texto-suave">Sube un PDF o Word y la IA te propone el curso. Llega en la siguiente entrega.</span>
+                    <span className="texto-suave">
+                      {datos.ia
+                        ? "Sube un PDF o Word con tu material y la IA te propone el curso para que lo revises."
+                        : "Necesita una IA conectada (clave de Gemini o de Claude en el servidor)."}
+                    </span>
                   </span>
+                  <IconoFlechaDer width={16} height={16} />
                 </button>
               </div>
             </div>
+            )}
           </section>
         );
       })}

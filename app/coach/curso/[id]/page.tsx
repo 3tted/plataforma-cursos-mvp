@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/components/Contexto";
 import EditorPreguntas from "@/components/editor/EditorPreguntas";
 import VideoEnEditor from "@/components/editor/VideoEnEditor";
-import { IconoBorrar, IconoFlechaIzq } from "@/components/Iconos";
+import { IconoAsistenteGeneral, IconoBorrar, IconoFlechaIzq } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
 import { api } from "@/lib/cliente";
 import type { CursoCreado, DatosCurso, LeccionCreada, ModuloCreado } from "@/lib/tipos";
@@ -223,6 +223,17 @@ export default function EditorCurso() {
               ))}
             </ul>
           )}
+        </div>
+      )}
+
+      {curso.origen === "ia" && curso.estado === "borrador" && (
+        <div className="aviso editor-aviso-ia">
+          <IconoAsistenteGeneral width={22} height={22} />
+          <p>
+            <strong>La IA armó este borrador con tu documento.</strong> Revísalo antes de publicar: que cada lección diga lo
+            que tú enseñas, que las respuestas marcadas como correctas lo sean y que los minutos tengan sentido. Después
+            sube el video de cada lección.
+          </p>
         </div>
       )}
 

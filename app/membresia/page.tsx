@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Arcos from "@/components/Arcos";
 import { useApp } from "@/components/Contexto";
-import { IconoCheck, IconoCopiar, IconoFlechaDer } from "@/components/Iconos";
+import { IconoCheck, IconoCopiar, IconoFlechaDer, IconoFlechaIzq } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
 import { agrupar, api, fechaCorta, moneda } from "@/lib/cliente";
 import type { MetodoPago, Pago } from "@/lib/tipos";
@@ -188,6 +188,9 @@ export default function PaginaMembresia() {
 
   return (
     <div className="pagina-membresia">
+      <Link href="/comunidad" className="volver">
+        <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
+      </Link>
       <header className="membresia-cabecera portada">
         <Arcos />
         <h1>Únete a {comunidad?.nombre ?? "Finanzas Claras"}</h1>

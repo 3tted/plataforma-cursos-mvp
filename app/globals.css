@@ -3048,6 +3048,7 @@ main:focus {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
   grid-template-areas:
+    "volver volver"
     "cabecera pago"
     "plan pago";
   gap: 24px 40px;
@@ -3056,6 +3057,11 @@ main:focus {
 
 .membresia-cabecera {
   grid-area: cabecera;
+}
+
+.pagina-membresia > .volver {
+  grid-area: volver;
+  justify-self: start;
 }
 
 .pagina-membresia .checkout {
@@ -3086,6 +3092,7 @@ main:focus {
   .pagina-membresia {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
+      "volver"
       "cabecera"
       "pago"
       "plan";
@@ -4456,6 +4463,24 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
   }
 }
 
+/* En la lección, el menú inferior se esconde: abajo solo queda la barra de
+   acciones (Completar / Siguiente), pegada al borde y con la zona segura. */
+@media (max-width: 760px) {
+  body:has(.rejilla-leccion) .nav {
+    display: none;
+  }
+  body:has(.rejilla-leccion) {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  body:has(.rejilla-leccion) .barra-siguiente {
+    bottom: 0;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  body:has(.rejilla-leccion[data-con-barra="true"]) {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}
+
 /* Ruta obligatoria del alumno: video completo → repaso → lección completada */
 .video-aviso {
   margin: 8px 0 0;
@@ -4844,8 +4869,70 @@ details.modulo[open] > .modulo-cabecera {
 
 .visitantes-cuenta {
   display: flex;
+  align-items: center;
   gap: 8px;
   margin-left: auto;
+}
+
+.visitantes-barra-interior {
+  position: relative;
+}
+
+/* Menú del celular (debajo de 768px) */
+.visitantes-menu-boton {
+  display: none;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--graphite);
+}
+
+.visitantes-menu-boton:hover {
+  background: var(--light-1);
+}
+
+.visitantes-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+  box-shadow: 0 12px 24px var(--sombra);
+}
+
+.visitantes-menu[hidden] {
+  display: none;
+}
+
+.visitantes-menu a {
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--graphite);
+  font-family: var(--fuente-display);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.visitantes-menu .boton {
+  margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .visitantes-menu {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .visitantes-nav {
+    display: none;
+  }
+  .visitantes-menu-boton {
+    display: inline-grid;
+  }
 }
 
 .visitantes-contenido {
@@ -5099,9 +5186,6 @@ button.tarjeta-comunidad-enlace {
     min-height: 0;
     padding-top: 64px;
   }
-  .visitantes-nav {
-    display: none;
-  }
 }
 
 @media (max-width: 560px) {
@@ -5113,9 +5197,6 @@ button.tarjeta-comunidad-enlace {
   }
   .visitantes-barra .marca-logo {
     height: 30px;
-  }
-  .visitantes-cuenta .boton-fantasma {
-    display: none;
   }
   .visitantes-contenido {
     gap: 44px;

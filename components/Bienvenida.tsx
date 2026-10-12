@@ -152,7 +152,7 @@ export default function Bienvenida() {
             <button type="button" className="volver entrada-volver" onClick={() => setPidiendoUsuario(false)}>
               <IconoFlechaIzq width={16} height={16} /> Volver
             </button>
-            <h1 id="entrada-titulo">Cursos en línea</h1>
+            <h1 id="entrada-titulo">Entra a Merkatics</h1>
             <p className="texto-suave">
               Toma los cursos de tu coach, resuelve tus dudas con un asistente que responde con las lecciones y participa
               en su comunidad.

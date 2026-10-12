@@ -8,6 +8,7 @@ import {
   Exam,
   GraduationCap,
   House,
+  List,
   ListChecks,
   XCircle,
   BookOpenText,
@@ -68,6 +69,7 @@ export const IconoUtil = icono(ThumbsUp);
 export const IconoComentario = icono(ChatCircleText);
 export const IconoCopiar = icono(Copy);
 export const IconoCerrar = icono(X);
+export const IconoMenu = icono(List);
 export const IconoFlechaDer = icono(ArrowRight);
 export const IconoFlechaIzq = icono(ArrowLeft);
 export const IconoFijado = icono(PushPin);

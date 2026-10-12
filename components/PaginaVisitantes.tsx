@@ -1,9 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
-import { IconoAsistente, IconoAsistenteGeneral, IconoBillete, IconoComunidad, IconoCurso, IconoFlechaDer } from "./Iconos";
+import {
+  IconoAsistente,
+  IconoAsistenteGeneral,
+  IconoBillete,
+  IconoCerrar,
+  IconoComunidad,
+  IconoCurso,
+  IconoFlechaDer,
+  IconoMenu,
+} from "./Iconos";
 import PiePagina from "./PiePagina";
 import TarjetaComunidad from "./TarjetaComunidad";
 
@@ -26,6 +36,32 @@ export default function PaginaVisitantes() {
   const { pedirEntrada, cambiarComunidad, comunidades } = useApp();
   const abiertas = comunidades.filter((c) => c.estado === "activa");
 
+  // Menú del celular: se cierra con Escape, al tocar fuera o al elegir algo.
+  const [menu, setMenu] = useState(false);
+  const barra = useRef<HTMLDivElement>(null);
+  const botonMenu = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!menu) return;
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setMenu(false);
+      botonMenu.current?.focus();
+    };
+    const fuera = (e: PointerEvent) => {
+      if (!barra.current?.contains(e.target as Node)) setMenu(false);
+    };
+    document.addEventListener("keydown", tecla);
+    document.addEventListener("pointerdown", fuera);
+    return () => {
+      document.removeEventListener("keydown", tecla);
+      document.removeEventListener("pointerdown", fuera);
+    };
+  }, [menu]);
+  const entrar = () => {
+    setMenu(false);
+    pedirEntrada();
+  };
+
   // Elegir una comunidad: después de entrar, la persona llega a ella.
   const elegirComunidad = (id: string) => {
     cambiarComunidad(id);
@@ -36,22 +72,46 @@ export default function PaginaVisitantes() {
   return (
     <div className="visitantes" data-app-fondo>
       <header className="visitantes-barra">
-        <div className="envoltura visitantes-barra-interior">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="marca-logo" src="/merkatics-logo.png" alt="Merkatics Growth Operating System" width={2311} height={544} />
+        <div className="envoltura visitantes-barra-interior" ref={barra}>
+          <a href="#" className="marca" aria-label="Merkatics, inicio" onClick={() => setMenu(false)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="marca-logo" src="/merkatics-logo.png" alt="" width={2311} height={544} />
+          </a>
           <nav className="visitantes-nav" aria-label="Secciones">
             <a href="#funciones">Qué puedes hacer</a>
             <a href="#comunidades">Comunidades</a>
             <a href="#coaches">Para coaches</a>
           </nav>
           <div className="visitantes-cuenta">
-            <button type="button" className="boton boton-chico boton-fantasma" onClick={() => pedirEntrada()}>
-              Iniciar sesión
+            <button type="button" className="boton boton-chico" onClick={entrar}>
+              Entrar
             </button>
-            <button type="button" className="boton boton-chico" onClick={() => pedirEntrada("alumno")}>
-              Crear cuenta
+            <button
+              ref={botonMenu}
+              type="button"
+              className="boton-icono visitantes-menu-boton"
+              aria-expanded={menu}
+              aria-controls="menu-visitantes"
+              aria-label={menu ? "Cerrar el menú" : "Abrir el menú"}
+              onClick={() => setMenu(!menu)}
+            >
+              {menu ? <IconoCerrar width={22} height={22} /> : <IconoMenu width={22} height={22} />}
             </button>
           </div>
+          <nav id="menu-visitantes" className="visitantes-menu" aria-label="Menú" hidden={!menu}>
+            <a href="#funciones" onClick={() => setMenu(false)}>
+              Qué puedes hacer
+            </a>
+            <a href="#comunidades" onClick={() => setMenu(false)}>
+              Comunidades
+            </a>
+            <a href="#coaches" onClick={() => setMenu(false)}>
+              Para coaches
+            </a>
+            <button type="button" className="boton" onClick={entrar}>
+              Entrar
+            </button>
+          </nav>
         </div>
       </header>
 

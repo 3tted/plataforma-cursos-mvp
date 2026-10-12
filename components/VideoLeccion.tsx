@@ -6,6 +6,7 @@ import { MAX_BYTES_VIDEO, tipoDeVideo, tamañoLegible } from "@/lib/reglas-video
 import type { Leccion } from "@/lib/tipos";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
+import { posterDeVideo } from "@/lib/poster";
 import { IconoSubir } from "./Iconos";
 
 type Estado = "inactivo" | "subiendo" | "error";
@@ -177,6 +178,7 @@ export default function VideoLeccion({
           preload="metadata"
           playsInline
           src={leccion.video.url}
+          poster={posterDeVideo(`Lección ${leccion.id}`, leccion.titulo)}
           aria-label={`Video de la lección «${leccion.titulo}»`}
           onLoadedMetadata={() => {
             visto.current = 0;

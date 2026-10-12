@@ -7,6 +7,7 @@ import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
 import { IconoBillete, IconoCheck, IconoComunidad, IconoPlay, IconoPublicacion } from "./Iconos";
+import { posterDeVideo } from "@/lib/poster";
 import PortadaTema from "./PortadaTema";
 
 type Vista = { tipo: "video" } | { tipo: "publicaciones" } | { tipo: "curso"; id: string };
@@ -108,7 +109,15 @@ export default function PresentacionComunidad({
         <div className="presentacion-galeria">
           <div className="presentacion-visor">
             {vista.tipo === "video" && video && (
-              <video key={video.url} src={video.url} controls preload="metadata" playsInline aria-label="Video de bienvenida" />
+              <video
+                key={video.url}
+                src={video.url}
+                poster={posterDeVideo("Video de bienvenida", comunidad.nombre)}
+                controls
+                preload="metadata"
+                playsInline
+                aria-label="Video de bienvenida"
+              />
             )}
             {vista.tipo === "publicaciones" && (
               <div className="presentacion-publicaciones" data-tema={tema}>

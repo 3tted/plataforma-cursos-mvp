@@ -172,7 +172,7 @@ export default function PaginaVisitantes() {
         <section id="comunidades" className="visitantes-seccion" aria-labelledby="comunidades-titulo">
           <div className="visitantes-seccion-cabecera">
             <h2 id="comunidades-titulo">Comunidades abiertas</h2>
-            <p className="texto-suave">Entra gratis: el módulo 1 de cada curso no cuesta nada.</p>
+            <p className="texto-suave">Entra gratis y empieza con las lecciones gratis de cada curso.</p>
           </div>
           <ul className="proximas-lista">
             {abiertas.map((c) => (

@@ -71,8 +71,13 @@ export default function PaginaComunidades() {
       {/* Un tema por columna: con pocas comunidades por tema, la página no se llena de huecos. */}
       <div className="directorio-grupos">
         {grupos.map((g) => (
-          <section key={g.tema} className="directorio-grupo" aria-labelledby={`tema-${g.tema}`}>
-            <h2 id={`tema-${g.tema}`}>{g.tema}</h2>
+          <section
+            key={g.tema}
+            className="directorio-grupo"
+            {...(tema === "Todos" ? { "aria-labelledby": `tema-${g.tema}` } : { "aria-label": g.tema })}
+          >
+            {/* Con un tema elegido, el filtro ya lo dice y cada tarjeta lleva su etiqueta: sin título repetido. */}
+            {tema === "Todos" && <h2 id={`tema-${g.tema}`}>{g.tema}</h2>}
             <ul className="directorio-grupo-lista">
               {g.comunidades.map((c) => (
                 <TarjetaComunidad key={c.id} comunidad={c} />

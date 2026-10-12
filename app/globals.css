@@ -554,8 +554,9 @@ main:focus {
 }
 
 .error {
-  color: var(--peligro);
-  background: var(--peligro-suave);
+  /* coral-darker: el coral oscuro no llega a 4.5:1 sobre el rosa de error */
+  color: var(--coral-darker);
+  background: var(--error-bg);
   border-radius: var(--radio-control);
   padding: 10px 14px;
   font-size: var(--t-small);
@@ -924,8 +925,15 @@ button.boton:disabled:hover {
 .comentar input:focus,
 .pregunta-rapida input:focus {
   outline: 2px solid var(--focus-ring);
-  outline-offset: 1px;
-  border-color: var(--acento);
+  outline-offset: 2px;
+  border-color: var(--dark-gray);
+}
+
+/* Error: solo con aria-invalid, para que no se confunda con el foco */
+.campo input[aria-invalid="true"],
+.campo select[aria-invalid="true"],
+.campo textarea[aria-invalid="true"] {
+  border-color: var(--error);
 }
 
 .casilla {
@@ -1430,6 +1438,28 @@ button.boton:disabled:hover {
 
 .cursos-comunidad-fila {
   display: none;
+}
+
+/* Carruseles sin la barra de desplazamiento del navegador */
+.cursos-comunidad-fila > ul,
+.presentacion-miniaturas,
+.filtros {
+  scrollbar-width: none;
+}
+
+.cursos-comunidad-fila > ul::-webkit-scrollbar,
+.presentacion-miniaturas::-webkit-scrollbar,
+.filtros::-webkit-scrollbar {
+  display: none;
+}
+
+/* Con 3 cursos o menos y espacio de sobra, en cuadrícula en vez de carrusel */
+@media (min-width: 600px) and (max-width: 920px) {
+  .cursos-comunidad-fila > ul[data-pocos="true"] {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    overflow: visible;
+  }
 }
 
 @media (max-width: 920px) {
@@ -3064,9 +3094,9 @@ button.boton:disabled:hover {
 }
 
 .chat-entrada:focus-within {
-  border-color: var(--acento);
+  border-color: var(--dark-gray);
   outline: 2px solid var(--focus-ring);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .chat-aviso {
@@ -3743,24 +3773,19 @@ button.boton:disabled:hover {
   display: block;
   aspect-ratio: 2 / 1;
   overflow: hidden;
-  background: var(--rubor);
+  background: var(--light-1);
 }
 
-.portada-tema svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+/* Sin foto: hoja clara con el ícono del tema en coral, al centro */
+.portada-tema-sin-foto {
+  display: grid;
+  place-items: center;
 }
 
-.portada-tema[data-tema="Ventas"],
-.portada-tema[data-tema="Diseño"] {
-  background: var(--rubor-2);
-}
-
-.portada-tema[data-tema="Productividad"],
-.portada-tema[data-tema="Liderazgo"] {
-  background: var(--superficie-2);
+.portada-tema-icono {
+  width: clamp(28px, 26%, 72px);
+  height: auto;
+  color: var(--coral);
 }
 
 .portada-tema-etiqueta {
@@ -3905,8 +3930,9 @@ button.boton:disabled:hover {
 }
 
 .buscador-comunidades:focus-within {
-  border-color: var(--acento);
-  outline: 2px solid var(--acento-suave);
+  border-color: var(--dark-gray);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .buscador-comunidades input {
@@ -3932,6 +3958,13 @@ button.boton:disabled:hover {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 18px;
+}
+
+/* En la página de visitantes hay pocas comunidades abiertas: centradas y del
+   mismo ancho, en vez de dejar medio renglón vacío */
+.visitantes .proximas-lista {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 360px));
+  justify-content: center;
 }
 
 .tarjeta-comunidad {
@@ -4878,6 +4911,17 @@ details.modulo[open] > .modulo-cabecera {
 .directorio-grupo h2 {
   font-size: var(--t-title);
   color: var(--tinta-2);
+}
+
+/* Comunidades que todavía no abren: sin acción, sin efecto al pasar el mouse */
+.tarjeta-comunidad[data-real="false"] {
+  cursor: default;
+}
+
+.pastilla-proximamente {
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--gray);
 }
 
 .tarjeta-comunidad-enlace {

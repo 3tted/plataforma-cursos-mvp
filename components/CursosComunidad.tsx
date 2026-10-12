@@ -20,7 +20,7 @@ export default function CursosComunidad({ fila = false }: { fila?: boolean }) {
       <h2 className="cursos-comunidad-titulo">
         Cursos <span className="cifra texto-suave">{cursosComunidad.length}</span>
       </h2>
-      <ul>
+      <ul data-pocos={cursosComunidad.length <= 3}>
         {cursosComunidad.map((c) => {
           const inscrito = !esAlumno || (inscripcionLista && inscritoEn(c.id));
           const hechas = c.lecciones.filter((id) => completadas.includes(id)).length;

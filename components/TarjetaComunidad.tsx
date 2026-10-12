@@ -27,7 +27,7 @@ export default function TarjetaComunidad({
 
   const cuerpo = (
     <>
-      <PortadaTema tema={c.tema} clave={c.id} />
+      <PortadaTema tema={c.tema} clave={c.id} alt={c.nombre} />
       <span className="tarjeta-comunidad-cuerpo">
         <span className="ficha-nombre">{c.nombre}</span>
         <span className="tarjeta-comunidad-curso">{cursoTexto}</span>
@@ -42,10 +42,12 @@ export default function TarjetaComunidad({
           ) : (
             <span />
           )}
-          {real && (
+          {real ? (
             <span className={enLaComunidad(c.id) ? "pastilla pastilla-ok" : "pastilla pastilla-marca"}>
               {enLaComunidad(c.id) ? "Eres parte" : "Abierta"}
             </span>
+          ) : (
+            <span className="pastilla pastilla-proximamente">Próximamente</span>
           )}
         </span>
       </span>

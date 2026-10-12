@@ -24,9 +24,12 @@ const IDS_ARCHIVO = Object.keys(ARCHIVOS);
 /** Para leer también los borradores (el editor de la coach y su vista previa). */
 interface Opciones {
   borradores?: boolean;
+  /** Nombre de la coach: suma sus cursos subidos a la página sin publicar. */
+  deCoach?: string;
 }
 
-const visible = (c: CursoCreado, { borradores = false }: Opciones) => borradores || c.estado === "publicado";
+const visible = (c: CursoCreado, { borradores = false, deCoach }: Opciones) =>
+  borradores || c.estado === "publicado" || (!!deCoach && c.autor === deCoach && c.enPagina === true);
 
 /** El curso que pide el navegador; si no llega o no existe, el principal. */
 export async function idCurso(valor: unknown, opciones: Opciones = {}): Promise<string> {
@@ -98,6 +101,7 @@ export function datosDeCursoCreado(c: CursoCreado, comunidad: Comunidad): DatosC
     comunidad,
     curso: {
       id: c.id,
+      ...(c.estado !== "publicado" ? { sinPublicar: true } : {}),
       titulo: c.titulo,
       subtitulo: c.subtitulo,
       aprenderas: c.aprenderas,
@@ -254,6 +258,7 @@ export function resumenDe({ curso, comunidad }: DatosCurso): ResumenCurso {
     lecciones: lecciones.map((l) => l.id),
     minutos: lecciones.reduce((s, l) => s + l.duracion_min, 0),
     gratis: etiquetaGratis(modulos),
+    publicado: !curso.sinPublicar,
   };
 }
 

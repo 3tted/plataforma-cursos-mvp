@@ -22,6 +22,7 @@ export const GET = manejar((req: Request) =>
           comunidad: c.comunidad,
           titulo: c.titulo,
           estado: c.estado,
+          enPagina: c.enPagina === true,
           origen: c.origen,
           lecciones: c.modulos.reduce((s, m) => s + m.lecciones.length, 0),
           actualizadoEn: c.actualizadoEn,

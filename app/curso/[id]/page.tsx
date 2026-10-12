@@ -22,6 +22,7 @@ import RepasoLeccion from "@/components/RepasoLeccion";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import VideoLeccion from "@/components/VideoLeccion";
+import AvisoSinPublicar from "@/components/AvisoSinPublicar";
 import { moneda, parteGratis } from "@/lib/cliente";
 
 type Pestana = "resumen" | "transcripcion" | "repaso";
@@ -264,6 +265,7 @@ export default function PaginaLeccion() {
       </nav>
 
       <article className="leccion">
+        <AvisoSinPublicar compacto />
         <h1>{leccion.titulo}</h1>
         <p className="leccion-meta">
           <span className="cita-id" title="Así aparece esta lección en las respuestas del asistente">

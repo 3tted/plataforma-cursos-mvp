@@ -48,6 +48,12 @@ export default function PaginaComunidad() {
       .then((d) => setSinCursos(d.comunidades.find((c) => c.id === id) ?? null))
       .catch(() => undefined);
   }, [cursos, usuario, cambiarComunidad]);
+  // El catálogo de la coach (con sus cursos sin publicar) puede llegar después del público.
+  useEffect(() => {
+    if (!sinCursos || !cursos.some((c) => c.comunidad === sinCursos.id)) return;
+    cambiarComunidad(sinCursos.id);
+    setSinCursos(null);
+  }, [cursos, sinCursos, cambiarComunidad]);
   const [publicaciones, setPublicaciones] = useState<Publicacion[] | null>(null);
   const [miembros, setMiembros] = useState<number | null>(null);
   const [error, setError] = useState(false);

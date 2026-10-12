@@ -73,6 +73,8 @@ export interface Curso {
   requisitos?: string;
   preguntas_sugeridas: string[];
   modulos: Modulo[];
+  /** Curso de la coach que ya está en la página pero sin publicar (solo ella lo ve). */
+  sinPublicar?: boolean;
 }
 
 export interface DatosCurso {
@@ -117,6 +119,8 @@ export interface CursoCreado {
   comunidad: string;
   /** Los alumnos solo ven los publicados. */
   estado: "borrador" | "publicado";
+  /** Subido a la página sin publicar: la coach lo ve en su comunidad como lo verá el alumno. */
+  enPagina?: boolean;
   /** Cómo nació el borrador: a mano o a partir de un documento con IA. */
   origen: "manual" | "ia";
   titulo: string;
@@ -151,6 +155,8 @@ export interface ResumenCurso {
   minutos: number;
   /** Lo que se ve sin membresía: "Módulo 1 gratis", "2 lecciones gratis" o "". */
   gratis: string;
+  /** false: está en la página pero sin publicar (solo lo ve su coach). */
+  publicado: boolean;
 }
 
 export type Categoria = "Anuncios" | "Dudas" | "Logros" | "Presentaciones" | "General";

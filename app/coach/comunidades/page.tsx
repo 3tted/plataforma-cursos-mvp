@@ -12,7 +12,7 @@ import { api, hace, moneda } from "@/lib/cliente";
 import { TEMAS } from "@/lib/comunidades";
 import type { ComunidadCreada, CursoCreado } from "@/lib/tipos";
 
-type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "estado" | "origen" | "actualizadoEn"> & {
+type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "estado" | "origen" | "actualizadoEn" | "enPagina"> & {
   lecciones: number;
 };
 type Datos = { comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean };
@@ -131,7 +131,7 @@ export default function PaginaMisComunidades() {
               {x.origen === "ia" && " · hecho con IA"} · editado {hace(x.actualizadoEn)}
             </span>
             <span className={x.estado === "publicado" ? "pastilla pastilla-ok" : "pastilla"}>
-              {x.estado === "publicado" ? "Publicado" : "Borrador"}
+              {x.estado === "publicado" ? "Publicado" : x.enPagina ? "En la página" : "Borrador"}
             </span>
             <span className="mi-curso-editar" aria-hidden="true">
               <IconoEditar width={16} height={16} />

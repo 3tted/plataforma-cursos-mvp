@@ -20,6 +20,8 @@ export const POST = manejar((req: Request, contexto: Contexto) =>
       const faltan = publicar ? pendientesParaPublicar(curso) : [];
       if (faltan.length) return { faltan };
       curso.estado = publicar ? "publicado" : "borrador";
+      // Al despublicarlo se queda en la página para la coach (sin que lo vean los alumnos).
+      if (!publicar) curso.enPagina = true;
       curso.actualizadoEn = new Date().toISOString();
       return { curso };
     });

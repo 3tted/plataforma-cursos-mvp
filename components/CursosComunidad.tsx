@@ -35,6 +35,7 @@ export default function CursosComunidad({ fila = false }: { fila?: boolean }) {
                 <Link href="/curso" className="curso-comunidad-nombre" onClick={() => cambiarCurso(c.id)}>
                   {c.titulo}
                 </Link>
+                {!c.publicado && <span className="pastilla pastilla-pendiente curso-comunidad-estado">Sin publicar</span>}
                 <p className="curso-comunidad-meta texto-suave">
                   <span className="cifra">{total}</span> {total === 1 ? "lección" : "lecciones"} · <span className="cifra">{c.minutos}</span>{" "}
                   min

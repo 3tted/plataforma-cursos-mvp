@@ -6293,6 +6293,84 @@ button.tarjeta-comunidad-enlace {
   justify-self: start;
 }
 
+/* Curso de la coach en la página sin publicar (components/AvisoSinPublicar.tsx) */
+.aviso-publicar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin-bottom: 18px;
+  padding: 18px 22px;
+  border: 2px solid var(--coral-dark);
+  border-radius: var(--radio-hoja);
+  background: var(--white);
+}
+
+.aviso-publicar.aviso-ok {
+  border: 1px solid var(--border);
+}
+
+.aviso-publicar-texto {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 360px;
+  justify-items: start;
+}
+
+.aviso-publicar-texto h2 {
+  font-size: var(--t-title);
+}
+
+.aviso-publicar-cuenta {
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.aviso-publicar-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+}
+
+.aviso-publicar-error {
+  flex-basis: 100%;
+}
+
+.aviso-publicar-error ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-weight: 400;
+}
+
+.aviso-sin-publicar-linea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-bottom: 10px;
+  font-size: var(--t-small);
+  color: var(--dark-gray);
+}
+
+.aviso-sin-publicar-linea a {
+  color: var(--graphite);
+  font-weight: 600;
+}
+
+.curso-comunidad-estado {
+  justify-self: start;
+  margin-block: 2px;
+}
+
+.editor-pie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  justify-self: start;
+}
+
 .editor-borrar {
   justify-self: start;
 }

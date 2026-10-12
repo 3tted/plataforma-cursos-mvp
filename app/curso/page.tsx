@@ -22,6 +22,7 @@ import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda, parteGratis } from "@/lib/cliente";
 import { fotoDePortada } from "@/lib/portadas";
+import AvisoSinPublicar from "@/components/AvisoSinPublicar";
 import type { Expediente } from "@/lib/tipos";
 
 // Portada del curso: de qué trata, lo que aprenderás, el temario por módulos
@@ -112,6 +113,7 @@ export default function PaginaCurso() {
   return (
     <div className="pagina-curso">
       {volver}
+      <AvisoSinPublicar />
       <header className="curso-portada">
         <Arcos />
         <div className="curso-portada-textos">

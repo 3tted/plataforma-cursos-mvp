@@ -208,11 +208,40 @@ export default function EditorCurso() {
     }
   };
 
-  const vistaPrevia = async () => {
+  // Lleva el curso a su comunidad, tal como lo verá el alumno. Si todavía no
+  // estaba en la página, primero lo sube (sin publicarlo: solo la coach lo ve).
+  const irALaPagina = async () => {
     if (sinGuardar && !(await guardar())) return;
+    setError(null);
+    if (curso.estado !== "publicado" && !curso.enPagina) {
+      const res = await fetch(`/api/coach/cursos/${id}/pagina`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...cabeceras },
+        body: JSON.stringify({ autor, enPagina: true }),
+      }).catch(() => null);
+      const datos = res ? ((await res.json().catch(() => ({}))) as CursoCreado & { error?: string }) : null;
+      if (!res?.ok || !datos) return setError(datos?.error ?? "No se pudo subir a la página. Revisa tu conexión.");
+      setGuardado(datos);
+      setCurso(datos);
+    }
+    await recargarCatalogo();
     cambiarCurso(id);
     await recargarCurso();
     router.push("/curso");
+  };
+
+  const quitarDeLaPagina = async () => {
+    const res = await fetch(`/api/coach/cursos/${id}/pagina`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...cabeceras },
+      body: JSON.stringify({ autor, enPagina: false }),
+    }).catch(() => null);
+    if (!res?.ok) return setError("No se pudo quitar de la página.");
+    const datos = (await res.json()) as CursoCreado;
+    setGuardado(datos);
+    setCurso(datos);
+    setAviso("El curso volvió a quedar solo en el editor.");
+    void recargarCatalogo();
   };
 
   const borrar = async () => {
@@ -235,7 +264,7 @@ export default function EditorCurso() {
           <IconoFlechaIzq width={16} height={16} /> Mis comunidades y cursos
         </Link>
         <span className={curso.estado === "publicado" ? "pastilla pastilla-ok" : "pastilla"}>
-          {curso.estado === "publicado" ? "Publicado" : "Borrador"}
+          {curso.estado === "publicado" ? "Publicado" : curso.enPagina ? "En la página · sin publicar" : "Borrador"}
         </span>
         <span className="texto-suave editor-estado" role="status">
           {ocupado === "guardar" ? "Guardando…" : sinGuardar ? "Cambios sin guardar" : aviso}
@@ -243,12 +272,12 @@ export default function EditorCurso() {
         <div className="editor-acciones">
           <button
             type="button"
-            className="boton boton-chico boton-fantasma"
-            onClick={() => void vistaPrevia()}
+            className="boton boton-chico boton-fantasma-borde"
+            onClick={() => void irALaPagina()}
             disabled={!curso.comunidad}
             title={curso.comunidad ? undefined : "Ponlo primero en una comunidad"}
           >
-            Ver como alumno
+            {curso.estado === "publicado" || curso.enPagina ? "Ver en la página" : "Subir a la página"}
           </button>
           <button
             type="button"
@@ -300,7 +329,8 @@ export default function EditorCurso() {
             <p>
               <strong>La IA armó este borrador con tu documento.</strong> Revísalo antes de publicar: que cada lección
               diga lo que tú enseñas, que las respuestas marcadas como correctas lo sean y que los minutos tengan
-              sentido. Después sube el video de cada lección.
+              sentido. Después súbelo a la página: ahí lo ves como tus alumnos, le agregas los videos (o presentaciones con
+              IA) y lo publicas cuando esté listo.
             </p>
             {avisoIA && <p className="editor-aviso-faltan">{avisoIA}</p>}
           </div>
@@ -592,9 +622,16 @@ export default function EditorCurso() {
       </section>
 
       {curso.estado === "borrador" && (
-        <button type="button" className="enlace enlace-discreto editor-borrar" onClick={() => void borrar()}>
-          Borrar este borrador
-        </button>
+        <div className="editor-pie">
+          {curso.enPagina && (
+            <button type="button" className="enlace enlace-discreto" onClick={() => void quitarDeLaPagina()}>
+              Quitar de la página
+            </button>
+          )}
+          <button type="button" className="enlace enlace-discreto editor-borrar" onClick={() => void borrar()}>
+            Borrar este borrador
+          </button>
+        </div>
       )}
     </div>
   );

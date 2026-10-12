@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type ReactNode,
@@ -240,20 +241,35 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     setChatGeneral(restaurar(CLAVES.chatGeneral));
     setCursoId(leerLocal<string>(CLAVES.curso) ?? CURSO_PRINCIPAL);
     setListo(true);
-    void recargarCatalogo();
     api<EstadoPlataforma>("/api/estado")
       .then(setEstado)
       .catch(() => setEstado({ iaActiva: false, modelo: null }));
   }, []);
 
+  // La coach también ve sus cursos subidos a la página sin publicar.
+  const usuarioActual = useRef<Usuario | null>(null);
+  usuarioActual.current = usuario;
+  // Solo cuenta la última carga: una respuesta vieja no pisa el catálogo.
+  const cargaCatalogo = useRef(0);
   const recargarCatalogo = useCallback(async () => {
+    const esta = ++cargaCatalogo.current;
+    const u = usuarioActual.current;
+    const deCoach = u?.rol === "coach" ? `?autor=${encodeURIComponent(u.nombre)}` : "";
     const [lista, directorio] = await Promise.all([
-      api<ResumenCurso[]>("/api/cursos").catch(() => null),
+      api<ResumenCurso[]>(`/api/cursos${deCoach}`, deCoach ? { headers: { "X-Rol": "coach" } } : undefined).catch(
+        () => null,
+      ),
       api<ComunidadDirectorio[]>("/api/comunidades").catch(() => null),
     ]);
+    if (esta !== cargaCatalogo.current) return;
     if (lista) setCursos(lista);
     if (directorio) setComunidades(directorio);
   }, []);
+
+  // Al entrar o cambiar de rol, el catálogo se vuelve a pedir (la coach suma sus cursos sin publicar).
+  useEffect(() => {
+    if (listo) void recargarCatalogo();
+  }, [listo, usuario?.nombre, usuario?.rol, recargarCatalogo]);
 
   const guardarUsuario = useCallback((u: Usuario) => {
     const completo = { ...u, desde: u.desde ?? new Date().toISOString() };

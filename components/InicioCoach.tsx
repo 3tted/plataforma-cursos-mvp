@@ -111,7 +111,9 @@ export default function InicioCoach() {
                 <Link href="/curso" className="inicio-curso" onClick={() => cambiarCurso(c.id)}>
                   <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} />
                   <span className="inicio-curso-cuerpo">
-                    <span className="pastilla pastilla-ok">Publicado</span>
+                    <span className={c.publicado ? "pastilla pastilla-ok" : "pastilla pastilla-pendiente"}>
+                      {c.publicado ? "Publicado" : "Sin publicar"}
+                    </span>
                     <span className="ficha-nombre">{c.titulo}</span>
                     <span className="texto-suave inicio-meta">
                       <span className="cifra">{c.lecciones.length}</span> lecciones · <span className="cifra">{c.minutos}</span>{" "}

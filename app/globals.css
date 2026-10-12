@@ -6303,6 +6303,67 @@ button.tarjeta-comunidad-enlace {
   justify-items: start;
 }
 
+/* La coach elige si la presentación con IA lleva voz (components/EleccionVoz.tsx) */
+.eleccion-voz {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.eleccion-voz[data-recien="true"] {
+  padding: 12px 14px;
+  border: 2px solid var(--coral-dark);
+  border-radius: var(--radio-control);
+  background: var(--white);
+}
+
+.eleccion-voz-recien {
+  color: var(--graphite);
+}
+
+.eleccion-voz-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.eleccion-voz-etiqueta {
+  font-family: var(--fuente-display);
+  font-size: var(--t-small);
+  font-weight: 700;
+}
+
+.eleccion-voz-opciones {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--white);
+}
+
+.eleccion-voz-opciones button {
+  min-height: 34px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dark-gray);
+  font: inherit;
+  font-size: var(--t-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.eleccion-voz-opciones button[aria-pressed="true"] {
+  background: var(--coral-dark);
+  color: var(--white);
+}
+
+.eleccion-voz .nota {
+  margin: 0;
+}
+
 .editor-video-opciones {
   display: flex;
   flex-wrap: wrap;

@@ -8,6 +8,7 @@ import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
 import { posterDeVideo } from "@/lib/poster";
 import { IconoAsistenteGeneral, IconoSubir } from "./Iconos";
+import EleccionVoz from "./EleccionVoz";
 import PresentacionLeccion from "./PresentacionLeccion";
 
 type Estado = "inactivo" | "subiendo" | "error";
@@ -44,6 +45,8 @@ export default function VideoLeccion({
   const [avisoAdelantar, setAvisoAdelantar] = useState(false);
   const subida = useRef<XMLHttpRequest | null>(null);
   const [generando, setGenerando] = useState(false);
+  // Recién generada: se le pide a la coach que la revise y elija si lleva voz.
+  const [recienGenerada, setRecienGenerada] = useState(false);
 
   // Presentación con IA (diapositivas narradas por la voz del dispositivo).
   const generarPresentacion = async () => {
@@ -60,7 +63,8 @@ export default function VideoLeccion({
       return fallo(datos.error ?? "No se pudo generar la presentación. Revisa tu conexión e inténtalo de nuevo.");
     }
     await recargarCurso();
-    setAnuncio("Presentación lista.");
+    setRecienGenerada(true);
+    setAnuncio("Presentación lista. Mírala y elige si lleva voz.");
   };
 
   const quitarPresentacion = async () => {
@@ -296,9 +300,21 @@ export default function VideoLeccion({
           idLeccion={leccion.id}
           numero={numero}
           diapositivas={leccion.presentacion.diapositivas}
+          conVoz={leccion.presentacion.conVoz}
           sinAdelantar={sinAdelantar}
           alTerminar={alTerminar}
         />
+        {esCoach && (
+          <EleccionVoz
+            leccion={leccion.id}
+            conVoz={leccion.presentacion.conVoz}
+            recien={recienGenerada}
+            alCambiar={async () => {
+              setRecienGenerada(false);
+              await recargarCurso();
+            }}
+          />
+        )}
         {esCoach && (
           <div className="video-coach">
             {selector}

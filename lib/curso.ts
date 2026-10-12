@@ -179,7 +179,14 @@ export async function cargarCurso(id: string = CURSO_PRINCIPAL, opciones: Opcion
           const video = porLeccion.get(l.id);
           const presentacion = presentacionDe.get(l.id);
           const conPresentacion = presentacion
-            ? { ...l, presentacion: { diapositivas: presentacion.diapositivas, creadaEn: presentacion.creadaEn } }
+            ? {
+                ...l,
+                presentacion: {
+                  diapositivas: presentacion.diapositivas,
+                  creadaEn: presentacion.creadaEn,
+                  conVoz: presentacion.conVoz !== false,
+                },
+              }
             : l;
           if (!video) return conPresentacion;
           return {

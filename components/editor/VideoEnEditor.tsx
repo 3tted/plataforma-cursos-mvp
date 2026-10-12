@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { MAX_BYTES_VIDEO, tamañoLegible, tipoDeVideo } from "@/lib/reglas-video";
+import EleccionVoz from "../EleccionVoz";
 import { IconoAsistenteGeneral, IconoSubir, IconoVideo } from "../Iconos";
 
 // Video de una lección dentro del editor: subir, cambiar o quitar. Una lección
@@ -10,15 +11,15 @@ export default function VideoEnEditor({
   leccion,
   guardada,
   video,
-  diapositivas,
+  presentacion,
   sinGuardar,
   alCambiar,
 }: {
   leccion: string;
   guardada: boolean;
   video: { nombre: string; url: string } | null;
-  /** Diapositivas de su presentación con IA, si tiene. */
-  diapositivas: number | null;
+  /** Su presentación con IA, si tiene: cuántas diapositivas y si lleva voz. */
+  presentacion: { diapositivas: number; conVoz: boolean } | null;
   /** Hay cambios sin guardar (la presentación usa el texto guardado). */
   sinGuardar: boolean;
   alCambiar: () => void;
@@ -27,6 +28,7 @@ export default function VideoEnEditor({
   const [progreso, setProgreso] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [generando, setGenerando] = useState(false);
+  const [recien, setRecien] = useState(false);
 
   // Presentación con IA: diapositivas del texto guardado, narradas por la voz del dispositivo.
   const generar = async () => {
@@ -38,6 +40,7 @@ export default function VideoEnEditor({
       const datos = res ? ((await res.json().catch(() => ({}))) as { error?: string }) : {};
       return setError(datos.error ?? "No se pudo generar la presentación. Inténtalo de nuevo.");
     }
+    setRecien(true);
     alCambiar();
   };
 
@@ -131,11 +134,11 @@ export default function VideoEnEditor({
           </button>
           {generando ? (
             <span className="texto-suave editor-video-generando">Generando la presentación…</span>
-          ) : diapositivas ? (
+          ) : presentacion ? (
             <span className="editor-video-actual">
               <IconoAsistenteGeneral width={16} height={16} />
               <span>
-                Presentación con IA · <span className="cifra">{diapositivas}</span> diapositivas
+                Presentación con IA · <span className="cifra">{presentacion.diapositivas}</span> diapositivas
               </span>
               <button type="button" className="enlace" onClick={() => void generar()}>
                 Volver a generar
@@ -150,6 +153,17 @@ export default function VideoEnEditor({
             </button>
           )}
         </div>
+      )}
+      {!video && presentacion && !generando && (
+        <EleccionVoz
+          leccion={leccion}
+          conVoz={presentacion.conVoz}
+          recien={recien}
+          alCambiar={() => {
+            setRecien(false);
+            alCambiar();
+          }}
+        />
       )}
       {!video && sinGuardar && !generando && (
         <p className="nota">La presentación usa el texto guardado: guarda tus cambios antes de generarla.</p>

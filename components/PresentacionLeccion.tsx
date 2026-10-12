@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretLeft, CaretRight, ClosedCaptioning, Pause, Play, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, ClosedCaptioning, Pause, Play } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Diapositiva } from "@/lib/tipos";
 
@@ -32,6 +32,7 @@ export default function PresentacionLeccion({
   idLeccion,
   numero,
   diapositivas,
+  conVoz = true,
   sinAdelantar = false,
   alTerminar,
 }: {
@@ -39,6 +40,8 @@ export default function PresentacionLeccion({
   /** Número de la lección en el curso, para la etiqueta ("Lección 2 · 1 de 4"). */
   numero?: number;
   diapositivas: Diapositiva[];
+  /** La coach decide si la presentación lleva voz; sin voz avanza al ritmo de lectura. */
+  conVoz?: boolean;
   sinAdelantar?: boolean;
   alTerminar?: () => void;
 }) {
@@ -52,16 +55,7 @@ export default function PresentacionLeccion({
   const [velocidad, setVelocidad] = useState(1);
   const [subtitulos, setSubtitulos] = useState(true);
   const [sinVoz, setSinVoz] = useState(false);
-  // Quien la ve puede quitar la voz: avanza al ritmo de lectura con subtítulos.
-  // Se recuerda en este navegador.
-  const [silencio, setSilencio] = useState(false);
-  useEffect(() => {
-    try {
-      setSilencio(localStorage.getItem("fc.presentacionSinVoz") === "1");
-    } catch {
-      // sin almacenamiento: con voz
-    }
-  }, []);
+  const silencio = !conVoz;
   const [frase, setFrase] = useState(0);
 
   // Cada arranque lleva un número: lo que avise una voz ya cancelada se ignora.
@@ -173,6 +167,16 @@ export default function PresentacionLeccion({
     [detener, diapositivas, terminar, total],
   );
 
+  // Si la coach cambia la voz mientras se reproduce, sigue desde la misma frase.
+  const conVozAntes = useRef(conVoz);
+  useEffect(() => {
+    if (conVozAntes.current === conVoz) return;
+    conVozAntes.current = conVoz;
+    if (conVoz === false) setSubtitulos(true);
+    if (reproduciendo) narrar(indice, frase);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar la voz
+  }, [conVoz]);
+
   const reproducir = () => {
     setEmpezo(true);
     if (terminada) {
@@ -199,20 +203,6 @@ export default function PresentacionLeccion({
     setTerminada(false);
     if (reproduciendo) narrar(i, 0);
     else detener();
-  };
-
-  const alternarVoz = () => {
-    const nuevo = !silencio;
-    setSilencio(nuevo);
-    estado.current.sinVoz = nuevo || sinVoz;
-    if (nuevo) setSubtitulos(true);
-    try {
-      localStorage.setItem("fc.presentacionSinVoz", nuevo ? "1" : "0");
-    } catch {
-      // sin almacenamiento: solo dura esta vez
-    }
-    // Si está sonando, sigue desde la misma frase con o sin voz.
-    if (reproduciendo) narrar(indice, frase);
   };
 
   const cambiarVelocidad = (v: number) => {
@@ -315,18 +305,6 @@ export default function PresentacionLeccion({
             ))}
           </select>
         </label>
-        {!sinVoz && (
-          <button
-            type="button"
-            className="presentacion-control"
-            aria-pressed={!silencio}
-            onClick={alternarVoz}
-            aria-label={silencio ? "Poner la voz" : "Quitar la voz"}
-            title={silencio ? "Poner la voz" : "Quitar la voz"}
-          >
-            {silencio ? <SpeakerSlash aria-hidden="true" /> : <SpeakerHigh aria-hidden="true" />}
-          </button>
-        )}
         <button
           type="button"
           className="presentacion-control"
@@ -343,9 +321,11 @@ export default function PresentacionLeccion({
         {sinVoz
           ? "Tu dispositivo no tiene voz en español: la presentación avanza sola al ritmo de lectura."
           : silencio
-            ? "Sin voz: la presentación avanza sola al ritmo de lectura."
+            ? "Presentación sin voz: avanza sola al ritmo de lectura."
             : "Narrada con la voz de tu dispositivo."}
-        {sinAdelantar && !terminada && " Escúchala completa para desbloquear el repaso."}
+        {sinAdelantar &&
+          !terminada &&
+          (sinVoz || silencio ? " Mírala completa para desbloquear el repaso." : " Escúchala completa para desbloquear el repaso.")}
       </figcaption>
 
       {/* Para lectores de pantalla: la narración completa de la diapositiva actual. */}

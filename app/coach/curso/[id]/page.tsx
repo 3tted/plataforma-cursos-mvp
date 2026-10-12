@@ -36,7 +36,7 @@ export default function EditorCurso() {
   const [curso, setCurso] = useState<CursoCreado | null>(null);
   const [videos, setVideos] = useState<Record<string, { nombre: string; url: string }>>({});
   // Diapositivas de la presentación con IA de cada lección (si tiene).
-  const [presentaciones, setPresentaciones] = useState<Record<string, number>>({});
+  const [presentaciones, setPresentaciones] = useState<Record<string, { diapositivas: number; conVoz: boolean }>>({});
   const [ocupado, setOcupado] = useState<"guardar" | "publicar" | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,9 +63,11 @@ export default function EditorCurso() {
     for (const m of datos.curso.modulos)
       for (const l of m.lecciones) if (l.video) lista[l.id] = { nombre: l.video.nombre, url: l.video.url };
     setVideos(lista);
-    const conPresentacion: Record<string, number> = {};
+    const conPresentacion: Record<string, { diapositivas: number; conVoz: boolean }> = {};
     for (const m of datos.curso.modulos)
-      for (const l of m.lecciones) if (l.presentacion) conPresentacion[l.id] = l.presentacion.diapositivas.length;
+      for (const l of m.lecciones)
+        if (l.presentacion)
+          conPresentacion[l.id] = { diapositivas: l.presentacion.diapositivas.length, conVoz: l.presentacion.conVoz };
     setPresentaciones(conPresentacion);
   }, [id]);
 
@@ -481,7 +483,7 @@ export default function EditorCurso() {
                       leccion={l.id}
                       guardada={guardadas.has(l.id)}
                       video={videos[l.id] ?? null}
-                      diapositivas={presentaciones[l.id] ?? null}
+                      presentacion={presentaciones[l.id] ?? null}
                       sinGuardar={sinGuardar}
                       alCambiar={() => void cargarVideos()}
                     />

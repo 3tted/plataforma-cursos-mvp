@@ -1,20 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Red_Hat_Display, Red_Hat_Text } from "next/font/google";
+import { IBM_Plex_Mono, Inter, Montserrat } from "next/font/google";
 import Bienvenida from "@/components/Bienvenida";
 import { ProveedorApp } from "@/components/Contexto";
 import Marco from "@/components/Marco";
 import "./globals.css";
 
-// Hoja de tipografía "Cursos en línea" de Merkatics: Red Hat Display para
-// mandar (títulos, botones, etiquetas) y Red Hat Text para leer (lecciones,
-// publicaciones, asistente). Sustituyen a la Montreal Serial de la papelería,
-// que es de pago; el logotipo conserva Futura Bold y Caros.
-const display = Red_Hat_Display({ subsets: ["latin"], variable: "--fuente-display", display: "swap" });
-const cuerpo = Red_Hat_Text({ subsets: ["latin"], variable: "--fuente-cuerpo", display: "swap" });
+// Tipografías del manual de marca de Merkatics: Montserrat para mandar
+// (títulos, botones, etiquetas) e Inter para leer (lecciones, publicaciones,
+// asistente). IBM Plex Mono queda para referencias y cifras de pago.
+const display = Montserrat({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-display",
+  display: "swap",
+});
+const cuerpo = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
 const mono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
-  variable: "--fuente-mono",
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -28,7 +32,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   // Siempre claro, también en navegadores en modo oscuro.
   colorScheme: "light",
-  themeColor: "#fefefd",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

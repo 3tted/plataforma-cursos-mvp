@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
 import { IconoAsistente, IconoAsistenteGeneral, IconoBillete, IconoComunidad, IconoCurso, IconoFlechaDer } from "./Iconos";
+import PiePagina from "./PiePagina";
 import TarjetaComunidad from "./TarjetaComunidad";
 
 const FUNCIONES = [
@@ -57,7 +58,9 @@ export default function PaginaVisitantes() {
       <main id="contenido" className="envoltura visitantes-contenido">
         <section className="visitantes-hero" aria-labelledby="visitantes-titulo">
           <div className="visitantes-hero-texto">
-            <h1 id="visitantes-titulo">Aprende, pregunta y avanza en un solo lugar.</h1>
+            <h1 id="visitantes-titulo">
+              Aprende, pregunta y avanza en <span className="palabra-clave">un solo lugar.</span>
+            </h1>
             <p>
               Cursos y comunidades en español, con pagos en OXXO, SPEI o Mercado Pago, y un asistente de IA que responde con
               el contenido de tus lecciones.
@@ -134,13 +137,7 @@ export default function PaginaVisitantes() {
         </section>
       </main>
 
-      <footer className="visitantes-pie">
-        <div className="envoltura visitantes-pie-interior">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="marca-logo" src="/merkatics-logo.png" alt="Merkatics" width={2311} height={544} />
-          <span className="texto-suave">© 2026 Merkatics Growth Operating System</span>
-        </div>
-      </footer>
+      <PiePagina />
     </div>
   );
 }

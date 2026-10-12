@@ -1,48 +1,69 @@
 /* ==========================================================================
-   Finanzas Claras · plataforma de cursos de Merkatics (MVP)
-   Identidad: manual corporativo de Merkatics en luz de día. Hojas casi
-   blancas, campos rubor (el coral del manual diluido) para las portadas,
-   arcos coral en las esquinas y el rojo corporativo solo para acciones. El
-   negro de marca queda para el texto. Verde solo para "completado" y
-   "pagado"; ámbar solo para "pendiente".
-   Tipos: Jost (títulos), Nunito Sans (texto), IBM Plex Mono (referencias).
-   Íconos: Phosphor, una sola familia.
+   Plataforma de cursos y comunidades de Merkatics (MVP)
+   Identidad: manual de marca "Merkatics · Growth Operating System". Fondo
+   gris muy claro, hojas blancas, texto en grafito y el coral solo como acento
+   (10–20 % de la pantalla): íconos, gráficas, bordes de lo elegido y la
+   palabra clave de un título. Los botones principales van en coral oscuro
+   con texto blanco; las secciones oscuras, en grafito.
+   Tipos: Montserrat (títulos, botones, etiquetas), Inter (texto),
+   IBM Plex Mono (referencias). Íconos: Phosphor, lineales y redondeados.
    ========================================================================== */
 
 :root {
-  --fondo: #f2f1f1;
-  --superficie: #fefefd;
-  --superficie-2: #efeeec;
-  --tinta: #1e1e1e;
-  --tinta-2: #4f4a49;
-  --tinta-3: #6b6866;
-  --linea: #e5e3e1;
-  --linea-fuerte: #cfccca;
-  --linea-campo: #928e8c;
+  /* Paleta oficial del manual. Solo estos colores. */
+  --coral: #e2554f; /* acento: íconos, gráficas, bordes, palabra destacada */
+  --coral-dark: #c73f39; /* botones principales, enlaces, estados activos */
+  --coral-darker: #a8332e; /* hover de botones */
+  --graphite: #111111; /* texto principal, secciones oscuras */
+  --dark-gray: #333333; /* texto secundario */
+  --gray: #757575; /* metadatos, texto terciario */
+  --white: #ffffff;
+  --light-1: #f7f7f7; /* tarjetas secundarias */
+  --light-2: #f1f1f1; /* fondo de página */
+  --border: #e5e5e5;
+  --border-strong: #bdbdbd;
+  --error: #c73f39;
+  --error-bg: #fbeae9; /* único rosa permitido: mensajes de error */
+  --focus-ring: #333333;
 
-  --acento: #c6443f;
-  --acento-hover: #b23a35;
-  --acento-tinta: #fefefd;
-  --acento-suave: #fceae7;
-  --acento-texto: #b03a35;
-  --rubor: #fceeeb;
-  --rubor-2: #f8deda;
-  --tinta-rubor: #74504b;
-  --progreso: #e95349;
-  --arco-1: #e26a69;
-  --arco-2: #d64d4d;
-  --arco-3: #f4c2bd;
+  /* Nombres que usa el resto de la hoja, apuntando a la paleta. */
+  --fondo: var(--light-2);
+  --superficie: var(--white);
+  --superficie-2: var(--light-1);
+  --tinta: var(--graphite);
+  --tinta-2: var(--dark-gray);
+  --tinta-3: var(--gray);
+  --linea: var(--border);
+  --linea-fuerte: var(--border-strong);
+  --linea-campo: var(--gray);
 
-  --exito: #2f7d4f;
-  --exito-tinta: #fefefd;
-  --exito-suave: #e6f3ea;
-  --exito-texto: #236b41;
-  --pendiente: #8a5a00;
-  --pendiente-suave: #fdf1d8;
-  --peligro: #9f1d2b;
-  --peligro-suave: #fbe4e6;
+  --acento: var(--coral-dark);
+  --acento-hover: var(--coral-darker);
+  --acento-tinta: var(--white);
+  /* Lo que antes era un fondo rosa ahora es una hoja clara. */
+  --acento-suave: var(--light-1);
+  --acento-texto: var(--coral-dark);
+  --rubor: var(--light-1);
+  --rubor-2: var(--light-2);
+  --tinta-rubor: var(--dark-gray);
+  --progreso: var(--coral);
+  --arco-1: var(--coral);
+  --arco-2: var(--coral-dark);
+  --arco-3: var(--border-strong);
 
-  --velo: rgb(30 30 30 / 45%);
+  /* Estados: "hecho" se marca con el acento y texto en grafito; los errores,
+     en coral oscuro sobre el rosa de error. */
+  --exito: var(--coral-dark);
+  --exito-tinta: var(--white);
+  --exito-suave: var(--light-1);
+  --exito-texto: var(--graphite);
+  --pendiente: var(--dark-gray);
+  --pendiente-suave: var(--light-2);
+  --peligro: var(--error);
+  --peligro-suave: var(--error-bg);
+
+  --velo: rgb(17 17 17 / 45%);
+  --sombra: rgb(17 17 17 / 8%);
 
   --radio-control: 12px;
   --radio-hoja: 16px;
@@ -65,46 +86,10 @@
 
   --alto-barra: 64px;
   --alto-nav-inferior: 66px;
-  --fuente-display: "Red Hat Display", ui-sans-serif, system-ui, sans-serif;
-  --fuente-cuerpo: "Red Hat Text", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --fuente-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --fuente-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --fuente-cuerpo: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fuente-mono: var(--font-mono), ui-monospace, "Cascadia Mono", Consolas, monospace;
   color-scheme: light;
-}
-
-/* La versión clara es la de siempre, aunque el sistema o el navegador estén en
-   modo oscuro: así lo pidió el cliente. El tema oscuro solo existe si alguien
-   lo activa a propósito con data-theme="dark" en <html>. */
-
-:root[data-theme="dark"] {
-  --fondo: #141313;
-  --superficie: #1c1b1b;
-  --superficie-2: #262424;
-  --tinta: #f2efee;
-  --tinta-2: #b3adab;
-  --tinta-3: #8f8988;
-  --linea: #312e2e;
-  --linea-fuerte: #4a4545;
-  --linea-campo: #7a7272;
-  --acento: #e95349;
-  --acento-hover: #f06a5f;
-  --acento-tinta: #1e1e1e;
-  --acento-suave: #3a201f;
-  --acento-texto: #f4908a;
-  --rubor: #2a1d1c;
-  --rubor-2: #3a2422;
-  --tinta-rubor: #d9b3ae;
-  --progreso: #f07c73;
-  --arco-3: #5a3431;
-  --exito: #7acb98;
-  --exito-tinta: #1e1e1e;
-  --exito-suave: #1d3326;
-  --exito-texto: #8fd6a9;
-  --pendiente: #f0b45a;
-  --pendiente-suave: #2e2412;
-  --peligro: #f59aa3;
-  --peligro-suave: #3a1a1e;
-  --velo: rgb(0 0 0 / 60%);
-  color-scheme: dark;
 }
 
 /* ---------- Base ---------- */
@@ -132,23 +117,22 @@ body {
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: var(--fuente-display);
+  font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   text-wrap: balance;
   margin: 0;
 }
 
 h1 {
   font-size: var(--t-display);
-  font-weight: 800;
-  letter-spacing: -0.03em;
 }
 
 h2 {
   font-size: var(--t-headline);
-  font-weight: 800;
 }
 
 h3 {
@@ -171,7 +155,7 @@ img {
 }
 
 ::selection {
-  background: var(--acento-suave);
+  background: var(--border);
   color: var(--tinta);
 }
 
@@ -205,7 +189,7 @@ textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--acento);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -270,20 +254,58 @@ main:focus {
   min-height: calc(100vh - 150px);
 }
 
+/* Pie de página: sección oscura del manual */
 .pie {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 28px;
-  padding-block: 22px 30px;
-  border-top: 1px solid var(--linea);
-  color: var(--tinta-2);
-  font-size: var(--t-caption);
+  background: var(--graphite);
+  color: var(--border-strong);
+  font-size: var(--t-small);
 }
 
-.pie strong {
-  color: var(--tinta);
-  font-family: var(--fuente-display);
-  font-weight: 600;
+.pie-interior {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding-block: 28px;
+}
+
+.pie-logo {
+  height: 30px;
+  width: auto;
+}
+
+.pie-enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.pie-enlaces a {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pie-enlaces a:hover {
+  color: var(--coral);
+  text-decoration: underline;
+}
+
+.pie-enlaces a:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+
+.pie-derechos {
+  flex-basis: 100%;
+  padding-top: 16px;
+  border-top: 1px solid var(--dark-gray);
+}
+
+/* La palabra clave de un título grande va en coral, como en el manual */
+.palabra-clave {
+  color: var(--coral);
 }
 
 @media (max-width: 760px) {
@@ -602,15 +624,11 @@ main:focus {
   place-items: center;
   flex-shrink: 0;
   border-radius: 50%;
-  background: hsl(var(--tono) 42% 90%);
-  color: hsl(var(--tono) 50% 26%);
+  background: var(--light-1);
+  color: var(--dark-gray);
+  box-shadow: inset 0 0 0 1px var(--border);
   font-weight: 800;
   letter-spacing: 0.02em;
-}
-
-:root[data-theme="dark"] .avatar {
-  background: hsl(var(--tono) 22% 24%);
-  color: hsl(var(--tono) 55% 82%);
 }
 
 .avatar-coach {
@@ -707,8 +725,8 @@ main:focus {
 }
 
 .boton-secundario:hover {
-  background: #333030;
-  border-color: #333030;
+  background: var(--dark-gray);
+  border-color: var(--dark-gray);
 }
 
 .boton-fantasma {
@@ -901,7 +919,7 @@ main:focus {
 .campo textarea:focus,
 .comentar input:focus,
 .pregunta-rapida input:focus {
-  outline: 2px solid var(--acento);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
   border-color: var(--acento);
 }
@@ -1060,7 +1078,7 @@ main:focus {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #000;
+  background: var(--graphite);
 }
 
 .presentacion-publicaciones {
@@ -1079,7 +1097,7 @@ main:focus {
   border: 1px solid var(--linea);
   border-radius: var(--radio-control);
   background: var(--superficie);
-  box-shadow: 0 6px 18px rgb(116 80 75 / 0.12);
+  box-shadow: 0 6px 18px var(--sombra);
 }
 
 .presentacion-post-autor {
@@ -1559,9 +1577,10 @@ main:focus {
 }
 
 .filtro[aria-pressed="true"] {
-  background: var(--acento-suave);
-  border-color: var(--acento);
-  color: var(--acento-texto);
+  border-color: var(--coral-dark);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+  color: var(--graphite);
 }
 
 /* En el celular los filtros van en una sola fila que se desliza */
@@ -2202,12 +2221,23 @@ main:focus {
   overflow-y: auto;
 }
 
+/* Va sobre el fondo gris de la página: en grafito (el coral oscuro no llega a 4.5:1 ahí) */
 .volver {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  color: var(--graphite);
+  font-family: var(--fuente-display);
   font-weight: 700;
   text-decoration: none;
+}
+
+.volver svg {
+  color: var(--coral-dark);
+}
+
+.volver:hover {
+  text-decoration: underline;
 }
 
 .indice-modulo-titulo {
@@ -2243,9 +2273,10 @@ main:focus {
 }
 
 .indice-modulo a[aria-current="page"] {
-  background: var(--acento-suave);
-  color: var(--acento-texto);
-  font-weight: 800;
+  background: var(--white);
+  box-shadow: inset 0 0 0 2px var(--coral-dark);
+  color: var(--graphite);
+  font-weight: 700;
 }
 
 .indice-marca {
@@ -2979,7 +3010,7 @@ main:focus {
 
 .chat-entrada:focus-within {
   border-color: var(--acento);
-  outline: 2px solid var(--acento);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
 }
 
@@ -3122,12 +3153,14 @@ main:focus {
 }
 
 .metodo[data-activo="true"] {
-  border-color: var(--acento);
-  background: var(--acento-suave);
+  border-color: var(--coral-dark);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+  color: var(--graphite);
 }
 
 .metodo:has(input:focus-visible) {
-  outline: 2px solid var(--acento);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -3578,12 +3611,14 @@ main:focus {
 }
 
 .opcion-rol[data-activa="true"] {
-  border-color: var(--acento);
-  background: var(--acento-suave);
+  border-color: var(--coral-dark);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+  color: var(--graphite);
 }
 
 .opcion-rol:has(input:focus-visible) {
-  outline: 2px solid var(--acento);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -4204,9 +4239,10 @@ a.inicio-curso:hover {
 }
 
 .selector-curso-opcion[aria-pressed="true"] {
-  border-color: var(--acento);
-  background: var(--acento-suave);
-  box-shadow: inset 0 0 0 1px var(--acento);
+  border-color: var(--coral-dark);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+  color: var(--graphite);
 }
 
 .selector-curso-titulo {
@@ -4216,7 +4252,7 @@ a.inicio-curso:hover {
 }
 
 .selector-curso-opcion[aria-pressed="true"] .selector-curso-titulo {
-  color: var(--acento-texto);
+  color: var(--graphite);
 }
 
 .selector-curso-meta {
@@ -4339,7 +4375,7 @@ a.inicio-curso:hover {
   padding-block: 12px calc(12px + env(safe-area-inset-bottom));
   background: var(--superficie);
   border-top: 1px solid var(--linea-fuerte);
-  box-shadow: 0 -6px 18px rgb(30 30 30 / 6%);
+  box-shadow: 0 -6px 18px var(--sombra);
 }
 
 .barra-siguiente-interior {
@@ -4575,7 +4611,7 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
   width: 9px;
   height: 5px;
   margin: 8px 0 0 3px;
-  border: 2.5px solid var(--exito);
+  border: 2.5px solid var(--coral);
   border-top: 0;
   border-right: 0;
   transform: rotate(-45deg);
@@ -4876,7 +4912,7 @@ details.modulo[open] > .modulo-cabecera {
   padding: 18px;
   border-radius: var(--radio-hoja);
   background: var(--superficie);
-  box-shadow: 0 12px 32px rgb(30 30 30 / 8%);
+  box-shadow: 0 12px 32px var(--sombra);
 }
 
 .visitantes-chat-cabecera {
@@ -4955,14 +4991,16 @@ details.modulo[open] > .modulo-cabecera {
   font-size: var(--t-title);
 }
 
+/* Ícono en "badge" del manual: hoja blanca con borde y el ícono en coral */
 .visitantes-funcion-icono {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: var(--radio-control);
-  background: var(--acento-suave);
-  color: var(--acento-texto);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--coral);
 }
 
 .visitantes-coach {
@@ -4972,12 +5010,21 @@ details.modulo[open] > .modulo-cabecera {
   align-items: center;
   padding: 34px;
   border-radius: var(--radio-ventana);
-  background: var(--rubor);
+  background: var(--graphite);
+  color: var(--white);
+}
+
+.visitantes-coach h2 {
+  color: var(--white);
 }
 
 .visitantes-coach p {
   margin-top: 8px;
-  color: var(--tinta-rubor);
+  color: var(--border-strong);
+}
+
+.visitantes-coach .boton:focus-visible {
+  outline-color: var(--white);
 }
 
 .visitantes-coach-lista {
@@ -5004,25 +5051,6 @@ details.modulo[open] > .modulo-cabecera {
   border-top: 0;
   border-right: 0;
   transform: rotate(-45deg);
-}
-
-.visitantes-pie {
-  border-top: 1px solid var(--linea);
-  background: var(--superficie);
-}
-
-.visitantes-pie-interior {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-block: 22px;
-  font-size: var(--t-small);
-}
-
-.visitantes-pie .marca-logo {
-  height: 32px;
 }
 
 /* La tarjeta de comunidad como botón (en esta página, elegir pide entrar) */
@@ -5774,7 +5802,7 @@ button.tarjeta-comunidad-enlace {
 }
 
 .editor-opcion-texto:focus {
-  outline: 2px solid var(--acento);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
 }
 
@@ -5904,8 +5932,10 @@ button.tarjeta-comunidad-enlace {
 }
 
 .opcion-entrada[data-activa="true"] {
-  border-color: var(--acento);
-  background: var(--acento-suave);
+  border-color: var(--coral-dark);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+  color: var(--graphite);
 }
 
 .opcion-entrada[data-activa="true"] .opcion-entrada-icono {
@@ -5913,7 +5943,7 @@ button.tarjeta-comunidad-enlace {
 }
 
 .opcion-entrada:has(input:focus-visible) {
-  outline: 2px solid var(--acento);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -6416,8 +6446,10 @@ button.tarjeta-comunidad-enlace {
 }
 
 .opcion[data-elegida="true"] {
-  border-color: var(--acento);
-  background: var(--acento-suave);
+  border-color: var(--coral-dark);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+  color: var(--graphite);
 }
 
 .opcion:has(input:disabled) {

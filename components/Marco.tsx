@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useApp } from "./Contexto";
 import Encabezado from "./Encabezado";
 import PaginaVisitantes from "./PaginaVisitantes";
+import PiePagina from "./PiePagina";
 
 // Con sesión se ve la plataforma (barra, página y pie); sin sesión, la página
 // para visitantes, que explica qué es y abre la entrada desde sus botones.
@@ -20,11 +21,7 @@ export default function Marco({ children }: { children: ReactNode }) {
       <main id="contenido" tabIndex={-1} className="envoltura contenido" data-app-fondo>
         {children}
       </main>
-      <footer className="envoltura pie" data-app-fondo>
-        <span>
-          <strong>Merkatics</strong> Growth Operating System
-        </span>
-      </footer>
+      <PiePagina fondoApp />
     </>
   );
 }

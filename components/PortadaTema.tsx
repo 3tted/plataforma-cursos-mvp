@@ -8,7 +8,7 @@ import {
   UsersThree,
   type Icon,
 } from "@phosphor-icons/react";
-import { fotoDePortada } from "@/lib/portadas";
+import { useApp } from "./Contexto";
 
 // Portada de un curso o una comunidad. Si tiene foto, se muestra la foto (con
 // su punto de encuadre); si no, una hoja clara con el ícono de su tema en
@@ -28,6 +28,7 @@ export default function PortadaTema({
   clave,
   className = "",
   alt = "",
+  foto: propia,
 }: {
   tema: string;
   clave: string;
@@ -36,8 +37,11 @@ export default function PortadaTema({
   alt?: string;
   /** Ya no cambia nada: las portadas sin foto son siempre el ícono centrado. */
   encajar?: boolean;
+  /** Foto que se acaba de subir (si no, se busca la de esa clave). */
+  foto?: string;
 }) {
-  const foto = fotoDePortada(clave);
+  const { fotoDe } = useApp();
+  const foto = propia ? { src: propia, foco: "50% 50%" } : fotoDe(clave);
   if (foto) {
     return (
       <span className={`portada-tema portada-tema-con-foto ${className}`} data-tema={tema}>

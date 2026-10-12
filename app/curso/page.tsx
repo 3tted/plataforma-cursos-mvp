@@ -21,8 +21,8 @@ import SelectorCurso from "@/components/SelectorCurso";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda, parteGratis } from "@/lib/cliente";
-import { fotoDePortada } from "@/lib/portadas";
 import AvisoSinPublicar from "@/components/AvisoSinPublicar";
+import EnlaceEditarCurso from "@/components/EnlaceEditarCurso";
 import type { Expediente } from "@/lib/tipos";
 
 // Portada del curso: de qué trata, lo que aprenderás, el temario por módulos
@@ -42,6 +42,7 @@ export default function PaginaCurso() {
     inscripcionLista,
     enComunidad,
     inscritoEn,
+    fotoDe,
   } = useApp();
   const evaluaciones = useEvaluaciones();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
@@ -109,6 +110,7 @@ export default function PaginaCurso() {
   // La coach revisa el curso: no tiene avance ni examen que presentar.
   const esCoach = usuario?.rol === "coach";
   const conVideo = base.filter((l) => l.video).length;
+  const foto = fotoDe(curso.id);
 
   return (
     <div className="pagina-curso">
@@ -117,13 +119,13 @@ export default function PaginaCurso() {
       <header className="curso-portada">
         <Arcos />
         <div className="curso-portada-textos">
-          {fotoDePortada(curso.id) && (
-            // eslint-disable-next-line @next/next/no-img-element -- foto estática ya ligera
+          {foto && (
+            // eslint-disable-next-line @next/next/no-img-element -- fotos ya ligeras
             <img
-              src={fotoDePortada(curso.id)!.src}
+              src={foto.src}
               alt={`Portada del curso «${curso.titulo}»`}
               className="curso-portada-foto"
-              style={{ objectPosition: fotoDePortada(curso.id)!.foco }}
+              style={{ objectPosition: foto.foco }}
             />
           )}
           <h1>{curso.titulo}</h1>
@@ -156,6 +158,8 @@ export default function PaginaCurso() {
                   Ver la primera lección
                 </Link>
               )}
+              {/* Sin publicar, el aviso de arriba ya lleva "Editar". */}
+              {!curso.sinPublicar && <EnlaceEditarCurso className="curso-editar" />}
             </>
           ) : !inscrito ? (
             <>

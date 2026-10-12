@@ -14,6 +14,7 @@ import {
 } from "react";
 import { api, guardarLocal, guardarSesion, leerLocal, leerSesion } from "@/lib/cliente";
 import { COMUNIDADES, type ComunidadDirectorio } from "@/lib/comunidades";
+import { fotoDePortada, type Foto } from "@/lib/portadas";
 import type {
   Categoria,
   DatosCurso,
@@ -78,6 +79,8 @@ interface ContextoApp {
   comunidades: ComunidadDirectorio[];
   /** El tema de una comunidad (para su portada ilustrada). */
   temaDe: (comunidad: string) => string;
+  /** La foto de portada de un curso o una comunidad: la que subió la coach o la del proyecto. */
+  fotoDe: (clave: string) => Foto | null;
   /** Vuelve a pedir cursos y comunidades (por ejemplo, al publicar un curso). */
   recargarCatalogo: () => Promise<void>;
   cursoId: string;
@@ -470,6 +473,18 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     [comunidades],
   );
 
+  const fotoDe = useCallback(
+    (clave: string): Foto | null => {
+      const subida =
+        cursos.find((c) => c.id === clave)?.foto ??
+        comunidades.find((c) => c.id === clave)?.foto ??
+        (datos?.curso.id === clave ? datos.curso.foto : undefined) ??
+        (datos?.comunidad.id === clave ? datos.comunidad.foto : undefined);
+      return subida ? { src: subida, foco: "50% 50%" } : fotoDePortada(clave);
+    },
+    [cursos, comunidades, datos],
+  );
+
   const valor: ContextoApp = {
     listo,
     usuario,
@@ -487,6 +502,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     cursosComunidad,
     comunidades,
     temaDe,
+    fotoDe,
     recargarCatalogo,
     cursoId,
     cambiarCurso,

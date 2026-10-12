@@ -1,7 +1,7 @@
 // Fotos de portada (en public/portadas), por id de curso o de comunidad. Lo que
 // no tiene foto usa la ilustración de su tema (components/PortadaTema.tsx).
 // "foco" es el punto de la foto que se conserva al recortarla (donde está la persona).
-type Foto = { src: string; foco: string };
+export type Foto = { src: string; foco: string };
 
 const FINANZAS: Foto = { src: "/portadas/finanzas-negocio.jpg", foco: "72% 35%" };
 const PRECIOS: Foto = { src: "/portadas/precios-servicios.jpg", foco: "68% 30%" };

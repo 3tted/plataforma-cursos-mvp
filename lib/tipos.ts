@@ -12,6 +12,8 @@ export interface Comunidad {
   descripcion: string;
   /** Texto más largo para la presentación de la comunidad (lo escribe la coach). */
   acerca?: string;
+  /** Foto de portada que subió la coach (url de /api/fotos). */
+  foto?: string;
   precio_mensual: number;
   moneda: string;
 }
@@ -75,6 +77,8 @@ export interface Curso {
   modulos: Modulo[];
   /** Curso de la coach que ya está en la página pero sin publicar (solo ella lo ve). */
   sinPublicar?: boolean;
+  /** Foto de portada que subió la coach (url de /api/fotos). */
+  foto?: string;
 }
 
 export interface DatosCurso {
@@ -123,6 +127,8 @@ export interface CursoCreado {
   enPagina?: boolean;
   /** Cómo nació el borrador: a mano o a partir de un documento con IA. */
   origen: "manual" | "ia";
+  /** Foto de portada que subió la coach (url de /api/fotos). */
+  foto?: string;
   titulo: string;
   subtitulo: string;
   aprenderas: string[];
@@ -157,6 +163,8 @@ export interface ResumenCurso {
   gratis: string;
   /** false: está en la página pero sin publicar (solo lo ve su coach). */
   publicado: boolean;
+  /** Foto de portada que subió la coach. */
+  foto?: string;
 }
 
 export type Categoria = "Anuncios" | "Dudas" | "Logros" | "Presentaciones" | "General";

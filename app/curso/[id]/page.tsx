@@ -23,6 +23,7 @@ import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
 import VideoLeccion from "@/components/VideoLeccion";
 import AvisoSinPublicar from "@/components/AvisoSinPublicar";
+import EnlaceEditarCurso from "@/components/EnlaceEditarCurso";
 import { moneda, parteGratis } from "@/lib/cliente";
 
 type Pestana = "resumen" | "transcripcion" | "repaso";
@@ -266,6 +267,7 @@ export default function PaginaLeccion() {
 
       <article className="leccion">
         <AvisoSinPublicar compacto />
+        {!leccion.deCoach && <EnlaceEditarCurso texto="Editar lección" className="leccion-editar" />}
         <h1>{leccion.titulo}</h1>
         <p className="leccion-meta">
           <span className="cita-id" title="Así aparece esta lección en las respuestas del asistente">

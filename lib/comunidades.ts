@@ -16,6 +16,8 @@ export interface ComunidadDirectorio {
   lecciones?: number;
   minutos?: number;
   estado: "activa" | "proximamente";
+  /** Foto de portada que subió la coach. */
+  foto?: string;
 }
 
 /** Temas para elegir al crear una comunidad (cada uno tiene su portada ilustrada). */

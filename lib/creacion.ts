@@ -32,8 +32,10 @@ function slug(nombre: string): string {
     .slice(0, 40);
 }
 
-/** Valida los datos de una comunidad nueva y la arma. */
-export function nuevaComunidad(a: Almacen, autor: string, datos: Record<string, unknown>): ComunidadCreada {
+type CamposComunidad = Pick<ComunidadCreada, "nombre" | "descripcion" | "acerca" | "tema" | "precio_mensual" | "coach_titulo">;
+
+/** Revisa lo que la coach escribe de su comunidad (al crearla o al editarla). */
+export function camposDeComunidad(datos: Record<string, unknown>): CamposComunidad {
   const nombre = texto(datos.nombre, 60);
   if (nombre.length < 3) throw new ErrorDeDatos("Ponle un nombre a tu comunidad (al menos 3 letras).");
   const descripcion = texto(datos.descripcion, 240);
@@ -43,6 +45,19 @@ export function nuevaComunidad(a: Almacen, autor: string, datos: Record<string, 
   if (!Number.isFinite(precio) || precio < 50 || precio > 5000) {
     throw new ErrorDeDatos("El precio de la membresía debe ser entre $50 y $5,000 al mes.");
   }
+  return {
+    nombre,
+    descripcion,
+    acerca: texto(datos.acerca, 1500) || undefined,
+    tema,
+    precio_mensual: precio,
+    coach_titulo: texto(datos.coach_titulo, 80) || "Coach",
+  };
+}
+
+/** Valida los datos de una comunidad nueva y la arma. */
+export function nuevaComunidad(a: Almacen, autor: string, datos: Record<string, unknown>): ComunidadCreada {
+  const { nombre, descripcion, acerca, tema, precio_mensual, coach_titulo } = camposDeComunidad(datos);
   const base = slug(nombre) || "comunidad";
   const usados = new Set([...COMUNIDADES.map((c) => c.id), ...(a.comunidadesCoach ?? []).map((c) => c.id)]);
   let id = base;
@@ -51,11 +66,11 @@ export function nuevaComunidad(a: Almacen, autor: string, datos: Record<string, 
     id,
     nombre,
     coach: autor,
-    coach_titulo: texto(datos.coach_titulo, 80) || "Coach",
+    coach_titulo,
     descripcion,
-    ...(texto(datos.acerca, 1500) ? { acerca: texto(datos.acerca, 1500) } : {}),
+    ...(acerca ? { acerca } : {}),
     tema,
-    precio_mensual: precio,
+    precio_mensual,
     moneda: "MXN",
     autor,
     creadaEn: new Date().toISOString(),

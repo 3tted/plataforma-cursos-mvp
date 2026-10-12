@@ -6,7 +6,7 @@ import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
 import Compositor from "@/components/Compositor";
 import { useApp } from "@/components/Contexto";
-import { IconoAsistente, IconoFlechaIzq } from "@/components/Iconos";
+import { IconoAsistente, IconoEditar, IconoFlechaIzq } from "@/components/Iconos";
 import PreguntaRapida from "@/components/PreguntaRapida";
 import CursosComunidad from "@/components/CursosComunidad";
 import TarjetaPublicacion from "@/components/TarjetaPublicacion";
@@ -114,9 +114,14 @@ export default function PaginaComunidad() {
           <Arcos />
           <h1>{sinCursos.nombre}</h1>
           <p className="portada-texto">{sinCursos.descripcion}</p>
-          <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(sinCursos.id)}`} className="boton portada-accion">
-            + Agregar un curso
-          </Link>
+          <div className="portada-accion presentacion-duena">
+            <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(sinCursos.id)}`} className="boton">
+              + Agregar un curso
+            </Link>
+            <Link href={`/coach/comunidad/${encodeURIComponent(sinCursos.id)}`} className="boton boton-fantasma-borde">
+              <IconoEditar width={16} height={16} /> Editar
+            </Link>
+          </div>
         </header>
         <div className="aviso">
           <p>

@@ -1,4 +1,4 @@
-import { consultar, modificar } from "@/lib/almacen";
+import { borrarFoto, consultar, modificar } from "@/lib/almacen";
 import { aplicarEdicion } from "@/lib/creacion";
 import { ErrorDeDatos, leerJson, manejar } from "@/lib/http";
 import { coachDe, conPermiso, cursoDeCoach } from "@/lib/permisos";
@@ -47,6 +47,7 @@ export const DELETE = manejar((req: Request, contexto: Contexto) =>
       const lecciones = new Set(curso.modulos.flatMap((m) => m.lecciones.map((l) => l.id)));
       a.presentaciones = (a.presentaciones ?? []).filter((p) => !lecciones.has(p.leccion));
     });
+    await borrarFoto(`curso-${id}`);
     return new Response(null, { status: 204 });
   }),
 );

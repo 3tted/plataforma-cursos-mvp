@@ -90,6 +90,7 @@ export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
     coach_titulo: c.coach_titulo,
     descripcion: c.descripcion,
     ...(c.acerca ? { acerca: c.acerca } : {}),
+    ...(c.foto ? { foto: c.foto } : {}),
     precio_mensual: c.precio_mensual,
     moneda: c.moneda,
   };
@@ -102,6 +103,7 @@ export function datosDeCursoCreado(c: CursoCreado, comunidad: Comunidad): DatosC
     curso: {
       id: c.id,
       ...(c.estado !== "publicado" ? { sinPublicar: true } : {}),
+      ...(c.foto ? { foto: c.foto } : {}),
       titulo: c.titulo,
       subtitulo: c.subtitulo,
       aprenderas: c.aprenderas,
@@ -259,6 +261,7 @@ export function resumenDe({ curso, comunidad }: DatosCurso): ResumenCurso {
     minutos: lecciones.reduce((s, l) => s + l.duracion_min, 0),
     gratis: etiquetaGratis(modulos),
     publicado: !curso.sinPublicar,
+    ...(curso.foto ? { foto: curso.foto } : {}),
   };
 }
 

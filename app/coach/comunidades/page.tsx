@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useApp } from "@/components/Contexto";
+import CamposComunidad, { COMUNIDAD_VACIA } from "@/components/editor/CamposComunidad";
 import CrearConIA from "@/components/editor/CrearConIA";
 import { IconoAsistenteGeneral, IconoEditar, IconoFlechaDer } from "@/components/Iconos";
 import PortadaTema from "@/components/PortadaTema";
 import { useTitulo } from "@/components/useTitulo";
 import { api, hace, moneda } from "@/lib/cliente";
-import { TEMAS } from "@/lib/comunidades";
 import type { ComunidadCreada, CursoCreado } from "@/lib/tipos";
 
 type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "estado" | "origen" | "actualizadoEn" | "enPagina"> & {
@@ -17,7 +17,6 @@ type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "esta
 };
 type Datos = { comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean };
 
-const COMUNIDAD_VACIA = { nombre: "", descripcion: "", acerca: "", tema: "Finanzas", coach_titulo: "", precio_mensual: "390" };
 /** Clave de la sección de cursos que todavía no están en una comunidad. */
 const SUELTOS = "";
 
@@ -244,68 +243,7 @@ export default function PaginaMisComunidades() {
       {creando && (
         <form className="tarjeta forma-comunidad" onSubmit={crearComunidad}>
           <h2>Nueva comunidad</h2>
-          <label className="campo">
-            <span>Nombre</span>
-            <input
-              value={forma.nombre}
-              onChange={(e) => setForma({ ...forma, nombre: e.target.value })}
-              maxLength={60}
-              placeholder="Por ejemplo: Cocina que Vende"
-              required
-            />
-          </label>
-          <label className="campo">
-            <span>¿Para quién es?</span>
-            <textarea
-              value={forma.descripcion}
-              onChange={(e) => setForma({ ...forma, descripcion: e.target.value })}
-              maxLength={240}
-              rows={3}
-              placeholder="Una o dos líneas: a quién ayudas y con qué."
-              required
-            />
-          </label>
-          <label className="campo">
-            <span>Acerca de tu comunidad (opcional)</span>
-            <textarea
-              value={forma.acerca}
-              onChange={(e) => setForma({ ...forma, acerca: e.target.value })}
-              maxLength={1500}
-              rows={4}
-              placeholder="Lo que aparece en la presentación de tu comunidad: qué van a aprender, cómo trabajas con tus miembros, para quién no es."
-            />
-          </label>
-          <div className="forma-fila">
-            <label className="campo">
-              <span>Tema</span>
-              <select value={forma.tema} onChange={(e) => setForma({ ...forma, tema: e.target.value })}>
-                {TEMAS.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </label>
-            <label className="campo">
-              <span>Membresía al mes (MXN)</span>
-              <input
-                type="number"
-                min={50}
-                max={5000}
-                step={10}
-                value={forma.precio_mensual}
-                onChange={(e) => setForma({ ...forma, precio_mensual: e.target.value })}
-                required
-              />
-            </label>
-          </div>
-          <label className="campo">
-            <span>Tu título (aparece junto a tu nombre)</span>
-            <input
-              value={forma.coach_titulo}
-              onChange={(e) => setForma({ ...forma, coach_titulo: e.target.value })}
-              maxLength={80}
-              placeholder="Por ejemplo: Chef y asesora de negocios"
-            />
-          </label>
+          <CamposComunidad forma={forma} alCambiar={setForma} />
           <div className="forma-acciones">
             <button type="submit" className="boton" disabled={enviando === "comunidad"}>
               {enviando === "comunidad" ? "Creando…" : "Crear comunidad"}
@@ -339,7 +277,7 @@ export default function PaginaMisComunidades() {
         return (
           <section key={c.id} id={`tarjeta-${c.id}`} className="tarjeta mi-comunidad" aria-labelledby={`comunidad-${c.id}`}>
             <div className="mi-comunidad-cabecera">
-              <PortadaTema tema={c.tema} clave={c.id} className="mi-comunidad-portada" />
+              <PortadaTema tema={c.tema} clave={c.id} foto={c.foto} className="mi-comunidad-portada" />
               <div className="mi-comunidad-datos">
                 <h2 id={`comunidad-${c.id}`}>{c.nombre}</h2>
                 <p className="texto-suave">{c.descripcion}</p>
@@ -347,9 +285,14 @@ export default function PaginaMisComunidades() {
                   {c.tema} · {moneda(c.precio_mensual)} al mes
                   {publicados === 0 && " · Aparece en el directorio al publicar su primer curso"}
                 </p>
-                <Link href={`/comunidad?id=${encodeURIComponent(c.id)}`} className="enlace mi-comunidad-ver">
-                  Ver la comunidad <IconoFlechaDer width={15} height={15} />
-                </Link>
+                <div className="mi-comunidad-enlaces">
+                  <Link href={`/comunidad?id=${encodeURIComponent(c.id)}`} className="enlace mi-comunidad-ver">
+                    Ver la comunidad <IconoFlechaDer width={15} height={15} />
+                  </Link>
+                  <Link href={`/coach/comunidad/${encodeURIComponent(c.id)}`} className="enlace mi-comunidad-ver">
+                    <IconoEditar width={15} height={15} /> Editar
+                  </Link>
+                </div>
               </div>
             </div>
 

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/components/Contexto";
 import EditorPreguntas from "@/components/editor/EditorPreguntas";
+import FotoPortada from "@/components/editor/FotoPortada";
 import VideoEnEditor from "@/components/editor/VideoEnEditor";
 import { IconoAsistenteGeneral, IconoBorrar, IconoFlechaIzq } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
@@ -41,7 +42,7 @@ export default function EditorCurso() {
   const [aviso, setAviso] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [faltan, setFaltan] = useState<string[]>([]);
-  const [comunidades, setComunidades] = useState<{ id: string; nombre: string }[] | null>(null);
+  const [comunidades, setComunidades] = useState<{ id: string; nombre: string; tema: string }[] | null>(null);
   // Aviso de la IA al crear el borrador (si no juntó todas las lecciones o preguntas pedidas).
   const [avisoIA, setAvisoIA] = useState<string | null>(null);
   useEffect(() => {
@@ -79,13 +80,13 @@ export default function EditorCurso() {
         setCurso(c);
       })
       .catch((e) => setError((e as Error).message));
-    api<{ comunidades: { id: string; nombre: string }[] }>(
+    api<{ comunidades: { id: string; nombre: string; tema: string }[] }>(
       `/api/coach/comunidades?autor=${encodeURIComponent(autor)}`,
       {
         headers: { "X-Rol": "coach" },
       },
     )
-      .then((d) => setComunidades(d.comunidades.map((c) => ({ id: c.id, nombre: c.nombre }))))
+      .then((d) => setComunidades(d.comunidades.map((c) => ({ id: c.id, nombre: c.nombre, tema: c.tema }))))
       .catch(() => setComunidades([]));
     void cargarVideos();
   }, [id, autor, cargarVideos]);
@@ -365,6 +366,20 @@ export default function EditorCurso() {
             !curso.comunidad && <p className="nota">Para publicar el curso, elige en qué comunidad va.</p>
           )}
         </label>
+        <FotoPortada
+          de="curso"
+          id={curso.id}
+          autor={autor}
+          tema={comunidades?.find((c) => c.id === curso.comunidad)?.tema ?? "Otro"}
+          foto={curso.foto}
+          alCambiar={(foto) => {
+            // La foto se guarda al momento, aparte del resto del curso.
+            const conFoto = (c: CursoCreado | null) => (c ? { ...c, foto } : c);
+            setGuardado(conFoto);
+            setCurso(conFoto);
+            void recargarCatalogo();
+          }}
+        />
         <label className="campo">
           <span>Título</span>
           <input

@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { DIRECTORIO_VIDEOS, consultar, modificar } from "@/lib/almacen";
+import { DIRECTORIO_VIDEOS, borrarFoto, consultar, modificar } from "@/lib/almacen";
 import { iaDisponible } from "@/lib/asistente";
-import { nuevaComunidad } from "@/lib/creacion";
+import { camposDeComunidad, nuevaComunidad } from "@/lib/creacion";
 import { leerJson, manejar } from "@/lib/http";
 import { coachDe, comunidadDeCoach, conPermiso } from "@/lib/permisos";
 
@@ -47,6 +47,23 @@ export const POST = manejar((req: Request) =>
   }),
 );
 
+// Edita una comunidad de la coach: nombre, descripción, "Acerca de", tema,
+// precio y su título. El id (y con él su dirección) no cambia.
+export const PATCH = manejar((req: Request) =>
+  conPermiso(async () => {
+    const datos = await leerJson(req);
+    const autor = coachDe(req, datos.autor);
+    const campos = camposDeComunidad(datos);
+    const comunidad = await modificar((a) => {
+      const c = comunidadDeCoach(a, datos.id, autor);
+      Object.assign(c, campos);
+      if (!campos.acerca) delete c.acerca;
+      return c;
+    });
+    return Response.json(comunidad);
+  }),
+);
+
 // Borra una comunidad de la coach con todo lo suyo: sus cursos, los videos de
 // sus lecciones, sus publicaciones, pagos y lo que los alumnos llevaban en
 // ella (inscripción, avance, repasos, exámenes y preguntas al asistente).
@@ -79,7 +96,11 @@ export const DELETE = manejar((req: Request) =>
       a.semillas = (a.semillas ?? []).filter((s) => s !== comunidad.id);
       return { videos, borrado: { comunidad: comunidad.id, cursos: [...ids] } };
     });
-    await Promise.all(videos.map((v) => fs.rm(path.join(DIRECTORIO_VIDEOS, v.archivo), { force: true })));
+    await Promise.all([
+      ...videos.map((v) => fs.rm(path.join(DIRECTORIO_VIDEOS, v.archivo), { force: true })),
+      borrarFoto(`comunidad-${borrado.comunidad}`),
+      ...borrado.cursos.map((c) => borrarFoto(`curso-${c}`)),
+    ]);
     return Response.json(borrado);
   }),
 );

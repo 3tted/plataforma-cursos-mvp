@@ -20,6 +20,7 @@ export const GET = manejar(async () => {
           descripcion: c.descripcion,
           curso: publicados[0].titulo,
           estado: "activa",
+          ...(c.foto ? { foto: c.foto } : {}),
         },
       ];
     }),

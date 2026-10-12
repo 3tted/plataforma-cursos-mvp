@@ -6,11 +6,11 @@ import { moneda } from "@/lib/cliente";
 import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
-import { IconoBillete, IconoCheck, IconoComunidad, IconoPlay, IconoPublicacion } from "./Iconos";
+import { IconoBillete, IconoCheck, IconoComunidad, IconoEditar, IconoPlay, IconoPublicacion } from "./Iconos";
 import { posterDeVideo } from "@/lib/poster";
 import PortadaTema from "./PortadaTema";
 
-type Vista = { tipo: "video" } | { tipo: "publicaciones" } | { tipo: "curso"; id: string };
+type Vista = { tipo: "foto" } | { tipo: "video" } | { tipo: "publicaciones" } | { tipo: "curso"; id: string };
 
 // Presentación de la comunidad, arriba de sus publicaciones (como la página
 // "Acerca de" de Skool): una galería con el video de bienvenida, lo que se
@@ -32,7 +32,10 @@ export default function PresentacionComunidad({
   // El video de bienvenida: el de la primera lección gratis que tenga video.
   const video = datos?.curso.modulos.flatMap((m) => m.lecciones).find((l) => l.gratis && l.video)?.video ?? null;
   const recientes = (publicaciones ?? []).slice(0, 3);
+  // La foto de portada que subió la coach abre la galería.
+  const foto = datos?.comunidad.foto;
   const vistas: Vista[] = [
+    ...(foto ? [{ tipo: "foto" } as const] : []),
     ...(video ? [{ tipo: "video" } as const] : []),
     ...(recientes.length ? [{ tipo: "publicaciones" } as const] : []),
     ...cursosComunidad.map((c) => ({ tipo: "curso", id: c.id }) as const),
@@ -98,9 +101,17 @@ export default function PresentacionComunidad({
       <div className="presentacion-cabecera">
         <h1 id="titulo-comunidad">{comunidad.nombre}</h1>
         {esDuena && (
-          <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(comunidadId)}`} className="boton boton-chico">
-            + Agregar un curso
-          </Link>
+          <div className="presentacion-duena">
+            <Link
+              href={`/coach/comunidad/${encodeURIComponent(comunidadId)}`}
+              className="boton boton-chico boton-fantasma-borde"
+            >
+              <IconoEditar width={15} height={15} /> Editar
+            </Link>
+            <Link href={`/coach/comunidades?comunidad=${encodeURIComponent(comunidadId)}`} className="boton boton-chico">
+              + Agregar un curso
+            </Link>
+          </div>
         )}
       </div>
       <p className="presentacion-descripcion texto-suave">{comunidad.descripcion}</p>
@@ -108,6 +119,9 @@ export default function PresentacionComunidad({
       {vista && (
         <div className="presentacion-galeria">
           <div className="presentacion-visor">
+            {vista.tipo === "foto" && foto && (
+              <PortadaTema tema={tema} clave={comunidadId} foto={foto} alt={`Portada de «${comunidad.nombre}»`} className="presentacion-foto" />
+            )}
             {vista.tipo === "video" && video && (
               <video
                 key={video.url}
@@ -159,7 +173,7 @@ export default function PresentacionComunidad({
               {vistas.map((v, i) => {
                 const curso = v.tipo === "curso" ? cursosComunidad.find((x) => x.id === v.id) : null;
                 const nombre =
-                  v.tipo === "video" ? "Video de bienvenida" : v.tipo === "publicaciones" ? "Publicaciones recientes" : (curso?.titulo ?? "Curso");
+                  v.tipo === "foto" ? "Portada" : v.tipo === "video" ? "Video de bienvenida" : v.tipo === "publicaciones" ? "Publicaciones recientes" : (curso?.titulo ?? "Curso");
                 return (
                   <button
                     key={i}
@@ -170,7 +184,11 @@ export default function PresentacionComunidad({
                     title={nombre}
                     onClick={() => setElegida(i)}
                   >
-                    <PortadaTema tema={tema} clave={v.tipo === "curso" ? v.id : `${comunidadId}-${v.tipo}`} />
+                    <PortadaTema
+                      tema={tema}
+                      clave={v.tipo === "curso" ? v.id : `${comunidadId}-${v.tipo}`}
+                      foto={v.tipo === "foto" ? foto : undefined}
+                    />
                     <span className="presentacion-miniatura-icono" aria-hidden="true">
                       {v.tipo === "video" ? (
                         <IconoPlay width={20} height={20} />

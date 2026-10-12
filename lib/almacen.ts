@@ -243,6 +243,50 @@ async function escribirCrudo(almacen: Almacen, version: string | null): Promise<
   return true;
 }
 
+// Fotos de portada: cada una en su propia clave de Redis (o su archivo), fuera
+// del documento del almacén, para que no lo haga pesado. En Redis, a
+// diferencia de los videos, sobreviven entre copias del servidor en Vercel.
+const DIRECTORIO_FOTOS = path.join(DIRECTORIO, "fotos");
+const claveFoto = (clave: string) => `${CLAVE}:foto:${clave}`;
+
+export async function guardarFoto(clave: string, tipo: string, datos: Buffer): Promise<void> {
+  if (redis) {
+    await redis.set(claveFoto(clave), JSON.stringify({ tipo, datos: datos.toString("base64") }));
+    return;
+  }
+  await fs.mkdir(DIRECTORIO_FOTOS, { recursive: true });
+  await fs.writeFile(path.join(DIRECTORIO_FOTOS, clave), datos);
+  await fs.writeFile(path.join(DIRECTORIO_FOTOS, `${clave}.tipo`), tipo, "utf8");
+}
+
+export async function leerFoto(clave: string): Promise<{ tipo: string; datos: Buffer } | null> {
+  if (redis) {
+    const texto = await redis.get<string>(claveFoto(clave));
+    if (!texto) return null;
+    const { tipo, datos } = JSON.parse(texto) as { tipo: string; datos: string };
+    return { tipo, datos: Buffer.from(datos, "base64") };
+  }
+  try {
+    const [datos, tipo] = await Promise.all([
+      fs.readFile(path.join(DIRECTORIO_FOTOS, clave)),
+      fs.readFile(path.join(DIRECTORIO_FOTOS, `${clave}.tipo`), "utf8"),
+    ]);
+    return { tipo, datos };
+  } catch {
+    return null;
+  }
+}
+
+export async function borrarFoto(clave: string): Promise<void> {
+  if (redis) {
+    await redis.del(claveFoto(clave));
+    return;
+  }
+  await Promise.all(
+    [clave, `${clave}.tipo`].map((a) => fs.rm(path.join(DIRECTORIO_FOTOS, a), { force: true })),
+  );
+}
+
 // Lee el almacén; si no existe, lo siembra. `cambiado` indica que hay que guardarlo.
 async function cargar(): Promise<{ almacen: Almacen; version: string | null; cambiado: boolean }> {
   const { texto, version } = await leerCrudo();

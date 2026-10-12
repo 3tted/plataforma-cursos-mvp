@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useApp } from "./Contexto";
+import { IconoEditar } from "./Iconos";
 
 // Para la coach, en un curso suyo que está en la página pero sin publicar:
 // solo ella lo ve. En la portada del curso lleva el botón para publicarlo; en
@@ -76,8 +77,8 @@ export default function AvisoSinPublicar({ compacto = false }: { compacto?: bool
         <button type="button" className="boton" onClick={() => void publicar()} disabled={publicando}>
           {publicando ? "Publicando…" : "Publicar curso"}
         </button>
-        <Link href={`/coach/curso/${id}`} className="enlace">
-          Editar en el editor
+        <Link href={`/coach/curso/${id}`} className="enlace enlace-editar">
+          <IconoEditar width={15} height={15} /> Editar
         </Link>
       </div>
       {error && (

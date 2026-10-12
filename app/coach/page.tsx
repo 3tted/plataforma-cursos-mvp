@@ -158,8 +158,8 @@ export default function PaginaCoach() {
         </div>
         <div className="panel-alcance-fila">
           <p className="panel-alcance-etiqueta">Curso</p>
-          {cursosComunidad.length > 1 ? (
-            <SelectorCurso activo={cursoId} alElegir={cambiarCurso} etiqueta="Curso" />
+          {cursosComunidad.length > 0 ? (
+            <SelectorCurso activo={cursoId} alElegir={cambiarCurso} etiqueta="Curso" aunqueSeaUno />
           ) : (
             <p className="panel-alcance-unico">{datos?.curso.titulo ?? "…"}</p>
           )}

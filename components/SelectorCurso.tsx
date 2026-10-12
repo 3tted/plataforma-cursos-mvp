@@ -11,6 +11,7 @@ export default function SelectorCurso({
   conAvance = false,
   etiqueta = "Cursos de la comunidad",
   todos = false,
+  aunqueSeaUno = false,
 }: {
   activo: string;
   alElegir: (id: string) => void;
@@ -19,10 +20,12 @@ export default function SelectorCurso({
   etiqueta?: string;
   /** Todos los cursos de la plataforma (panel de la coach), no solo los de esta comunidad. */
   todos?: boolean;
+  /** Se muestra aunque haya un solo curso (en el panel, para que se vea cuál es). */
+  aunqueSeaUno?: boolean;
 }) {
   const { cursos: todosLosCursos, cursosComunidad, completadas, inscritoEn } = useApp();
   const cursos = todos ? todosLosCursos : cursosComunidad;
-  if (cursos.length < 2) return null;
+  if (cursos.length < (aunqueSeaUno ? 1 : 2)) return null;
 
   return (
     <div className="selector-curso" role="group" aria-label={etiqueta}>

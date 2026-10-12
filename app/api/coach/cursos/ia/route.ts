@@ -46,13 +46,14 @@ export const POST = manejar((req: Request) =>
       { lecciones: campo("lecciones"), repaso: campo("repaso"), examen: campo("examen") },
       medidasDelTexto(indicaciones),
     );
-    const propuesta = await proponerCurso(doc, indicaciones, medidas);
+    const { propuesta, aviso } = await proponerCurso(doc, indicaciones, medidas);
 
     const curso = await modificar((a) => {
       const borrador = aplicarEdicion(a, nuevoCurso(a, autor, destinoDeCurso(a, comunidad, autor), "ia"), comoEdicion(propuesta));
       (a.cursosCoach ??= []).push(borrador);
       return borrador;
     });
-    return Response.json(curso, { status: 201 });
+    // "aviso": si no se juntó todo lo pedido; el editor se lo muestra a la coach.
+    return Response.json({ ...curso, aviso }, { status: 201 });
   }),
 );

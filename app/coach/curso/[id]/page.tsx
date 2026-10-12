@@ -40,6 +40,15 @@ export default function EditorCurso() {
   const [error, setError] = useState<string | null>(null);
   const [faltan, setFaltan] = useState<string[]>([]);
   const [comunidades, setComunidades] = useState<{ id: string; nombre: string }[] | null>(null);
+  // Aviso de la IA al crear el borrador (si no juntó todas las lecciones o preguntas pedidas).
+  const [avisoIA, setAvisoIA] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setAvisoIA(sessionStorage.getItem(`fc.avisoIA.${id}`));
+    } catch {
+      setAvisoIA(null);
+    }
+  }, [id]);
   useTitulo(curso?.titulo || "Editar curso");
 
   const autor = usuario?.nombre ?? "";
@@ -49,7 +58,8 @@ export default function EditorCurso() {
     const datos = await api<DatosCurso>(`/api/curso?curso=${encodeURIComponent(id)}&borrador=1`).catch(() => null);
     if (!datos || datos.curso.id !== id) return;
     const lista: Record<string, { nombre: string; url: string }> = {};
-    for (const m of datos.curso.modulos) for (const l of m.lecciones) if (l.video) lista[l.id] = { nombre: l.video.nombre, url: l.video.url };
+    for (const m of datos.curso.modulos)
+      for (const l of m.lecciones) if (l.video) lista[l.id] = { nombre: l.video.nombre, url: l.video.url };
     setVideos(lista);
   }, [id]);
 
@@ -61,9 +71,12 @@ export default function EditorCurso() {
         setCurso(c);
       })
       .catch((e) => setError((e as Error).message));
-    api<{ comunidades: { id: string; nombre: string }[] }>(`/api/coach/comunidades?autor=${encodeURIComponent(autor)}`, {
-      headers: { "X-Rol": "coach" },
-    })
+    api<{ comunidades: { id: string; nombre: string }[] }>(
+      `/api/coach/comunidades?autor=${encodeURIComponent(autor)}`,
+      {
+        headers: { "X-Rol": "coach" },
+      },
+    )
       .then((d) => setComunidades(d.comunidades.map((c) => ({ id: c.id, nombre: c.nombre }))))
       .catch(() => setComunidades([]));
     void cargarVideos();
@@ -121,7 +134,11 @@ export default function EditorCurso() {
     setOcupado("guardar");
     setError(null);
     try {
-      const nuevo = await api<CursoCreado>(`/api/coach/cursos/${id}`, { method: "PUT", headers: cabeceras, json: { autor, curso } });
+      const nuevo = await api<CursoCreado>(`/api/coach/cursos/${id}`, {
+        method: "PUT",
+        headers: cabeceras,
+        json: { autor, curso },
+      });
       setGuardado(nuevo);
       setCurso(nuevo);
       setAviso("Cambios guardados.");
@@ -154,7 +171,9 @@ export default function EditorCurso() {
       }
       setGuardado(datos);
       setCurso(datos);
-      setAviso(publicar ? "¡Publicado! Tus alumnos ya lo ven en la comunidad." : "Despublicado: vuelve a ser borrador.");
+      setAviso(
+        publicar ? "¡Publicado! Tus alumnos ya lo ven en la comunidad." : "Despublicado: vuelve a ser borrador.",
+      );
       await recargarCatalogo();
     } catch {
       setError("No se pudo conectar. Revisa tu conexión.");
@@ -167,7 +186,11 @@ export default function EditorCurso() {
   const moverA = async (destino: string) => {
     setError(null);
     try {
-      await api(`/api/coach/cursos/${id}/comunidad`, { method: "POST", headers: cabeceras, json: { autor, comunidad: destino } });
+      await api(`/api/coach/cursos/${id}/comunidad`, {
+        method: "POST",
+        headers: cabeceras,
+        json: { autor, comunidad: destino },
+      });
       setCurso((c) => (c ? { ...c, comunidad: destino } : c));
       setGuardado((g) => (g ? { ...g, comunidad: destino } : g));
       setAviso(destino ? "Curso puesto en la comunidad." : "El curso quedó sin comunidad.");
@@ -228,11 +251,21 @@ export default function EditorCurso() {
             Guardar
           </button>
           {curso.estado === "publicado" ? (
-            <button type="button" className="boton boton-chico boton-fantasma" onClick={() => void publicar(false)} disabled={ocupado !== null}>
+            <button
+              type="button"
+              className="boton boton-chico boton-fantasma"
+              onClick={() => void publicar(false)}
+              disabled={ocupado !== null}
+            >
               Despublicar
             </button>
           ) : (
-            <button type="button" className="boton boton-chico" onClick={() => void publicar(true)} disabled={ocupado !== null}>
+            <button
+              type="button"
+              className="boton boton-chico"
+              onClick={() => void publicar(true)}
+              disabled={ocupado !== null}
+            >
               {ocupado === "publicar" ? "Publicando…" : "Publicar"}
             </button>
           )}
@@ -255,11 +288,14 @@ export default function EditorCurso() {
       {curso.origen === "ia" && curso.estado === "borrador" && (
         <div className="aviso editor-aviso-ia">
           <IconoAsistenteGeneral width={22} height={22} />
-          <p>
-            <strong>La IA armó este borrador con tu documento.</strong> Revísalo antes de publicar: que cada lección diga lo
-            que tú enseñas, que las respuestas marcadas como correctas lo sean y que los minutos tengan sentido. Después
-            sube el video de cada lección.
-          </p>
+          <div className="editor-aviso-ia-texto">
+            <p>
+              <strong>La IA armó este borrador con tu documento.</strong> Revísalo antes de publicar: que cada lección
+              diga lo que tú enseñas, que las respuestas marcadas como correctas lo sean y que los minutos tengan
+              sentido. Después sube el video de cada lección.
+            </p>
+            {avisoIA && <p className="editor-aviso-faltan">{avisoIA}</p>}
+          </div>
         </div>
       )}
 
@@ -302,7 +338,11 @@ export default function EditorCurso() {
         </label>
         <label className="campo">
           <span>Subtítulo (una línea que diga qué logra el alumno)</span>
-          <input value={curso.subtitulo} onChange={(e) => cambiar((c) => ({ ...c, subtitulo: e.target.value }))} maxLength={240} />
+          <input
+            value={curso.subtitulo}
+            onChange={(e) => cambiar((c) => ({ ...c, subtitulo: e.target.value }))}
+            maxLength={240}
+          />
         </label>
         <div className="forma-fila">
           <label className="campo">
@@ -324,7 +364,12 @@ export default function EditorCurso() {
         </div>
         <label className="campo">
           <span>Requisitos</span>
-          <input value={curso.requisitos} onChange={(e) => cambiar((c) => ({ ...c, requisitos: e.target.value }))} maxLength={300} placeholder="Por ejemplo: Ninguno." />
+          <input
+            value={curso.requisitos}
+            onChange={(e) => cambiar((c) => ({ ...c, requisitos: e.target.value }))}
+            maxLength={300}
+            placeholder="Por ejemplo: Ninguno."
+          />
         </label>
       </section>
 
@@ -344,16 +389,31 @@ export default function EditorCurso() {
                 />
               </label>
               <div className="editor-orden">
-                <button type="button" className="boton-icono boton-icono-chico" onClick={() => cambiar((c) => ({ ...c, modulos: mover(c.modulos, i, i - 1) }))} disabled={i === 0} aria-label="Subir módulo">
+                <button
+                  type="button"
+                  className="boton-icono boton-icono-chico"
+                  onClick={() => cambiar((c) => ({ ...c, modulos: mover(c.modulos, i, i - 1) }))}
+                  disabled={i === 0}
+                  aria-label="Subir módulo"
+                >
                   ↑
                 </button>
-                <button type="button" className="boton-icono boton-icono-chico" onClick={() => cambiar((c) => ({ ...c, modulos: mover(c.modulos, i, i + 1) }))} disabled={i === curso.modulos.length - 1} aria-label="Bajar módulo">
+                <button
+                  type="button"
+                  className="boton-icono boton-icono-chico"
+                  onClick={() => cambiar((c) => ({ ...c, modulos: mover(c.modulos, i, i + 1) }))}
+                  disabled={i === curso.modulos.length - 1}
+                  aria-label="Bajar módulo"
+                >
                   ↓
                 </button>
                 <button
                   type="button"
                   className="boton-icono boton-icono-chico"
-                  onClick={() => window.confirm("¿Quitar este módulo con todas sus lecciones?") && cambiar((c) => ({ ...c, modulos: c.modulos.filter((_, j) => j !== i) }))}
+                  onClick={() =>
+                    window.confirm("¿Quitar este módulo con todas sus lecciones?") &&
+                    cambiar((c) => ({ ...c, modulos: c.modulos.filter((_, j) => j !== i) }))
+                  }
                   aria-label={`Quitar el módulo ${i + 1}`}
                 >
                   <IconoBorrar width={16} height={16} />
@@ -376,7 +436,11 @@ export default function EditorCurso() {
                   <div className="forma-fila editor-fila-leccion">
                     <label className="campo">
                       <span>Título</span>
-                      <input value={l.titulo} onChange={(e) => cambiarLeccion(i, k, { titulo: e.target.value })} maxLength={140} />
+                      <input
+                        value={l.titulo}
+                        onChange={(e) => cambiarLeccion(i, k, { titulo: e.target.value })}
+                        maxLength={140}
+                      />
                     </label>
                     <label className="campo editor-minutos">
                       <span>Minutos</span>
@@ -389,25 +453,48 @@ export default function EditorCurso() {
                       />
                     </label>
                     <label className="editor-gratis">
-                      <input type="checkbox" checked={l.gratis} onChange={(e) => cambiarLeccion(i, k, { gratis: e.target.checked })} />
+                      <input
+                        type="checkbox"
+                        checked={l.gratis}
+                        onChange={(e) => cambiarLeccion(i, k, { gratis: e.target.checked })}
+                      />
                       Gratis (sin membresía)
                     </label>
                   </div>
                   <label className="campo">
                     <span>Resumen (una línea)</span>
-                    <input value={l.resumen} onChange={(e) => cambiarLeccion(i, k, { resumen: e.target.value })} maxLength={300} />
+                    <input
+                      value={l.resumen}
+                      onChange={(e) => cambiarLeccion(i, k, { resumen: e.target.value })}
+                      maxLength={300}
+                    />
                   </label>
                   <div className="campo">
                     <span>Video</span>
-                    <VideoEnEditor leccion={l.id} guardada={guardadas.has(l.id)} video={videos[l.id] ?? null} alCambiar={() => void cargarVideos()} />
+                    <VideoEnEditor
+                      leccion={l.id}
+                      guardada={guardadas.has(l.id)}
+                      video={videos[l.id] ?? null}
+                      alCambiar={() => void cargarVideos()}
+                    />
                   </div>
                   <label className="campo">
                     <span>Texto de la lección (con ## para subtítulos y ** para negritas)</span>
-                    <textarea rows={10} value={l.contenido} onChange={(e) => cambiarLeccion(i, k, { contenido: e.target.value })} maxLength={20000} />
+                    <textarea
+                      rows={10}
+                      value={l.contenido}
+                      onChange={(e) => cambiarLeccion(i, k, { contenido: e.target.value })}
+                      maxLength={20000}
+                    />
                   </label>
                   <label className="campo">
                     <span>Transcripción del video (opcional)</span>
-                    <textarea rows={4} value={l.transcripcion} onChange={(e) => cambiarLeccion(i, k, { transcripcion: e.target.value })} maxLength={20000} />
+                    <textarea
+                      rows={4}
+                      value={l.transcripcion}
+                      onChange={(e) => cambiarLeccion(i, k, { transcripcion: e.target.value })}
+                      maxLength={20000}
+                    />
                   </label>
                   <label className="campo">
                     <span>Preguntas sugeridas de esta lección (una por renglón)</span>
@@ -427,16 +514,29 @@ export default function EditorCurso() {
                     />
                   </div>
                   <div className="editor-leccion-acciones">
-                    <button type="button" className="enlace" onClick={() => cambiarModulo(i, (x) => ({ ...x, lecciones: mover(x.lecciones, k, k - 1) }))} disabled={k === 0}>
+                    <button
+                      type="button"
+                      className="enlace"
+                      onClick={() => cambiarModulo(i, (x) => ({ ...x, lecciones: mover(x.lecciones, k, k - 1) }))}
+                      disabled={k === 0}
+                    >
                       Subir
                     </button>
-                    <button type="button" className="enlace" onClick={() => cambiarModulo(i, (x) => ({ ...x, lecciones: mover(x.lecciones, k, k + 1) }))} disabled={k === m.lecciones.length - 1}>
+                    <button
+                      type="button"
+                      className="enlace"
+                      onClick={() => cambiarModulo(i, (x) => ({ ...x, lecciones: mover(x.lecciones, k, k + 1) }))}
+                      disabled={k === m.lecciones.length - 1}
+                    >
                       Bajar
                     </button>
                     <button
                       type="button"
                       className="enlace enlace-discreto"
-                      onClick={() => window.confirm("¿Quitar esta lección?") && cambiarModulo(i, (x) => ({ ...x, lecciones: x.lecciones.filter((_, j) => j !== k) }))}
+                      onClick={() =>
+                        window.confirm("¿Quitar esta lección?") &&
+                        cambiarModulo(i, (x) => ({ ...x, lecciones: x.lecciones.filter((_, j) => j !== k) }))
+                      }
                     >
                       Quitar lección
                     </button>
@@ -445,7 +545,11 @@ export default function EditorCurso() {
               </details>
             ))}
 
-            <button type="button" className="boton boton-chico boton-fantasma" onClick={() => cambiarModulo(i, (x) => ({ ...x, lecciones: [...x.lecciones, leccionNueva()] }))}>
+            <button
+              type="button"
+              className="boton boton-chico boton-fantasma"
+              onClick={() => cambiarModulo(i, (x) => ({ ...x, lecciones: [...x.lecciones, leccionNueva()] }))}
+            >
               + Agregar lección
             </button>
           </div>
@@ -453,7 +557,12 @@ export default function EditorCurso() {
         <button
           type="button"
           className="boton boton-secundario"
-          onClick={() => cambiar((c) => ({ ...c, modulos: [...c.modulos, { id: `M${c.modulos.length + 1}`, titulo: "", lecciones: [leccionNueva()] }] }))}
+          onClick={() =>
+            cambiar((c) => ({
+              ...c,
+              modulos: [...c.modulos, { id: `M${c.modulos.length + 1}`, titulo: "", lecciones: [leccionNueva()] }],
+            }))
+          }
         >
           + Agregar módulo
         </button>
@@ -461,7 +570,9 @@ export default function EditorCurso() {
 
       <section className="tarjeta editor-seccion" aria-labelledby="examen-editor-titulo">
         <h2 id="examen-editor-titulo">Examen final</h2>
-        <p className="texto-suave">Se desbloquea al terminar todas las lecciones. Se aprueba con 70% y hay 3 intentos.</p>
+        <p className="texto-suave">
+          Se desbloquea al terminar todas las lecciones. Se aprueba con 70% y hay 3 intentos.
+        </p>
         <EditorPreguntas
           preguntas={curso.examen}
           alCambiar={(examen) => cambiar((c) => ({ ...c, examen }))}

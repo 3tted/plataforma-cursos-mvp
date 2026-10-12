@@ -292,7 +292,29 @@ function leer(texto: string): PropuestaCurso {
 }
 
 /** Pide la propuesta a la IA configurada. Lanza ErrorDeDatos con un mensaje para la coach. */
-export async function proponerCurso(doc: Documento, indicaciones: string, medidas: Medidas): Promise<PropuestaCurso> {
+/** Para la coach, si al final no se juntó todo lo que pidió (null si sí). */
+function avisoDeCantidades(p: PropuestaCurso, m: Medidas): string | null {
+  const partes: string[] = [];
+  if (m.lecciones !== undefined && p.lecciones.length < m.lecciones) {
+    partes.push(`pediste ${m.lecciones} lecciones y la IA armó ${p.lecciones.length}`);
+  }
+  if (m.repaso !== undefined) {
+    const cortas = p.lecciones.filter((l) => (l.repaso?.length ?? 0) < m.repaso!).length;
+    if (cortas) partes.push(`${cortas} ${cortas === 1 ? "lección quedó" : "lecciones quedaron"} con menos de ${m.repaso} preguntas de repaso`);
+  }
+  if (m.examen !== undefined && (p.examen?.length ?? 0) < m.examen) {
+    partes.push(`el examen quedó con ${p.examen?.length ?? 0} de ${m.examen} preguntas`);
+  }
+  if (!partes.length) return null;
+  const texto = partes.join("; ");
+  return `${texto[0].toUpperCase()}${texto.slice(1)}: tu documento no daba para más. Agrega lo que falte aquí abajo.`;
+}
+
+export async function proponerCurso(
+  doc: Documento,
+  indicaciones: string,
+  medidas: Medidas,
+): Promise<{ propuesta: PropuestaCurso; aviso: string | null }> {
   const proveedor = proveedorIA();
   if (!proveedor) {
     throw new ErrorDeDatos("Para crear cursos con IA hace falta conectar una IA (GEMINI_API_KEY o ANTHROPIC_API_KEY en .env.local).");
@@ -316,9 +338,14 @@ export async function proponerCurso(doc: Documento, indicaciones: string, medida
       { rol: "coach", texto: `No cumpliste lo pedido: ${faltan.join("; ")}. Devuelve el curso completo corregido, con ${cantidades(medidas).join("; ")}.` },
     );
     const corregida = leer(await preguntar(turnos));
-    if (diferencias(corregida, medidas).length <= faltan.length) propuesta = corregida;
+    // Se queda con la que más se acerque a lo pedido.
+    const distancia = (p: PropuestaCurso) =>
+      Math.abs((medidas.lecciones ?? p.lecciones.length) - p.lecciones.length) +
+      Math.abs((medidas.examen ?? p.examen.length) - p.examen.length);
+    if (distancia(corregida) <= distancia(propuesta)) propuesta = corregida;
   }
-  return recortar(propuesta, medidas);
+  const final = recortar(propuesta, medidas);
+  return { propuesta: final, aviso: avisoDeCantidades(final, medidas) };
 }
 
 // Para armar un curso conviene el modelo más capaz; Lite queda de respaldo.
@@ -335,7 +362,13 @@ async function conGemini(doc: Documento, turnos: Turno[], medidas: Medidas, limi
     parts: i === 0 ? [documento, { text: t.texto }] : [{ text: t.texto }],
   }));
 
-  for (const [i, model] of MODELOS_GEMINI.entries()) {
+  // Las cantidades van en el esquema (Gemini las respeta al generar). Con muchas
+  // lecciones o preguntas el esquema le resulta demasiado grande y responde 400:
+  // entonces se repite con las cantidades solo en las instrucciones, y el
+  // servidor las revisa después (recorta lo que sobra y pide corregir lo que falta).
+  let conLimites = true;
+  for (let i = 0; i < MODELOS_GEMINI.length; i++) {
+    const model = MODELOS_GEMINI[i];
     const desde = Date.now();
     try {
       const respuesta = await cliente.models.generateContent({
@@ -344,8 +377,9 @@ async function conGemini(doc: Documento, turnos: Turno[], medidas: Medidas, limi
         config: {
           systemInstruction: INSTRUCCIONES,
           responseMimeType: "application/json",
-          responseJsonSchema: esquema(medidas, true),
-          maxOutputTokens: 32_768,
+          responseJsonSchema: esquema(medidas, conLimites),
+          // Holgado: un curso de 20 o 30 lecciones con sus preguntas no cabe en 32k.
+          maxOutputTokens: 65_536,
           abortSignal: AbortSignal.timeout(Math.max(limite - Date.now(), 5_000)),
           // El SDK reintenta 5 veces con espera creciente (casi un minuto si el modelo está
           // saturado). Mejor un reintento rápido y pasar al de respaldo.
@@ -357,6 +391,12 @@ async function conGemini(doc: Documento, turnos: Turno[], medidas: Medidas, limi
       if (!texto) throw new ErrorDeDatos("La IA no pudo leer el documento. Prueba con otro archivo o pega el texto.");
       return texto;
     } catch (e) {
+      if (conLimites && e instanceof ApiError && e.status === 400 && /invalid argument/i.test(e.message)) {
+        console.warn(`Curso con IA: ${model} no aceptó el esquema con cantidades; se repite sin ellas.`);
+        conLimites = false;
+        i--;
+        continue;
+      }
       const reintentable = e instanceof ApiError && [429, 500, 503, 404].includes(e.status);
       if (reintentable && i < MODELOS_GEMINI.length - 1 && Date.now() < limite - 20_000) {
         const seg = Math.round((Date.now() - desde) / 1000);

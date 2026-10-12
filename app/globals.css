@@ -5826,6 +5826,19 @@ button.tarjeta-comunidad-enlace {
   border-color: transparent;
 }
 
+.editor-aviso-ia-texto {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+}
+
+.editor-aviso-faltan {
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--graphite);
+}
+
 .editor-aviso-ia > svg {
   flex-shrink: 0;
   color: var(--acento-texto);

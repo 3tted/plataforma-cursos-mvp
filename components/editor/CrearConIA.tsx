@@ -65,7 +65,7 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
     setError(null);
     try {
       const res = await fetch("/api/coach/cursos/ia", { method: "POST", headers: { "X-Rol": "coach" }, body: forma });
-      const datos = (await res.json().catch(() => ({}))) as Partial<CursoCreado> & { error?: string };
+      const datos = (await res.json().catch(() => ({}))) as Partial<CursoCreado> & { error?: string; aviso?: string | null };
       if (!res.ok || !datos.id) {
         setError(
           res.status === 413
@@ -74,6 +74,12 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
         );
         setTrabajando(false);
         return;
+      }
+      // Si la IA no juntó todo lo pedido, el editor lo avisa al abrir el borrador.
+      try {
+        if (datos.aviso) sessionStorage.setItem(`fc.avisoIA.${datos.id}`, datos.aviso);
+      } catch {
+        // sin sessionStorage solo se pierde el aviso
       }
       router.push(`/coach/curso/${datos.id}`);
     } catch {

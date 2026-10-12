@@ -4686,7 +4686,7 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
 }
 
 /* Presentación con IA de una lección (components/PresentacionLeccion.tsx):
-   escena oscura del manual, subtítulos y controles debajo. */
+   escena oscura del manual con controles como los de un video encima. */
 .presentacion-leccion {
   display: grid;
   gap: 10px;
@@ -4696,15 +4696,27 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
 .presentacion-escena {
   container-type: inline-size;
   position: relative;
-  display: grid;
-  align-content: center;
-  gap: 2.6cqw;
   aspect-ratio: 16 / 9;
-  padding: 6cqw 7cqw;
   overflow: hidden;
   border-radius: var(--radio-hoja);
   background: var(--graphite);
   color: var(--white);
+}
+
+.presentacion-escena:fullscreen {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.presentacion-diapositiva {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: 2.6cqw;
+  padding: 6cqw 7cqw calc(6cqw + 40px);
 }
 
 .presentacion-escena-etiqueta {
@@ -4754,7 +4766,7 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
 .presentacion-escena-flecha {
   position: absolute;
   right: 5cqw;
-  bottom: 6cqw;
+  bottom: calc(6cqw + 44px);
   width: 16cqw;
   fill: none;
   stroke: var(--coral);
@@ -4763,9 +4775,40 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
   stroke-linejoin: round;
 }
 
+/* Con subtítulos, la diapositiva se recorre hacia arriba para que no la tapen */
+.presentacion-escena[data-cc="true"] .presentacion-diapositiva {
+  padding-bottom: calc(64px + 8cqw);
+}
+
+.presentacion-escena[data-cc="true"] .presentacion-escena-flecha {
+  bottom: calc(64px + 8cqw);
+}
+
+/* Subtítulos sobre la imagen, como los de un video */
+.presentacion-cc {
+  position: absolute;
+  left: 6cqw;
+  right: 6cqw;
+  bottom: 64px;
+  margin: 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.presentacion-cc span {
+  padding: 0.15em 0.5em;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 78%);
+  color: var(--white);
+  font-size: max(0.85rem, 2.1cqw);
+  line-height: 1.65;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 .presentacion-empezar {
   position: absolute;
-  inset: 0;
+  inset: 0 0 52px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4797,109 +4840,169 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
   outline-offset: -6px;
 }
 
-.presentacion-subtitulo {
-  min-height: calc(2 * 1.5em + 20px);
-  margin: 0;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radio-control);
-  background: var(--white);
-  color: var(--graphite);
-  line-height: 1.5;
+/* Barra de controles: botones arriba y la línea de avance abajo */
+.presentacion-barra {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  padding: 28px 10px 4px;
+  background: linear-gradient(to top, rgb(0 0 0 / 72%), rgb(0 0 0 / 0%));
+  color: var(--white);
 }
 
-.presentacion-controles {
+.presentacion-barra-fila {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
 }
 
-.presentacion-control {
+.presentacion-barra-espacio {
+  flex: 1;
+}
+
+.presentacion-boton {
   display: inline-grid;
   place-items: center;
   width: 40px;
   height: 40px;
   flex-shrink: 0;
-  border: 1px solid var(--border-strong);
-  border-radius: 50%;
-  background: var(--white);
-  color: var(--graphite);
-  cursor: pointer;
-}
-
-.presentacion-control svg {
-  width: 20px;
-  height: 20px;
-}
-
-.presentacion-control:hover:not(:disabled) {
-  background: var(--light-1);
-}
-
-.presentacion-control:disabled {
-  border-color: var(--border);
-  color: var(--border-strong);
-  cursor: not-allowed;
-}
-
-.presentacion-control[aria-pressed="true"] {
-  border-color: var(--coral-dark);
-  box-shadow: inset 0 0 0 1px var(--coral-dark);
-}
-
-.presentacion-control-principal {
-  width: 46px;
-  height: 46px;
-  border-color: var(--coral-dark);
-  background: var(--coral-dark);
-  color: var(--white);
-}
-
-.presentacion-control-principal:hover:not(:disabled) {
-  background: var(--coral-darker);
-}
-
-.presentacion-avance {
-  display: flex;
-  flex: 1;
-  gap: 4px;
-  min-width: 120px;
-}
-
-.presentacion-punto {
-  flex: 1;
-  height: 8px;
   padding: 0;
   border: 0;
-  border-radius: 999px;
-  background: var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--white);
   cursor: pointer;
 }
 
-.presentacion-punto[data-vista="true"] {
+.presentacion-boton svg {
+  width: 22px;
+  height: 22px;
+}
+
+.presentacion-boton:hover,
+.presentacion-boton[aria-expanded="true"] {
+  background: rgb(255 255 255 / 16%);
+}
+
+.presentacion-boton:focus-visible,
+.presentacion-progreso:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 1px;
+}
+
+.presentacion-tiempo {
+  margin-left: 6px;
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.presentacion-progreso {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.presentacion-progreso::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--coral) var(--avance, 0%), rgb(255 255 255 / 35%) var(--avance, 0%));
+}
+
+.presentacion-progreso::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--coral) var(--avance, 0%), rgb(255 255 255 / 35%) var(--avance, 0%));
+}
+
+.presentacion-progreso::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -4.5px;
+  border: 0;
+  border-radius: 50%;
   background: var(--coral);
 }
 
-.presentacion-punto[aria-current="step"] {
-  background: var(--coral-dark);
-  box-shadow: 0 0 0 2px var(--white), 0 0 0 3px var(--coral-dark);
+.presentacion-progreso::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--coral);
 }
 
-.presentacion-punto:disabled {
-  cursor: not-allowed;
-}
-
-.presentacion-velocidad select {
-  height: 40px;
-  padding: 0 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  background: var(--white);
-  color: var(--graphite);
-  font: inherit;
+/* Menú ⋮: velocidad y subtítulos */
+.presentacion-menu {
+  position: absolute;
+  right: 10px;
+  bottom: 66px;
+  display: grid;
+  gap: 8px;
+  min-width: 210px;
+  padding: 12px 14px;
+  border-radius: var(--radio-control);
+  background: rgb(28 28 28 / 96%);
+  color: var(--white);
   font-size: var(--t-small);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+}
+
+.presentacion-menu-titulo {
+  margin: 0;
+  font-weight: 700;
+  color: rgb(255 255 255 / 75%);
+}
+
+.presentacion-menu-velocidades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.presentacion-menu-velocidades button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--white);
+  font: inherit;
   font-weight: 600;
+  cursor: pointer;
+}
+
+.presentacion-menu-velocidades button[aria-pressed="true"] {
+  border-color: var(--coral-dark);
+  background: var(--coral-dark);
+}
+
+.presentacion-menu-opcion {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid rgb(255 255 255 / 15%);
+  background: transparent;
+  color: var(--white);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.presentacion-menu-opcion span {
+  color: rgb(255 255 255 / 75%);
 }
 
 .presentacion-nota {
@@ -4908,15 +5011,20 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
 }
 
 @media (max-width: 560px) {
-  .presentacion-avance {
-    order: 10;
-    flex-basis: 100%;
-  }
   /* En el celular la diapositiva crece con su contenido: en 16:9 no cabría */
   .presentacion-escena {
+    display: grid;
     aspect-ratio: auto;
-    min-height: 210px;
-    padding: 22px 20px 56px;
+    min-height: 230px;
+    padding-bottom: 62px;
+  }
+  .presentacion-escena:fullscreen {
+    align-content: center;
+  }
+  .presentacion-diapositiva,
+  .presentacion-escena[data-cc="true"] .presentacion-diapositiva {
+    position: static;
+    padding: 22px 20px 12px;
     gap: 10px;
   }
   .presentacion-escena-titulo,
@@ -4924,9 +5032,14 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
     max-width: none;
   }
   .presentacion-escena-flecha {
-    width: 56px;
-    right: 16px;
-    bottom: 14px;
+    display: none;
+  }
+  .presentacion-cc {
+    position: static;
+    padding: 0 12px 6px;
+  }
+  .presentacion-barra {
+    padding-top: 18px;
   }
 }
 

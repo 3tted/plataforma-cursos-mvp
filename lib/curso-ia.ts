@@ -26,7 +26,7 @@ export interface Medidas {
   examen?: number;
 }
 
-export const LIMITES_MEDIDAS = { lecciones: [1, 30], repaso: [0, 5], examen: [1, 30] } as const;
+export const LIMITES_MEDIDAS = { lecciones: [1, 30], repaso: [0, 10], examen: [1, 30] } as const;
 
 /** Lo que propone la IA, antes de pasar por la misma validación del editor. */
 export interface PropuestaCurso {

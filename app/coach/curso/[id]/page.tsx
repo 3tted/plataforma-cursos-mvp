@@ -510,7 +510,7 @@ export default function EditorCurso() {
                       preguntas={l.repaso}
                       alCambiar={(repaso) => cambiarLeccion(i, k, { repaso })}
                       vacio="Sin preguntas de repaso. Te recomendamos dos."
-                      maximo={5}
+                      maximo={10}
                     />
                   </div>
                   <div className="editor-leccion-acciones">

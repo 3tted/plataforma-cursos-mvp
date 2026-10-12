@@ -53,6 +53,17 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
     if (pegar ? texto.trim().length < 200 : !archivo) {
       return setError(pegar ? "Pega al menos un par de párrafos de tu material." : "Elige el documento con tu material.");
     }
+    // Las cantidades se revisan aquí (con un mensaje claro) y no con el globito del navegador.
+    for (const [clave, nombre, min, max] of [
+      ["lecciones", "Las lecciones", 1, 30],
+      ["repaso", "Las preguntas de repaso por lección", 0, 10],
+      ["examen", "Las preguntas del examen", 1, 30],
+    ] as const) {
+      const v = cantidades[clave].trim();
+      if (v === "") continue;
+      const n = Number(v);
+      if (!Number.isInteger(n) || n < min || n > max) return setError(`${nombre} van de ${min} a ${max}.`);
+    }
     const forma = new FormData();
     forma.set("autor", autor);
     forma.set("comunidad", comunidad);
@@ -102,7 +113,7 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
   }
 
   return (
-    <form className="crear-ia" onSubmit={enviar}>
+    <form className="crear-ia" onSubmit={enviar} noValidate>
       <div className="crear-ia-cabecera">
         <p className="agregar-curso-titulo">Crear un curso con IA</p>
         <button type="button" className="enlace enlace-discreto" onClick={alCerrar}>
@@ -148,7 +159,7 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
         {(
           [
             ["lecciones", "Lecciones", 1, 30, "Auto"],
-            ["repaso", "Preguntas de repaso por lección", 0, 5, "2"],
+            ["repaso", "Preguntas de repaso por lección", 0, 10, "2"],
             ["examen", "Preguntas del examen", 1, 30, "Auto"],
           ] as const
         ).map(([clave, etiqueta, min, max, ejemplo]) => (

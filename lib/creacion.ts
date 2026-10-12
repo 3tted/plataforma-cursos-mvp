@@ -12,6 +12,8 @@ const MAX_MODULOS = 8;
 const MAX_LECCIONES = 30;
 const MAX_TEXTO_LECCION = 20_000;
 const MAX_PREGUNTAS = 30;
+/** Preguntas de repaso por lección (el mismo límite que el formulario de IA). */
+const MAX_REPASO = 10;
 
 const texto = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 const lista = (v: unknown, max: number, largo: number) =>
@@ -146,7 +148,7 @@ export function aplicarEdicion(a: Almacen, actual: CursoCreado, entrada: Record<
         contenido: texto(l.contenido, MAX_TEXTO_LECCION),
         transcripcion: texto(l.transcripcion, MAX_TEXTO_LECCION),
         preguntas_sugeridas: lista(l.preguntas_sugeridas, 4, 200),
-        repaso: (Array.isArray(l.repaso) ? l.repaso : []).slice(0, 5).map((p) => pregunta(a, p, "KR", ids)),
+        repaso: (Array.isArray(l.repaso) ? l.repaso : []).slice(0, MAX_REPASO).map((p) => pregunta(a, p, "KR", ids)),
       })),
     };
   });

@@ -333,7 +333,12 @@ export default function PaginaLeccion() {
           </div>
         ) : (
           <>
-            <VideoLeccion leccion={leccion} sinAdelantar={guiado && !videoListo} alTerminar={alTerminarVideo} />
+            <VideoLeccion
+              leccion={leccion}
+              numero={indice + 1}
+              sinAdelantar={guiado && !videoListo}
+              alTerminar={alTerminarVideo}
+            />
 
             {pestanas.length > 1 && (
               <div className="pestanas" role="tablist" aria-label="Contenido de la lección" onKeyDown={alTeclear}>

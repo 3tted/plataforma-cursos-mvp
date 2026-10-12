@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretLeft, CaretRight, ClosedCaptioning, Pause, Play } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, ClosedCaptioning, Pause, Play, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Diapositiva } from "@/lib/tipos";
 
@@ -30,11 +30,14 @@ function vozEnEspañol(): SpeechSynthesisVoice | null {
 
 export default function PresentacionLeccion({
   idLeccion,
+  numero,
   diapositivas,
   sinAdelantar = false,
   alTerminar,
 }: {
   idLeccion: string;
+  /** Número de la lección en el curso, para la etiqueta ("Lección 2 · 1 de 4"). */
+  numero?: number;
   diapositivas: Diapositiva[];
   sinAdelantar?: boolean;
   alTerminar?: () => void;
@@ -49,14 +52,24 @@ export default function PresentacionLeccion({
   const [velocidad, setVelocidad] = useState(1);
   const [subtitulos, setSubtitulos] = useState(true);
   const [sinVoz, setSinVoz] = useState(false);
+  // Quien la ve puede quitar la voz: avanza al ritmo de lectura con subtítulos.
+  // Se recuerda en este navegador.
+  const [silencio, setSilencio] = useState(false);
+  useEffect(() => {
+    try {
+      setSilencio(localStorage.getItem("fc.presentacionSinVoz") === "1");
+    } catch {
+      // sin almacenamiento: con voz
+    }
+  }, []);
   const [frase, setFrase] = useState(0);
 
   // Cada arranque lleva un número: lo que avise una voz ya cancelada se ignora.
   const turno = useRef(0);
   const reloj = useRef<ReturnType<typeof setTimeout> | null>(null);
   const avisado = useRef(false);
-  const estado = useRef({ indice, velocidad, sinVoz });
-  estado.current = { indice, velocidad, sinVoz };
+  const estado = useRef({ indice, velocidad, sinVoz: sinVoz || silencio });
+  estado.current = { indice, velocidad, sinVoz: sinVoz || silencio };
 
   const detener = useCallback(() => {
     turno.current++;
@@ -188,6 +201,20 @@ export default function PresentacionLeccion({
     else detener();
   };
 
+  const alternarVoz = () => {
+    const nuevo = !silencio;
+    setSilencio(nuevo);
+    estado.current.sinVoz = nuevo || sinVoz;
+    if (nuevo) setSubtitulos(true);
+    try {
+      localStorage.setItem("fc.presentacionSinVoz", nuevo ? "1" : "0");
+    } catch {
+      // sin almacenamiento: solo dura esta vez
+    }
+    // Si está sonando, sigue desde la misma frase con o sin voz.
+    if (reproduciendo) narrar(indice, frase);
+  };
+
   const cambiarVelocidad = (v: number) => {
     setVelocidad(v);
     estado.current.velocidad = v;
@@ -202,7 +229,12 @@ export default function PresentacionLeccion({
     <figure className="presentacion-leccion" aria-label="Presentación de la lección">
       <div className="presentacion-escena" aria-live="polite">
         <p className="presentacion-escena-etiqueta">
-          Lección {idLeccion} · <span className="cifra">{indice + 1}</span> de <span className="cifra">{total}</span>
+          {numero ? (
+            <>
+              Lección <span className="cifra">{numero}</span> ·{" "}
+            </>
+          ) : null}
+          <span className="cifra">{indice + 1}</span> de <span className="cifra">{total}</span>
         </p>
         <h3 className="presentacion-escena-titulo">{d.titulo}</h3>
         {d.puntos.length > 0 && (
@@ -283,6 +315,18 @@ export default function PresentacionLeccion({
             ))}
           </select>
         </label>
+        {!sinVoz && (
+          <button
+            type="button"
+            className="presentacion-control"
+            aria-pressed={!silencio}
+            onClick={alternarVoz}
+            aria-label={silencio ? "Poner la voz" : "Quitar la voz"}
+            title={silencio ? "Poner la voz" : "Quitar la voz"}
+          >
+            {silencio ? <SpeakerSlash aria-hidden="true" /> : <SpeakerHigh aria-hidden="true" />}
+          </button>
+        )}
         <button
           type="button"
           className="presentacion-control"
@@ -298,7 +342,9 @@ export default function PresentacionLeccion({
       <figcaption className="presentacion-nota texto-suave">
         {sinVoz
           ? "Tu dispositivo no tiene voz en español: la presentación avanza sola al ritmo de lectura."
-          : "Narrada con la voz de tu dispositivo."}
+          : silencio
+            ? "Sin voz: la presentación avanza sola al ritmo de lectura."
+            : "Narrada con la voz de tu dispositivo."}
         {sinAdelantar && !terminada && " Escúchala completa para desbloquear el repaso."}
       </figcaption>
 

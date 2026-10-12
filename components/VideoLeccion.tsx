@@ -18,10 +18,13 @@ type Estado = "inactivo" | "subiendo" | "error";
 // y `alTerminar` avisa cuando llegó al final.
 export default function VideoLeccion({
   leccion,
+  numero,
   sinAdelantar = false,
   alTerminar,
 }: {
   leccion: Leccion;
+  /** Número de la lección dentro del curso (lo que ve el alumno, no su código interno). */
+  numero?: number;
   sinAdelantar?: boolean;
   alTerminar?: () => void;
 }) {
@@ -207,7 +210,7 @@ export default function VideoLeccion({
           preload="metadata"
           playsInline
           src={leccion.video.url}
-          poster={posterDeVideo(`Lección ${leccion.id}`, leccion.titulo)}
+          poster={posterDeVideo(numero ? `Lección ${numero}` : "Lección", leccion.titulo)}
           aria-label={`Video de la lección «${leccion.titulo}»`}
           onLoadedMetadata={() => {
             visto.current = 0;
@@ -291,6 +294,7 @@ export default function VideoLeccion({
       <div className="video-leccion">
         <PresentacionLeccion
           idLeccion={leccion.id}
+          numero={numero}
           diapositivas={leccion.presentacion.diapositivas}
           sinAdelantar={sinAdelantar}
           alTerminar={alTerminar}

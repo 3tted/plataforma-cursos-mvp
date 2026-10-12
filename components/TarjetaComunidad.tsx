@@ -27,7 +27,7 @@ export default function TarjetaComunidad({
 
   const cuerpo = (
     <>
-      <PortadaTema tema={c.tema} clave={c.id} alt={c.nombre} />
+      <PortadaTema tema={c.tema} clave={c.id} />
       <span className="tarjeta-comunidad-cuerpo">
         <span className="ficha-nombre">{c.nombre}</span>
         <span className="tarjeta-comunidad-curso">{cursoTexto}</span>

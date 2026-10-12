@@ -173,8 +173,18 @@ export default function TarjetaPublicacion({
             <IconoUtil width={17} height={17} weight={meSirve ? "fill" : "regular"} />
             Me sirve{p.reacciones.length > 0 && <span className="conteo">{p.reacciones.length}</span>}
           </button>
-          <button type="button" className="accion" onClick={() => campoComentario.current?.focus()}>
-            <IconoComentario width={17} height={17} />
+          {/* Lleva al campo de abajo; con otro nombre para que no se oiga "Comentar" dos veces */}
+          <button
+            type="button"
+            className="accion"
+            onClick={() => campoComentario.current?.focus()}
+            aria-label={
+              total === 0
+                ? "Escribir un comentario"
+                : `${total} comentario${total === 1 ? "" : "s"}; escribir uno`
+            }
+          >
+            <IconoComentario width={17} height={17} aria-hidden="true" />
             {total === 0 ? "Comentar" : `${total} comentario${total === 1 ? "" : "s"}`}
           </button>
         </footer>

@@ -219,9 +219,15 @@ export default function PaginaMembresia() {
                     value={m.id}
                     checked={metodo === m.id}
                     onChange={() => setMetodo(m.id)}
+                    aria-labelledby={`metodo-${m.id}`}
+                    aria-describedby={`metodo-${m.id}-detalle`}
                   />
-                  <span className="metodo-nombre">{m.nombre}</span>
-                  <span className="texto-suave">{m.detalle}</span>
+                  <span className="metodo-nombre" id={`metodo-${m.id}`}>
+                    {m.nombre}
+                  </span>
+                  <span className="texto-suave" id={`metodo-${m.id}-detalle`}>
+                    {m.detalle}
+                  </span>
                 </label>
               ))}
             </div>

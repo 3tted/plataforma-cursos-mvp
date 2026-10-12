@@ -39,12 +39,12 @@ export default function Encabezado() {
     <header className="barra" data-app-fondo>
       <div className="envoltura barra-interior">
         {/* Imagotipo oficial, tomado del manual de identidad (página "Identidad Básica"). */}
-        <Link href="/" className="marca">
+        <Link href="/" className="marca" aria-label="Merkatics, inicio">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="marca-logo"
             src="/merkatics-logo.png"
-            alt="Merkatics Growth Operating System, inicio"
+            alt=""
             width={2311}
             height={544}
           />

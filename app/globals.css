@@ -42,7 +42,9 @@
   --acento-tinta: var(--white);
   /* Lo que antes era un fondo rosa ahora es una hoja clara. */
   --acento-suave: var(--light-1);
-  --acento-texto: var(--coral-dark);
+  /* Texto en coral (enlaces, etiquetas): el tono más oscuro de la paleta, que
+     pasa 4.5:1 sobre blanco y sobre el gris del fondo */
+  --acento-texto: var(--coral-darker);
   --rubor: var(--light-1);
   --rubor-2: var(--light-2);
   --tinta-rubor: var(--dark-gray);
@@ -2896,7 +2898,7 @@ button.boton:disabled:hover {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--gray);
+  color: var(--dark-gray);
 }
 
 .fuentes .citas {
@@ -7183,4 +7185,11 @@ button.tarjeta-comunidad-enlace {
 .comentario-borrar {
   margin-left: 8px;
   font-size: var(--t-caption);
+}
+
+/* Metadatos que van sobre el gris del fondo: el gris claro no llega a 4.5:1 ahí */
+.indice-modulo-avance,
+.indice-min,
+.leccion-vecina-espera {
+  color: var(--dark-gray);
 }

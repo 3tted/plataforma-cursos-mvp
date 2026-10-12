@@ -119,7 +119,7 @@ export default function PaginaCurso() {
             // eslint-disable-next-line @next/next/no-img-element -- foto estática ya ligera
             <img
               src={fotoDePortada(curso.id)!.src}
-              alt=""
+              alt={`Portada del curso «${curso.titulo}»`}
               className="curso-portada-foto"
               style={{ objectPosition: fotoDePortada(curso.id)!.foco }}
             />

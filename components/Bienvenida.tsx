@@ -85,11 +85,17 @@ export default function Bienvenida() {
             value="alumno"
             checked={rol === "alumno"}
             onChange={() => setRol("alumno")}
+            aria-labelledby="rol-alumno"
+            aria-describedby="rol-alumno-detalle"
           />
-          <IconoAlumno width={24} height={24} className="opcion-entrada-icono" />
+          <IconoAlumno width={24} height={24} className="opcion-entrada-icono" aria-hidden="true" />
           <span>
-            <span className="opcion-titulo">Alumno</span>
-            <span className="opcion-detalle">Toma el curso, pregunta y publica.</span>
+            <span className="opcion-titulo" id="rol-alumno">
+              Alumno
+            </span>
+            <span className="opcion-detalle" id="rol-alumno-detalle">
+              Toma el curso, pregunta y publica.
+            </span>
           </span>
         </label>
         <label className="opcion-entrada" data-activa={rol === "coach"}>
@@ -100,11 +106,17 @@ export default function Bienvenida() {
             value="coach"
             checked={rol === "coach"}
             onChange={() => setRol("coach")}
+            aria-labelledby="rol-coach"
+            aria-describedby="rol-coach-detalle"
           />
-          <IconoCoach width={24} height={24} className="opcion-entrada-icono" />
+          <IconoCoach width={24} height={24} className="opcion-entrada-icono" aria-hidden="true" />
           <span>
-            <span className="opcion-titulo">Coach</span>
-            <span className="opcion-detalle">Sube los videos de las lecciones y publica anuncios.</span>
+            <span className="opcion-titulo" id="rol-coach">
+              Coach
+            </span>
+            <span className="opcion-detalle" id="rol-coach-detalle">
+              Sube los videos de las lecciones y publica anuncios.
+            </span>
           </span>
         </label>
       </fieldset>

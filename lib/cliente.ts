@@ -1,14 +1,17 @@
 // Utilidades de la interfaz (se ejecutan en el navegador).
 
 import type { Curso, EstadoAlumno } from "./tipos";
+import { etiquetaGratis } from "./gratis";
 
 /** Qué parte del curso se ve sin membresía, dicho como frase corta. */
 export function parteGratis(curso: Curso): string {
-  const gratis = curso.modulos.flatMap((m) => m.lecciones).filter((l) => l.gratis).length;
-  const primero = curso.modulos[0]?.lecciones ?? [];
-  if (gratis === 0) return "Todo el curso es con la membresía.";
-  if (gratis === primero.length && primero.every((l) => l.gratis)) return "El módulo 1 es gratis; el resto, con la membresía.";
-  return gratis === 1 ? "Una lección es gratis; el resto, con la membresía." : `${gratis} lecciones son gratis; el resto, con la membresía.`;
+  const etiqueta = etiquetaGratis(curso.modulos);
+  return etiqueta ? `${etiqueta}; el resto, con la membresía.` : "Todo el curso es con la membresía.";
+}
+
+/** Debajo del botón de un curso: "Módulo 1 gratis · resto con membresía". */
+export function notaGratis(etiqueta: string): string {
+  return etiqueta ? `${etiqueta} · resto con membresía` : "Todo con membresía";
 }
 
 /** Cómo se nombra y se colorea el estado de un alumno en el expediente y en la matriz. */

@@ -243,7 +243,7 @@ export default function PaginaCoach() {
                 {g.ultima.respuesta && (
                   <details>
                     <summary>Ver qué respondió el asistente</summary>
-                    <Markdown texto={g.ultima.respuesta} className="prosa prosa-chat" />
+                    <Markdown texto={g.ultima.respuesta} className="prosa prosa-chat" conFuentes />
                   </details>
                 )}
                 <div className="grupo-pregunta-acciones">

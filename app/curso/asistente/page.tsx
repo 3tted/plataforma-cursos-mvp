@@ -186,6 +186,9 @@ export default function PaginaAsistenteCurso() {
             Pregunta lo que quieras sobre las lecciones.
             {estado && !estado.iaActiva && " En esta demostración responde con fragmentos del curso, sin redactar."}
           </p>
+          <p className="asistente-otro">
+            ¿Tu duda no es del curso? <Link href="/asistente">Usa el asistente general</Link>
+          </p>
         </div>
         {estado && !estado.iaActiva && <span className="pastilla">Modo demostración</span>}
       </header>
@@ -259,7 +262,7 @@ export default function PaginaAsistenteCurso() {
                   )}
                 </div>
               ) : (
-                <Markdown texto={m.content} className="prosa prosa-chat" />
+                <Markdown texto={m.content} className="prosa prosa-chat" conFuentes />
               )}
               {m.estado === "detenido" && <p className="nota">Respuesta detenida.</p>}
               {(m.estado === "listo" || m.estado === "detenido") && chat[i - 1] && (

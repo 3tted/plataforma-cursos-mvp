@@ -6,7 +6,7 @@ import { moneda } from "@/lib/cliente";
 import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
-import { IconoBillete, IconoCandado, IconoCheck, IconoComunidad, IconoPlay, IconoPublicacion } from "./Iconos";
+import { IconoBillete, IconoCheck, IconoComunidad, IconoPlay, IconoPublicacion } from "./Iconos";
 import PortadaTema from "./PortadaTema";
 
 type Vista = { tipo: "video" } | { tipo: "publicaciones" } | { tipo: "curso"; id: string };
@@ -54,6 +54,11 @@ export default function PresentacionComunidad({
 
   if (!comunidad) return null;
   const precio = moneda(comunidad.precio_mensual);
+  // "al módulo 1" solo si en todos sus cursos el módulo 1 es lo gratis.
+  const textoEntrar =
+    cursosComunidad.length > 0 && cursosComunidad.every((c) => c.gratis === "Módulo 1 gratis")
+      ? "Entrar gratis al módulo 1"
+      : "Entrar gratis";
   const totalLecciones = cursosComunidad.reduce((s, c) => s + c.lecciones.length, 0);
 
   const obtienes = [
@@ -174,14 +179,11 @@ export default function PresentacionComunidad({
 
       <ul className="presentacion-datos">
         <li>
-          <IconoCandado width={20} height={20} /> Privada
+          <IconoBillete width={20} height={20} /> Membresía {precio}/mes
         </li>
         <li>
           <IconoComunidad width={20} height={20} /> <span className="cifra">{miembros ?? "…"}</span>{" "}
           {miembros === 1 ? "miembro" : "miembros"}
-        </li>
-        <li>
-          <IconoBillete width={20} height={20} /> {precio}/mes
         </li>
         <li>
           <Avatar nombre={comunidad.coach} tamaño={24} coach /> Por {comunidad.coach}
@@ -198,7 +200,7 @@ export default function PresentacionComunidad({
           {sobre}
           <div className="presentacion-unirse">
             <button type="button" className="boton" onClick={unirme} disabled={enviando || !usuario}>
-              {enviando ? "Uniéndote…" : "Unirme gratis"}
+              {enviando ? "Uniéndote…" : textoEntrar}
             </button>
             <p className="nota">Después eliges a qué cursos inscribirte.</p>
           </div>

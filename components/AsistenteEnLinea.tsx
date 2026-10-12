@@ -110,7 +110,7 @@ export default function AsistenteEnLinea({
               {m.estado === "error" ? (
                 <p className="error">{m.content}</p>
               ) : m.content ? (
-                <Markdown texto={m.content} className="prosa prosa-chat" />
+                <Markdown texto={m.content} className="prosa prosa-chat" conFuentes />
               ) : (
                 <p className="texto-suave">Escribiendo…</p>
               )}

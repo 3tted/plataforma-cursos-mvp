@@ -20,9 +20,16 @@ export default function Encabezado() {
       corto: "Comunidades",
       Icono: IconoComunidad,
       // El curso vive dentro de su comunidad: también marca este enlace.
-      activo: ruta.startsWith("/comunidad") || ruta.startsWith("/curso"),
+      activo: (ruta.startsWith("/comunidad") || ruta.startsWith("/curso")) && ruta !== "/curso/asistente",
     },
-    { href: "/asistente", texto: "Asistente", corto: "Asistente", Icono: IconoAsistenteGeneral, activo: ruta === "/asistente" },
+    // Abre el asistente del curso; el general queda enlazado desde ahí.
+    {
+      href: "/curso/asistente",
+      texto: "Asistente",
+      corto: "Asistente",
+      Icono: IconoAsistenteGeneral,
+      activo: ruta === "/curso/asistente" || ruta === "/asistente",
+    },
     ...(usuario?.rol === "coach"
       ? [{ href: "/coach", texto: "Panel de la coach", corto: "Panel", Icono: IconoPanel, activo: ruta === "/coach" }]
       : []),

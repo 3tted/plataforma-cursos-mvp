@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { consultar, type Almacen } from "./almacen";
+import { etiquetaGratis } from "./gratis";
 import type { Comunidad, CursoCreado, Curso, DatosCurso, Leccion, LeccionCoach, Modulo, ResumenCurso } from "./tipos";
 
 const DATOS = path.join(process.cwd(), "data");
@@ -236,6 +237,7 @@ export function resumenDe({ curso, comunidad }: DatosCurso): ResumenCurso {
     modulos: modulos.length,
     lecciones: lecciones.map((l) => l.id),
     minutos: lecciones.reduce((s, l) => s + l.duracion_min, 0),
+    gratis: etiquetaGratis(modulos),
   };
 }
 

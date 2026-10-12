@@ -712,8 +712,12 @@ main:focus {
   transform: translateY(1px);
 }
 
-.boton:disabled {
-  opacity: 0.5;
+/* Deshabilitado: hoja clara y texto gris (también los botones oscuros) */
+button.boton:disabled,
+button.boton:disabled:hover {
+  border-color: var(--border);
+  background: var(--light-1);
+  color: var(--gray);
   cursor: not-allowed;
   transform: none;
 }
@@ -1416,6 +1420,12 @@ main:focus {
   align-items: center;
   gap: 4px;
   font-size: var(--t-small);
+}
+
+.curso-comunidad-gratis {
+  margin-top: 4px;
+  font-size: var(--t-caption);
+  color: var(--gray);
 }
 
 .cursos-comunidad-fila {
@@ -2824,6 +2834,39 @@ main:focus {
   max-width: 22ch;
 }
 
+/* "Fuentes" al final de una respuesta del asistente: cada lección una vez, con su nombre completo */
+.fuentes {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.fuentes-titulo {
+  font-family: var(--fuente-display);
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+
+.fuentes .citas {
+  flex-wrap: wrap;
+}
+
+.fuentes .cita {
+  white-space: normal;
+}
+
+.fuentes .cita-titulo {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
 .cita-id {
   font-family: var(--fuente-mono);
   font-size: var(--t-label);
@@ -2847,6 +2890,18 @@ main:focus {
   margin-inline: auto;
   display: grid;
   gap: 16px;
+}
+
+.asistente-otro {
+  margin-top: 6px;
+  font-size: var(--t-small);
+  color: var(--dark-gray);
+}
+
+/* Sobre el fondo gris: en grafito, que sí llega a 4.5:1 */
+.asistente-otro a {
+  color: var(--graphite);
+  font-weight: 600;
 }
 
 .asistente-cabecera {
@@ -4422,6 +4477,13 @@ a.inicio-curso:hover {
   display: none;
 }
 
+.barra-aviso {
+  display: none;
+  font-size: var(--t-caption);
+  font-weight: 600;
+  color: var(--dark-gray);
+}
+
 .barra-marcar[aria-pressed="true"] {
   border-color: var(--exito);
   background: var(--exito-suave);
@@ -4441,6 +4503,15 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
   .barra-siguiente-texto,
   .barra-texto-largo {
     display: none;
+  }
+  .barra-siguiente-interior {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .barra-aviso {
+    display: block;
+    flex-basis: 100%;
+    text-align: center;
   }
   .barra-texto-corto {
     display: inline;

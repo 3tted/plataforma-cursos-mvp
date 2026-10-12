@@ -131,6 +131,8 @@ export interface ResumenCurso {
   /** Ids de las lecciones del curso (sin las que agrega la coach desde su panel). */
   lecciones: string[];
   minutos: number;
+  /** Lo que se ve sin membresía: "Módulo 1 gratis", "2 lecciones gratis" o "". */
+  gratis: string;
 }
 
 export type Categoria = "Anuncios" | "Dudas" | "Logros" | "Presentaciones" | "General";

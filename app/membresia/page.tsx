@@ -53,6 +53,7 @@ export default function PaginaMembresia() {
     leccionDeseada,
     guardarLeccionDeseada,
     comunidadId,
+    cursosComunidad,
   } = useApp();
   const [metodo, setMetodo] = useState<MetodoPago>("oxxo");
   const [procesando, setProcesando] = useState(false);
@@ -361,10 +362,10 @@ export default function PaginaMembresia() {
         </h2>
         <ul className="incluye">
           <li>
-            <IconoCheck width={16} height={16} /> Curso completo: {datos?.curso.titulo}
+            <IconoCheck width={16} height={16} /> Todos los cursos de la comunidad ({cursosComunidad.length || "…"})
           </li>
           <li>
-            <IconoCheck width={16} height={16} /> Comunidad con {comunidad?.coach} y otros dueños de negocio
+            <IconoCheck width={16} height={16} /> Comunidad con {comunidad?.coach ?? "tu coach"} y otros dueños de negocio
           </li>
           <li>
             <IconoCheck width={16} height={16} /> Asistente que responde tus dudas a cualquier hora, citando la lección

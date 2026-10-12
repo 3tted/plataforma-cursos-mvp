@@ -149,7 +149,11 @@ export default function PaginaLeccion() {
   const inscrito = !esAlumno || !inscripcionLista || (enComunidad && inscritoEn(cursoId));
   const videoListo = !guiado || !leccion.video || vistos.includes(leccion.id);
   const repasoListo = !guiado || preguntasRepaso === 0 || repasados.includes(leccion.id);
-  const pendiente = !videoListo ? "Mira el video completo" : !repasoListo ? "Responde el repaso" : null;
+  const pendiente = !videoListo
+    ? "Termina el video para continuar"
+    : !repasoListo
+      ? "Responde el repaso para continuar"
+      : null;
 
   const completar = () => {
     if (hecha) return;
@@ -499,7 +503,7 @@ export default function PaginaLeccion() {
             <p className="barra-siguiente-texto">
               {pendiente ? (
                 <>
-                  <small>Para continuar</small>
+                  <small>Falta un paso</small>
                   <strong>{pendiente}</strong>
                 </>
               ) : cursoTerminado ? (
@@ -524,6 +528,10 @@ export default function PaginaLeccion() {
                 </>
               )}
             </p>
+            {/* En el celular el texto de arriba no cabe: el motivo va en su propia línea. */}
+            {pendiente && (
+              <p className="barra-aviso">{pendiente}</p>
+            )}
             <div className="barra-siguiente-acciones">
               <button
                 type="button"

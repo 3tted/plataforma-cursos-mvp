@@ -9,7 +9,9 @@ import { IconoBillete } from "./Iconos";
 // párrafos, **negritas**, _cursivas_, listas, citas (>), subtítulos (##),
 // tablas simples y referencias a lecciones como [L4]. Todo se construye como
 // elementos de React, nunca como HTML crudo. Los montos y porcentajes se
-// escriben en letra monoespaciada, como en una libreta de cuentas.
+// escriben en letra monoespaciada, como en una libreta de cuentas. En las
+// respuestas del asistente (fuentes) las referencias no se repiten en cada
+// párrafo: se juntan una sola vez en "Fuentes", al final.
 
 const PATRON_EN_LINEA =
   /(\*\*[^*]+\*\*)|(\[(?:[LPWKC]\d+)(?:\s*,\s*[LPWKC]\d+)*\])|((?<=^|[\s(])_[^_\n]+_(?=$|[\s.,;:!?)]))|(\$\d[\d,]*(?:\.\d+)?|(?<![\w$.,])\d+(?:\.\d+)?\s?%)/g;
@@ -38,16 +40,36 @@ function Cita({ id }: { id: string }) {
   );
 }
 
-function enLinea(texto: string): ReactNode[] {
+/** Si llega, las referencias se guardan aquí en vez de dibujarse en el texto. */
+type Fuentes = string[] | undefined;
+
+function enLinea(texto: string, fuentes?: Fuentes): ReactNode[] {
   const nodos: ReactNode[] = [];
   let ultimo = 0;
   for (const m of texto.matchAll(PATRON_EN_LINEA)) {
     const inicio = m.index ?? 0;
     if (inicio > ultimo) nodos.push(texto.slice(ultimo, inicio));
-    if (m[1]) nodos.push(<strong key={inicio}>{enLinea(m[1].slice(2, -2))}</strong>);
-    else if (m[4]) nodos.push(<span key={inicio} className="cifra">{m[4]}</span>);
-    else if (m[2]) {
-      const ids = m[2].slice(1, -1).split(",").map((s) => s.trim());
+    if (m[1]) nodos.push(<strong key={inicio}>{enLinea(m[1].slice(2, -2), fuentes)}</strong>);
+    else if (m[4])
+      nodos.push(
+        <span key={inicio} className="cifra">
+          {m[4]}
+        </span>,
+      );
+    else if (m[2] && fuentes) {
+      for (const id of m[2]
+        .slice(1, -1)
+        .split(",")
+        .map((s) => s.trim()))
+        if (!fuentes.includes(id)) fuentes.push(id);
+      // Sin la referencia, que no quede un espacio suelto antes del punto.
+      const previo = nodos.at(-1);
+      if (typeof previo === "string") nodos[nodos.length - 1] = previo.replace(/\s+$/, "");
+    } else if (m[2]) {
+      const ids = m[2]
+        .slice(1, -1)
+        .split(",")
+        .map((s) => s.trim());
       nodos.push(
         <span key={inicio} className="citas">
           {ids.map((id) => (
@@ -99,7 +121,11 @@ function bloques(texto: string): Bloque[] {
     } else if (linea.startsWith("|")) {
       const filas: string[][] = [];
       while (i < lineas.length && lineas[i].trim().startsWith("|")) {
-        const celdas = lineas[i].trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+        const celdas = lineas[i]
+          .trim()
+          .replace(/^\||\|$/g, "")
+          .split("|")
+          .map((c) => c.trim());
         if (!celdas.every((c) => /^:?-{2,}:?$/.test(c))) filas.push(celdas);
         i++;
       }
@@ -122,64 +148,80 @@ export default function Markdown({
   texto,
   className,
   nivelTitulos = 3,
+  conFuentes = false,
 }: {
   texto: string;
   className?: string;
   /** Nivel de los subtítulos (##): 2 dentro de una página cuyo h1 es la lección. */
   nivelTitulos?: 2 | 3;
+  /** Respuestas del asistente: las referencias van una sola vez en "Fuentes", al final. */
+  conFuentes?: boolean;
 }) {
   const Titulo = nivelTitulos === 2 ? "h2" : "h3";
+  const fuentes: Fuentes = conFuentes ? [] : undefined;
+  const enLinea2 = (t: string) => enLinea(t, fuentes);
+  const contenido = bloques(texto).map((b, i) => {
+    switch (b.tipo) {
+      case "h":
+        return <Titulo key={i}>{enLinea2(b.texto)}</Titulo>;
+      case "p":
+        return <p key={i}>{enLinea2(b.texto)}</p>;
+      case "cita":
+        return (
+          <blockquote key={i}>
+            {b.texto.split("\n").map((renglon, j) => (
+              <Fragment key={j}>
+                {j > 0 && <br />}
+                {enLinea2(renglon)}
+              </Fragment>
+            ))}
+          </blockquote>
+        );
+      case "ul":
+      case "ol": {
+        const Lista = b.tipo;
+        return (
+          <Lista key={i}>
+            {b.items.map((item, j) => (
+              <li key={j}>{enLinea2(item)}</li>
+            ))}
+          </Lista>
+        );
+      }
+      case "tabla":
+        return (
+          <div key={i} className="tabla-desplazable">
+            <table>
+              <tbody>
+                {b.filas.map((fila, j) => (
+                  <tr key={j}>
+                    {fila.map((celda, k) => {
+                      const Celda = j === 0 ? "th" : "td";
+                      return <Celda key={k}>{enLinea2(celda)}</Celda>;
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      default:
+        return <Fragment key={i} />;
+    }
+  });
   return (
     <div className={className ?? "prosa"}>
-      {bloques(texto).map((b, i) => {
-        switch (b.tipo) {
-          case "h":
-            return <Titulo key={i}>{enLinea(b.texto)}</Titulo>;
-          case "p":
-            return <p key={i}>{enLinea(b.texto)}</p>;
-          case "cita":
-            return (
-              <blockquote key={i}>
-                {b.texto.split("\n").map((renglon, j) => (
-                  <Fragment key={j}>
-                    {j > 0 && <br />}
-                    {enLinea(renglon)}
-                  </Fragment>
-                ))}
-              </blockquote>
-            );
-          case "ul":
-          case "ol": {
-            const Lista = b.tipo;
-            return (
-              <Lista key={i}>
-                {b.items.map((item, j) => (
-                  <li key={j}>{enLinea(item)}</li>
-                ))}
-              </Lista>
-            );
-          }
-          case "tabla":
-            return (
-              <div key={i} className="tabla-desplazable">
-                <table>
-                  <tbody>
-                    {b.filas.map((fila, j) => (
-                      <tr key={j}>
-                        {fila.map((celda, k) => {
-                          const Celda = j === 0 ? "th" : "td";
-                          return <Celda key={k}>{enLinea(celda)}</Celda>;
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            );
-          default:
-            return <Fragment key={i} />;
-        }
-      })}
+      {contenido}
+      {fuentes && fuentes.length > 0 && (
+        <div className="fuentes">
+          <p className="fuentes-titulo">Fuentes</p>
+          <div className="citas">
+            {fuentes.map((id) => (
+              <Cita key={id} id={id} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

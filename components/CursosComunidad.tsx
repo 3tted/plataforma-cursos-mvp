@@ -5,6 +5,7 @@ import BotonInscribirse from "./BotonInscribirse";
 import { useApp } from "./Contexto";
 import { IconoFlechaDer } from "./Iconos";
 import PortadaTema from "./PortadaTema";
+import { notaGratis } from "@/lib/cliente";
 
 // Los cursos de la comunidad que se está viendo, cada uno con su avance y su
 // botón (inscribirse, empezar o continuar). En la columna de al lado del feed
@@ -65,7 +66,10 @@ export default function CursosComunidad({ fila = false }: { fila?: boolean }) {
                     Ver el curso <IconoFlechaDer width={15} height={15} />
                   </Link>
                 ) : !inscripcionLista ? null : !inscrito ? (
-                  <BotonInscribirse curso={c.id} className="boton boton-chico curso-comunidad-boton" texto="Inscribirme gratis" />
+                  <>
+                    <BotonInscribirse curso={c.id} className="boton boton-chico curso-comunidad-boton" texto="Empezar gratis" />
+                    <p className="curso-comunidad-gratis">{notaGratis(c.gratis)}</p>
+                  </>
                 ) : siguiente ? (
                   <Link href={`/curso/${siguiente}`} className="boton boton-chico curso-comunidad-boton" onClick={() => cambiarCurso(c.id)}>
                     {hechas === 0 ? "Empezar" : "Continuar"}

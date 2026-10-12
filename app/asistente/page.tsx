@@ -141,6 +141,9 @@ export default function PaginaAsistenteGeneral() {
         <div className="cabecera-pagina">
           <h1>Asistente Merkatics</h1>
           <p className="texto-suave">Pregúntale lo que quieras: ideas, mensajes, explicaciones o cómo organizarte.</p>
+          <p className="asistente-otro">
+            ¿Tu duda es de una lección? <Link href="/curso/asistente">Vuelve al asistente del curso</Link>
+          </p>
         </div>
         {estado && !estado.iaActiva && <span className="pastilla">IA sin conectar</span>}
       </header>
@@ -197,7 +200,7 @@ export default function PaginaAsistenteGeneral() {
                   )}
                 </div>
               ) : (
-                <Markdown texto={m.content} className="prosa prosa-chat" />
+                <Markdown texto={m.content} className="prosa prosa-chat" conFuentes />
               )}
               {m.estado === "detenido" && <p className="nota">Respuesta detenida.</p>}
             </div>

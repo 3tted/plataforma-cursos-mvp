@@ -2,7 +2,10 @@
 
 import { useRef, useState } from "react";
 import { MAX_BYTES_VIDEO, tamañoLegible, tipoDeVideo } from "@/lib/reglas-video";
+import type { Leccion, OpcionesPresentacion } from "@/lib/tipos";
 import EleccionVoz from "../EleccionVoz";
+import EditorPresentacion from "./EditorPresentacion";
+import FormaPresentacionIA from "./FormaPresentacionIA";
 import { IconoAsistenteGeneral, IconoSubir, IconoVideo } from "../Iconos";
 
 // Video de una lección dentro del editor: subir, cambiar o quitar. Una lección
@@ -18,8 +21,8 @@ export default function VideoEnEditor({
   leccion: string;
   guardada: boolean;
   video: { nombre: string; url: string } | null;
-  /** Su presentación con IA, si tiene: cuántas diapositivas y si lleva voz. */
-  presentacion: { diapositivas: number; conVoz: boolean } | null;
+  /** Su presentación con IA, si tiene. */
+  presentacion: Leccion["presentacion"] | null;
   /** Hay cambios sin guardar (la presentación usa el texto guardado). */
   sinGuardar: boolean;
   alCambiar: () => void;
@@ -29,12 +32,19 @@ export default function VideoEnEditor({
   const [error, setError] = useState<string | null>(null);
   const [generando, setGenerando] = useState(false);
   const [recien, setRecien] = useState(false);
+  const [pidiendo, setPidiendo] = useState(false);
+  const [editando, setEditando] = useState(false);
 
   // Presentación con IA: diapositivas del texto guardado, narradas por la voz del dispositivo.
-  const generar = async () => {
+  const generar = async (opciones: OpcionesPresentacion) => {
     setError(null);
+    setPidiendo(false);
     setGenerando(true);
-    const res = await fetch(`/api/presentaciones/${leccion}`, { method: "POST", headers: { "X-Rol": "coach" } }).catch(() => null);
+    const res = await fetch(`/api/presentaciones/${leccion}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Rol": "coach" },
+      body: JSON.stringify(opciones),
+    }).catch(() => null);
     setGenerando(false);
     if (!res?.ok) {
       const datos = res ? ((await res.json().catch(() => ({}))) as { error?: string }) : {};
@@ -138,9 +148,12 @@ export default function VideoEnEditor({
             <span className="editor-video-actual">
               <IconoAsistenteGeneral width={16} height={16} />
               <span>
-                Presentación con IA · <span className="cifra">{presentacion.diapositivas}</span> diapositivas
+                Presentación con IA · <span className="cifra">{presentacion.diapositivas.length}</span> diapositivas
               </span>
-              <button type="button" className="enlace" onClick={() => void generar()}>
+              <button type="button" className="enlace" onClick={() => setEditando(true)}>
+                Editar
+              </button>
+              <button type="button" className="enlace" onClick={() => setPidiendo(!pidiendo)} aria-expanded={pidiendo}>
                 Volver a generar
               </button>
               <button type="button" className="enlace enlace-discreto" onClick={() => void quitarPresentacion()}>
@@ -148,11 +161,32 @@ export default function VideoEnEditor({
               </button>
             </span>
           ) : (
-            <button type="button" className="boton boton-chico boton-fantasma-borde" onClick={() => void generar()}>
+            <button
+              type="button"
+              className="boton boton-chico boton-fantasma-borde"
+              onClick={() => setPidiendo(!pidiendo)}
+              aria-expanded={pidiendo}
+            >
               <IconoAsistenteGeneral width={15} height={15} /> Generar presentación con IA
             </button>
           )}
         </div>
+      )}
+      {!video && pidiendo && !generando && (
+        <FormaPresentacionIA
+          inicial={presentacion?.opciones}
+          generando={generando}
+          alGenerar={(o) => void generar(o)}
+          alCancelar={() => setPidiendo(false)}
+        />
+      )}
+      {editando && presentacion && (
+        <EditorPresentacion
+          leccion={leccion}
+          inicial={presentacion.diapositivas}
+          alCerrar={() => setEditando(false)}
+          alGuardar={alCambiar}
+        />
       )}
       {!video && presentacion && !generando && (
         <EleccionVoz

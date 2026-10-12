@@ -191,6 +191,7 @@ export async function cargarCurso(id: string = CURSO_PRINCIPAL, opciones: Opcion
                   diapositivas: presentacion.diapositivas,
                   creadaEn: presentacion.creadaEn,
                   conVoz: presentacion.conVoz !== false,
+                  ...(presentacion.opciones ? { opciones: presentacion.opciones } : {}),
                 },
               }
             : l;

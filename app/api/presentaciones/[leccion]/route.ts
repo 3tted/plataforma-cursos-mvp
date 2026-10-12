@@ -1,7 +1,7 @@
 import { modificar } from "@/lib/almacen";
 import { cursoDeLeccion } from "@/lib/curso";
 import { error, leerJson, manejar } from "@/lib/http";
-import { generarPresentacion } from "@/lib/presentacion-ia";
+import { diapositivasEditadas, generarPresentacion, opcionesDe } from "@/lib/presentacion-ia";
 import type { Presentacion } from "@/lib/tipos";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +15,7 @@ export const maxDuration = 60;
 type Contexto = { params: Promise<{ leccion: string }> };
 
 // Genera (o vuelve a generar) la presentación con el texto guardado de la lección.
+// El cuerpo (opcional) trae lo que pide la coach: { minutos, diapositivas, tono, indicaciones }.
 export const POST = manejar(async (req: Request, contexto: Contexto) => {
   if (req.headers.get("x-rol") !== "coach") return error("Solo la coach puede generar presentaciones.", 403);
   const { leccion: id } = await contexto.params;
@@ -22,13 +23,34 @@ export const POST = manejar(async (req: Request, contexto: Contexto) => {
   const leccion = datos?.curso.modulos.flatMap((m) => m.lecciones).find((l) => l.id === id);
   if (!leccion) return error("No encontramos esa lección.", 404);
 
-  const diapositivas = await generarPresentacion(leccion);
+  const opciones = opcionesDe(await req.json().catch(() => ({})));
+  const diapositivas = await generarPresentacion(leccion, opciones);
   // Recién generada lleva voz; después la coach decide si se queda o no.
-  const presentacion: Presentacion = { leccion: id, diapositivas, creadaEn: new Date().toISOString(), conVoz: true };
+  const presentacion: Presentacion = {
+    leccion: id,
+    diapositivas,
+    creadaEn: new Date().toISOString(),
+    conVoz: true,
+    ...(Object.keys(opciones).length ? { opciones } : {}),
+  };
   await modificar((a) => {
     a.presentaciones = [...(a.presentaciones ?? []).filter((p) => p.leccion !== id), presentacion];
   });
   return Response.json(presentacion, { status: 201 });
+});
+
+// Guarda lo que la coach editó a mano: { diapositivas }. La voz y lo que pidió se quedan igual.
+export const PUT = manejar(async (req: Request, contexto: Contexto) => {
+  if (req.headers.get("x-rol") !== "coach") return error("Solo la coach puede editar presentaciones.", 403);
+  const { leccion: id } = await contexto.params;
+  const diapositivas = diapositivasEditadas((await leerJson(req)).diapositivas);
+  const editada = await modificar((a) => {
+    const p = (a.presentaciones ?? []).find((x) => x.leccion === id);
+    if (p) Object.assign(p, { diapositivas, editadaEn: new Date().toISOString() });
+    return p ?? null;
+  });
+  if (!editada) return error("Esta lección no tiene presentación.", 404);
+  return Response.json(editada);
 });
 
 // La coach decide si la presentación lleva voz: { conVoz: boolean }.

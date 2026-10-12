@@ -31,7 +31,7 @@ export interface Leccion {
   /** Video que subió la coach; sin él, la lección se lee en texto y transcripción. */
   video?: { url: string; tipo: string; nombre: string; subidoEn: string };
   /** Presentación con IA (diapositivas narradas con la voz del dispositivo), si no hay video. */
-  presentacion?: { diapositivas: Diapositiva[]; creadaEn: string; conVoz: boolean };
+  presentacion?: { diapositivas: Diapositiva[]; creadaEn: string; conVoz: boolean; opciones?: OpcionesPresentacion };
 }
 
 /** Una diapositiva de la presentación de una lección. */
@@ -42,12 +42,27 @@ export interface Diapositiva {
   narracion: string;
 }
 
+/** Lo que la coach le pide a la IA al generar una presentación. */
+export interface OpcionesPresentacion {
+  /** Duración aproximada en minutos (sin el dato: la IA decide por lo largo de la lección). */
+  minutos?: number;
+  /** Cuántas diapositivas (sin el dato: según la duración). */
+  diapositivas?: number;
+  tono?: "cercano" | "formal" | "motivador";
+  /** Indicaciones libres de la coach. */
+  indicaciones?: string;
+}
+
 export interface Presentacion {
   leccion: string;
   diapositivas: Diapositiva[];
   creadaEn: string;
   /** La coach decide si lleva voz (sin el dato: con voz). */
   conVoz?: boolean;
+  /** Lo que pidió al generarla, para proponerlo la siguiente vez. */
+  opciones?: OpcionesPresentacion;
+  /** Última vez que la coach la editó a mano. */
+  editadaEn?: string;
 }
 
 /** Registro de un video subido (el archivo vive en DATA_DIR/videos). */

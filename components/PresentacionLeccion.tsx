@@ -2,6 +2,7 @@
 
 import { CornersIn, CornersOut, DotsThreeVertical, Pause, Play, SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { duracionDe, enMinutos, frasesDe, vozEnEspañol } from "@/lib/narracion";
 import type { Diapositiva } from "@/lib/tipos";
 
 // Presentación narrada de una lección: diapositivas de marca y la voz del
@@ -15,29 +16,6 @@ import type { Diapositiva } from "@/lib/tipos";
 // diapositiva que todavía no escuchó; `alTerminar` avisa al llegar al final.
 
 const VELOCIDADES = [1, 1.25, 1.5, 2];
-
-/** Segundos que dura una frase a velocidad normal (~2.6 palabras por segundo). */
-const duracionDe = (frase: string) => Math.max(1.2, frase.split(/\s+/).length / 2.6);
-
-const enMinutos = (segundos: number) => {
-  const s = Math.max(0, Math.round(segundos));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-};
-
-/** Parte la narración en frases para que la voz no se corte. */
-const frasesDe = (texto: string) =>
-  texto
-    .split(/(?<=[.!?…])\s+/)
-    .map((f) => f.trim())
-    .filter(Boolean);
-
-/** Voz en español: primero de México, luego de EE. UU. (latina), luego cualquiera. */
-function vozEnEspañol(): SpeechSynthesisVoice | null {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
-  const voces = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith("es"));
-  const de = (lang: string) => voces.find((v) => v.lang.toLowerCase().replace("_", "-") === lang);
-  return de("es-mx") ?? de("es-us") ?? de("es-419") ?? voces.find((v) => v.localService) ?? voces[0] ?? null;
-}
 
 export default function PresentacionLeccion({
   idLeccion,

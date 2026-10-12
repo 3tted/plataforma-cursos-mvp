@@ -10,7 +10,7 @@ import VideoEnEditor from "@/components/editor/VideoEnEditor";
 import { IconoAsistenteGeneral, IconoBorrar, IconoFlechaIzq } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
 import { api } from "@/lib/cliente";
-import type { CursoCreado, DatosCurso, LeccionCreada, ModuloCreado } from "@/lib/tipos";
+import type { CursoCreado, DatosCurso, Leccion, LeccionCreada, ModuloCreado } from "@/lib/tipos";
 
 const idTemporal = () => `nueva-${Math.random().toString(36).slice(2, 10)}`;
 
@@ -36,8 +36,8 @@ export default function EditorCurso() {
   const [guardado, setGuardado] = useState<CursoCreado | null>(null);
   const [curso, setCurso] = useState<CursoCreado | null>(null);
   const [videos, setVideos] = useState<Record<string, { nombre: string; url: string }>>({});
-  // Diapositivas de la presentación con IA de cada lección (si tiene).
-  const [presentaciones, setPresentaciones] = useState<Record<string, { diapositivas: number; conVoz: boolean }>>({});
+  // La presentación con IA de cada lección (si tiene).
+  const [presentaciones, setPresentaciones] = useState<Record<string, NonNullable<Leccion["presentacion"]>>>({});
   const [ocupado, setOcupado] = useState<"guardar" | "publicar" | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -64,11 +64,8 @@ export default function EditorCurso() {
     for (const m of datos.curso.modulos)
       for (const l of m.lecciones) if (l.video) lista[l.id] = { nombre: l.video.nombre, url: l.video.url };
     setVideos(lista);
-    const conPresentacion: Record<string, { diapositivas: number; conVoz: boolean }> = {};
-    for (const m of datos.curso.modulos)
-      for (const l of m.lecciones)
-        if (l.presentacion)
-          conPresentacion[l.id] = { diapositivas: l.presentacion.diapositivas.length, conVoz: l.presentacion.conVoz };
+    const conPresentacion: Record<string, NonNullable<Leccion["presentacion"]>> = {};
+    for (const m of datos.curso.modulos) for (const l of m.lecciones) if (l.presentacion) conPresentacion[l.id] = l.presentacion;
     setPresentaciones(conPresentacion);
   }, [id]);
 

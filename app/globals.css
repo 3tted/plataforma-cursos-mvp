@@ -7907,3 +7907,380 @@ button.tarjeta-comunidad-enlace {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* ---------- Presentación con IA: lo que pide la coach y su editor ---------- */
+
+.forma-presentacion {
+  display: grid;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+
+.video-subir[data-pidiendo="true"] {
+  padding-right: 26px;
+}
+
+.forma-presentacion-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--fuente-display);
+  font-weight: 700;
+}
+
+.forma-presentacion-titulo svg {
+  color: var(--acento);
+}
+
+.forma-presentacion-grupo {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.forma-presentacion-grupo legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: var(--t-caption);
+  font-weight: 700;
+  color: var(--tinta-2);
+}
+
+.forma-presentacion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.forma-presentacion-chips button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--t-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.forma-presentacion-chips button:hover {
+  border-color: var(--tinta-2);
+}
+
+.forma-presentacion-chips button[aria-pressed="true"] {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--acento-tinta);
+}
+
+.forma-presentacion-minutos {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.forma-presentacion-minutos input {
+  width: 76px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--linea-campo);
+  border-radius: var(--radio-control);
+  font: inherit;
+}
+
+.editor-video .forma-presentacion {
+  margin-top: 4px;
+}
+
+/* El editor de la presentación: lista a la izquierda, diapositiva a la derecha */
+.editor-presentacion {
+  width: min(1120px, calc(100vw - 32px));
+  height: min(880px, calc(100dvh - 32px));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radio-ventana);
+  background: var(--fondo);
+  color: var(--tinta);
+  box-shadow: 0 24px 64px rgb(17 17 17 / 28%);
+}
+
+.editor-presentacion[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.editor-presentacion::backdrop {
+  background: var(--velo);
+}
+
+.editor-presentacion-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 16px 20px 16px 24px;
+  border-bottom: 1px solid var(--linea);
+  background: var(--superficie);
+}
+
+.editor-presentacion-cabecera h2 {
+  font-size: var(--t-title);
+}
+
+.editor-presentacion-acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-presentacion-cerrar,
+.editor-presentacion-icono {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 50%;
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.editor-presentacion-cerrar {
+  border-color: transparent;
+}
+
+.editor-presentacion-cerrar svg,
+.editor-presentacion-icono svg {
+  width: 20px;
+  height: 20px;
+}
+
+.editor-presentacion-cerrar:hover,
+.editor-presentacion-icono:hover:not(:disabled) {
+  background: var(--superficie-2);
+}
+
+.editor-presentacion-icono:disabled {
+  color: var(--linea-fuerte);
+  border-color: var(--linea);
+  cursor: not-allowed;
+}
+
+.editor-presentacion-cuerpo {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.editor-presentacion-lista {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 0;
+  padding: 16px 14px;
+  overflow-y: auto;
+  border-right: 1px solid var(--linea);
+  background: var(--superficie);
+}
+
+.editor-presentacion-lista ol {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.editor-presentacion-lista li button {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radio-control);
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.editor-presentacion-lista li button:hover {
+  background: var(--superficie-2);
+}
+
+.editor-presentacion-lista li button[aria-current="true"] {
+  border-color: var(--acento);
+  background: var(--superficie-2);
+}
+
+.editor-presentacion-numero {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--light-2);
+  font-size: var(--t-caption);
+  font-weight: 700;
+}
+
+[aria-current="true"] .editor-presentacion-numero {
+  background: var(--acento);
+  color: var(--acento-tinta);
+}
+
+.editor-presentacion-nombre {
+  overflow: hidden;
+  font-size: var(--t-small);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.editor-presentacion-dura {
+  font-size: var(--t-caption);
+  color: var(--tinta-3);
+}
+
+.editor-presentacion-agregar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  border: 1.5px dashed var(--linea-fuerte);
+  border-radius: var(--radio-control);
+  background: transparent;
+  color: var(--tinta-2);
+  font: inherit;
+  font-size: var(--t-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.editor-presentacion-agregar:hover:not(:disabled) {
+  border-color: var(--acento);
+  color: var(--acento-texto);
+}
+
+.editor-presentacion-agregar:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.editor-presentacion-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  padding: 20px 24px 28px;
+  overflow-y: auto;
+}
+
+/* En la columna nada se encoge: la vista previa guarda su 16:9 */
+.editor-presentacion-detalle > * {
+  flex-shrink: 0;
+}
+
+.editor-presentacion-vista {
+  width: 100%;
+  max-width: 640px;
+}
+
+.editor-presentacion-vista .presentacion-diapositiva {
+  padding-bottom: 6cqw;
+}
+
+.editor-presentacion-herramientas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 640px;
+}
+
+.editor-presentacion-herramientas .boton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.editor-presentacion-espacio {
+  flex: 1;
+}
+
+.editor-presentacion-rehacer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+}
+
+.editor-presentacion-rehacer .boton {
+  min-height: 44px;
+}
+
+@media (max-width: 760px) {
+  .editor-presentacion {
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .editor-presentacion-cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .editor-presentacion-lista {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  .editor-presentacion-lista ol {
+    display: flex;
+    gap: 6px;
+  }
+  .editor-presentacion-lista li button {
+    width: 190px;
+  }
+  .editor-presentacion-agregar {
+    flex: 0 0 auto;
+    padding: 0 14px;
+    white-space: nowrap;
+  }
+  .editor-presentacion-detalle {
+    padding: 16px;
+  }
+  .editor-presentacion-rehacer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

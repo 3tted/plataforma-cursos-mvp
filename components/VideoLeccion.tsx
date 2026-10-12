@@ -3,13 +3,15 @@
 import { useRef, useState, type DragEvent } from "react";
 import { fechaCorta } from "@/lib/cliente";
 import { MAX_BYTES_VIDEO, tipoDeVideo, tamañoLegible } from "@/lib/reglas-video";
-import type { Leccion } from "@/lib/tipos";
+import type { Leccion, OpcionesPresentacion } from "@/lib/tipos";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
 import { posterDeVideo } from "@/lib/poster";
 import { IconoAsistenteGeneral, IconoSubir } from "./Iconos";
 import EleccionVoz from "./EleccionVoz";
 import PresentacionLeccion from "./PresentacionLeccion";
+import EditorPresentacion from "./editor/EditorPresentacion";
+import FormaPresentacionIA from "./editor/FormaPresentacionIA";
 
 type Estado = "inactivo" | "subiendo" | "error";
 
@@ -47,14 +49,22 @@ export default function VideoLeccion({
   const [generando, setGenerando] = useState(false);
   // Recién generada: se le pide a la coach que la revise y elija si lleva voz.
   const [recienGenerada, setRecienGenerada] = useState(false);
+  // La coach dice cómo quiere la presentación antes de generarla, y luego la edita.
+  const [pidiendo, setPidiendo] = useState(false);
+  const [editando, setEditando] = useState(false);
 
   // Presentación con IA (diapositivas narradas por la voz del dispositivo).
-  const generarPresentacion = async () => {
+  const generarPresentacion = async (opciones: OpcionesPresentacion) => {
+    setPidiendo(false);
     setGenerando(true);
     setMensaje(null);
     setEstado("inactivo");
     setAnuncio("Generando la presentación con IA.");
-    const res = await fetch(`/api/presentaciones/${leccion.id}`, { method: "POST", headers: { "X-Rol": "coach" } }).catch(
+    const res = await fetch(`/api/presentaciones/${leccion.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Rol": "coach" },
+      body: JSON.stringify(opciones),
+    }).catch(
       () => null,
     );
     setGenerando(false);
@@ -325,7 +335,10 @@ export default function VideoLeccion({
               <button type="button" className="boton boton-chico boton-secundario" onClick={() => entrada.current?.click()}>
                 <IconoSubir width={16} height={16} /> Subir un video
               </button>
-              <button type="button" className="enlace" onClick={generarPresentacion}>
+              <button type="button" className="boton boton-chico boton-fantasma-borde" onClick={() => setEditando(true)}>
+                Editar presentación
+              </button>
+              <button type="button" className="enlace" onClick={() => setPidiendo(!pidiendo)} aria-expanded={pidiendo}>
                 Volver a generar
               </button>
               <button type="button" className="enlace enlace-discreto" onClick={quitarPresentacion}>
@@ -334,6 +347,22 @@ export default function VideoLeccion({
             </span>
             {error}
           </div>
+        )}
+        {esCoach && pidiendo && (
+          <FormaPresentacionIA
+            inicial={leccion.presentacion.opciones}
+            generando={generando}
+            alGenerar={(o) => void generarPresentacion(o)}
+            alCancelar={() => setPidiendo(false)}
+          />
+        )}
+        {esCoach && editando && (
+          <EditorPresentacion
+            leccion={leccion.id}
+            inicial={leccion.presentacion.diapositivas}
+            alCerrar={() => setEditando(false)}
+            alGuardar={recargarCurso}
+          />
         )}
         {avisoLector}
       </div>
@@ -358,6 +387,7 @@ export default function VideoLeccion({
     <div
       className="video video-subir"
       data-arrastrando={arrastrando}
+      data-pidiendo={pidiendo}
       onDragOver={(e) => {
         e.preventDefault();
         if (estado !== "subiendo") setArrastrando(true);
@@ -372,6 +402,8 @@ export default function VideoLeccion({
           <p className="video-titulo">{leccion.video ? "Cambiando el video de esta lección" : "Subiendo el video de esta lección"}</p>
           {avance}
         </>
+      ) : pidiendo ? (
+        <FormaPresentacionIA generando={generando} alGenerar={(o) => void generarPresentacion(o)} alCancelar={() => setPidiendo(false)} />
       ) : generando ? (
         <>
           <p className="video-titulo">Generando la presentación…</p>
@@ -392,7 +424,7 @@ export default function VideoLeccion({
             <button type="button" className="boton" onClick={() => entrada.current?.click()}>
               <IconoSubir width={18} height={18} /> Elegir video
             </button>
-            <button type="button" className="boton boton-fantasma-borde" onClick={generarPresentacion}>
+            <button type="button" className="boton boton-fantasma-borde" onClick={() => setPidiendo(true)}>
               <IconoAsistenteGeneral width={18} height={18} /> Generar presentación con IA
             </button>
           </div>

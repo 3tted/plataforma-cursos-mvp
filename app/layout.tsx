@@ -22,10 +22,23 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const DESCRIPCION =
+  "Cursos, comunidad y asistente de IA en español, con pagos en OXXO, SPEI o Mercado Pago. Plataforma de Merkatics para coaches y sus alumnos.";
+
 export const metadata: Metadata = {
-  title: "Merkatics · Cursos y comunidades",
-  description:
-    "Prototipo de la plataforma de cursos y comunidad de Merkatics: comunidad, curso y asistente de IA en español con pagos locales.",
+  metadataBase: new URL(process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000"),
+  // Cada ruta pone su título ("Comunidades", "Membresía"…) y aquí se le agrega la marca.
+  title: { template: "%s · Merkatics", default: "Merkatics · Cursos y comunidades" },
+  description: DESCRIPCION,
+  // La imagen para compartir sale de app/opengraph-image.png y app/twitter-image.png.
+  openGraph: {
+    type: "website",
+    locale: "es_MX",
+    siteName: "Merkatics",
+    title: "Merkatics · Cursos y comunidades",
+    description: DESCRIPCION,
+  },
+  twitter: { card: "summary_large_image", title: "Merkatics · Cursos y comunidades", description: DESCRIPCION },
 };
 
 export const viewport: Viewport = {

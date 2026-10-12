@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Arcos from "@/components/Arcos";
 import { useApp } from "@/components/Contexto";
-import { IconoCheck, IconoCopiar, IconoFlechaDer, IconoFlechaIzq } from "@/components/Iconos";
+import CodigoBarras from "@/components/CodigoBarras";
+import { IconoCheck, IconoCopiar, IconoDescargar, IconoEnviar, IconoFlechaDer, IconoFlechaIzq } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
 import { agrupar, api, fechaCorta, moneda } from "@/lib/cliente";
 import type { MetodoPago, Pago } from "@/lib/tipos";
@@ -273,6 +274,33 @@ export default function PaginaMembresia() {
                     </div>
                   )}
                 </dl>
+                <div className="ficha-codigo">
+                  <CodigoBarras texto={pago.referencia} />
+                  <span className="cifra">{agrupar(pago.referencia, 4)}</span>
+                </div>
+                <div className="ficha-compartir no-imprimir">
+                  <button type="button" className="boton boton-chico boton-fantasma-borde" onClick={() => window.print()}>
+                    <IconoDescargar width={16} height={16} /> Descargar ficha
+                  </button>
+                  <a
+                    className="boton boton-chico boton-fantasma-borde"
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      [
+                        `Ficha de pago OXXO · Membresía ${comunidad?.nombre ?? "Merkatics"}`,
+                        `Monto: ${moneda(pago.monto)} MXN`,
+                        `Referencia: ${agrupar(pago.referencia, 4)}`,
+                        pago.venceEn ? `Vence: ${fechaCorta(pago.venceEn)}` : "",
+                        "(Modo demostración: la referencia es ficticia)",
+                      ]
+                        .filter(Boolean)
+                        .join("\n"),
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <IconoEnviar width={16} height={16} /> Compartir por WhatsApp
+                  </a>
+                </div>
                 <ol className="pasos">
                   <li>Acude a cualquier tienda OXXO.</li>
                   <li>Indica en caja que quieres hacer un pago de servicio con referencia.</li>

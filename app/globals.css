@@ -578,6 +578,23 @@ main:focus {
   max-width: 62ch;
 }
 
+/* 404 */
+.no-encontrada {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  padding-block: 48px 64px;
+}
+
+.no-encontrada-codigo {
+  font-family: var(--fuente-display);
+  font-size: clamp(4rem, 3rem + 5vw, 7rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--coral);
+}
+
 .pagina-estrecha {
   max-width: 640px;
   margin-inline: auto;
@@ -3264,6 +3281,62 @@ button.boton:disabled:hover {
 .ficha {
   display: grid;
   gap: 14px;
+}
+
+.ficha-codigo {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 14px 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radio-control);
+  background: var(--white);
+  font-size: var(--t-small);
+  letter-spacing: 0.08em;
+}
+
+.codigo-barras {
+  width: 100%;
+  max-width: 360px;
+  height: 64px;
+}
+
+.ficha-compartir {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Botón secundario claro: hoja blanca con borde, texto en grafito */
+.boton-fantasma-borde {
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  color: var(--graphite);
+}
+
+.boton-fantasma-borde:hover {
+  background: var(--light-1);
+}
+
+/* "Descargar ficha": al imprimir solo sale la ficha */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .ficha,
+  .ficha * {
+    visibility: visible;
+  }
+  .ficha {
+    position: absolute;
+    inset: 0 0 auto;
+    padding: 24px;
+  }
+  .ficha .no-imprimir,
+  .ficha .boton-icono,
+  .ficha-acciones {
+    display: none !important;
+  }
 }
 
 .ficha-titulo {

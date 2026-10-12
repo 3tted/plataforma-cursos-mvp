@@ -4685,6 +4685,251 @@ body:has(.rejilla-leccion[data-con-barra="true"]) {
   }
 }
 
+/* Presentación con IA de una lección (components/PresentacionLeccion.tsx):
+   escena oscura del manual, subtítulos y controles debajo. */
+.presentacion-leccion {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.presentacion-escena {
+  container-type: inline-size;
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 2.6cqw;
+  aspect-ratio: 16 / 9;
+  padding: 6cqw 7cqw;
+  overflow: hidden;
+  border-radius: var(--radio-hoja);
+  background: var(--graphite);
+  color: var(--white);
+}
+
+.presentacion-escena-etiqueta {
+  font-family: var(--fuente-display);
+  font-size: max(0.7rem, 1.7cqw);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--coral);
+}
+
+.presentacion-escena-titulo {
+  max-width: 80%;
+  font-size: max(1.15rem, 4.8cqw);
+  line-height: 1.1;
+  color: var(--white);
+}
+
+.presentacion-escena-puntos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.4cqw;
+  max-width: 74%;
+  font-size: max(0.85rem, 2.4cqw);
+  line-height: 1.35;
+  color: var(--border);
+}
+
+.presentacion-escena-puntos li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1.4cqw;
+  align-items: baseline;
+}
+
+.presentacion-escena-puntos li::before {
+  content: "";
+  width: max(8px, 1.4cqw);
+  height: 3px;
+  border-radius: 2px;
+  background: var(--coral);
+  transform: translateY(-0.3em);
+}
+
+.presentacion-escena-flecha {
+  position: absolute;
+  right: 5cqw;
+  bottom: 6cqw;
+  width: 16cqw;
+  fill: none;
+  stroke: var(--coral);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.presentacion-empezar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  background: rgb(17 17 17 / 55%);
+  color: var(--white);
+  font-family: var(--fuente-display);
+  font-size: max(0.95rem, 2.4cqw);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.presentacion-empezar svg {
+  width: max(44px, 7cqw);
+  height: max(44px, 7cqw);
+  padding: max(11px, 1.8cqw);
+  border-radius: 50%;
+  background: var(--coral-dark);
+  color: var(--white);
+}
+
+.presentacion-empezar:hover svg {
+  background: var(--coral-darker);
+}
+
+.presentacion-empezar:focus-visible {
+  outline: 3px solid var(--white);
+  outline-offset: -6px;
+}
+
+.presentacion-subtitulo {
+  min-height: calc(2 * 1.5em + 20px);
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radio-control);
+  background: var(--white);
+  color: var(--graphite);
+  line-height: 1.5;
+}
+
+.presentacion-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.presentacion-control {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--graphite);
+  cursor: pointer;
+}
+
+.presentacion-control svg {
+  width: 20px;
+  height: 20px;
+}
+
+.presentacion-control:hover:not(:disabled) {
+  background: var(--light-1);
+}
+
+.presentacion-control:disabled {
+  border-color: var(--border);
+  color: var(--border-strong);
+  cursor: not-allowed;
+}
+
+.presentacion-control[aria-pressed="true"] {
+  border-color: var(--coral-dark);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+}
+
+.presentacion-control-principal {
+  width: 46px;
+  height: 46px;
+  border-color: var(--coral-dark);
+  background: var(--coral-dark);
+  color: var(--white);
+}
+
+.presentacion-control-principal:hover:not(:disabled) {
+  background: var(--coral-darker);
+}
+
+.presentacion-avance {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.presentacion-punto {
+  flex: 1;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--border);
+  cursor: pointer;
+}
+
+.presentacion-punto[data-vista="true"] {
+  background: var(--coral);
+}
+
+.presentacion-punto[aria-current="step"] {
+  background: var(--coral-dark);
+  box-shadow: 0 0 0 2px var(--white), 0 0 0 3px var(--coral-dark);
+}
+
+.presentacion-punto:disabled {
+  cursor: not-allowed;
+}
+
+.presentacion-velocidad select {
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--graphite);
+  font: inherit;
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.presentacion-nota {
+  margin: 0;
+  font-size: var(--t-caption);
+}
+
+@media (max-width: 560px) {
+  .presentacion-avance {
+    order: 10;
+    flex-basis: 100%;
+  }
+  /* En el celular la diapositiva crece con su contenido: en 16:9 no cabría */
+  .presentacion-escena {
+    aspect-ratio: auto;
+    min-height: 210px;
+    padding: 22px 20px 56px;
+    gap: 10px;
+  }
+  .presentacion-escena-titulo,
+  .presentacion-escena-puntos {
+    max-width: none;
+  }
+  .presentacion-escena-flecha {
+    width: 56px;
+    right: 16px;
+    bottom: 14px;
+  }
+}
+
 /* Ruta obligatoria del alumno: video completo → repaso → lección completada */
 .video-aviso {
   margin: 8px 0 0;
@@ -6056,6 +6301,17 @@ button.tarjeta-comunidad-enlace {
   display: grid;
   gap: 8px;
   justify-items: start;
+}
+
+.editor-video-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.editor-video-generando {
+  font-size: var(--t-small);
 }
 
 .editor-video-subiendo {

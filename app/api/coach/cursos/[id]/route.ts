@@ -43,6 +43,9 @@ export const DELETE = manejar((req: Request, contexto: Contexto) =>
       const curso = cursoDeCoach(a, id, autor);
       if (curso.estado === "publicado") throw new ErrorDeDatos("Primero despublica el curso para poder borrarlo.");
       a.cursosCoach = (a.cursosCoach ?? []).filter((c) => c.id !== id);
+      // Sus presentaciones con IA se van con él.
+      const lecciones = new Set(curso.modulos.flatMap((m) => m.lecciones.map((l) => l.id)));
+      a.presentaciones = (a.presentaciones ?? []).filter((p) => !lecciones.has(p.leccion));
     });
     return new Response(null, { status: 204 });
   }),

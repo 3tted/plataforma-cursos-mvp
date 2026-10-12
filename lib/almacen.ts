@@ -12,6 +12,7 @@ import type {
   LeccionCoach,
   Pago,
   PreguntaIA,
+  Presentacion,
   ProgresoAlumno,
   Publicacion,
   Rol,
@@ -44,6 +45,8 @@ export interface Almacen {
   /** Comunidades y cursos que crean las coaches desde la plataforma. */
   comunidadesCoach?: ComunidadCreada[];
   cursosCoach?: CursoCreado[];
+  /** Presentaciones con IA de las lecciones (solo texto: la voz la pone el dispositivo). */
+  presentaciones?: Presentacion[];
 }
 
 const DIRECTORIO =

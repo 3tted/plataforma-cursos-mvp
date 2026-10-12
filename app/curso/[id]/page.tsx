@@ -147,10 +147,12 @@ export default function PaginaLeccion() {
   const enOrden = !!leccion.deCoach || enOrdenLeccion(leccion.id);
   // Para ver la lección hay que estar en la comunidad e inscrito en su curso.
   const inscrito = !esAlumno || !inscripcionLista || (enComunidad && inscritoEn(cursoId));
-  const videoListo = !guiado || !leccion.video || vistos.includes(leccion.id);
+  // Video o presentación: hay que verlo completo para abrir el repaso.
+  const queVer = leccion.video || !leccion.presentacion ? "el video" : "la presentación";
+  const videoListo = !guiado || (!leccion.video && !leccion.presentacion) || vistos.includes(leccion.id);
   const repasoListo = !guiado || preguntasRepaso === 0 || repasados.includes(leccion.id);
   const pendiente = !videoListo
-    ? "Termina el video para continuar"
+    ? `Termina ${queVer} para continuar`
     : !repasoListo
       ? "Responde el repaso para continuar"
       : null;
@@ -349,7 +351,7 @@ export default function PaginaLeccion() {
                   >
                     {p.id === "repaso" && !videoListo && <IconoCandado width={14} height={14} />}
                     {p.texto}
-                    {p.id === "repaso" && !videoListo && <span className="sr-only"> (se abre al terminar el video)</span>}
+                    {p.id === "repaso" && !videoListo && <span className="sr-only"> (se abre al terminar {queVer})</span>}
                     {p.conteo !== undefined && <span className="pestana-conteo cifra">{p.conteo}</span>}
                   </button>
                 ))}
@@ -384,7 +386,7 @@ export default function PaginaLeccion() {
                   <div className="repaso-bloqueado">
                     <IconoCandado width={20} height={20} />
                     <p>
-                      <strong>El repaso se abre al terminar el video.</strong>
+                      <strong>El repaso se abre al terminar {queVer}.</strong>
                       <span className="texto-suave">
                         {" "}
                         Son {preguntasRepaso} preguntas y al contestarlas la lección queda completada.

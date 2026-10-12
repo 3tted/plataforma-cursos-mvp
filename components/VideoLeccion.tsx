@@ -7,7 +7,8 @@ import type { Leccion } from "@/lib/tipos";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
 import { posterDeVideo } from "@/lib/poster";
-import { IconoSubir } from "./Iconos";
+import { IconoAsistenteGeneral, IconoSubir } from "./Iconos";
+import PresentacionLeccion from "./PresentacionLeccion";
 
 type Estado = "inactivo" | "subiendo" | "error";
 
@@ -39,6 +40,34 @@ export default function VideoLeccion({
   const terminado = useRef(false);
   const [avisoAdelantar, setAvisoAdelantar] = useState(false);
   const subida = useRef<XMLHttpRequest | null>(null);
+  const [generando, setGenerando] = useState(false);
+
+  // Presentación con IA (diapositivas narradas por la voz del dispositivo).
+  const generarPresentacion = async () => {
+    setGenerando(true);
+    setMensaje(null);
+    setEstado("inactivo");
+    setAnuncio("Generando la presentación con IA.");
+    const res = await fetch(`/api/presentaciones/${leccion.id}`, { method: "POST", headers: { "X-Rol": "coach" } }).catch(
+      () => null,
+    );
+    setGenerando(false);
+    if (!res?.ok) {
+      const datos = res ? ((await res.json().catch(() => ({}))) as { error?: string }) : {};
+      return fallo(datos.error ?? "No se pudo generar la presentación. Revisa tu conexión e inténtalo de nuevo.");
+    }
+    await recargarCurso();
+    setAnuncio("Presentación lista.");
+  };
+
+  const quitarPresentacion = async () => {
+    const res = await fetch(`/api/presentaciones/${leccion.id}`, { method: "DELETE", headers: { "X-Rol": "coach" } }).catch(
+      () => null,
+    );
+    if (!res?.ok) return fallo("No se pudo quitar la presentación. Inténtalo de nuevo.");
+    await recargarCurso();
+    setAnuncio("Presentación quitada.");
+  };
 
   const fallo = (texto: string) => {
     setEstado("error");
@@ -256,6 +285,41 @@ export default function VideoLeccion({
     );
   }
 
+  // ---------------------------------------------------------------- sin video, con presentación
+  if (leccion.presentacion && estado !== "subiendo" && !generando) {
+    return (
+      <div className="video-leccion">
+        <PresentacionLeccion
+          idLeccion={leccion.id}
+          diapositivas={leccion.presentacion.diapositivas}
+          sinAdelantar={sinAdelantar}
+          alTerminar={alTerminar}
+        />
+        {esCoach && (
+          <div className="video-coach">
+            {selector}
+            <span className="video-archivo texto-suave">
+              Presentación con IA · {leccion.presentacion.diapositivas.length} diapositivas · {fechaCorta(leccion.presentacion.creadaEn)}
+            </span>
+            <span className="video-coach-acciones">
+              <button type="button" className="boton boton-chico boton-secundario" onClick={() => entrada.current?.click()}>
+                <IconoSubir width={16} height={16} /> Subir un video
+              </button>
+              <button type="button" className="enlace" onClick={generarPresentacion}>
+                Volver a generar
+              </button>
+              <button type="button" className="enlace enlace-discreto" onClick={quitarPresentacion}>
+                Quitar presentación
+              </button>
+            </span>
+            {error}
+          </div>
+        )}
+        {avisoLector}
+      </div>
+    );
+  }
+
   // ---------------------------------------------------------------- sin video, alumno
   if (!esCoach) {
     // Las lecciones que la coach pega desde su panel son de texto: sin aviso de video.
@@ -288,6 +352,14 @@ export default function VideoLeccion({
           <p className="video-titulo">{leccion.video ? "Cambiando el video de esta lección" : "Subiendo el video de esta lección"}</p>
           {avance}
         </>
+      ) : generando ? (
+        <>
+          <p className="video-titulo">Generando la presentación…</p>
+          <div className="progreso progreso-indeterminado" aria-hidden="true">
+            <span />
+          </div>
+          <p className="video-texto">La IA arma las diapositivas con el texto de la lección. Suele tardar unos segundos.</p>
+        </>
       ) : (
         <>
           <p className="video-titulo">Sube el video de esta lección</p>
@@ -300,7 +372,13 @@ export default function VideoLeccion({
             <button type="button" className="boton" onClick={() => entrada.current?.click()}>
               <IconoSubir width={18} height={18} /> Elegir video
             </button>
+            <button type="button" className="boton boton-fantasma-borde" onClick={generarPresentacion}>
+              <IconoAsistenteGeneral width={18} height={18} /> Generar presentación con IA
+            </button>
           </div>
+          <p className="video-texto">
+            ¿Sin video todavía? La IA arma diapositivas con el texto de la lección y la voz del dispositivo las narra.
+          </p>
           {error}
           <p className="nota video-nota-prototipo">
             En el prototipo el video se guarda en la computadora donde corre la plataforma, no en internet.

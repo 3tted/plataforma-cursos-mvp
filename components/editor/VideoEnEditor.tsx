@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { MAX_BYTES_VIDEO, tamañoLegible, tipoDeVideo } from "@/lib/reglas-video";
-import { IconoSubir, IconoVideo } from "../Iconos";
+import { IconoAsistenteGeneral, IconoSubir, IconoVideo } from "../Iconos";
 
 // Video de una lección dentro del editor: subir, cambiar o quitar. Una lección
 // nueva primero se guarda (así recibe su id) y luego se le sube el video.
@@ -10,16 +10,42 @@ export default function VideoEnEditor({
   leccion,
   guardada,
   video,
+  diapositivas,
+  sinGuardar,
   alCambiar,
 }: {
   leccion: string;
   guardada: boolean;
   video: { nombre: string; url: string } | null;
+  /** Diapositivas de su presentación con IA, si tiene. */
+  diapositivas: number | null;
+  /** Hay cambios sin guardar (la presentación usa el texto guardado). */
+  sinGuardar: boolean;
   alCambiar: () => void;
 }) {
   const entrada = useRef<HTMLInputElement>(null);
   const [progreso, setProgreso] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [generando, setGenerando] = useState(false);
+
+  // Presentación con IA: diapositivas del texto guardado, narradas por la voz del dispositivo.
+  const generar = async () => {
+    setError(null);
+    setGenerando(true);
+    const res = await fetch(`/api/presentaciones/${leccion}`, { method: "POST", headers: { "X-Rol": "coach" } }).catch(() => null);
+    setGenerando(false);
+    if (!res?.ok) {
+      const datos = res ? ((await res.json().catch(() => ({}))) as { error?: string }) : {};
+      return setError(datos.error ?? "No se pudo generar la presentación. Inténtalo de nuevo.");
+    }
+    alCambiar();
+  };
+
+  const quitarPresentacion = async () => {
+    const res = await fetch(`/api/presentaciones/${leccion}`, { method: "DELETE", headers: { "X-Rol": "coach" } }).catch(() => null);
+    if (!res?.ok) return setError("No se pudo quitar la presentación.");
+    alCambiar();
+  };
 
   if (!guardada) {
     return <p className="nota editor-video">Guarda el curso para poder subir el video de esta lección.</p>;
@@ -99,9 +125,34 @@ export default function VideoEnEditor({
           </button>
         </p>
       ) : (
-        <button type="button" className="boton boton-chico boton-fantasma" onClick={() => entrada.current?.click()}>
-          <IconoSubir width={15} height={15} /> Subir video (MP4, WebM o MOV)
-        </button>
+        <div className="editor-video-opciones">
+          <button type="button" className="boton boton-chico boton-fantasma" onClick={() => entrada.current?.click()}>
+            <IconoSubir width={15} height={15} /> Subir video (MP4, WebM o MOV)
+          </button>
+          {generando ? (
+            <span className="texto-suave editor-video-generando">Generando la presentación…</span>
+          ) : diapositivas ? (
+            <span className="editor-video-actual">
+              <IconoAsistenteGeneral width={16} height={16} />
+              <span>
+                Presentación con IA · <span className="cifra">{diapositivas}</span> diapositivas
+              </span>
+              <button type="button" className="enlace" onClick={() => void generar()}>
+                Volver a generar
+              </button>
+              <button type="button" className="enlace enlace-discreto" onClick={() => void quitarPresentacion()}>
+                Quitar
+              </button>
+            </span>
+          ) : (
+            <button type="button" className="boton boton-chico boton-fantasma-borde" onClick={() => void generar()}>
+              <IconoAsistenteGeneral width={15} height={15} /> Generar presentación con IA
+            </button>
+          )}
+        </div>
+      )}
+      {!video && sinGuardar && !generando && (
+        <p className="nota">La presentación usa el texto guardado: guarda tus cambios antes de generarla.</p>
       )}
       {error && (
         <p className="error" role="alert">

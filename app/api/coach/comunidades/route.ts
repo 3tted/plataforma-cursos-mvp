@@ -63,6 +63,7 @@ export const DELETE = manejar((req: Request) =>
       a.comunidadesCoach = (a.comunidadesCoach ?? []).filter((c) => c.id !== comunidad.id);
       a.cursosCoach = (a.cursosCoach ?? []).filter((c) => !ids.has(c.id));
       a.videos = (a.videos ?? []).filter((v) => !lecciones.has(v.leccion));
+      a.presentaciones = (a.presentaciones ?? []).filter((p) => !lecciones.has(p.leccion));
       a.publicaciones = a.publicaciones.filter((p) => p.comunidad !== comunidad.id);
       a.pagos = a.pagos.filter((p) => p.comunidad !== comunidad.id);
       a.preguntas = a.preguntas.filter((p) => !p.curso || !ids.has(p.curso));

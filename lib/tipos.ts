@@ -28,6 +28,22 @@ export interface Leccion {
   deCoach?: boolean;
   /** Video que subió la coach; sin él, la lección se lee en texto y transcripción. */
   video?: { url: string; tipo: string; nombre: string; subidoEn: string };
+  /** Presentación con IA (diapositivas narradas con la voz del dispositivo), si no hay video. */
+  presentacion?: { diapositivas: Diapositiva[]; creadaEn: string };
+}
+
+/** Una diapositiva de la presentación de una lección. */
+export interface Diapositiva {
+  titulo: string;
+  puntos: string[];
+  /** Lo que dice la voz mientras se ve la diapositiva (también son sus subtítulos). */
+  narracion: string;
+}
+
+export interface Presentacion {
+  leccion: string;
+  diapositivas: Diapositiva[];
+  creadaEn: string;
 }
 
 /** Registro de un video subido (el archivo vive en DATA_DIR/videos). */

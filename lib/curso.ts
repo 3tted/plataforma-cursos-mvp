@@ -158,12 +158,17 @@ export async function cargarCurso(id: string = CURSO_PRINCIPAL, opciones: Opcion
     const creado = (await cargarCursosCreados(opciones)).find((c) => c.curso.id === id);
     base = creado ?? (await cargarCursoDeArchivo(CURSO_PRINCIPAL));
   }
-  const { propias, videos } = await consultar((a) => ({ propias: a.leccionesCoach, videos: a.videos ?? [] }));
+  const { propias, videos, presentaciones } = await consultar((a) => ({
+    propias: a.leccionesCoach,
+    videos: a.videos ?? [],
+    presentaciones: a.presentaciones ?? [],
+  }));
   const conPropias = base.curso.id === CURSO_PRINCIPAL && propias.length > 0;
-  if (!conPropias && videos.length === 0) return base;
+  if (!conPropias && videos.length === 0 && presentaciones.length === 0) return base;
 
   const modulos = conPropias ? [...base.curso.modulos, moduloDeCoach(base, propias)] : base.curso.modulos;
   const porLeccion = new Map(videos.map((v) => [v.leccion, v]));
+  const presentacionDe = new Map(presentaciones.map((p) => [p.leccion, p]));
   return {
     ...base,
     curso: {
@@ -172,9 +177,13 @@ export async function cargarCurso(id: string = CURSO_PRINCIPAL, opciones: Opcion
         ...m,
         lecciones: m.lecciones.map((l) => {
           const video = porLeccion.get(l.id);
-          if (!video) return l;
+          const presentacion = presentacionDe.get(l.id);
+          const conPresentacion = presentacion
+            ? { ...l, presentacion: { diapositivas: presentacion.diapositivas, creadaEn: presentacion.creadaEn } }
+            : l;
+          if (!video) return conPresentacion;
           return {
-            ...l,
+            ...conPresentacion,
             video: {
               // La fecha en la URL evita que el navegador muestre el video anterior tras reemplazarlo.
               url: `/api/videos/${l.id}?v=${encodeURIComponent(video.subidoEn)}`,

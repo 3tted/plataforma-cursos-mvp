@@ -44,7 +44,10 @@ export default function PaginaComunidades() {
       <div className="proximas-cabecera">
         <div className="filtros" role="group" aria-label="Filtrar por tema">
           {["Todos", ...temas].map((t) => (
-            <button key={t} type="button" className="filtro" aria-pressed={tema === t} onClick={() => setTema(t)}>
+            <button key={t} type="button" className="filtro" aria-pressed={tema === t} onClick={(e) => {
+                setTema(t);
+                e.currentTarget.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+              }}>
               {t}
             </button>
           ))}

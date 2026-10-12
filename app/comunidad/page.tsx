@@ -154,7 +154,10 @@ export default function PaginaComunidad() {
                   type="button"
                   aria-pressed={filtro === c}
                   className="filtro"
-                  onClick={() => setFiltro(c)}
+                  onClick={(e) => {
+                    setFiltro(c);
+                    e.currentTarget.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+                  }}
                 >
                   {c}
                 </button>
@@ -237,7 +240,10 @@ export default function PaginaComunidad() {
             <p className="precio">
               {precio} <span>al mes</span>
             </p>
-            <p className="texto-suave">Curso completo, comunidad y asistente. Paga con OXXO, SPEI o Mercado Pago.</p>
+            <p className="texto-suave">
+              {cursosComunidad.length > 1 ? `Los ${cursosComunidad.length} cursos de la comunidad` : "El curso completo"}, la comunidad y el
+              asistente. Paga con OXXO, SPEI o Mercado Pago.
+            </p>
             <Link href="/membresia" className="boton boton-secundario boton-bloque solo-movil">
               {pagoPendiente ? "Ver mi ficha de pago" : `Unirme por ${precio} al mes`}
             </Link>

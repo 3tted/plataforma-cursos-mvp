@@ -13,8 +13,9 @@ import { IconoBillete } from "./Iconos";
 // respuestas del asistente (fuentes) las referencias no se repiten en cada
 // párrafo: se juntan una sola vez en "Fuentes", al final.
 
+// Grupos: 1 negritas, 2 referencias, 3 cursivas con _, 4 montos, 5 cursivas con *.
 const PATRON_EN_LINEA =
-  /(\*\*[^*]+\*\*)|(\[(?:[LPWKC]\d+)(?:\s*,\s*[LPWKC]\d+)*\])|((?<=^|[\s(])_[^_\n]+_(?=$|[\s.,;:!?)]))|(\$\d[\d,]*(?:\.\d+)?|(?<![\w$.,])\d+(?:\.\d+)?\s?%)/g;
+  /(\*\*[^*]+\*\*)|(\[(?:[LPWKC]\d+)(?:\s*,\s*[LPWKC]\d+)*\])|((?<=^|[\s(])_[^_\n]+_(?=$|[\s.,;:!?)]))|(\$\d[\d,]*(?:\.\d+)?|(?<![\w$.,])\d+(?:\.\d+)?\s?%)|((?<![*\w])\*(?![\s*])[^*\n]+?(?<![\s*])\*(?![*\w]))/g;
 
 function Cita({ id }: { id: string }) {
   const { lecciones, tieneAcceso } = useApp();
@@ -78,6 +79,7 @@ function enLinea(texto: string, fuentes?: Fuentes): ReactNode[] {
         </span>,
       );
     } else if (m[3]) nodos.push(<em key={inicio}>{m[3].slice(1, -1)}</em>);
+    else if (m[5]) nodos.push(<em key={inicio}>{enLinea(m[5].slice(1, -1), fuentes)}</em>);
     ultimo = inicio + m[0].length;
   }
   if (ultimo < texto.length) nodos.push(texto.slice(ultimo));

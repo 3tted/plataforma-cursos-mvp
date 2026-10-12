@@ -34,11 +34,20 @@ export default function Bienvenida() {
     if (!visible) return;
     const fondo = document.querySelectorAll<HTMLElement>("[data-app-fondo]");
     fondo.forEach((el) => el.setAttribute("inert", ""));
+    // La página de atrás no se desplaza: una sola barra de scroll, la de la ventana.
+    const html = document.documentElement;
+    const antes = { html: html.style.overflow, body: document.body.style.overflow };
+    html.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
     // Con mouse, el cursor va directo al nombre; en el celular el teclado
     // taparía la elección de rol, así que el foco se queda en la opción elegida.
     const conMouse = window.matchMedia("(pointer: fine)").matches;
     (conMouse ? campoNombre.current : formulario.current?.querySelector<HTMLInputElement>("input[name=rol]:checked"))?.focus();
-    return () => fondo.forEach((el) => el.removeAttribute("inert"));
+    return () => {
+      fondo.forEach((el) => el.removeAttribute("inert"));
+      html.style.overflow = antes.html;
+      document.body.style.overflow = antes.body;
+    };
   }, [visible]);
 
   if (!visible) return null;
@@ -51,7 +60,13 @@ export default function Bienvenida() {
       campoNombre.current?.focus();
       return;
     }
+    const primeraVez = !usuario;
     guardarUsuario({ nombre: limpio.slice(0, 60), rol });
+    // Al entrar, el inicio empieza desde arriba (la página de visitantes pudo quedar bajada).
+    if (primeraVez) {
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => window.scrollTo(0, 0));
+    }
   };
 
   const alTeclear = (e: KeyboardEvent<HTMLFormElement>) => {

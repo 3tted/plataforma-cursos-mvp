@@ -274,9 +274,16 @@ main:focus {
   padding-block: 28px;
 }
 
+/* A 30 px "Growth Operating System" no se leía: el logo va más grande */
 .pie-logo {
-  height: 30px;
+  height: 48px;
   width: auto;
+}
+
+@media (max-width: 560px) {
+  .pie-logo {
+    height: 40px;
+  }
 }
 
 .pie-enlaces {

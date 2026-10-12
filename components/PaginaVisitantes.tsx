@@ -73,7 +73,7 @@ export default function PaginaVisitantes() {
     <div className="visitantes" data-app-fondo>
       <header className="visitantes-barra">
         <div className="envoltura visitantes-barra-interior" ref={barra}>
-          <a href="#" className="marca" aria-label="Merkatics, inicio" onClick={() => setMenu(false)}>
+          <a href="/" className="marca" aria-label="Merkatics, inicio" onClick={() => setMenu(false)}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="marca-logo" src="/merkatics-logo.png" alt="" width={2311} height={544} />
           </a>

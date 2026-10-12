@@ -104,6 +104,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Al saltar a una sección (#comunidades…), que no quede debajo de la barra fija */
+  scroll-padding-top: calc(var(--alto-barra) + 20px);
   scrollbar-color: var(--linea-fuerte) var(--fondo);
 }
 

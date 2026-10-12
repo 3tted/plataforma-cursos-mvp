@@ -71,12 +71,15 @@ export default function PaginaComunidades() {
           : `${visibles.length} ${visibles.length === 1 ? "comunidad" : "comunidades"}`}
       </p>
 
-      {/* Un tema por columna: con pocas comunidades por tema, la página no se llena de huecos. */}
+      {/* Cada tema ocupa tantas columnas como comunidades tiene (hasta 3) y las pone lado a lado:
+          así un tema con dos comunidades no empuja a los demás ni deja huecos. Con un tema
+          elegido, ocupa todo el ancho. */}
       <div className="directorio-grupos">
         {grupos.map((g) => (
           <section
             key={g.tema}
             className="directorio-grupo"
+            data-cartas={tema === "Todos" ? Math.min(g.comunidades.length, 3) : 3}
             {...(tema === "Todos" ? { "aria-labelledby": `tema-${g.tema}` } : { "aria-label": g.tema })}
           >
             {/* Con un tema elegido, el filtro ya lo dice y cada tarjeta lleva su etiqueta: sin título repetido. */}

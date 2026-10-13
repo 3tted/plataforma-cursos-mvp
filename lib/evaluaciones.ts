@@ -3,6 +3,7 @@ import path from "path";
 import { consultar, type Almacen } from "./almacen";
 import { CURSO_PRINCIPAL, idCurso } from "./curso";
 import { ErrorDeDatos } from "./http";
+import { MIN_RESPUESTAS } from "./tipos";
 import type {
   DatosCurso,
   EstadoAlumno,
@@ -163,9 +164,11 @@ export function expedienteDe(a: Almacen, curso: DatosCurso, ev: Evaluaciones, au
     aprobadoEn,
   };
 
+  // Requiere apoyo desde que reprueba un intento del examen (aunque le queden
+  // intentos): así la coach lo ve a tiempo.
   const estado: EstadoAlumno = examen.aprobado
     ? "aprobado"
-    : examen.intentos >= ev.intentosExamen
+    : examen.intentos > 0
       ? "requiere-apoyo"
       : leccionesTotal > 0 && leccionesHechas === leccionesTotal
         ? "examen-pendiente"
@@ -244,10 +247,18 @@ export function construirMatriz(a: Almacen, curso: DatosCurso, ev: Evaluaciones)
       leccion: p.leccion ?? "",
     })),
   ];
+  // El porcentaje solo dice algo con varias respuestas: primero las que ya tienen
+  // MIN_RESPUESTAS o más (por porcentaje), luego las demás (por cuántas fallas).
+  const confiable = (p: { respuestas: number }) => p.respuestas >= MIN_RESPUESTAS;
   const masFalladas = preguntas
     .map((p) => ({ ...p, ...(conteo.get(p.id) ?? { respuestas: 0, fallas: 0 }) }))
     .filter((p) => p.fallas > 0)
-    .sort((x, y) => y.fallas / y.respuestas - x.fallas / x.respuestas || y.fallas - x.fallas)
+    .sort(
+      (x, y) =>
+        Number(confiable(y)) - Number(confiable(x)) ||
+        (confiable(x) ? y.fallas / y.respuestas - x.fallas / x.respuestas : 0) ||
+        y.fallas - x.fallas,
+    )
     .slice(0, 6);
 
   return {

@@ -18,16 +18,17 @@ const PRIORIDAD = { "requiere-apoyo": 0, "examen-pendiente": 1, "en-curso": 2, "
 // Inicio de la coach: sus cursos, sus alumnos y lo que le toca contestar.
 export default function InicioCoach() {
   const router = useRouter();
-  const { usuario, datos, setBorrador, cursos, cambiarCurso, temaDe } = useApp();
+  const { usuario, datos, setBorrador, cursos, cambiarCurso, temaDe, comunidadId } = useApp();
   const [resumen, setResumen] = useState<ResumenCoach | null>(null);
   const [matrices, setMatrices] = useState<MatrizAlumnos[] | null>(null);
   const [error, setError] = useState(false);
 
+  // Lo de la comunidad que se muestra ("Esto pasa hoy en…"), contado igual que en el panel.
   useEffect(() => {
-    api<ResumenCoach>("/api/coach/resumen")
+    api<ResumenCoach>(`/api/coach/resumen?comunidad=${encodeURIComponent(comunidadId)}`)
       .then(setResumen)
       .catch(() => setError(true));
-  }, []);
+  }, [comunidadId]);
 
   // Una matriz por curso; aquí se juntan para ver de un vistazo quién necesita apoyo.
   useEffect(() => {
@@ -133,7 +134,7 @@ export default function InicioCoach() {
                   documento.
                 </span>
                 <span className="enlace">
-                  Mis comunidades <IconoFlechaDer width={15} height={15} />
+                  Crear ahora <IconoFlechaDer width={15} height={15} />
                 </span>
               </span>
             </Link>

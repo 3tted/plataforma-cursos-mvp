@@ -269,6 +269,8 @@ export interface ResumenCoach {
   preguntasSemana: number;
   preguntas: PreguntaIA[];
   leccionesConsultadas: { id: string; total: number }[];
+  /** Título de cada lección citada, sea del curso que sea (el asistente general cita de todos). */
+  titulos: Record<string, string>;
   pagos: Pago[];
   ingresosSimulados: number;
   leccionesCoach: LeccionCoach[];
@@ -361,6 +363,9 @@ export interface IntentoExamen {
   fallas: string[];
   creadoEn: string;
 }
+
+/** Respuestas que necesita una pregunta para mostrar su porcentaje de fallas. */
+export const MIN_RESPUESTAS = 3;
 
 export type EstadoAlumno = "aprobado" | "requiere-apoyo" | "examen-pendiente" | "en-curso" | "sin-iniciar";
 

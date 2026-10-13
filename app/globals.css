@@ -8284,3 +8284,8 @@ button.tarjeta-comunidad-enlace {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* "1 de 2 fallaron": sin barra hasta que la pregunta tiene varias respuestas */
+.barra-conteo {
+  grid-column: 1 / -1;
+}

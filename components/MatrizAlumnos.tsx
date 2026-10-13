@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ESTADO_ALUMNO, api, hace } from "@/lib/cliente";
-import type { EstadoAlumno, Expediente, MatrizAlumnos as Matriz } from "@/lib/tipos";
+import { MIN_RESPUESTAS, type EstadoAlumno, type Expediente, type MatrizAlumnos as Matriz } from "@/lib/tipos";
 import { IconoBorrar, IconoDescargar } from "./Iconos";
 
 const ESTADOS: EstadoAlumno[] = ["aprobado", "examen-pendiente", "en-curso", "requiere-apoyo"];
@@ -212,7 +212,10 @@ export default function MatrizAlumnos({ curso }: { curso: string }) {
       {matriz && matriz.masFalladas.length > 0 && (
         <div className="matriz-falladas">
           <h3>Las preguntas que más fallan</h3>
-          <p className="texto-suave">Un tema con muchas fallas suele indicar una lección que conviene reforzar.</p>
+          <p className="texto-suave">
+            Un tema con muchas fallas suele indicar una lección que conviene reforzar. El porcentaje aparece cuando una
+            pregunta ya tiene {MIN_RESPUESTAS} respuestas o más.
+          </p>
           <ul className="barras">
             {matriz.masFalladas.map((p) => (
               <li key={p.id}>
@@ -225,12 +228,21 @@ export default function MatrizAlumnos({ curso }: { curso: string }) {
                   </Link>{" "}
                   {p.enunciado}
                 </span>
-                <span className="barra-pista">
-                  <span className="barra-relleno" style={{ width: `${(p.fallas / p.respuestas) * 100}%` }} />
-                </span>
-                <span className="barra-valor" title={`${p.fallas} de ${p.respuestas} respuestas equivocadas`}>
-                  {Math.round((p.fallas / p.respuestas) * 100)}%
-                </span>
+                {p.respuestas >= MIN_RESPUESTAS ? (
+                  <>
+                    <span className="barra-pista">
+                      <span className="barra-relleno" style={{ width: `${(p.fallas / p.respuestas) * 100}%` }} />
+                    </span>
+                    <span className="barra-valor" title={`${p.fallas} de ${p.respuestas} respuestas equivocadas`}>
+                      {Math.round((p.fallas / p.respuestas) * 100)}%
+                    </span>
+                  </>
+                ) : (
+                  <span className="barra-conteo texto-suave">
+                    <span className="cifra">{p.fallas}</span> de <span className="cifra">{p.respuestas}</span>{" "}
+                    {p.fallas === 1 ? "falló" : "fallaron"}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

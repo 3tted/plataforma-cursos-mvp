@@ -41,7 +41,7 @@ export default function PaginaCoach() {
   const [guardando, setGuardando] = useState(false);
   const [agregada, setAgregada] = useState<string | null>(null);
   const [porBorrar, setPorBorrar] = useState<number | null>(null);
-  useTitulo("Panel de la coach");
+  useTitulo("Panel de coach");
 
   // Todo el panel es del curso elegido arriba (y de su comunidad). Si cambia
   // antes de que llegue el resumen anterior, ese ya no se muestra.
@@ -115,10 +115,12 @@ export default function PaginaCoach() {
     router.push("/comunidad");
   };
 
-  const tituloDe = (id: string) => lecciones.find((l) => l.id === id)?.titulo ?? id;
+  const tituloDe = (id: string) => resumen?.titulos[id] ?? lecciones.find((l) => l.id === id)?.titulo ?? id;
   const maxConsultas = Math.max(1, ...(resumen?.leccionesConsultadas.map((l) => l.total) ?? [1]));
   const pagados = resumen?.pagos.filter((p) => p.estado === "pagado").length ?? 0;
-  const conVideo = lecciones.filter((l) => l.video).length;
+  // Las lecciones del curso; las que la coach pega abajo son de texto, para probar el asistente.
+  const delCurso = lecciones.filter((l) => !l.deCoach);
+  const conVideo = delCurso.filter((l) => l.video).length;
 
   return (
     <div className="pagina-coach">
@@ -208,7 +210,7 @@ export default function PaginaCoach() {
 
       <div className="rejilla-coach">
         <section className="tarjeta" aria-labelledby="preguntas-titulo">
-          <h2 id="preguntas-titulo">Lo que más preguntan tus alumnos</h2>
+          <h2 id="preguntas-titulo">Preguntas recientes de tus alumnos</h2>
           {resumen && grupos.length === 0 && (
             <p className="vacio">
               Todavía no hay preguntas. <Link href="/curso/asistente">Haz una de prueba</Link> para ver cómo aparece aquí.
@@ -282,11 +284,11 @@ export default function PaginaCoach() {
       <section className="tarjeta" aria-labelledby="videos-titulo">
         <h2 id="videos-titulo">Videos de tus lecciones</h2>
         <p className="texto-suave">
-          <span className="cifra">{conVideo}</span> de <span className="cifra">{lecciones.length}</span> lecciones
+          <span className="cifra">{conVideo}</span> de <span className="cifra">{delCurso.length}</span> lecciones
           tienen video. Para subir o cambiar uno, abre la lección.
         </p>
         <ul className="videos-lista">
-          {lecciones.map((l) => (
+          {delCurso.map((l) => (
             <li key={l.id}>
               <Link href={`/curso/${l.id}`}>
                 <span className="cita-id">{l.id}</span> {l.titulo}

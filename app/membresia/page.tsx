@@ -168,7 +168,7 @@ export default function PaginaMembresia() {
           <div className="cancelar-membresia">
             {cancelando ? (
               <span className="confirmacion" role="group" aria-label="Confirmar la cancelación">
-                ¿Cancelar tu membresía? Pierdes el acceso a las lecciones para miembros.
+                ¿Cancelar tu membresía? Pierdes el acceso a las lecciones con membresía.
                 <button type="button" className="boton boton-chico" onClick={cancelarMembresia}>
                   Sí, cancelar
                 </button>
@@ -195,7 +195,7 @@ export default function PaginaMembresia() {
       </Link>
       <header className="membresia-cabecera portada">
         <Arcos />
-        <h1>Únete a {comunidad?.nombre ?? "Finanzas Claras"}</h1>
+        <h1>Membresía de {comunidad?.nombre ?? "Finanzas Claras"}</h1>
         <p className="precio precio-grande">
           {precio} <span>MXN al mes</span>
         </p>
@@ -411,7 +411,7 @@ export default function PaginaMembresia() {
         <h2 className="plan-titulo">Cómo se paga cada mes</h2>
         <p className="texto-suave">
           Con OXXO o SPEI no hay cargos automáticos: cada mes generas una ficha nueva desde aquí. Si un mes no la pagas,
-          solo se pausa tu acceso a las lecciones para miembros.
+          solo se pausa tu acceso a las lecciones con membresía.
         </p>
       </section>
     </div>

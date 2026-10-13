@@ -229,7 +229,7 @@ export default function PaginaExamen() {
                 {!l.gratis && !tieneAcceso && (
                   <>
                     <IconoBillete width={14} height={14} />
-                    <span className="sr-only"> (para miembros)</span>
+                    <span className="sr-only"> (con membresía)</span>
                   </>
                 )}
               </li>
@@ -237,7 +237,7 @@ export default function PaginaExamen() {
           </ul>
           {bloqueadas && (
             <Link href="/membresia" className="boton">
-              Unirme por {moneda(datos.comunidad.precio_mensual)} al mes
+              Activar membresía por {moneda(datos.comunidad.precio_mensual)} al mes
             </Link>
           )}
         </section>

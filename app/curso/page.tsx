@@ -167,7 +167,7 @@ export default function PaginaCurso() {
                 <span className="cifra">{base.length}</span>
                 <span className="curso-progreso-total">lecciones · {minutos} min</span>
               </p>
-              <p className="curso-siguiente">Todavía no estás inscrito. Inscribirte es gratis y el módulo 1 también.</p>
+              <p className="curso-siguiente">Todavía no estás inscrito. Inscríbete y toma gratis su módulo 1.</p>
               <BotonInscribirse curso={cursoId} />
             </>
           ) : (
@@ -211,7 +211,7 @@ export default function PaginaCurso() {
             <strong>{parteGratis(datos.curso)}</strong> La membresía se paga con OXXO, SPEI o Mercado Pago.
           </p>
           <Link href="/membresia" className="boton boton-chico boton-secundario">
-            {pagoPendiente ? "Ver mi ficha de pago" : `Unirme por ${moneda(comunidad.precio_mensual)} al mes`}
+            {pagoPendiente ? "Ver mi ficha de pago" : `Activar membresía por ${moneda(comunidad.precio_mensual)} al mes`}
           </Link>
         </div>
       )}

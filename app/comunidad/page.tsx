@@ -256,7 +256,7 @@ export default function PaginaComunidad() {
               asistente. Paga con OXXO, SPEI o Mercado Pago.
             </p>
             <Link href="/membresia" className="boton boton-secundario boton-bloque solo-movil">
-              {pagoPendiente ? "Ver mi ficha de pago" : `Unirme por ${precio} al mes`}
+              {pagoPendiente ? "Ver mi ficha de pago" : `Activar membresía por ${precio} al mes`}
             </Link>
             <Link href="/membresia" className="enlace solo-escritorio lateral-enlace">
               {pagoPendiente ? "Ver mi ficha de pago" : "Ver qué incluye y cómo se paga"}

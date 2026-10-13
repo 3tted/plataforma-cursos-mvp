@@ -58,11 +58,6 @@ export default function PresentacionComunidad({
 
   if (!comunidad) return null;
   const precio = moneda(comunidad.precio_mensual);
-  // "al módulo 1" solo si en todos sus cursos el módulo 1 es lo gratis.
-  const textoEntrar =
-    cursosComunidad.length > 0 && cursosComunidad.every((c) => c.gratis === "Módulo 1 gratis")
-      ? "Entrar gratis al módulo 1"
-      : "Entrar gratis";
   const totalLecciones = cursosComunidad.reduce((s, c) => s + c.lecciones.length, 0);
 
   const obtienes = [
@@ -90,7 +85,10 @@ export default function PresentacionComunidad({
         ))}
         <li>
           <IconoBillete width={18} height={18} />
-          <span>Unirte es gratis y hay lecciones gratis para empezar; el resto es con la membresía de {precio} al mes.</span>
+          <span>
+            Unirte a la comunidad es gratis. Cada curso tiene su módulo 1 gratis; el resto se desbloquea con la membresía
+            de {precio} al mes.
+          </span>
         </li>
       </ul>
     </div>
@@ -227,9 +225,9 @@ export default function PresentacionComunidad({
           {sobre}
           <div className="presentacion-unirse">
             <button type="button" className="boton" onClick={unirme} disabled={enviando || !usuario}>
-              {enviando ? "Uniéndote…" : textoEntrar}
+              {enviando ? "Uniéndote…" : "Unirme gratis a la comunidad"}
             </button>
-            <p className="nota">Después eliges a qué cursos inscribirte.</p>
+            <p className="nota">Al unirte puedes inscribirte a sus cursos y tomar gratis el módulo 1 de cada uno.</p>
           </div>
           {error && (
             <p className="error" role="alert">

@@ -109,7 +109,7 @@ export default function PaginaLeccion() {
   const cursoTerminado = !leccion.deCoach && completadasBase === base.length;
   const precio = moneda(datos.comunidad.precio_mensual);
   const enlaceMembresia = (desde: string) => `/membresia?leccion=${desde}`;
-  const textoUnirse = pagoPendiente ? "Ver mi ficha de pago" : `Unirme por ${precio} al mes`;
+  const textoUnirse = pagoPendiente ? "Ver mi ficha de pago" : `Activar membresía por ${precio} al mes`;
 
   // Pestañas del contenido: solo las que esta lección tiene.
   const preguntasRepaso = leccion.deCoach ? 0 : (evaluaciones?.repaso[leccion.id]?.length ?? 0);
@@ -241,7 +241,7 @@ export default function PaginaLeccion() {
                           {l.titulo}
                           {(lHecha || lBloqueada || lEnEspera) && (
                             <span className="sr-only">
-                              {lHecha ? " (completada)" : lBloqueada ? " (para miembros)" : " (se abre al terminar la anterior)"}
+                              {lHecha ? " (completada)" : lBloqueada ? " (con membresía)" : " (se abre al terminar la anterior)"}
                             </span>
                           )}
                         </span>
@@ -284,7 +284,7 @@ export default function PaginaLeccion() {
             <span className="bloqueo-icono" data-tipo="pago">
               <IconoBillete width={22} height={22} />
             </span>
-            <h2>Esta lección es para miembros</h2>
+            <h2>Esta lección es con membresía</h2>
             <p className="texto-suave">{leccion.resumen}</p>
             <p>
               Con la membresía tienes el curso completo y el asistente te responde con todas las lecciones. Se paga en
@@ -444,7 +444,7 @@ export default function PaginaLeccion() {
                           .slice(numeroModulo)
                           .filter((m) => m.id !== "MC")
                           .map((m) => m.titulo)
-                          .join(" y ")}) es para miembros.
+                          .join(" y ")}) es con membresía.
                       </p>
                     )}
                   </div>
@@ -479,7 +479,7 @@ export default function PaginaLeccion() {
                 {siguienteBloqueada && (
                   <>
                     <IconoBillete width={14} height={14} />
-                    <span className="sr-only"> (para miembros)</span>
+                    <span className="sr-only"> (con membresía)</span>
                   </>
                 )}
                 <IconoFlechaDer width={14} height={14} />
@@ -526,7 +526,7 @@ export default function PaginaLeccion() {
                 <>
                   <small>
                     Siguiente lección · <span className="cifra">{siguiente.duracion_min}</span> min
-                    {siguienteBloqueada && " · para miembros"}
+                    {siguienteBloqueada && " · con membresía"}
                   </small>
                   <strong>{siguiente.titulo}</strong>
                 </>

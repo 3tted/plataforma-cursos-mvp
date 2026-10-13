@@ -368,7 +368,7 @@ export function responderEnModoDemo(
   if (cerrados.length && (!abiertos.length || cerrados[0].puntos > abiertos[0].puntos)) {
     const leccion = lecciones.find((l) => l.id === cerrados[0].f.leccion)!;
     const partes = [
-      `**Esto se explica en una lección para miembros:** [${leccion.id}]`,
+      `**Esto se explica en una lección con membresía:** [${leccion.id}]`,
       `De qué trata: ${leccion.resumen}`,
       "Con la membresía, el asistente te responde con esa lección completa.",
     ];
@@ -388,7 +388,7 @@ export function responderEnModoDemo(
   const umbral = (abiertos[0]?.puntos ?? 0) * 0.6;
   const tambien = [...new Set(cerrados.filter((x) => x.puntos >= umbral).map((x) => x.f.leccion))].slice(0, 2);
   const extra = tambien.length
-    ? `\n\nTambién se habla de esto en ${tambien.map((id) => `[${id}]`).join(" ")}, para miembros.`
+    ? `\n\nTambién se habla de esto en ${tambien.map((id) => `[${id}]`).join(" ")}, con membresía.`
     : "";
   return `${aviso}\n\n${elegidos.map(citar).join("\n\n")}${extra}`;
 }

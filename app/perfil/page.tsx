@@ -195,7 +195,7 @@ export default function PaginaPerfil() {
   const desde = usuario.desde ? new Date(usuario.desde) : new Date();
   const visibles = grupo === "todas" ? contribuciones : contribuciones.filter((c) => c.comunidad === grupo);
   const estadoMembresia = (comunidad: string) =>
-    usuario.rol === "coach" ? "Coach de la comunidad" : membresiaEn(comunidad) ? "Miembro" : "Acceso gratis al módulo 1";
+    usuario.rol === "coach" ? "Coach de la comunidad" : membresiaEn(comunidad) ? "Membresía activa" : "Acceso gratis al módulo 1";
 
   const abrirEdicion = () => {
     setNombre(usuario.nombre);
@@ -226,7 +226,7 @@ export default function PaginaPerfil() {
         </section>
 
         <section aria-labelledby="membresias-titulo" className="perfil-seccion">
-          <h2 id="membresias-titulo">Membresías</h2>
+          <h2 id="membresias-titulo">Tus comunidades</h2>
           {suyas.length === 0 && (
             <p className="vacio">
               Todavía no eres parte de ninguna comunidad. <Link href="/comunidades">Ve el directorio</Link> para unirte a una.

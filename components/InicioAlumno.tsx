@@ -146,7 +146,7 @@ export default function InicioAlumno() {
             {inscritos.length ? "Tus cursos" : unidas.length > 1 ? "Cursos de tus comunidades" : `Cursos de ${unidas[0].nombre}`}
           </h2>
           {porInscribir.length > 0 && (
-            <p className="texto-suave">Inscribirte es gratis; el módulo 1 de cada curso también.</p>
+            <p className="texto-suave">Inscríbete a un curso y toma gratis su módulo 1.</p>
           )}
         </div>
       </div>

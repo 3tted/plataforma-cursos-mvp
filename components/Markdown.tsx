@@ -26,14 +26,14 @@ function Cita({ id }: { id: string }) {
     <Link
       className="cita"
       href={`/curso/${id}`}
-      title={bloqueada ? `${leccion.titulo} (lección para miembros)` : leccion.titulo}
+      title={bloqueada ? `${leccion.titulo} (lección con membresía)` : leccion.titulo}
       data-bloqueada={bloqueada}
     >
       <span className="cita-id">{id}</span>
       {bloqueada && (
         <span className="cita-candado">
           <IconoBillete width={13} height={13} />
-          <span className="sr-only">Lección para miembros:</span>
+          <span className="sr-only">Lección con membresía:</span>
         </span>
       )}
       <span className="cita-titulo">{leccion.titulo}</span>

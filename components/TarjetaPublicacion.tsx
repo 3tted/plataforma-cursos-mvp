@@ -229,11 +229,11 @@ export default function TarjetaPublicacion({
             onChange={(e) => setComentario(e.target.value)}
             placeholder={total === 0 ? "Sé la primera persona en comentar" : "Escribe un comentario"}
             maxLength={2000}
-            aria-label={`Comentar «${p.titulo}»`}
+            aria-label={`Escribe un comentario en «${p.titulo}»`}
             required
           />
           <button type="submit" className="boton boton-chico" disabled={enviando || !comentario.trim()}>
-            {enviando ? "Enviando…" : "Comentar"}
+            {enviando ? "Publicando…" : "Publicar comentario"}
           </button>
         </form>
         {error && (

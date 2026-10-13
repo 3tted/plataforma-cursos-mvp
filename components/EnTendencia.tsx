@@ -13,6 +13,9 @@ import TarjetaComunidad from "./TarjetaComunidad";
 // Lo que está en tendencia en el inicio: un curso destacado (el de más
 // alumnos que la persona todavía no toma), una comunidad destacada (la de más
 // miembros a la que no pertenece) y, abajo, las demás comunidades.
+/** Con pocos alumnos o miembros, el número hace ver vacío lo destacado: no se muestra. */
+const MINIMO_PARA_MOSTRAR = 10;
+
 export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: string }) {
   const { cursos, inscritoEn, enLaComunidad, cambiarCurso, cambiarComunidad, comunidades: COMUNIDADES, temaDe } = useApp();
   const [tendencias, setTendencias] = useState<Tendencias | null>(null);
@@ -62,7 +65,7 @@ export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: stri
                 <p className="destacado-datos texto-suave">
                   <span className="cifra">{curso.lecciones.length}</span> lecciones ·{" "}
                   <span className="cifra">{curso.minutos}</span> min
-                  {cursoTop && cursoTop.alumnos > 0 && (
+                  {cursoTop && cursoTop.alumnos >= MINIMO_PARA_MOSTRAR && (
                     <>
                       {" "}
                       · <span className="cifra">{cursoTop.alumnos}</span> {cursoTop.alumnos === 1 ? "alumno" : "alumnos"}
@@ -95,7 +98,7 @@ export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: stri
                       </>
                     );
                   })()}
-                  {comunidadTop && comunidadTop.miembros > 0 && (
+                  {comunidadTop && comunidadTop.miembros >= MINIMO_PARA_MOSTRAR && (
                     <>
                       {" "}
                       · <span className="cifra">{comunidadTop.miembros}</span>{" "}

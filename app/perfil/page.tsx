@@ -386,7 +386,7 @@ export default function PaginaPerfil() {
 
           <dl className="perfil-cifras">
             <div>
-              <dd className="cifra">{perfil ? perfil.publicaciones.length + perfil.comentarios.length : "…"}</dd>
+              <dd className="cifra">{perfil ? contribuciones.length : "…"}</dd>
               <dt>Contribuciones</dt>
             </div>
             <div>

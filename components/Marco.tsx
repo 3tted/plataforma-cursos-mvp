@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useApp } from "./Contexto";
 import Encabezado from "./Encabezado";
 import PaginaVisitantes from "./PaginaVisitantes";
@@ -19,7 +19,7 @@ const RUTAS = [
   /^\/membresia$/,
   /^\/asistente$/,
   /^\/perfil$/,
-  /^\/coach(\/comunidades|\/curso\/[^/]+)?$/,
+  /^\/coach(\/comunidades|\/comunidad\/[^/]+|\/curso\/[^/]+)?$/,
 ];
 
 // Con sesión se ve la plataforma (barra, página y pie); sin sesión, la página
@@ -58,6 +58,29 @@ export default function Marco({ children }: { children: ReactNode }) {
         {children}
       </main>
       <PiePagina fondoApp />
+      <AvisoFlotante />
     </>
+  );
+}
+
+// El aviso breve del contexto: abajo de la pantalla, se va solo a los 7 segundos.
+function AvisoFlotante() {
+  const { aviso, avisar } = useApp();
+  useEffect(() => {
+    if (!aviso) return;
+    const id = setTimeout(() => avisar(null), 7000);
+    return () => clearTimeout(id);
+  }, [aviso, avisar]);
+  return (
+    <div className="aviso-flotante-zona" role="status" aria-live="polite">
+      {aviso && (
+        <p key={aviso.id} className="aviso-flotante">
+          <span>{aviso.texto}</span>
+          <button type="button" className="aviso-flotante-cerrar" onClick={() => avisar(null)} aria-label="Cerrar aviso">
+            ×
+          </button>
+        </p>
+      )}
+    </div>
   );
 }

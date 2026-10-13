@@ -211,6 +211,8 @@ export interface Publicacion {
 
 export interface LeccionCoach {
   id: number;
+  /** Curso al que la agregó la coach (sin el dato: el curso principal, como antes). */
+  curso?: string;
   titulo: string;
   contenido: string;
   creadaEn: string;

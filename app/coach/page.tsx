@@ -14,8 +14,6 @@ import { api, fechaCorta, hace, moneda } from "@/lib/cliente";
 import { agrupar } from "@/lib/preguntas";
 import type { LeccionCoach, ResumenCoach } from "@/lib/tipos";
 
-// Las lecciones pegadas en el panel se agregan a este curso.
-const CURSO_PRINCIPAL = "finanzas-negocio";
 const NOMBRE_METODO = { oxxo: "OXXO", spei: "SPEI", mercadopago: "Mercado Pago" } as const;
 
 export default function PaginaCoach() {
@@ -80,7 +78,7 @@ export default function PaginaCoach() {
     try {
       const nueva = await api<LeccionCoach & { idCurso: string }>("/api/coach/lecciones", {
         method: "POST",
-        json: { titulo, contenido },
+        json: { titulo, contenido, curso: cursoId },
       });
       setAgregada(nueva.idCurso);
       setTitulo("");
@@ -220,9 +218,11 @@ export default function PaginaCoach() {
             {grupos.map((g) => (
               <li key={g.clave} className="grupo-pregunta">
                 <div className="grupo-pregunta-cabecera">
-                  <span className="grupo-pregunta-conteo">
-                    <span className="cifra">{g.veces}</span> {g.veces === 1 ? "vez" : "veces"}
-                  </span>
+                  {g.veces > 1 && (
+                    <span className="grupo-pregunta-conteo">
+                      <span className="cifra">{g.veces}</span> veces
+                    </span>
+                  )}
                   <div>
                     <p className="pregunta-texto">{g.pregunta}</p>
                     <p className="texto-suave pregunta-meta">
@@ -301,11 +301,11 @@ export default function PaginaCoach() {
 
       <section className="tarjeta" aria-labelledby="propia-titulo">
         <h2 id="propia-titulo">Prueba el asistente con tu propio contenido</h2>
-        {cursoId === CURSO_PRINCIPAL ? (
+        {datos ? (
           <>
             <p className="texto-suave">
-              Pega el texto o la transcripción de una lección tuya. Se agrega al curso y el asistente empieza a responder
-              con ella al momento.
+              Pega el texto o la transcripción de una lección tuya. Se agrega a «{datos.curso.titulo}» y el asistente
+              empieza a responder con ella al momento.
             </p>
             <form className="formulario-leccion" onSubmit={agregarLeccion}>
               <label className="campo">
@@ -382,10 +382,7 @@ export default function PaginaCoach() {
             )}
           </>
         ) : (
-          <p className="texto-suave">
-            Las lecciones que pegas aquí se agregan a «Finanzas claras para tu negocio». Elige ese curso arriba para
-            probarlo.
-          </p>
+          <p className="texto-suave">Cargando el curso…</p>
         )}
       </section>
 

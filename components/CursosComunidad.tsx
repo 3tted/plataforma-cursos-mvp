@@ -29,7 +29,7 @@ export default function CursosComunidad({ fila = false }: { fila?: boolean }) {
           return (
             <li key={c.id} className="curso-comunidad" aria-current={c.id === cursoId ? "true" : undefined}>
               <Link href="/curso" className="curso-comunidad-portada" onClick={() => cambiarCurso(c.id)} tabIndex={-1} aria-hidden="true">
-                <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} />
+                <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} />
               </Link>
               <div className="curso-comunidad-cuerpo">
                 <Link href="/curso" className="curso-comunidad-nombre" onClick={() => cambiarCurso(c.id)}>

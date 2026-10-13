@@ -8289,3 +8289,75 @@ button.tarjeta-comunidad-enlace {
 .barra-conteo {
   grid-column: 1 / -1;
 }
+
+/* Aviso breve abajo de la pantalla (al inscribirse, por ejemplo) */
+.aviso-flotante-zona {
+  position: fixed;
+  left: 50%;
+  /* Arriba de la barra de "Siguiente lección" */
+  bottom: 96px;
+  z-index: 80;
+  width: min(560px, calc(100vw - 32px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.aviso-flotante {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 12px 14px 18px;
+  border-radius: var(--radio-control);
+  background: var(--graphite);
+  color: var(--white);
+  font-size: var(--t-small);
+  font-weight: 600;
+  line-height: 1.4;
+  box-shadow: 0 12px 32px rgb(17 17 17 / 28%);
+  pointer-events: auto;
+  animation: aviso-flotante-entra 0.2s ease-out;
+}
+
+.aviso-flotante span {
+  flex: 1;
+}
+
+.aviso-flotante-cerrar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--white);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.aviso-flotante-cerrar:hover {
+  background: rgb(255 255 255 / 15%);
+}
+
+@keyframes aviso-flotante-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aviso-flotante {
+    animation: none;
+  }
+}
+
+/* En celular, también arriba de la barra de navegación de abajo */
+@media (max-width: 760px) {
+  .aviso-flotante-zona {
+    bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+}

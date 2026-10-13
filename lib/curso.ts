@@ -169,10 +169,11 @@ export async function cargarCurso(id: string = CURSO_PRINCIPAL, opciones: Opcion
     videos: a.videos ?? [],
     presentaciones: a.presentaciones ?? [],
   }));
-  const conPropias = base.curso.id === CURSO_PRINCIPAL && propias.length > 0;
+  const suyas = propias.filter((l) => (l.curso ?? CURSO_PRINCIPAL) === base.curso.id);
+  const conPropias = suyas.length > 0;
   if (!conPropias && videos.length === 0 && presentaciones.length === 0) return base;
 
-  const modulos = conPropias ? [...base.curso.modulos, moduloDeCoach(base, propias)] : base.curso.modulos;
+  const modulos = conPropias ? [...base.curso.modulos, moduloDeCoach(base, suyas)] : base.curso.modulos;
   const porLeccion = new Map(videos.map((v) => [v.leccion, v]));
   const presentacionDe = new Map(presentaciones.map((p) => [p.leccion, p]));
   return {

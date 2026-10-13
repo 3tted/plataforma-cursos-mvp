@@ -77,7 +77,7 @@ export default function FotoPortada({
 
   return (
     <div className="foto-portada">
-      <PortadaTema tema={tema} clave={id} foto={foto} className="foto-portada-vista" />
+      <PortadaTema tema={tema} clave={id} foto={foto} className="foto-portada-vista" alt="Vista previa de la portada" />
       <div className="foto-portada-acciones">
         <p className="foto-portada-titulo">Foto de portada</p>
         <p className="nota">

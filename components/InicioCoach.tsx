@@ -110,7 +110,7 @@ export default function InicioCoach() {
             return (
               <li key={c.id}>
                 <Link href="/curso" className="inicio-curso" onClick={() => cambiarCurso(c.id)}>
-                  <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} />
+                  <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} />
                   <span className="inicio-curso-cuerpo">
                     <span className={c.publicado ? "pastilla pastilla-ok" : "pastilla pastilla-pendiente"}>
                       {c.publicado ? "Publicado" : "Sin publicar"}
@@ -190,7 +190,12 @@ export default function InicioCoach() {
                 <p className="inicio-publicacion-titulo">{g.pregunta}</p>
                 <p className="texto-suave inicio-meta">
                   {g.personas === 1 ? g.ultima.autor : `${g.personas} personas`} ·{" "}
-                  <span className="cifra">{g.veces}</span> {g.veces === 1 ? "vez" : "veces"} · {hace(g.ultima.creadaEn)}
+                  {g.veces > 1 && (
+                    <>
+                      <span className="cifra">{g.veces}</span> veces ·{" "}
+                    </>
+                  )}
+                  {hace(g.ultima.creadaEn)}
                 </p>
                 <button type="button" className="accion" onClick={() => responder(g.pregunta, g.veces)}>
                   <IconoComunidad width={15} height={15} /> Responder en la comunidad

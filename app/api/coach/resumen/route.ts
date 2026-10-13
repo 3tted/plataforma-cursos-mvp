@@ -57,7 +57,12 @@ export const GET = manejar(async (req: Request) => {
         .slice(0, 8),
       pagos: [...pagos].reverse().slice(0, 20),
       ingresosSimulados: pagos.filter((p) => p.estado === "pagado").reduce((s, p) => s + p.monto, 0),
-      leccionesCoach: a.leccionesCoach,
+      // Las lecciones pegadas del curso (o de los cursos de la comunidad) que se ve.
+      leccionesCoach: alcance
+        ? a.leccionesCoach.filter((l) =>
+            alcance.curso ? deCurso(l) === alcance.curso : alcance.cursos.has(deCurso(l)),
+          )
+        : a.leccionesCoach,
     };
   });
   // Títulos de las lecciones citadas, de cualquier curso.

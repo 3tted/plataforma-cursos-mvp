@@ -314,7 +314,7 @@ export default function PaginaLeccion() {
             <div className="bloqueo-acciones">
               <BotonInscribirse
                 curso={cursoId}
-                texto={enComunidad ? "Inscribirme al curso" : "Unirme e inscribirme al curso"}
+                texto="Inscribirme"
               />
             </div>
           </div>

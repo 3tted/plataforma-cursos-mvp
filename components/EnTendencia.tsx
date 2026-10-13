@@ -52,7 +52,12 @@ export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: stri
         <div className="tendencia-destacados">
           {curso && (
             <article className="destacado">
-              <PortadaTema tema={temaDe(curso.comunidad)} clave={curso.id} className="destacado-portada" encajar />
+              <PortadaTema
+                tema={temaDe(curso.comunidad)}
+                clave={curso.id}
+                className="destacado-portada"
+                alt={`Portada del curso «${curso.titulo}»`}
+              />
               <div className="destacado-cuerpo">
                 <span className="pastilla pastilla-marca">Curso en tendencia</span>
                 <h3>{curso.titulo}</h3>
@@ -81,7 +86,12 @@ export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: stri
 
           {comunidad && (
             <article className="destacado">
-              <PortadaTema tema={comunidad.tema} clave={comunidad.id} className="destacado-portada" encajar />
+              <PortadaTema
+                tema={comunidad.tema}
+                clave={comunidad.id}
+                className="destacado-portada"
+                alt={`Portada de la comunidad «${comunidad.nombre}»`}
+              />
               <div className="destacado-cuerpo">
                 <span className="pastilla pastilla-marca">Comunidad en tendencia</span>
                 <h3>{comunidad.nombre}</h3>

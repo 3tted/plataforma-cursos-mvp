@@ -61,7 +61,11 @@ export default function PortadaTema({
   }
   const Icono = ICONOS[tema] ?? Sparkle;
   return (
-    <span className={`portada-tema portada-tema-sin-foto ${className}`} data-tema={tema}>
+    <span
+      className={`portada-tema portada-tema-sin-foto ${className}`}
+      data-tema={tema}
+      {...(alt ? { role: "img", "aria-label": alt } : {})}
+    >
       <Icono className="portada-tema-icono" weight="regular" aria-hidden="true" focusable="false" />
       <span className="portada-tema-etiqueta">{tema}</span>
     </span>

@@ -83,6 +83,9 @@ interface ContextoApp {
   fotoDe: (clave: string) => Foto | null;
   /** Vuelve a pedir cursos y comunidades (por ejemplo, al publicar un curso). */
   recargarCatalogo: () => Promise<void>;
+  /** Aviso breve que aparece abajo de la pantalla (por ejemplo, al inscribirse). */
+  aviso: { texto: string; id: number } | null;
+  avisar: (texto: string | null) => void;
   cursoId: string;
   /** Cambia el curso activo: las páginas del curso, el examen y el asistente pasan a ese curso. */
   cambiarCurso: (id: string) => void;
@@ -485,6 +488,9 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     [cursos, comunidades, datos],
   );
 
+  const [aviso, setAviso] = useState<{ texto: string; id: number } | null>(null);
+  const avisar = useCallback((texto: string | null) => setAviso(texto ? { texto, id: Date.now() } : null), []);
+
   const valor: ContextoApp = {
     listo,
     usuario,
@@ -504,6 +510,8 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     temaDe,
     fotoDe,
     recargarCatalogo,
+    aviso,
+    avisar,
     cursoId,
     cambiarCurso,
     comunidadId,

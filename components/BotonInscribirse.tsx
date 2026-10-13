@@ -8,13 +8,13 @@ import { useApp } from "./Contexto";
 export default function BotonInscribirse({
   curso,
   className = "boton",
-  texto = "Inscribirme al curso",
+  texto = "Inscribirme",
 }: {
   curso: string;
   className?: string;
   texto?: string;
 }) {
-  const { enComunidad, unirmeAComunidad, inscribirmeACurso, cambiarCurso } = useApp();
+  const { enComunidad, unirmeAComunidad, inscribirmeACurso, cambiarCurso, cursos, comunidades, avisar } = useApp();
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,9 +22,15 @@ export default function BotonInscribirse({
     setEnviando(true);
     setError(null);
     try {
-      if (!enComunidad) await unirmeAComunidad();
+      const seUne = !enComunidad;
+      if (seUne) await unirmeAComunidad();
       await inscribirmeACurso(curso);
       cambiarCurso(curso);
+      // El botón desaparece al inscribirse: el aviso dice qué pasó.
+      const elegido = cursos.find((c) => c.id === curso);
+      const titulo = elegido ? `«${elegido.titulo}»` : "el curso";
+      const comunidad = comunidades.find((c) => c.id === elegido?.comunidad)?.nombre ?? "la comunidad";
+      avisar(seUne ? `Te uniste a ${comunidad} y te inscribiste a ${titulo}.` : `Te inscribiste a ${titulo}.`);
     } catch (e) {
       setError(e instanceof TypeError ? "No pudimos conectarnos. Inténtalo de nuevo." : (e as Error).message);
     } finally {

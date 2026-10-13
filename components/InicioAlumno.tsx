@@ -97,7 +97,7 @@ export default function InicioAlumno() {
 
   const tarjetaCurso = (c: ResumenCurso) => {
     const hechasCurso = c.lecciones.filter((id) => completadas.includes(id)).length;
-    const portada = <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} />;
+    const portada = <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} />;
     const datosCurso = (
       <span className="texto-suave inicio-meta">
         {unidas.length > 1 && `${nombreComunidad(c.comunidad)} · `}
@@ -123,7 +123,6 @@ export default function InicioAlumno() {
         <Link href="/curso" className="inicio-curso inicio-curso-alumno" onClick={() => cambiarCurso(c.id)}>
           {portada}
           <span className="inicio-curso-cuerpo">
-            {c.id === cursoId && inscritos.length > 1 && <span className="pastilla pastilla-marca">Lo estás viendo</span>}
             <span className="ficha-nombre">{c.titulo}</span>
             {datosCurso}
             <span className="progreso" aria-hidden="true">

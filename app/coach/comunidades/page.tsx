@@ -231,6 +231,9 @@ export default function PaginaMisComunidades() {
           >
             Crear curso
           </button>
+          <Link href="/coach/empresa" className="boton boton-fantasma-borde">
+            Mi empresa
+          </Link>
         </div>
       </header>
 

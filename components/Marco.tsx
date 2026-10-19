@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { useApp } from "./Contexto";
 import Encabezado from "./Encabezado";
+import { AplicarMarca } from "./Marca";
 import PaginaVisitantes from "./PaginaVisitantes";
 import PiePagina from "./PiePagina";
 
@@ -19,7 +20,7 @@ const RUTAS = [
   /^\/membresia$/,
   /^\/asistente$/,
   /^\/perfil$/,
-  /^\/coach(\/comunidades|\/comunidad\/[^/]+|\/curso\/[^/]+)?$/,
+  /^\/coach(\/comunidades|\/comunidad\/[^/]+|\/curso\/[^/]+|\/empresa)?$/,
 ];
 
 // Con sesión se ve la plataforma (barra, página y pie); sin sesión, la página
@@ -50,6 +51,7 @@ export default function Marco({ children }: { children: ReactNode }) {
   if (!usuario) return <PaginaVisitantes />;
   return (
     <>
+      <AplicarMarca />
       <a href="#contenido" className="saltar" data-app-fondo>
         Saltar al contenido
       </a>

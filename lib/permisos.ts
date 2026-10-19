@@ -1,6 +1,6 @@
 import type { Almacen } from "./almacen";
 import { ErrorDeDatos } from "./http";
-import type { ComunidadCreada, CursoCreado } from "./tipos";
+import type { ComunidadCreada, CursoCreado, Empresa } from "./tipos";
 
 // Permisos del MVP: la coach se identifica con el encabezado X-Rol y su
 // nombre. En la Fase 2 los da la sesión de su cuenta.
@@ -20,6 +20,13 @@ export function comunidadDeCoach(a: Almacen, id: unknown, autor: string): Comuni
   if (!c) throw new ErrorDeDatos("No encontramos esa comunidad.");
   if (c.autor !== autor) throw new SinPermiso("Esta comunidad es de otra coach.");
   return c;
+}
+
+export function empresaDeCoach(a: Almacen, id: unknown, autor: string): Empresa {
+  const e = (a.empresas ?? []).find((x) => x.id === id);
+  if (!e) throw new ErrorDeDatos("Primero guarda tu empresa para poder subir su logo.");
+  if (e.dueno !== autor) throw new SinPermiso("Esta empresa es de otra coach.");
+  return e;
 }
 
 export function cursoDeCoach(a: Almacen, id: unknown, autor: string): CursoCreado {

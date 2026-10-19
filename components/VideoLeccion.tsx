@@ -6,6 +6,7 @@ import { MAX_BYTES_VIDEO, tipoDeVideo, tamañoLegible } from "@/lib/reglas-video
 import type { Leccion, OpcionesPresentacion } from "@/lib/tipos";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
+import { acentoSobreOscuro } from "@/lib/marca";
 import { posterDeVideo } from "@/lib/poster";
 import { IconoAsistenteGeneral, IconoSubir } from "./Iconos";
 import EleccionVoz from "./EleccionVoz";
@@ -31,7 +32,7 @@ export default function VideoLeccion({
   sinAdelantar?: boolean;
   alTerminar?: () => void;
 }) {
-  const { usuario, recargarCurso } = useApp();
+  const { usuario, recargarCurso, datos } = useApp();
   const esCoach = usuario?.rol === "coach";
   const [estado, setEstado] = useState<Estado>("inactivo");
   const [progreso, setProgreso] = useState(0);
@@ -224,7 +225,7 @@ export default function VideoLeccion({
           preload="metadata"
           playsInline
           src={leccion.video.url}
-          poster={posterDeVideo(numero ? `Lección ${numero}` : "Lección", leccion.titulo)}
+          poster={posterDeVideo(numero ? `Lección ${numero}` : "Lección", leccion.titulo, acentoSobreOscuro(datos?.comunidad.marca?.color))}
           aria-label={`Video de la lección «${leccion.titulo}»`}
           onLoadedMetadata={() => {
             visto.current = 0;

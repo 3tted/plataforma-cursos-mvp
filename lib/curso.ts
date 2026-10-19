@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { consultar, type Almacen } from "./almacen";
 import { etiquetaGratis } from "./gratis";
-import type { Comunidad, CursoCreado, Curso, DatosCurso, Leccion, LeccionCoach, Modulo, ResumenCurso } from "./tipos";
+import type { Comunidad, CursoCreado, Curso, DatosCurso, Leccion, LeccionCoach, MarcaEmpresa, Modulo, ResumenCurso } from "./tipos";
 
 const DATOS = path.join(process.cwd(), "data");
 const SEPARADOR_TRANSCRIPCION = "<!-- transcripcion -->";
@@ -80,6 +80,12 @@ async function cargarCursoDeArchivo(id: string): Promise<DatosCurso> {
 }
 
 /** La comunidad que creó una coach, en la forma que usa el resto de la plataforma. */
+/** La marca de la empresa de una coach, si ya la configuró. */
+function marcaDe(a: Almacen, dueno: string): { marca?: MarcaEmpresa } {
+  const e = (a.empresas ?? []).find((x) => x.dueno === dueno);
+  return e ? { marca: { nombre: e.nombre, color: e.color, ...(e.logo ? { logo: e.logo } : {}) } } : {};
+}
+
 export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
   const c = (a.comunidadesCoach ?? []).find((x) => x.id === id);
   if (!c) return null;
@@ -91,6 +97,7 @@ export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
     descripcion: c.descripcion,
     ...(c.acerca ? { acerca: c.acerca } : {}),
     ...(c.foto ? { foto: c.foto } : {}),
+    ...marcaDe(a, c.autor),
     precio_mensual: c.precio_mensual,
     moneda: c.moneda,
   };

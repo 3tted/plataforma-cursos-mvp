@@ -1,20 +1,23 @@
 import { borrarFoto, guardarFoto, leerFoto, modificar } from "@/lib/almacen";
 import { error, manejar } from "@/lib/http";
-import { coachDe, comunidadDeCoach, conPermiso, cursoDeCoach } from "@/lib/permisos";
+import { coachDe, comunidadDeCoach, conPermiso, cursoDeCoach, empresaDeCoach } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
-// Fotos de portada que sube la coach: la de una comunidad ("comunidad-<id>") o
-// la de un curso ("curso-<id>"). El navegador ya la manda reducida a JPEG.
+// Fotos que sube la coach: la portada de una comunidad ("comunidad-<id>") o de
+// un curso ("curso-<id>"), y el logo de su empresa ("empresa-<id>"). El
+// navegador ya la manda reducida (JPEG las portadas, PNG el logo).
 // Como el resto del MVP, el permiso se simula con X-Rol y el nombre de la coach.
 
 type Contexto = { params: Promise<{ clave: string }> };
 
 const MAX_BYTES_FOTO = 3 * 1024 * 1024;
 
-function partes(clave: string): { de: "comunidad" | "curso"; id: string } | null {
-  const m = /^(comunidad|curso)-([a-z0-9-]{1,60})$/.exec(clave);
-  return m ? { de: m[1] as "comunidad" | "curso", id: m[2] } : null;
+type De = "comunidad" | "curso" | "empresa";
+
+function partes(clave: string): { de: De; id: string } | null {
+  const m = /^(comunidad|curso|empresa)-([a-z0-9-]{1,60})$/.exec(clave);
+  return m ? { de: m[1] as De, id: m[2] } : null;
 }
 
 // JPEG, PNG o WebP, por sus primeros bytes.
@@ -25,12 +28,19 @@ function tipoDeFoto(b: Buffer): string | null {
   return null;
 }
 
-/** Pone (o quita, con null) la url de la foto en la comunidad o el curso de la coach. */
+/** Pone (o quita, con null) la url de la foto en la comunidad, el curso o la empresa de la coach. */
 async function anotar(req: Request, clave: string, url: string | null) {
   const p = partes(clave);
   if (!p) return null;
   const autor = coachDe(req, new URL(req.url).searchParams.get("autor"));
   await modificar((a) => {
+    if (p.de === "empresa") {
+      const empresa = empresaDeCoach(a, p.id, autor);
+      if (url) empresa.logo = url;
+      else delete empresa.logo;
+      empresa.actualizadaEn = new Date().toISOString();
+      return;
+    }
     const dueno = p.de === "curso" ? cursoDeCoach(a, p.id, autor) : comunidadDeCoach(a, p.id, autor);
     if (url) dueno.foto = url;
     else delete dueno.foto;

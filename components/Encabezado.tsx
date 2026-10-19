@@ -4,12 +4,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
+import { useMarcaActiva } from "./Marca";
 import { IconoAsistenteGeneral, IconoComunidad, IconoInicio, IconoPanel, IconoSalir } from "./Iconos";
 
 export default function Encabezado() {
   const ruta = usePathname();
   const router = useRouter();
   const { usuario, cerrarSesion } = useApp();
+  // Dentro de una comunidad con marca, la barra lleva el logo (o el nombre) de su empresa.
+  const marca = useMarcaActiva();
 
   // El mismo menú para alumno y coach; la coach suma su panel.
   const enlaces = [
@@ -39,15 +42,16 @@ export default function Encabezado() {
     <header className="barra" data-app-fondo>
       <div className="envoltura barra-interior">
         {/* Imagotipo oficial, tomado del manual de identidad (página "Identidad Básica"). */}
-        <Link href="/" className="marca" aria-label="Merkatics, inicio">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="marca-logo"
-            src="/merkatics-logo.png"
-            alt=""
-            width={2311}
-            height={544}
-          />
+        <Link href="/" className="marca" aria-label={marca ? `${marca.nombre}, inicio` : "Merkatics, inicio"}>
+          {marca?.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="marca-logo marca-logo-empresa" src={marca.logo} alt="" />
+          ) : marca ? (
+            <span className="marca-nombre-empresa">{marca.nombre}</span>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="marca-logo" src="/merkatics-logo.png" alt="" width={2311} height={544} />
+          )}
         </Link>
 
         <nav className="nav" aria-label="Secciones">

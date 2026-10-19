@@ -7,6 +7,7 @@ import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
 import { IconoBillete, IconoCheck, IconoComunidad, IconoEditar, IconoPlay, IconoPublicacion } from "./Iconos";
+import { acentoSobreOscuro } from "@/lib/marca";
 import { posterDeVideo } from "@/lib/poster";
 import PortadaTema from "./PortadaTema";
 
@@ -124,7 +125,7 @@ export default function PresentacionComunidad({
               <video
                 key={video.url}
                 src={video.url}
-                poster={posterDeVideo("Video de bienvenida", comunidad.nombre)}
+                poster={posterDeVideo("Video de bienvenida", comunidad.nombre, acentoSobreOscuro(comunidad.marca?.color))}
                 controls
                 preload="metadata"
                 playsInline

@@ -20,7 +20,8 @@ function renglones(titulo: string): string[] {
   return lista;
 }
 
-export function posterDeVideo(etiqueta: string, titulo: string): string {
+/** acento: color de la etiqueta y la flecha (el de la marca de la empresa, si tiene). */
+export function posterDeVideo(etiqueta: string, titulo: string, acento = "#e2554f"): string {
   const lineas = renglones(titulo);
   const y0 = 360 - ((lineas.length - 1) * 70) / 2;
   const texto = lineas
@@ -28,9 +29,9 @@ export function posterDeVideo(etiqueta: string, titulo: string): string {
     .join("");
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" font-family="Montserrat, Arial, Helvetica, sans-serif">
 <rect width="1280" height="720" fill="#111111"/>
-<polyline points="760,600 900,520 990,560 1180,330" fill="none" stroke="#e2554f" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-<polyline points="1130,330 1180,330 1180,380" fill="none" stroke="#e2554f" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="96" y="${y0 - 100}" font-size="30" font-weight="700" letter-spacing="3" fill="#e2554f">${escapar(etiqueta.toUpperCase())}</text>
+<polyline points="760,600 900,520 990,560 1180,330" fill="none" stroke="${acento}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="1130,330 1180,330 1180,380" fill="none" stroke="${acento}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="96" y="${y0 - 100}" font-size="30" font-weight="700" letter-spacing="3" fill="${acento}">${escapar(etiqueta.toUpperCase())}</text>
 ${texto}
 </svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;

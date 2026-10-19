@@ -118,6 +118,10 @@ export default function EditarComunidad() {
           Ver la comunidad <IconoFlechaDer width={15} height={15} />
         </Link>
       </header>
+      <p className="texto-suave editar-comunidad-marca">
+        El logo y el color de tu marca se cambian en <Link href="/coach/empresa">Mi empresa</Link> y se aplican a todas tus
+        comunidades.
+      </p>
 
       <section className="tarjeta editar-comunidad-foto" aria-label="Foto de portada">
         <FotoPortada

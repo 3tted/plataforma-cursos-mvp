@@ -14,6 +14,8 @@ export interface Comunidad {
   acerca?: string;
   /** Foto de portada que subió la coach (url de /api/fotos). */
   foto?: string;
+  /** Marca de la empresa dueña (color y logo); sin el dato, la de Merkatics. */
+  marca?: MarcaEmpresa;
   precio_mensual: number;
   moneda: string;
 }
@@ -154,6 +156,30 @@ export interface CursoCreado {
   autor: string;
   creadoEn: string;
   actualizadoEn: string;
+}
+
+/**
+ * Empresa (tenant): la cuenta dueña de comunidades y cursos, con su marca. Por
+ * ahora cada coach es una empresa de una persona (dueno = nombre de la coach);
+ * con cuentas reales tendrá varios miembros con su rol.
+ */
+export interface Empresa {
+  id: string;
+  dueno: string;
+  nombre: string;
+  /** Color principal en hex (#rrggbb); los demás tonos se calculan (lib/marca.ts). */
+  color: string;
+  /** Logo (url de /api/fotos). */
+  logo?: string;
+  creadaEn: string;
+  actualizadaEn: string;
+}
+
+/** Lo que la interfaz necesita para pintar la marca de una empresa. */
+export interface MarcaEmpresa {
+  nombre: string;
+  color: string;
+  logo?: string;
 }
 
 export interface ComunidadCreada extends Comunidad {

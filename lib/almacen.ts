@@ -6,6 +6,7 @@ import type {
   Comentario,
   ComunidadCreada,
   CursoCreado,
+  Empresa,
   Inscripcion,
   IntentoExamen,
   IntentoRepaso,
@@ -47,6 +48,8 @@ export interface Almacen {
   cursosCoach?: CursoCreado[];
   /** Presentaciones con IA de las lecciones (solo texto: la voz la pone el dispositivo). */
   presentaciones?: Presentacion[];
+  /** Empresas (tenants) con su marca. Opcional: llegó después. */
+  empresas?: Empresa[];
 }
 
 const DIRECTORIO =

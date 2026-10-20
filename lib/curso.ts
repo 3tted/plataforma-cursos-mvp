@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { consultar, type Almacen } from "./almacen";
+import { EMPRESA_MERKATICS } from "./cuentas";
 import { etiquetaGratis } from "./gratis";
 import type { Comunidad, CursoCreado, Curso, DatosCurso, Leccion, LeccionCoach, MarcaEmpresa, Modulo, ResumenCurso } from "./tipos";
 
@@ -82,7 +83,9 @@ async function cargarCursoDeArchivo(id: string): Promise<DatosCurso> {
 /** La marca de una empresa, si ya eligió su color. */
 export function marcaDe(a: Almacen, empresa: string | undefined): { marca?: MarcaEmpresa } {
   const e = (a.empresas ?? []).find((x) => x.id === empresa);
-  return e?.color ? { marca: { nombre: e.nombre, color: e.color, ...(e.logo ? { logo: e.logo } : {}) } } : {};
+  // Sin logo propio, la barra lleva el nombre de la empresa; Merkatics sigue con su logo de siempre.
+  const logo = e?.logo ?? (e?.id === EMPRESA_MERKATICS ? "/merkatics-logo.png" : undefined);
+  return e?.color ? { marca: { nombre: e.nombre, color: e.color, ...(logo ? { logo } : {}) } } : {};
 }
 
 function empresaNombreDe(a: Almacen, empresa: string | undefined): { empresaNombre?: string } {
@@ -179,11 +182,15 @@ export async function cargarCurso(id: string = CURSO_PRINCIPAL, opciones: Opcion
     const creado = (await cargarCursosCreados(opciones)).find((c) => c.curso.id === id);
     base = creado ?? (await cargarCursoDeArchivo(CURSO_PRINCIPAL));
   }
-  const { propias, videos, presentaciones } = await consultar((a) => ({
+  const { propias, videos, presentaciones, deMerkatics } = await consultar((a) => ({
     propias: a.leccionesCoach,
     videos: a.videos ?? [],
     presentaciones: a.presentaciones ?? [],
+    // Las comunidades que viajan con la plataforma son de la empresa Merkatics y llevan su marca.
+    deMerkatics: { empresa: EMPRESA_MERKATICS, ...empresaNombreDe(a, EMPRESA_MERKATICS), ...marcaDe(a, EMPRESA_MERKATICS) },
   }));
+  // Sin tocar la copia en caché del curso de archivo.
+  if (!base.comunidad.empresa) base = { ...base, comunidad: { ...base.comunidad, ...deMerkatics } };
   const suyas = propias.filter((l) => (l.curso ?? CURSO_PRINCIPAL) === base.curso.id);
   const conPropias = suyas.length > 0;
   if (!conPropias && videos.length === 0 && presentaciones.length === 0) return base;

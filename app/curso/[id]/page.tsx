@@ -53,6 +53,8 @@ export default function PaginaLeccion() {
     enComunidad,
     inscritoEn,
     coachAqui,
+    usuario,
+    pedirEntrada,
   } = useApp();
   const evaluaciones = useEvaluaciones();
   // El sello se anima solo cuando la alumna marca la lección, no al volver a abrirla.
@@ -139,16 +141,19 @@ export default function PaginaLeccion() {
   // Ruta del alumno en cada lección: el video completo, luego el repaso, y con
   // eso la lección se completa sola. Las lecciones se abren en orden. La coach
   // revisa todo libremente y lo ya completado no se vuelve a pedir.
+  // Sin cuenta es una vista previa: las lecciones gratis se ven completas y en
+  // cualquier orden, pero el avance, el repaso y la membresía piden entrar.
+  const esVisitante = !usuario;
   const esAlumno = !coachAqui;
-  const guiado = esAlumno && !leccion.deCoach && !hecha;
+  const guiado = esAlumno && !esVisitante && !leccion.deCoach && !hecha;
   const enOrdenLeccion = (idLeccion: string) => {
     const i = base.findIndex((l) => l.id === idLeccion);
-    return !esAlumno || i <= 0 || completadas.includes(idLeccion) || completadas.includes(base[i - 1].id);
+    return !esAlumno || esVisitante || i <= 0 || completadas.includes(idLeccion) || completadas.includes(base[i - 1].id);
   };
   const previa = base[base.findIndex((l) => l.id === leccion.id) - 1];
   const enOrden = !!leccion.deCoach || enOrdenLeccion(leccion.id);
   // Para ver la lección hay que estar en la comunidad e inscrito en su curso.
-  const inscrito = !esAlumno || !inscripcionLista || (enComunidad && inscritoEn(cursoId));
+  const inscrito = !esAlumno || esVisitante || !inscripcionLista || (enComunidad && inscritoEn(cursoId));
   // Video o presentación: hay que verlo completo para abrir el repaso.
   const queVer = leccion.video || !leccion.presentacion ? "el video" : "la presentación";
   const videoListo = !guiado || (!leccion.video && !leccion.presentacion) || vistos.includes(leccion.id);
@@ -196,9 +201,15 @@ export default function PaginaLeccion() {
   return (
     <div className="rejilla-leccion" data-con-barra={!bloqueada && enOrden && inscrito}>
       <nav className="indice-lecciones" aria-label="Lecciones del curso">
-        <Link href="/curso" className="volver">
-          <IconoFlechaIzq width={16} height={16} /> Todo el curso
-        </Link>
+        {esVisitante ? (
+          <Link href={`/c/${datos.comunidad.id}`} className="volver">
+            <IconoFlechaIzq width={16} height={16} /> {datos.comunidad.nombre}
+          </Link>
+        ) : (
+          <Link href="/curso" className="volver">
+            <IconoFlechaIzq width={16} height={16} /> Todo el curso
+          </Link>
+        )}
         {datos.curso.modulos.map((m) => {
           const hechasM = m.lecciones.filter((l) => completadas.includes(l.id)).length;
           const parte = m.lecciones.length ? hechasM / m.lecciones.length : 0;
@@ -291,9 +302,15 @@ export default function PaginaLeccion() {
               efectivo en OXXO, por transferencia SPEI o con Mercado Pago.
             </p>
             <div className="bloqueo-acciones">
-              <Link href={enlaceMembresia(leccion.id)} className="boton">
-                {textoUnirse}
-              </Link>
+              {esVisitante ? (
+                <button type="button" className="boton" onClick={() => pedirEntrada("alumno")}>
+                  Entra para activar la membresía
+                </button>
+              ) : (
+                <Link href={enlaceMembresia(leccion.id)} className="boton">
+                  {textoUnirse}
+                </Link>
+              )}
               <button type="button" className="enlace" onClick={() => preguntar(`¿De qué trata «${leccion.titulo}»?`)}>
                 Pregúntale al asistente de qué trata
               </button>
@@ -389,7 +406,15 @@ export default function PaginaLeccion() {
             )}
             {preguntasRepaso > 0 && (
               <div role="tabpanel" id="panel-repaso" aria-labelledby="pestana-repaso" hidden={pestana !== "repaso"}>
-                {videoListo ? (
+                {esVisitante ? (
+                  <div className="repaso-bloqueado">
+                    <IconoCandado width={20} height={20} />
+                    <p>
+                      <strong>Crea tu cuenta para contestar el repaso.</strong>
+                      <span className="texto-suave"> Son {preguntasRepaso} preguntas y tu avance se guarda.</span>
+                    </p>
+                  </div>
+                ) : videoListo ? (
                   <RepasoLeccion key={leccion.id} leccion={leccion} alRevisar={alRevisarRepaso} />
                 ) : (
                   <div className="repaso-bloqueado">
@@ -507,8 +532,23 @@ export default function PaginaLeccion() {
         </section>
       </aside>
 
+      {/* Vista previa: la barra invita a crear la cuenta; al entrar se inscribe solo. */}
+      {esVisitante && !bloqueada && (
+        <div className="barra-siguiente" role="region" aria-label="Vista previa de la lección">
+          <div className="envoltura barra-siguiente-interior">
+            <p className="barra-siguiente-texto">
+              <small>Vista previa gratis · {datos.comunidad.nombre}</small>
+              <strong>Crea tu cuenta para guardar tu avance y contestar el repaso</strong>
+            </p>
+            <div className="barra-siguiente-acciones">
+              <BotonInscribirse curso={cursoId} texto="Crear cuenta y empezar" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Barra fija: marcar la lección y pasar a lo que sigue sin buscar el botón. */}
-      {!bloqueada && enOrden && inscrito && (
+      {!esVisitante && !bloqueada && enOrden && inscrito && (
         <div className="barra-siguiente" role="region" aria-label="Avance de la lección">
           <div className="envoltura barra-siguiente-interior">
             <p className="barra-siguiente-texto">

@@ -11,12 +11,13 @@ import PiePagina from "./PiePagina";
 
 // Rutas que piden cuenta: sin sesión muestran la página para visitantes.
 // Las demás se ven aunque no haya sesión, con una barra sencilla: el
-// directorio, cada comunidad (/c/<id>), el asistente del curso, la página de
-// una empresa, una invitación o un 404.
+// directorio, cada comunidad (/c/<id>), las lecciones (las gratis se ven
+// completas), el asistente del curso, la página de una empresa, una
+// invitación o un 404.
 const RUTAS = [
   /^\/$/,
   /^\/cursos$/,
-  /^\/curso(\/(?!asistente$)[^/]+)?$/,
+  /^\/curso\/examen$/,
   /^\/membresia$/,
   /^\/asistente$/,
   /^\/perfil$/,

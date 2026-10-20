@@ -168,8 +168,8 @@ export default function PaginaCurso() {
                 <span className="cifra">{base.length}</span>
                 <span className="curso-progreso-total">lecciones · {minutos} min</span>
               </p>
-              <p className="curso-siguiente">Todavía no estás inscrito. Inscríbete y toma gratis su módulo 1.</p>
-              <BotonInscribirse curso={cursoId} />
+              <p className="curso-siguiente">Todavía no estás inscrito. Empieza y toma gratis su módulo 1.</p>
+              <BotonInscribirse curso={cursoId} empezar />
             </>
           ) : (
             <>

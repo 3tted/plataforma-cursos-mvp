@@ -113,7 +113,7 @@ export default function InicioAlumno() {
             <span className="ficha-nombre">{c.titulo}</span>
             {datosCurso}
             <span className="texto-suave inicio-meta">{c.subtitulo}</span>
-            <BotonInscribirse curso={c.id} className="boton boton-chico" />
+            <BotonInscribirse curso={c.id} className="boton boton-chico" empezar />
           </span>
         </li>
       );

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { moneda } from "@/lib/cliente";
 import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
+import BotonInscribirse from "./BotonInscribirse";
 import { useApp } from "./Contexto";
 import { IconoBillete, IconoCheck, IconoComunidad, IconoEditar, IconoPlay, IconoPublicacion } from "./Iconos";
 import { acentoSobreOscuro } from "@/lib/marca";
@@ -26,7 +27,7 @@ export default function PresentacionComunidad({
   publicaciones: Publicacion[] | null;
   esDuena: boolean;
 }) {
-  const { datos, cursosComunidad, comunidadId, enComunidad, unirmeAComunidad, temaDe, usuario } = useApp();
+  const { datos, cursosComunidad, comunidadId, enComunidad, unirmeAComunidad, temaDe, usuario, inscripcionLista } = useApp();
   const comunidad = datos?.comunidad;
   const tema = temaDe(comunidadId);
 
@@ -58,6 +59,7 @@ export default function PresentacionComunidad({
   };
 
   if (!comunidad) return null;
+  const primerCurso = cursosComunidad[0];
   const precio = moneda(comunidad.precio_mensual);
   const totalLecciones = cursosComunidad.reduce((s, c) => s + c.lecciones.length, 0);
 
@@ -114,6 +116,29 @@ export default function PresentacionComunidad({
         )}
       </div>
       <p className="presentacion-descripcion texto-suave">{comunidad.descripcion}</p>
+
+      {/* Quien todavía no está en la comunidad tiene un solo paso, arriba: unirse, inscribirse al primer curso y abrir su lección 1. */}
+      {!enComunidad && inscripcionLista && (
+        <div className="comunidad-empezar">
+          {primerCurso ? (
+            <BotonInscribirse curso={primerCurso.id} empezar />
+          ) : (
+            <button type="button" className="boton" onClick={unirme} disabled={enviando || !usuario}>
+              {enviando ? "Uniéndote…" : "Unirme gratis a la comunidad"}
+            </button>
+          )}
+          <p className="nota">
+            {primerCurso
+              ? `Te une a la comunidad, te inscribe a «${primerCurso.titulo}» y abre su lección 1. El módulo 1 es gratis.`
+              : "Unirte es gratis. Cuando la comunidad publique su primer curso, podrás tomar su módulo 1 sin pagar."}
+          </p>
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+        </div>
+      )}
 
       {vista && (
         <div className="presentacion-galeria">
@@ -226,20 +251,7 @@ export default function PresentacionComunidad({
           {sobre}
         </details>
       ) : (
-        <>
-          {sobre}
-          <div className="presentacion-unirse">
-            <button type="button" className="boton" onClick={unirme} disabled={enviando || !usuario}>
-              {enviando ? "Uniéndote…" : "Unirme gratis a la comunidad"}
-            </button>
-            <p className="nota">Al unirte puedes inscribirte a sus cursos y tomar gratis el módulo 1 de cada uno.</p>
-          </div>
-          {error && (
-            <p className="error" role="alert">
-              {error}
-            </p>
-          )}
-        </>
+        sobre
       )}
     </section>
   );

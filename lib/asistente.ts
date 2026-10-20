@@ -54,13 +54,13 @@ export function modeloActivo(): string | null {
 // Prompt
 // ---------------------------------------------------------------------------
 
-// Quien no es miembro solo recibe el resumen de las lecciones de pago: el
+// Quien no tiene la membresía solo recibe el resumen de las lecciones de pago: el
 // asistente puede decir dónde está la respuesta, pero no entregarla.
 function contenidoDelCurso({ curso }: DatosCurso, miembro: boolean): string {
   return todasLasLecciones(curso)
     .map((l) => {
       if (!miembro && !l.gratis) {
-        return `<leccion id="${l.id}" acceso="miembros">\n[${l.id}] ${l.modulo.titulo} — ${l.titulo}\nResumen: ${l.resumen}\n</leccion>`;
+        return `<leccion id="${l.id}" acceso="membresia">\n[${l.id}] ${l.modulo.titulo} — ${l.titulo}\nResumen: ${l.resumen}\n</leccion>`;
       }
       const partes = [
         `[${l.id}] ${l.modulo.titulo} — ${l.titulo}`,
@@ -73,7 +73,9 @@ function contenidoDelCurso({ curso }: DatosCurso, miembro: boolean): string {
 }
 
 const REGLA_NO_MIEMBRO = `
-- Este alumno todavía no es miembro. Las lecciones con acceso="miembros" solo traen su resumen. Si la respuesta está en una de ellas, no la expliques ni des sus pasos, cálculos o fórmulas: di en qué lección se explica, cítala con su identificador, cuenta en una frase de qué trata y comenta que con la membresía puedes responderle con esa lección completa. Todo lo que esté en las lecciones abiertas respóndelo con normalidad.`;
+- Este alumno no tiene la membresía de pago (puede estar unido gratis a la comunidad e inscrito al curso). Nunca le digas que no es miembro ni que no está en la comunidad.
+- Las lecciones abiertas (sin acceso="membresia") son suyas: si la respuesta está en ellas, dásela completa, con todos sus pasos y detalles, y no menciones la membresía.
+- Las lecciones con acceso="membresia" solo traen su resumen. Si la respuesta está en una de ellas, no la expliques ni des sus pasos, cálculos o fórmulas: di en qué lección se explica, cítala con su identificador, cuenta en una frase de qué trata y comenta que con la membresía puedes responderle con esa lección completa.`;
 
 export function instrucciones({ comunidad, curso }: DatosCurso, miembro: boolean): string {
   return `Eres el asistente del curso "${curso.titulo}", de la comunidad ${comunidad.nombre}, creado por ${comunidad.coach} (${comunidad.coach_titulo}). Resuelves las dudas de los alumnos sobre el contenido del curso, que aparece completo más abajo dentro de <curso>.

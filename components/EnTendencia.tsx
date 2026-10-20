@@ -40,7 +40,10 @@ export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: stri
     candidatos.find((c) => c.alumnos === candidatos[0].alumnos && comunidadDe(c.id) !== comunidad?.id) ?? candidatos[0];
   const curso = cursos.find((c) => c.id === cursoTop?.id);
   const deCurso = COMUNIDADES.find((c) => c.id === curso?.comunidad);
-  const demas = COMUNIDADES.filter((c) => c.id !== comunidad?.id && !(c.estado === "activa" && enLaComunidad(c.id)));
+  // Abajo no se repite lo que ya está destacado arriba: ni la comunidad ni la del curso destacado.
+  const demas = COMUNIDADES.filter(
+    (c) => c.id !== comunidad?.id && c.id !== deCurso?.id && !(c.estado === "activa" && enLaComunidad(c.id)),
+  );
 
   if (!tendencias && cursos.length === 0) return null;
 

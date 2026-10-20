@@ -1299,13 +1299,17 @@ button.boton:disabled:hover {
   margin-bottom: 12px;
 }
 
-.presentacion-unirse {
+/* El único paso para empezar, arriba de la galería */
+.comunidad-empezar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--linea);
+}
+
+.comunidad-empezar .nota {
+  flex: 1 1 260px;
+  max-width: 52ch;
 }
 
 @media (max-width: 560px) {
@@ -9052,4 +9056,57 @@ button.tarjeta-comunidad-enlace {
 /* Secciones a las que se llega con #: no quedan debajo de la barra fija */
 .ancla {
   scroll-margin-top: calc(var(--alto-barra) + 16px);
+}
+
+/* ---------- Esqueleto mientras carga la sesión ---------- */
+
+.esqueleto-contenido {
+  display: grid;
+  gap: 14px;
+}
+
+.esqueleto {
+  display: block;
+  border-radius: var(--radio-control);
+  background: var(--border);
+  animation: esqueleto-pulso 1.4s ease-in-out infinite;
+}
+
+.esqueleto-titulo {
+  width: min(520px, 80%);
+  height: 48px;
+  margin-bottom: 6px;
+}
+
+.esqueleto-linea {
+  width: min(640px, 95%);
+  height: 16px;
+}
+
+.esqueleto-corta {
+  width: min(380px, 60%);
+}
+
+.esqueleto-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.esqueleto-tarjeta {
+  height: 240px;
+  border-radius: var(--radio-hoja);
+}
+
+@keyframes esqueleto-pulso {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto {
+    animation: none;
+  }
 }

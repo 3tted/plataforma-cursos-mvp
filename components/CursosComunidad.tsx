@@ -68,7 +68,7 @@ export default function CursosComunidad({ fila = false }: { fila?: boolean }) {
                   </Link>
                 ) : !inscripcionLista ? null : !inscrito ? (
                   <>
-                    <BotonInscribirse curso={c.id} className="boton boton-chico curso-comunidad-boton" texto="Inscribirme" />
+                    <BotonInscribirse curso={c.id} className="boton boton-chico curso-comunidad-boton" empezar />
                     <p className="curso-comunidad-gratis">{notaGratis(c.gratis)}</p>
                   </>
                 ) : siguiente ? (

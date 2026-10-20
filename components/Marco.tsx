@@ -31,7 +31,7 @@ export default function Marco({ children }: { children: ReactNode }) {
   const marca = useMarcaActiva();
   const ruta = usePathname();
   const existe = RUTAS.some((r) => r.test(ruta));
-  if (!listo) return null;
+  if (!listo) return <Esqueleto />;
   if (!usuario && !existe) {
     return (
       <>
@@ -85,6 +85,31 @@ function AvisoFlotante() {
           </button>
         </p>
       )}
+    </div>
+  );
+}
+
+// Mientras se sabe quién entró (la sesión llega del servidor), la página ya
+// muestra su forma: la barra con el logo y bloques del tamaño del contenido.
+function Esqueleto() {
+  return (
+    <div className="esqueleto-pagina" aria-busy="true" aria-label="Cargando">
+      <header className="visitantes-barra">
+        <div className="envoltura visitantes-barra-interior">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="marca-logo" src="/merkatics-logo.png" alt="" width={2311} height={544} />
+        </div>
+      </header>
+      <main className="envoltura contenido esqueleto-contenido">
+        <span className="esqueleto esqueleto-titulo" />
+        <span className="esqueleto esqueleto-linea" />
+        <span className="esqueleto esqueleto-linea esqueleto-corta" />
+        <div className="esqueleto-tarjetas">
+          <span className="esqueleto esqueleto-tarjeta" />
+          <span className="esqueleto esqueleto-tarjeta" />
+          <span className="esqueleto esqueleto-tarjeta" />
+        </div>
+      </main>
     </div>
   );
 }

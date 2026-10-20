@@ -15,7 +15,8 @@ export default function Avatar({
     "--tono": tonoDe(nombre),
     width: tamaño,
     height: tamaño,
-    fontSize: Math.round(tamaño * 0.38),
+    // Nunca menos de 11 px: en los avatares chicos (24 px) las iniciales se seguían leyendo mal.
+    fontSize: Math.max(11, Math.round(tamaño * 0.38)),
   } as CSSProperties;
   return (
     <span className={coach ? "avatar avatar-coach" : "avatar"} style={estilo} aria-hidden="true">

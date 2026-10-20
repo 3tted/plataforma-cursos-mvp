@@ -26,7 +26,13 @@ export const GET = manejar(async (req: Request) => {
   return Response.json({
     cuenta: cuenta ? cuentaPublica(cuenta) : null,
     google: googleConfigurado(),
-    demo: contrasena ? { contrasena, cuentas: CUENTAS_DEMO.map(({ nombre, correo, detalle }) => ({ nombre, correo, detalle })) } : null,
+    // La cuenta del equipo de Merkatics administra la plataforma: no se anuncia en la pantalla de entrada.
+    demo: contrasena
+      ? {
+          contrasena,
+          cuentas: CUENTAS_DEMO.filter((d) => !d.admin).map(({ nombre, correo, detalle }) => ({ nombre, correo, detalle })),
+        }
+      : null,
   });
 });
 

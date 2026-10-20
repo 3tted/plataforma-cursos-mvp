@@ -11,8 +11,9 @@ import {
 import { useApp } from "./Contexto";
 
 // Portada de un curso o una comunidad. Si tiene foto, se muestra la foto (con
-// su punto de encuadre); si no, una hoja clara con el ícono de su tema en
-// coral, al centro, como los íconos del manual de marca.
+// su punto de encuadre). Si no, una portada tipográfica: el nombre en grande
+// sobre una hoja clara, con el ícono de su tema en coral; en miniaturas muy
+// chicas queda solo el ícono, al centro.
 
 const ICONOS: Record<string, Icon> = {
   Finanzas: ChartBar,
@@ -29,6 +30,7 @@ export default function PortadaTema({
   className = "",
   alt = "",
   foto: propia,
+  titulo,
 }: {
   tema: string;
   clave: string;
@@ -39,6 +41,8 @@ export default function PortadaTema({
   encajar?: boolean;
   /** Foto que se acaba de subir (si no, se busca la de esa clave). */
   foto?: string;
+  /** Nombre del curso o la comunidad: sin foto, la portada lo lleva escrito. */
+  titulo?: string;
 }) {
   const { fotoDe } = useApp();
   const foto = propia ? { src: propia, foco: "50% 50%" } : fotoDe(clave);
@@ -62,11 +66,16 @@ export default function PortadaTema({
   const Icono = ICONOS[tema] ?? Sparkle;
   return (
     <span
-      className={`portada-tema portada-tema-sin-foto ${className}`}
+      className={`portada-tema portada-tema-sin-foto ${titulo ? "portada-tema-tipografica" : ""} ${className}`}
       data-tema={tema}
       {...(alt ? { role: "img", "aria-label": alt } : {})}
     >
       <Icono className="portada-tema-icono" weight="regular" aria-hidden="true" focusable="false" />
+      {titulo && (
+        <span className="portada-tema-titulo" aria-hidden="true">
+          {titulo}
+        </span>
+      )}
       <span className="portada-tema-etiqueta">{tema}</span>
     </span>
   );

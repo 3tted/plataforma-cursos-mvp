@@ -283,7 +283,7 @@ export default function PaginaMisComunidades() {
           return (
             <section key={id} id={`tarjeta-${id}`} className="tarjeta mi-comunidad" aria-labelledby={`comunidad-${id}`}>
               <div className="mi-comunidad-cabecera">
-                <PortadaTema tema={c.tema} clave={id} foto={c.foto} className="mi-comunidad-portada" alt={`Portada de la comunidad «${c.nombre}»`} />
+                <PortadaTema tema={c.tema} clave={id} foto={c.foto} className="mi-comunidad-portada" alt={`Portada de la comunidad «${c.nombre}»`} titulo={c.nombre} />
                 <div className="mi-comunidad-datos">
                   <h2 id={`comunidad-${id}`}>{c.nombre}</h2>
                   <p className="texto-suave">{c.descripcion}</p>
@@ -328,7 +328,7 @@ export default function PaginaMisComunidades() {
         return (
           <section key={c.id} id={`tarjeta-${c.id}`} className="tarjeta mi-comunidad" aria-labelledby={`comunidad-${c.id}`}>
             <div className="mi-comunidad-cabecera">
-              <PortadaTema tema={c.tema} clave={c.id} foto={c.foto} className="mi-comunidad-portada" alt={`Portada de la comunidad «${c.nombre}»`} />
+              <PortadaTema tema={c.tema} clave={c.id} foto={c.foto} className="mi-comunidad-portada" alt={`Portada de la comunidad «${c.nombre}»`} titulo={c.nombre} />
               <div className="mi-comunidad-datos">
                 <h2 id={`comunidad-${c.id}`}>{c.nombre}</h2>
                 <p className="texto-suave">{c.descripcion}</p>

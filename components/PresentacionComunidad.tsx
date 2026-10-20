@@ -180,7 +180,7 @@ export default function PresentacionComunidad({
                 if (!c) return null;
                 return (
                   <div className="presentacion-curso">
-                    <PortadaTema tema={tema} clave={c.id} alt={`Portada del curso «${c.titulo}»`} />
+                    <PortadaTema tema={tema} clave={c.id} alt={`Portada del curso «${c.titulo}»`} titulo={c.titulo} />
                     <div className="presentacion-curso-texto">
                       <p className="presentacion-curso-etiqueta">Curso</p>
                       <p className="presentacion-curso-titulo">{c.titulo}</p>

@@ -97,7 +97,7 @@ export default function InicioAlumno() {
 
   const tarjetaCurso = (c: ResumenCurso) => {
     const hechasCurso = c.lecciones.filter((id) => completadas.includes(id)).length;
-    const portada = <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} />;
+    const portada = <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} titulo={c.titulo} />;
     const datosCurso = (
       <span className="texto-suave inicio-meta">
         {unidas.length > 1 && `${nombreComunidad(c.comunidad)} · `}

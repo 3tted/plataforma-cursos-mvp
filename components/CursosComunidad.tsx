@@ -32,7 +32,7 @@ export default function CursosComunidad({ fila = false }: { fila?: boolean }) {
               {/* Solo quien está inscrito entra al temario; los demás empiezan con el botón. */}
               {inscrito ? (
                 <Link href="/curso" className="curso-comunidad-portada" onClick={() => cambiarCurso(c.id)} tabIndex={-1} aria-hidden="true">
-                  <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} />
+                  <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} titulo={c.titulo} />
                 </Link>
               ) : (
                 <span className="curso-comunidad-portada" aria-hidden="true">

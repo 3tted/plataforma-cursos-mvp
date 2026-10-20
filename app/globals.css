@@ -9282,3 +9282,57 @@ button.tarjeta-comunidad-enlace {
   color: var(--tinta);
   font-weight: 600;
 }
+
+/* Portada tipográfica (sin foto): el nombre en grande, el ícono del tema arriba a la derecha */
+.portada-tema-tipografica {
+  container-type: inline-size;
+  display: grid;
+  place-items: end start;
+  grid-template-areas: "todo";
+  padding: 8% 7% 7%;
+  background:
+    linear-gradient(135deg, rgb(226 85 79 / 9%), rgb(226 85 79 / 0%) 60%),
+    var(--light-1);
+}
+
+.portada-tema-tipografica .portada-tema-icono {
+  position: absolute;
+  top: 8cqw;
+  right: 8cqw;
+  width: max(20px, 13cqw);
+}
+
+.portada-tema-titulo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  max-width: 88%;
+  font-family: var(--fuente-display);
+  font-size: max(0.85rem, 7.2cqw);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--graphite);
+}
+
+.portada-tema-titulo::before {
+  content: "";
+  display: block;
+  width: max(18px, 9cqw);
+  height: 3px;
+  margin-bottom: 3cqw;
+  border-radius: 2px;
+  background: var(--coral);
+}
+
+/* Miniaturas muy chicas: solo el ícono, al centro */
+@container (max-width: 150px) {
+  .portada-tema-titulo {
+    display: none;
+  }
+  .portada-tema-tipografica .portada-tema-icono {
+    position: static;
+    place-self: center;
+    width: clamp(28px, 26%, 72px);
+  }
+}

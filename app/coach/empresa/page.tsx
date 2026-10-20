@@ -5,12 +5,19 @@ import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 
 import Arcos from "@/components/Arcos";
 import { useApp } from "@/components/Contexto";
 import { IconoFlechaDer, IconoFlechaIzq, IconoSubir } from "@/components/Iconos";
+import EquipoEmpresa from "@/components/EquipoEmpresa";
 import { useTitulo } from "@/components/useTitulo";
 import { api } from "@/lib/cliente";
 import { COLOR_MERKATICS, normalizarColor, tonosDeMarca, variablesDeMarca } from "@/lib/marca";
 import type { Empresa } from "@/lib/tipos";
 
-type EmpresaVista = Omit<Empresa, "id" | "creadaEn" | "actualizadaEn"> & { id: string | null };
+type EmpresaVista = Empresa & {
+  color: string;
+  /** Ya eligió su color: sus comunidades se ven con su marca. */
+  conMarca: boolean;
+  /** Solo la dueña cambia la marca. */
+  puedeEditar: boolean;
+};
 
 /** Colores para empezar; cualquier otro se elige con el selector. */
 const SUGERIDOS = [
@@ -45,11 +52,11 @@ async function reducirLogo(archivo: File): Promise<Blob> {
 }
 
 // La empresa de la coach y su marca: nombre, color principal y logo. Se aplica
-// en sus comunidades, cursos y lecciones; el directorio y el panel siguen con
-// la marca de Merkatics. Por ahora cada coach es una empresa de una persona.
+// en sus comunidades, cursos y lecciones y en su página (/e/<id>); el
+// directorio y el panel siguen con la marca de Merkatics. Todas sus coaches la
+// ven; solo la dueña la cambia e invita coaches.
 export default function PaginaMiEmpresa() {
   const { usuario, recargarCurso } = useApp();
-  const autor = usuario?.nombre ?? "";
   const [empresa, setEmpresa] = useState<EmpresaVista | null>(null);
   const [nombre, setNombre] = useState("");
   const [color, setColor] = useState(COLOR_MERKATICS);
@@ -63,9 +70,8 @@ export default function PaginaMiEmpresa() {
   useTitulo("Mi empresa");
 
   useEffect(() => {
-    if (!autor || usuario?.rol !== "coach") return;
-    const cabeceras = { "X-Rol": "coach" };
-    api<EmpresaVista>(`/api/coach/empresa?autor=${encodeURIComponent(autor)}`, { headers: cabeceras })
+    if (usuario?.rol !== "coach") return;
+    api<EmpresaVista>("/api/coach/empresa")
       .then((e) => {
         setEmpresa(e);
         setNombre(e.nombre);
@@ -73,10 +79,10 @@ export default function PaginaMiEmpresa() {
         setTextoColor(e.color);
       })
       .catch((e) => setError((e as Error).message));
-    api<{ comunidades: { id: string }[] }>(`/api/coach/comunidades?autor=${encodeURIComponent(autor)}`, { headers: cabeceras })
+    api<{ comunidades: { id: string }[] }>("/api/coach/comunidades")
       .then((d) => setComunidad(d.comunidades[0]?.id ?? null))
       .catch(() => undefined);
-  }, [autor, usuario?.rol]);
+  }, [usuario?.rol, usuario?.empresa]);
 
   if (usuario?.rol !== "coach") {
     return (
@@ -87,7 +93,9 @@ export default function PaginaMiEmpresa() {
   }
 
   const tonos = tonosDeMarca(color);
-  const sinGuardar = !!empresa && (empresa.id === null || nombre.trim() !== empresa.nombre || color !== empresa.color);
+  const puedeEditar = empresa?.puedeEditar === true;
+  const sinGuardar =
+    puedeEditar && !!empresa && (!empresa.conMarca || nombre.trim() !== empresa.nombre || color !== empresa.color);
 
   const elegirColor = (valor: string) => {
     setTextoColor(valor);
@@ -101,11 +109,7 @@ export default function PaginaMiEmpresa() {
     setError(null);
     setAviso(null);
     try {
-      const guardada = await api<Empresa>("/api/coach/empresa", {
-        method: "PUT",
-        headers: { "X-Rol": "coach" },
-        json: { autor, nombre, color },
-      });
+      const guardada = await api<EmpresaVista>("/api/coach/empresa", { method: "PUT", json: { nombre, color } });
       setEmpresa(guardada);
       setAviso("Cambios guardados. Tus comunidades ya se ven con tu marca.");
       await recargarCurso();
@@ -116,7 +120,7 @@ export default function PaginaMiEmpresa() {
     }
   };
 
-  const rutaLogo = empresa?.id ? `/api/fotos/empresa-${empresa.id}?autor=${encodeURIComponent(autor)}` : null;
+  const rutaLogo = empresa && puedeEditar ? `/api/fotos/empresa-${empresa.id}` : null;
 
   const subirLogo = async (archivo: File) => {
     if (!rutaLogo) return;
@@ -127,7 +131,7 @@ export default function PaginaMiEmpresa() {
       const blob = await reducirLogo(archivo).catch(() => {
         throw new Error("No pudimos abrir esa imagen. Prueba con un PNG o JPG.");
       });
-      const res = await fetch(rutaLogo, { method: "PUT", headers: { "Content-Type": "image/png", "X-Rol": "coach" }, body: blob });
+      const res = await fetch(rutaLogo, { method: "PUT", headers: { "Content-Type": "image/png" }, body: blob });
       const datos = (await res.json().catch(() => ({}))) as { foto?: string; error?: string };
       if (!res.ok || !datos.foto) throw new Error(datos.error ?? "No se pudo subir el logo. Inténtalo de nuevo.");
       setEmpresa((e) => (e ? { ...e, logo: datos.foto } : e));
@@ -141,13 +145,13 @@ export default function PaginaMiEmpresa() {
 
   const quitarLogo = async () => {
     if (!rutaLogo) return;
-    const res = await fetch(rutaLogo, { method: "DELETE", headers: { "X-Rol": "coach" } }).catch(() => null);
+    const res = await fetch(rutaLogo, { method: "DELETE" }).catch(() => null);
     if (!res?.ok) return setError("No se pudo quitar el logo.");
     setEmpresa((e) => (e ? { ...e, logo: undefined } : e));
     await recargarCurso();
   };
 
-  const nombreVisible = nombre.trim() || autor;
+  const nombreVisible = nombre.trim() || empresa?.nombre || "";
 
   return (
     <div className="mi-empresa">
@@ -176,98 +180,112 @@ export default function PaginaMiEmpresa() {
           <div className="mi-empresa-ajustes">
             <form className="tarjeta forma-comunidad" onSubmit={guardar} noValidate>
               <h2>Nombre y color</h2>
-              <label className="campo">
-                <span>Nombre de tu empresa o marca</span>
-                <input value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={60} required />
-              </label>
+              {!puedeEditar && (
+                <p className="nota">Solo {empresa.dueno}, la dueña de la empresa, cambia su nombre, su color y su logo.</p>
+              )}
+              <fieldset className="mi-empresa-campos" disabled={!puedeEditar}>
+                <label className="campo">
+                  <span>Nombre de tu empresa o marca</span>
+                  <input value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={60} required />
+                </label>
 
-              <fieldset className="mi-empresa-colores">
-                <legend>Color principal</legend>
-                <div className="mi-empresa-sugeridos">
-                  {SUGERIDOS.map((s) => (
-                    <button
-                      key={s.color}
-                      type="button"
-                      className="mi-empresa-muestra"
-                      style={{ background: s.color }}
-                      aria-pressed={color === s.color}
-                      aria-label={s.nombre}
-                      title={s.nombre}
-                      onClick={() => elegirColor(s.color)}
-                    />
-                  ))}
-                </div>
-                <div className="mi-empresa-propio">
-                  <label className="mi-empresa-selector">
-                    <input type="color" value={color} onChange={(e) => elegirColor(e.target.value)} aria-label="Elegir otro color" />
-                    <span>Otro color</span>
-                  </label>
-                  <label className="campo mi-empresa-hex">
-                    <span className="sr-only">Código del color</span>
-                    <input
-                      value={textoColor}
-                      onChange={(e) => elegirColor(e.target.value)}
-                      maxLength={7}
-                      spellCheck={false}
-                      aria-invalid={!normalizarColor(textoColor)}
-                    />
-                  </label>
+                <fieldset className="mi-empresa-colores">
+                  <legend>Color principal</legend>
+                  <div className="mi-empresa-sugeridos">
+                    {SUGERIDOS.map((s) => (
+                      <button
+                        key={s.color}
+                        type="button"
+                        className="mi-empresa-muestra"
+                        style={{ background: s.color }}
+                        aria-pressed={color === s.color}
+                        aria-label={s.nombre}
+                        title={s.nombre}
+                        onClick={() => elegirColor(s.color)}
+                      />
+                    ))}
+                  </div>
+                  <div className="mi-empresa-propio">
+                    <label className="mi-empresa-selector">
+                      <input type="color" value={color} onChange={(e) => elegirColor(e.target.value)} aria-label="Elegir otro color" />
+                      <span>Otro color</span>
+                    </label>
+                    <label className="campo mi-empresa-hex">
+                      <span className="sr-only">Código del color</span>
+                      <input
+                        value={textoColor}
+                        onChange={(e) => elegirColor(e.target.value)}
+                        maxLength={7}
+                        spellCheck={false}
+                        aria-invalid={!normalizarColor(textoColor)}
+                      />
+                    </label>
+                  </div>
+                </fieldset>
+
+                <div className={tonos.ajustado ? "mi-empresa-contraste mi-empresa-contraste-ajustado" : "mi-empresa-contraste"} role="status">
+                  {tonos.ajustado ? (
+                    <p>
+                      <b>Tu color es claro para poner texto blanco encima.</b> En botones y enlaces usamos un tono más oscuro
+                      del mismo color para que se lean bien; en íconos y barras de avance se usa el tuyo.
+                    </p>
+                  ) : (
+                    <p>
+                      <b>Se lee bien.</b> Tu color funciona con texto blanco en botones y enlaces.
+                    </p>
+                  )}
+                  <ul className="mi-empresa-tonos">
+                    <li>
+                      <span style={{ background: tonos.botones }} /> Botones y enlaces <code>{tonos.botones}</code>
+                    </li>
+                    <li>
+                      <span style={{ background: tonos.acento }} /> Íconos y avance <code>{tonos.acento}</code>
+                    </li>
+                    <li>
+                      <span style={{ background: tonos.texto }} /> Texto destacado <code>{tonos.texto}</code>
+                    </li>
+                  </ul>
+                  <p className="nota">El texto, los errores y los avisos no cambian de color, para que todo siga legible.</p>
                 </div>
               </fieldset>
-
-              <div className={tonos.ajustado ? "mi-empresa-contraste mi-empresa-contraste-ajustado" : "mi-empresa-contraste"} role="status">
-                {tonos.ajustado ? (
-                  <p>
-                    <b>Tu color es claro para poner texto blanco encima.</b> En botones y enlaces usamos un tono más oscuro
-                    del mismo color para que se lean bien; en íconos y barras de avance se usa el tuyo.
-                  </p>
-                ) : (
-                  <p>
-                    <b>Se lee bien.</b> Tu color funciona con texto blanco en botones y enlaces.
-                  </p>
-                )}
-                <ul className="mi-empresa-tonos">
-                  <li>
-                    <span style={{ background: tonos.botones }} /> Botones y enlaces <code>{tonos.botones}</code>
-                  </li>
-                  <li>
-                    <span style={{ background: tonos.acento }} /> Íconos y avance <code>{tonos.acento}</code>
-                  </li>
-                  <li>
-                    <span style={{ background: tonos.texto }} /> Texto destacado <code>{tonos.texto}</code>
-                  </li>
-                </ul>
-                <p className="nota">El texto, los errores y los avisos no cambian de color, para que todo siga legible.</p>
-              </div>
 
               {error && (
                 <p className="error" role="alert">
                   {error}
                 </p>
               )}
-              <div className="forma-acciones">
-                <button type="submit" className="boton" disabled={!sinGuardar || guardando}>
-                  {guardando ? "Guardando…" : "Guardar cambios"}
-                </button>
-                <span className="texto-suave" role="status">
-                  {sinGuardar ? "Cambios sin guardar" : aviso}
-                </span>
-              </div>
+              {puedeEditar && (
+                <div className="forma-acciones">
+                  <button type="submit" className="boton" disabled={!sinGuardar || guardando}>
+                    {guardando ? "Guardando…" : empresa.conMarca ? "Guardar cambios" : "Usar mi marca"}
+                  </button>
+                  <span className="texto-suave" role="status">
+                    {!empresa.conMarca
+                      ? "Mientras no la guardes, tus comunidades se ven con la marca de Merkatics."
+                      : sinGuardar
+                        ? "Cambios sin guardar"
+                        : aviso}
+                  </span>
+                </div>
+              )}
             </form>
 
             <section className="tarjeta mi-empresa-logo" aria-labelledby="logo-titulo">
               <h2 id="logo-titulo">Logo</h2>
-              {empresa.id ? (
+              <div className="mi-empresa-logo-vista">
+                {empresa.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={empresa.logo} alt={`Logo de ${nombreVisible}`} />
+                ) : (
+                  <span className="texto-suave">Sin logo: la barra muestra el nombre de tu empresa.</span>
+                )}
+              </div>
+              {puedeEditar && (
                 <>
-                  <div className="mi-empresa-logo-vista">
-                    {empresa.logo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={empresa.logo} alt={`Logo de ${nombreVisible}`} />
-                    ) : (
-                      <span className="texto-suave">Sin logo: la barra muestra el nombre de tu empresa.</span>
-                    )}
-                  </div>
-                  <p className="nota">PNG con fondo transparente y horizontal se ve mejor. Aparece en la barra de arriba.</p>
+                  <p className="nota">
+                    PNG con fondo transparente y horizontal se ve mejor. Aparece en la barra de arriba
+                    {empresa.conMarca ? "." : " en cuanto guardes tu color."}
+                  </p>
                   <input
                     ref={entrada}
                     type="file"
@@ -290,8 +308,6 @@ export default function PaginaMiEmpresa() {
                     )}
                   </div>
                 </>
-              ) : (
-                <p className="texto-suave">Guarda el nombre y el color de tu empresa para poder subir su logo.</p>
               )}
             </section>
           </div>
@@ -330,6 +346,8 @@ export default function PaginaMiEmpresa() {
           </section>
         </div>
       )}
+
+      {empresa && <EquipoEmpresa empresa={empresa.id} dueno={puedeEditar} />}
     </div>
   );
 }

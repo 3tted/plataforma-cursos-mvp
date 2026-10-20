@@ -32,8 +32,8 @@ export default function VideoLeccion({
   sinAdelantar?: boolean;
   alTerminar?: () => void;
 }) {
-  const { usuario, recargarCurso, datos } = useApp();
-  const esCoach = usuario?.rol === "coach";
+  const { recargarCurso, datos, coachAqui } = useApp();
+  const esCoach = coachAqui;
   const [estado, setEstado] = useState<Estado>("inactivo");
   const [progreso, setProgreso] = useState(0);
   const [archivoEnCurso, setArchivoEnCurso] = useState("");
@@ -63,7 +63,7 @@ export default function VideoLeccion({
     setAnuncio("Generando la presentación con IA.");
     const res = await fetch(`/api/presentaciones/${leccion.id}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Rol": "coach" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(opciones),
     }).catch(
       () => null,
@@ -79,7 +79,7 @@ export default function VideoLeccion({
   };
 
   const quitarPresentacion = async () => {
-    const res = await fetch(`/api/presentaciones/${leccion.id}`, { method: "DELETE", headers: { "X-Rol": "coach" } }).catch(
+    const res = await fetch(`/api/presentaciones/${leccion.id}`, { method: "DELETE" }).catch(
       () => null,
     );
     if (!res?.ok) return fallo("No se pudo quitar la presentación. Inténtalo de nuevo.");
@@ -106,7 +106,6 @@ export default function VideoLeccion({
     subida.current = xhr;
     xhr.open("PUT", `/api/videos/${leccion.id}`);
     xhr.setRequestHeader("Content-Type", tipo);
-    xhr.setRequestHeader("X-Rol", usuario?.rol ?? "alumno");
     xhr.setRequestHeader("X-Nombre-Archivo", encodeURIComponent(archivo.name));
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) setProgreso(e.loaded / e.total);
@@ -149,7 +148,6 @@ export default function VideoLeccion({
   const quitar = async () => {
     const res = await fetch(`/api/videos/${leccion.id}`, {
       method: "DELETE",
-      headers: { "X-Rol": usuario?.rol ?? "alumno" },
     }).catch(() => null);
     setConfirmandoQuitar(false);
     if (!res?.ok) return fallo("No se pudo quitar el video. Inténtalo de nuevo.");

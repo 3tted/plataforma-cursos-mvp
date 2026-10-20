@@ -3,6 +3,7 @@ import path from "path";
 import { Readable } from "stream";
 import { DIRECTORIO_VIDEOS, consultar, modificar, rutaDelVideo } from "@/lib/almacen";
 import { cursoDeLeccion } from "@/lib/curso";
+import { coachDeLaLeccion } from "@/lib/permisos";
 import { error, manejar } from "@/lib/http";
 import { MAX_BYTES_VIDEO, TIPOS_VIDEO, tamañoLegible } from "@/lib/reglas-video";
 import type { VideoLeccion } from "@/lib/tipos";
@@ -14,8 +15,7 @@ export const dynamic = "force-dynamic";
 // de objetos o a un servicio de video; en Vercel el disco es temporal y el
 // cuerpo de una petición no puede pasar de unos 4 MB.
 //
-// Como el resto del MVP, el permiso se simula: la coach se identifica con el
-// encabezado X-Rol. La autenticación real llega en la Fase 2.
+// Subirlo o quitarlo es solo para las coaches de la empresa dueña del curso.
 
 type Contexto = { params: Promise<{ leccion: string }> };
 
@@ -80,9 +80,9 @@ export const GET = manejar(async (req: Request, contexto: Contexto) => {
 // El archivo llega tal cual en el cuerpo (no como formulario) y se escribe al
 // disco mientras llega, sin cargarlo completo en memoria.
 export const PUT = manejar(async (req: Request, contexto: Contexto) => {
-  if (req.headers.get("x-rol") !== "coach") return error("Solo la coach puede subir videos.", 403);
   const leccion = await leccionExistente(contexto);
   if (!leccion) return error("No encontramos esa lección.", 404);
+  await coachDeLaLeccion(req, leccion);
 
   const tipo = (req.headers.get("content-type") ?? "").split(";")[0].trim();
   const extension = TIPOS_VIDEO[tipo];
@@ -157,9 +157,9 @@ export const PUT = manejar(async (req: Request, contexto: Contexto) => {
 
 // ---------------------------------------------------------------- DELETE
 export const DELETE = manejar(async (req: Request, contexto: Contexto) => {
-  if (req.headers.get("x-rol") !== "coach") return error("Solo la coach puede quitar videos.", 403);
   const leccion = await leccionExistente(contexto);
   if (!leccion) return error("No encontramos esa lección.", 404);
+  await coachDeLaLeccion(req, leccion);
   const quitado = await modificar((a) => {
     const lista = a.videos ?? [];
     a.videos = lista.filter((v) => v.leccion !== leccion);

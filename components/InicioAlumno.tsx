@@ -49,7 +49,7 @@ export default function InicioAlumno() {
 
   useEffect(() => {
     if (!usuario || !enCurso) return;
-    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}&curso=${encodeURIComponent(cursoId)}`)
+    api<Expediente>(`/api/expediente?curso=${encodeURIComponent(cursoId)}`)
       .then(setExpediente)
       .catch(() => setExpediente(null));
   }, [usuario, completadas, cursoId, enCurso]);

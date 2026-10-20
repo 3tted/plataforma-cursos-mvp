@@ -1,22 +1,23 @@
 import { consultar, modificar } from "@/lib/almacen";
 import { cargarCursos } from "@/lib/curso";
 import { completadasDe, leccionesDelCurso } from "@/lib/evaluaciones";
-import { ErrorDeDatos, error, leerJson, manejar, texto } from "@/lib/http";
+import { ErrorDeDatos, leerJson, manejar } from "@/lib/http";
+import { cuentaDeReq } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
 // Lecciones completadas de cada alumno. El navegador las recuerda y aquí se
 // guarda una copia para que la coach vea el avance de todos y para que el
-// alumno lo recupere al volver a entrar. En el MVP se identifica por nombre.
+// alumno lo recupere al volver a entrar. Cada alumno guarda solo el suyo (por su sesión).
 export const GET = manejar(async (req: Request) => {
-  const autor = new URL(req.url).searchParams.get("autor")?.trim();
-  if (!autor) return error("Falta el nombre del alumno.");
+  const autor = (await cuentaDeReq(req)).nombre;
   return Response.json({ completadas: await consultar((a) => completadasDe(a, autor)) });
 });
 
 export const POST = manejar(async (req: Request) => {
   const datos = await leerJson(req);
-  const autor = texto(datos.autor, "autor", 60);
+  const cuenta = await cuentaDeReq(req);
+  const autor = cuenta.nombre;
   if (!Array.isArray(datos.completadas)) throw new ErrorDeDatos('Falta el campo "completadas".');
   const validas = new Set(
     (await cargarCursos()).flatMap((c) => leccionesDelCurso(c).flatMap((m) => m.lecciones.map((l) => l.id))),

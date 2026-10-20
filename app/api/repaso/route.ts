@@ -1,8 +1,9 @@
 import { modificar } from "@/lib/almacen";
 import { cursoDeLeccion } from "@/lib/curso";
 import { calificar, cargarEvaluaciones } from "@/lib/evaluaciones";
-import { error, leerJson, manejar, rol, texto } from "@/lib/http";
+import { error, leerJson, manejar, texto } from "@/lib/http";
 import type { ResultadoRepaso } from "@/lib/tipos";
+import { cuentaDeReq, empresaDeDatos } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,8 @@ export const dynamic = "force-dynamic";
 // y su explicación, porque el repaso es para aprender.
 export const POST = manejar(async (req: Request) => {
   const datos = await leerJson(req);
-  const autor = texto(datos.autor, "autor", 60);
+  const cuenta = await cuentaDeReq(req);
+  const autor = cuenta.nombre;
   const leccion = texto(datos.leccion, "leccion", 10);
   // Los ids de lección no se repiten entre cursos: la lección dice de qué curso es.
   const curso = await cursoDeLeccion(leccion, { borradores: true });
@@ -19,8 +21,8 @@ export const POST = manejar(async (req: Request) => {
   if (!preguntas) return error("Esta lección no tiene repaso.", 404);
 
   const { detalle, aciertos, total, fallas } = calificar(preguntas, datos.respuestas);
-  // Las respuestas de la coach (vista previa) no cuentan en las estadísticas.
-  if (rol(datos.rol) === "alumno") {
+  // Las respuestas de una coach de la empresa del curso (vista previa) no cuentan en las estadísticas.
+  if (!(cuenta.rol === "coach" && cuenta.empresa === empresaDeDatos(curso!))) {
     await modificar((a) => {
       (a.repasos ??= []).push({
         autor,

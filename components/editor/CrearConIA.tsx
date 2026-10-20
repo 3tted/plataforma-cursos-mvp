@@ -14,7 +14,7 @@ const PASOS = ["Leyendo tu documento…", "Ordenando los temas en módulos…", 
 
 // Formulario para que la IA proponga un curso a partir de un documento de la
 // coach. Al terminar abre el borrador en el editor.
-export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: string; comunidad: string; alCerrar: () => void }) {
+export default function CrearConIA({ comunidad, alCerrar }: { comunidad: string; alCerrar: () => void }) {
   const router = useRouter();
   const entrada = useRef<HTMLInputElement>(null);
   const [archivo, setArchivo] = useState<File | null>(null);
@@ -65,7 +65,6 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
       if (!Number.isInteger(n) || n < min || n > max) return setError(`${nombre} van de ${min} a ${max}.`);
     }
     const forma = new FormData();
-    forma.set("autor", autor);
     forma.set("comunidad", comunidad);
     forma.set("indicaciones", indicaciones);
     for (const [k, v] of Object.entries(cantidades)) if (v.trim()) forma.set(k, v.trim());
@@ -75,7 +74,7 @@ export default function CrearConIA({ autor, comunidad, alCerrar }: { autor: stri
     setTrabajando(true);
     setError(null);
     try {
-      const res = await fetch("/api/coach/cursos/ia", { method: "POST", headers: { "X-Rol": "coach" }, body: forma });
+      const res = await fetch("/api/coach/cursos/ia", { method: "POST", body: forma });
       const datos = (await res.json().catch(() => ({}))) as Partial<CursoCreado> & { error?: string; aviso?: string | null };
       if (!res.ok || !datos.id) {
         setError(

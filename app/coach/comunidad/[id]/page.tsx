@@ -38,9 +38,7 @@ export default function EditarComunidad() {
 
   useEffect(() => {
     if (!autor) return;
-    api<{ comunidades: ComunidadCreada[] }>(`/api/coach/comunidades?autor=${encodeURIComponent(autor)}`, {
-      headers: { "X-Rol": "coach" },
-    })
+    api<{ comunidades: ComunidadCreada[] }>("/api/coach/comunidades")
       .then((d) => {
         const c = d.comunidades.find((x) => x.id === id);
         if (!c) return setError("No encontramos esa comunidad entre las tuyas.");
@@ -95,8 +93,7 @@ export default function EditarComunidad() {
     try {
       const nueva = await api<ComunidadCreada>("/api/coach/comunidades", {
         method: "PATCH",
-        headers: { "X-Rol": "coach" },
-        json: { autor, id: comunidad.id, ...forma, precio_mensual: Number(forma.precio_mensual) },
+        json: { id: comunidad.id, ...forma, precio_mensual: Number(forma.precio_mensual) },
       });
       setComunidad(nueva);
       setForma(formaDe(nueva));
@@ -127,7 +124,6 @@ export default function EditarComunidad() {
         <FotoPortada
           de="comunidad"
           id={comunidad.id}
-          autor={autor}
           tema={forma.tema}
           foto={comunidad.foto}
           alCambiar={(foto) => {

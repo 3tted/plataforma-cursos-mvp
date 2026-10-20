@@ -1,8 +1,9 @@
 import { randomInt } from "crypto";
 import { modificar, nuevoId } from "@/lib/almacen";
 import { cargarComunidades, idComunidad } from "@/lib/curso";
-import { ErrorDeDatos, leerJson, manejar, texto } from "@/lib/http";
+import { ErrorDeDatos, leerJson, manejar } from "@/lib/http";
 import type { MetodoPago, Pago } from "@/lib/tipos";
+import { cuentaDeReq } from "@/lib/permisos";
 
 // PAGOS SIMULADOS. No se contacta a ningún proveedor ni se cobra nada: se
 // generan referencias ficticias para mostrar cómo se vería el flujo con OXXO,
@@ -19,7 +20,8 @@ export const POST = manejar(async (req: Request) => {
   const datos = await leerJson(req);
   const metodo = datos.metodo as MetodoPago;
   if (!METODOS.includes(metodo)) throw new ErrorDeDatos("Método de pago no válido.");
-  const autor = texto(datos.autor, "autor", 60);
+  const cuenta = await cuentaDeReq(req);
+  const autor = cuenta.nombre;
   const id = await idComunidad(datos.comunidad);
   const comunidad = (await cargarComunidades()).find((c) => c.id === id)!;
 

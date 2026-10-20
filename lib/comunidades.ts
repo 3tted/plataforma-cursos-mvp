@@ -18,6 +18,8 @@ export interface ComunidadDirectorio {
   estado: "activa" | "proximamente";
   /** Foto de portada que subió la coach. */
   foto?: string;
+  /** Empresa dueña; sin el dato, la de Merkatics. */
+  empresa?: string;
 }
 
 /** Temas para elegir al crear una comunidad (cada uno tiene su portada ilustrada). */

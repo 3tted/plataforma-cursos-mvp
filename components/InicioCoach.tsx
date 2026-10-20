@@ -11,6 +11,7 @@ import { useApp } from "./Contexto";
 import { IconoComunidad, IconoFlechaDer } from "./Iconos";
 import PortadaTema from "./PortadaTema";
 import PublicacionesRecientes from "./PublicacionesRecientes";
+import { useCursosDeMiEmpresa } from "./useMiEmpresa";
 
 // Primero quien necesita ayuda, luego quien está por presentar el examen.
 const PRIORIDAD = { "requiere-apoyo": 0, "examen-pendiente": 1, "en-curso": 2, "sin-iniciar": 3, aprobado: 4 } as const;
@@ -18,17 +19,20 @@ const PRIORIDAD = { "requiere-apoyo": 0, "examen-pendiente": 1, "en-curso": 2, "
 // Inicio de la coach: sus cursos, sus alumnos y lo que le toca contestar.
 export default function InicioCoach() {
   const router = useRouter();
-  const { usuario, datos, setBorrador, cursos, cambiarCurso, temaDe, comunidadId } = useApp();
+  const { usuario, datos, setBorrador, cambiarCurso, temaDe, comunidadId } = useApp();
+  // Solo lo de su empresa (no los cursos de otras que también ve en el directorio).
+  const { mios: cursos, activoEsMio } = useCursosDeMiEmpresa();
   const [resumen, setResumen] = useState<ResumenCoach | null>(null);
   const [matrices, setMatrices] = useState<MatrizAlumnos[] | null>(null);
   const [error, setError] = useState(false);
 
   // Lo de la comunidad que se muestra ("Esto pasa hoy en…"), contado igual que en el panel.
   useEffect(() => {
+    if (!activoEsMio) return;
     api<ResumenCoach>(`/api/coach/resumen?comunidad=${encodeURIComponent(comunidadId)}`)
       .then(setResumen)
       .catch(() => setError(true));
-  }, [comunidadId]);
+  }, [comunidadId, activoEsMio]);
 
   // Una matriz por curso; aquí se juntan para ver de un vistazo quién necesita apoyo.
   useEffect(() => {
@@ -69,7 +73,11 @@ export default function InicioCoach() {
     <div className="inicio">
       <header className="inicio-saludo">
         <h1>Hola{nombre && `, ${nombre}`}</h1>
-        <p className="texto-suave">Esto pasa hoy en {datos?.comunidad.nombre ?? "tu comunidad"}.</p>
+        <p className="texto-suave">
+          {activoEsMio
+            ? `Esto pasa hoy en ${datos?.comunidad.nombre ?? "tu comunidad"}.`
+            : "Cuando subas tu primer curso a la página, aquí verás lo que pasa en tu comunidad."}
+        </p>
       </header>
 
       {error && (

@@ -21,6 +21,7 @@ export const GET = manejar(async () => {
           curso: publicados[0].titulo,
           estado: "activa",
           ...(c.foto ? { foto: c.foto } : {}),
+          ...(c.empresa ? { empresa: c.empresa } : {}),
         },
       ];
     }),

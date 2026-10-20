@@ -8683,3 +8683,347 @@ button.tarjeta-comunidad-enlace {
     position: static;
   }
 }
+
+/* ---------- Cuentas: entrada, invitaciones, equipo y página de empresa ---------- */
+
+.entrada-pestanas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+  border: 1px solid var(--linea);
+}
+
+.entrada-pestanas button {
+  min-height: 40px;
+  border: 0;
+  border-radius: calc(var(--radio-control) - 4px);
+  background: transparent;
+  color: var(--tinta-2);
+  font: inherit;
+  font-size: var(--t-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.entrada-pestanas button[aria-pressed="true"] {
+  background: var(--superficie);
+  color: var(--tinta);
+  box-shadow: 0 1px 2px var(--sombra), inset 0 0 0 1px var(--linea);
+}
+
+.entrada-pestanas button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.aviso-entrada {
+  padding: 12px 14px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+  border: 1px solid var(--linea);
+  color: var(--tinta);
+  font-size: var(--t-small);
+}
+
+.aviso-entrada code,
+.entrada-demo code,
+.enlace-copiable {
+  font-family: var(--fuente-mono);
+  font-size: 0.92em;
+}
+
+.entrada-separador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--tinta-3);
+  font-size: var(--t-caption);
+}
+
+.entrada-separador::before,
+.entrada-separador::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--linea);
+}
+
+.boton-google {
+  gap: 10px;
+  text-decoration: none;
+}
+
+.entrada-demo {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linea);
+}
+
+.entrada-demo h2 {
+  font-size: var(--t-small);
+  letter-spacing: 0.02em;
+}
+
+.entrada-demo ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entrada-demo-cuenta {
+  display: grid;
+  gap: 1px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.entrada-demo-cuenta:hover {
+  border-color: var(--linea-fuerte);
+}
+
+.entrada-demo-cuenta:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.entrada-demo-nombre {
+  font-weight: 700;
+  font-size: var(--t-small);
+}
+
+.entrada-demo-detalle {
+  color: var(--tinta-2);
+  font-size: var(--t-caption);
+  overflow-wrap: anywhere;
+}
+
+.enlace-boton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--acento-texto);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.invitacion {
+  display: grid;
+  gap: 16px;
+}
+
+.invitacion-tarjeta {
+  display: grid;
+  gap: 14px;
+  max-width: 480px;
+}
+
+.invitacion-tarjeta h2 {
+  font-size: var(--t-title);
+}
+
+.pagina-empresa {
+  display: grid;
+  gap: 24px;
+}
+
+.pagina-empresa-cabecera {
+  display: grid;
+  gap: 8px;
+  max-width: 640px;
+}
+
+.pagina-empresa-cabecera h1 {
+  font-size: var(--t-display);
+  line-height: 1.05;
+}
+
+.pagina-empresa-entrar {
+  justify-self: start;
+  margin-top: 8px;
+}
+
+.pagina-empresa-logo {
+  display: block;
+  max-width: 260px;
+  max-height: 80px;
+  width: auto;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.equipo-empresa {
+  display: grid;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.equipo-empresa .tarjeta {
+  display: grid;
+  gap: 14px;
+}
+
+.equipo-empresa h2 {
+  font-size: var(--t-title);
+}
+
+.equipo-empresa h3 {
+  font-size: var(--t-body);
+}
+
+.enlace-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.enlace-copiable {
+  min-width: 0;
+  padding: 8px 12px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+  border: 1px solid var(--linea);
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.enlace-fila .enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.equipo-lista,
+.invitaciones-lista {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.equipo-lista li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.equipo-datos {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.equipo-nombre {
+  font-weight: 700;
+}
+
+.equipo-datos .nota {
+  overflow-wrap: anywhere;
+}
+
+.equipo-invitar {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding-top: 14px;
+  border-top: 1px solid var(--linea);
+}
+
+.equipo-invitar > p {
+  max-width: 62ch;
+}
+
+.equipo-forma {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  width: 100%;
+}
+
+.equipo-forma .campo {
+  flex: 1 1 260px;
+}
+
+.invitaciones-lista {
+  width: 100%;
+}
+
+.invitaciones-lista li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  padding: 10px 0;
+  border-top: 1px dashed var(--linea);
+}
+
+.invitaciones-texto {
+  display: grid;
+  gap: 4px;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.invitaciones-acciones {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mi-empresa-campos {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.mi-empresa-campos:disabled .mi-empresa-muestra,
+.mi-empresa-campos:disabled .mi-empresa-selector {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.perfil-cuenta {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  margin-top: 16px;
+  padding: 18px 22px;
+  border-top: 1px solid var(--linea);
+}
+
+.perfil-cuenta h2 {
+  font-size: var(--t-small);
+}
+
+.perfil-cuenta-correo {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.perfil-cuenta .perfil-edicion {
+  width: 100%;
+}

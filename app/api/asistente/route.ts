@@ -12,6 +12,7 @@ import { extraerCitas } from "@/lib/citas";
 import { cargarCurso, idCurso } from "@/lib/curso";
 import { error, leerJson, manejar, texto } from "@/lib/http";
 import type { TurnoChat } from "@/lib/tipos";
+import { cuentaDe } from "@/lib/sesion";
 
 export const dynamic = "force-dynamic";
 
@@ -201,7 +202,7 @@ export const POST = manejar(async (req: Request) => {
       : respuestaClaude(responderGeneralConClaude(pregunta, historial), nadaQueRegistrar);
   }
 
-  const autor = typeof datos.autor === "string" && datos.autor.trim() ? datos.autor.trim().slice(0, 60) : "Anónimo";
+  const autor = (await cuentaDe(req))?.nombre ?? "Anónimo";
   // En el prototipo la membresía vive en el navegador y llega con la pregunta.
   // En la Fase 2 se valida con la sesión, del lado del servidor.
   const miembro = datos.miembro === true;

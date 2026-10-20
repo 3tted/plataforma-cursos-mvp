@@ -16,6 +16,8 @@ export interface Comunidad {
   foto?: string;
   /** Marca de la empresa dueña (color y logo); sin el dato, la de Merkatics. */
   marca?: MarcaEmpresa;
+  /** Empresa dueña; sin el dato, la de Merkatics (las comunidades de ejemplo). */
+  empresa?: string;
   precio_mensual: number;
   moneda: string;
 }
@@ -154,25 +156,96 @@ export interface CursoCreado {
   modulos: ModuloCreado[];
   examen: PreguntaCurso[];
   autor: string;
+  /** Empresa del curso (la de la coach que lo creó). Opcional: llegó con las cuentas. */
+  empresa?: string;
   creadoEn: string;
   actualizadoEn: string;
 }
 
 /**
- * Empresa (tenant): la cuenta dueña de comunidades y cursos, con su marca. Por
- * ahora cada coach es una empresa de una persona (dueno = nombre de la coach);
- * con cuentas reales tendrá varios miembros con su rol.
+ * Empresa (tenant): dueña de comunidades y cursos, con su marca. Sus coaches
+ * son las cuentas con `empresa` igual a su id; una de ellas es la dueña.
  */
 export interface Empresa {
   id: string;
+  /** Nombre de la cuenta dueña (la que cambia la marca e invita coaches). */
   dueno: string;
   nombre: string;
-  /** Color principal en hex (#rrggbb); los demás tonos se calculan (lib/marca.ts). */
-  color: string;
+  /** Color principal en hex (#rrggbb); sin él, la marca de Merkatics. Los demás tonos se calculan (lib/marca.ts). */
+  color?: string;
   /** Logo (url de /api/fotos). */
   logo?: string;
   creadaEn: string;
   actualizadaEn: string;
+}
+
+/** Rol de una coach dentro de su empresa. */
+export type RolEmpresa = "dueno" | "coach";
+
+/**
+ * Cuenta de una persona. El nombre no se repite: es con el que se firma todo
+ * lo que hace en la plataforma (publicaciones, avance, cursos).
+ */
+export interface Cuenta {
+  id: string;
+  correo: string;
+  nombre: string;
+  rol: Rol;
+  /** Solo las coaches: su empresa y su rol en ella. */
+  empresa?: string;
+  rolEmpresa?: RolEmpresa;
+  /** Equipo de Merkatics: invita a las empresas nuevas. */
+  admin?: boolean;
+  /** Contraseña cifrada (scrypt). Las cuentas que solo entran con Google no la tienen. */
+  contrasena?: { sal: string; hash: string };
+  /** Identificador de Google ("sub"), si la cuenta entra con Google. */
+  google?: string;
+  /** Cuenta de demostración: entra con la contraseña de demo mientras no ponga una propia. */
+  demo?: boolean;
+  bio?: string;
+  creadaEn: string;
+  intentosFallidos?: number;
+  bloqueadaHasta?: string;
+}
+
+/** Sesión abierta: el navegador guarda el token en una cookie; aquí solo su huella (SHA-256). */
+export interface Sesion {
+  huella: string;
+  cuenta: string;
+  creadaEn: string;
+  venceEn: string;
+}
+
+/** Invitación para ser coach: de una empresa que ya existe o para crear una empresa nueva. */
+export interface Invitacion {
+  codigo: string;
+  tipo: "coach" | "empresa";
+  /** La empresa a la que entra (tipo "coach"). */
+  empresa?: string;
+  /** Nombre propuesto para la empresa nueva (tipo "empresa"). */
+  nombreEmpresa?: string;
+  creadaPor: string;
+  creadaEn: string;
+  venceEn: string;
+  usadaPor?: string;
+  usadaEn?: string;
+}
+
+/** Lo que el navegador sabe de la cuenta con sesión abierta. */
+export interface CuentaPublica {
+  nombre: string;
+  correo: string;
+  rol: Rol;
+  empresa?: string;
+  /** Dueña de su empresa: cambia la marca e invita coaches. */
+  dueno: boolean;
+  admin: boolean;
+  /** Tiene contraseña propia (las de Google o demo pueden no tenerla). */
+  conContrasena: boolean;
+  conGoogle: boolean;
+  demo: boolean;
+  bio?: string;
+  desde: string;
 }
 
 /** Lo que la interfaz necesita para pintar la marca de una empresa. */
@@ -184,7 +257,7 @@ export interface MarcaEmpresa {
 
 export interface ComunidadCreada extends Comunidad {
   tema: string;
-  /** Nombre de la coach que la creó (en la Fase 2, su cuenta). */
+  /** Nombre de la coach que la creó. */
   autor: string;
   creadaEn: string;
 }
@@ -194,6 +267,8 @@ export interface ResumenCurso {
   id: string;
   /** Comunidad a la que pertenece el curso. */
   comunidad: string;
+  /** Empresa dueña del curso. */
+  empresa: string;
   titulo: string;
   subtitulo: string;
   modulos: number;

@@ -1,8 +1,9 @@
 import { modificar, nuevoId } from "@/lib/almacen";
 import { cargarCurso, idCurso } from "@/lib/curso";
 import { calificar, cargarEvaluaciones, completadasDe, examenesDelCurso, leccionesDelCurso } from "@/lib/evaluaciones";
-import { error, leerJson, manejar, rol, texto } from "@/lib/http";
+import { error, leerJson, manejar } from "@/lib/http";
 import type { ResultadoExamen } from "@/lib/tipos";
+import { cuentaDeReq, empresaDeDatos } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +12,12 @@ export const dynamic = "force-dynamic";
 // limitados. No revela las respuestas correctas, solo qué lecciones repasar.
 export const POST = manejar(async (req: Request) => {
   const datos = await leerJson(req);
-  const autor = texto(datos.autor, "autor", 60);
-  const vistaPrevia = rol(datos.rol) === "coach";
+  const cuenta = await cuentaDeReq(req);
+  const autor = cuenta.nombre;
   const id = await idCurso(datos.curso, { borradores: true });
   const [ev, curso] = await Promise.all([cargarEvaluaciones(id), cargarCurso(id)]);
+  // Una coach de la empresa del curso lo presenta para revisarlo (vista previa).
+  const vistaPrevia = cuenta.rol === "coach" && cuenta.empresa === empresaDeDatos(curso);
 
   const { aciertos, total, fallas } = calificar(ev.examenFinal.preguntas, datos.respuestas);
   const puntaje = Math.round((aciertos / total) * 100);

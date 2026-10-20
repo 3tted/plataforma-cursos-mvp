@@ -1,12 +1,12 @@
 import { cargarCursos, resumenDe } from "@/lib/curso";
 import { manejar } from "@/lib/http";
+import { coachOpcional } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
-// Los cursos de la comunidad, en ficha corta, para elegir cuál tomar. Para la
-// coach (?autor= y X-Rol: coach) también van sus cursos subidos a la página sin publicar.
+// Los cursos de la comunidad, en ficha corta, para elegir cuál tomar. Para una
+// coach también van los cursos de su empresa subidos a la página sin publicar.
 export const GET = manejar(async (req: Request) => {
-  const autor = new URL(req.url).searchParams.get("autor");
-  const deCoach = req.headers.get("x-rol") === "coach" && autor ? autor : undefined;
-  return Response.json((await cargarCursos({ deCoach })).map(resumenDe));
+  const coach = await coachOpcional(req);
+  return Response.json((await cargarCursos({ deEmpresa: coach?.empresa })).map(resumenDe));
 });

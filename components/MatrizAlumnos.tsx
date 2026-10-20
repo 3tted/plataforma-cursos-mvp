@@ -72,10 +72,7 @@ export default function MatrizAlumnos({ curso }: { curso: string }) {
   const quitar = async (autor: string) => {
     setErrorQuitar(null);
     try {
-      await api(`/api/coach/alumnos?autor=${encodeURIComponent(autor)}`, {
-        method: "DELETE",
-        headers: { "X-Rol": "coach" },
-      });
+      await api(`/api/coach/alumnos?autor=${encodeURIComponent(autor)}`, { method: "DELETE" });
       setPorQuitar(null);
       cargar();
     } catch (e) {

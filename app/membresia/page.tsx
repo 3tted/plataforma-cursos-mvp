@@ -55,6 +55,7 @@ export default function PaginaMembresia() {
     guardarLeccionDeseada,
     comunidadId,
     cursosComunidad,
+    coachAqui,
   } = useApp();
   const [metodo, setMetodo] = useState<MetodoPago>("oxxo");
   const [procesando, setProcesando] = useState(false);
@@ -106,7 +107,7 @@ export default function PaginaMembresia() {
     try {
       const nuevo = await api<Pago>("/api/pagos", {
         method: "POST",
-        json: { metodo, autor: usuario.nombre, comunidad: comunidadId },
+        json: { metodo, comunidad: comunidadId },
       });
       if (metodo === "mercadopago") {
         // Simula el viaje de ida y vuelta al checkout de Mercado Pago.
@@ -129,13 +130,12 @@ export default function PaginaMembresia() {
     setCancelando(false);
   };
 
-  if (usuario?.rol === "coach") {
+  if (coachAqui) {
     return (
       <div className="pagina-estrecha">
-        <h1>Estás viendo la plataforma como coach</h1>
+        <h1>Esta comunidad es de tu empresa</h1>
         <p className="texto-suave">
-          Las coaches tienen acceso completo. Para probar el flujo de pago, cierra sesión y entra con el rol de
-          alumno.
+          Como coach tienes acceso completo a ella. Para probar el flujo de pago, entra con una cuenta de alumno.
         </p>
       </div>
     );

@@ -17,10 +17,12 @@ import { COMUNIDADES, type ComunidadDirectorio } from "@/lib/comunidades";
 import { fotoDePortada, type Foto } from "@/lib/portadas";
 import type {
   Categoria,
+  CuentaPublica,
   DatosCurso,
   EstadoInscripcion,
   EstadoPlataforma,
   Leccion,
+  MarcaEmpresa,
   MetodoPago,
   Modulo,
   Pago,
@@ -28,14 +30,23 @@ import type {
   Rol,
 } from "@/lib/tipos";
 
-export interface Usuario {
-  nombre: string;
-  rol: Rol;
-  /** Fecha en que entró por primera vez (se muestra en el perfil). */
-  desde?: string;
-  /** Descripción corta que la persona escribe en su perfil. */
-  bio?: string;
+/** La cuenta con sesión abierta (la da el servidor; ver /api/sesion). */
+export type Usuario = CuentaPublica;
+
+/** Cómo se puede entrar en este servidor. */
+export interface OpcionesEntrada {
+  google: boolean;
+  /** Cuentas de demostración y su contraseña (solo si es la del proyecto). */
+  demo: { contrasena: string; cuentas: { nombre: string; correo: string; detalle: string }[] } | null;
 }
+
+// Lo que pasó al volver de Google (?google=…).
+const AVISOS_GOOGLE: Record<string, string> = {
+  cancelado: "Cancelaste la entrada con Google.",
+  fallo: "No pudimos entrar con Google. Inténtalo de nuevo.",
+  invitacion: "Entraste, pero la invitación ya no sirve: ya se usó o venció. Pide una nueva.",
+  "sin-configurar": "La entrada con Google todavía no está configurada en este servidor. Entra con tu correo.",
+};
 
 export interface Membresia {
   metodo: MetodoPago;
@@ -59,9 +70,16 @@ export interface Borrador {
 interface ContextoApp {
   listo: boolean;
   usuario: Usuario | null;
+  /** Pone la cuenta con sesión: al entrar o cuando cambia algo de su perfil. */
   guardarUsuario: (u: Usuario) => void;
   /** Cierra la sesión y borra lo de esa persona en este navegador. */
   cerrarSesion: () => void;
+  opcionesEntrada: OpcionesEntrada | null;
+  /** Aviso para la pantalla de entrada (por ejemplo, al volver de Google). */
+  avisoEntrada: string | null;
+  /** La marca de la página de una empresa (/e/<id>), que la pone esa página. */
+  marcaPagina: MarcaEmpresa | null;
+  fijarMarcaPagina: (m: MarcaEmpresa | null) => void;
   pidiendoUsuario: boolean;
   setPidiendoUsuario: (v: boolean) => void;
   /** Abre la pantalla de entrada; con rol, ya viene elegido (por ejemplo, "Soy coach"). */
@@ -97,6 +115,10 @@ interface ContextoApp {
   inscripcionLista: boolean;
   /** Unido a la comunidad que se está viendo. */
   enComunidad: boolean;
+  /** Coach de la empresa dueña de la comunidad que se está viendo: la edita y la modera. */
+  coachAqui: boolean;
+  /** ¿Es coach de la empresa dueña de esa comunidad? */
+  esCoachDe: (comunidad: string) => boolean;
   enLaComunidad: (comunidad: string) => boolean;
   inscritoEn: (curso: string) => boolean;
   /** Paso 1: unirse a una comunidad (gratis); sin id, a la que se está viendo. */
@@ -141,6 +163,7 @@ interface ContextoApp {
 const Contexto = createContext<ContextoApp | null>(null);
 
 const CLAVES = {
+  /** De quién es lo guardado en este navegador (avance, membresías): si entra otra cuenta, se borra. */
   usuario: "fc.usuario",
   membresia: "fc.membresia",
   completadas: "fc.completadas",
@@ -153,12 +176,35 @@ const CLAVES = {
   repasados: "fc.repasados",
 };
 
+/** Lo que este navegador guarda por persona (se borra si entra otra). */
+const CLAVES_PERSONALES = ["membresia", "completadas", "vistos", "repasados", "pagoPendiente", "leccionDeseada"] as const;
+
+/**
+ * Anota de quién es lo guardado en el navegador. Si entra otra cuenta (o
+ * ninguna) después de alguien, borra lo de la anterior y devuelve true.
+ */
+function quedarseCon(cuenta: Usuario | null): boolean {
+  const antes = leerLocal<{ nombre?: string }>(CLAVES.usuario)?.nombre ?? null;
+  const ahora = cuenta?.nombre ?? null;
+  if (antes === ahora) return false;
+  if (antes !== null) {
+    for (const clave of CLAVES_PERSONALES) guardarLocal(CLAVES[clave], null);
+    guardarSesion(CLAVES.chat, null);
+    guardarSesion(CLAVES.chatGeneral, null);
+  }
+  guardarLocal(CLAVES.usuario, ahora ? { nombre: ahora } : null);
+  return antes !== null;
+}
+
 const CURSO_PRINCIPAL = "finanzas-negocio";
 const COMUNIDAD_PRINCIPAL = "finanzas-claras";
 
 export function ProveedorApp({ children }: { children: ReactNode }) {
   const [listo, setListo] = useState(false);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [opcionesEntrada, setOpcionesEntrada] = useState<OpcionesEntrada | null>(null);
+  const [avisoEntrada, setAvisoEntrada] = useState<string | null>(null);
+  const [marcaPagina, fijarMarcaPagina] = useState<MarcaEmpresa | null>(null);
   const [pidiendoUsuario, setPidiendoUsuario] = useState(false);
   const [rolSugerido, setRolSugerido] = useState<Rol | null>(null);
   const pedirEntrada = useCallback((rol?: Rol) => {
@@ -213,58 +259,70 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     if (listo) void recargarCurso();
   }, [listo, recargarCurso]);
 
+  // Al abrir la plataforma: primero la sesión (del servidor) y luego lo que
+  // este navegador recuerda de esa misma persona.
   useEffect(() => {
-    const guardadoUsuario = leerLocal<Usuario>(CLAVES.usuario);
-    // Sesiones creadas antes del perfil no traen fecha de alta: se fija hoy.
-    if (guardadoUsuario && !guardadoUsuario.desde) {
-      guardadoUsuario.desde = new Date().toISOString();
-      guardarLocal(CLAVES.usuario, guardadoUsuario);
-    }
-    setUsuario(guardadoUsuario);
-    // Antes había una sola membresía (de Finanzas Claras); ahora hay una por comunidad.
-    const guardadas = leerLocal<Membresia | Record<string, Membresia>>(CLAVES.membresia);
-    setMembresias(
-      !guardadas ? {} : "metodo" in guardadas ? { [COMUNIDAD_PRINCIPAL]: guardadas as Membresia } : (guardadas as Record<string, Membresia>),
-    );
-    const pendiente = leerLocal<Pago>(CLAVES.pagoPendiente);
-    // Una ficha vencida ya no sirve para pagar: se descarta.
-    if (pendiente && (!pendiente.venceEn || Date.parse(pendiente.venceEn) > Date.now())) {
-      setPagoPendiente(pendiente);
-    } else if (pendiente) {
-      guardarLocal(CLAVES.pagoPendiente, null);
-    }
-    setCompletadas(leerLocal<string[]>(CLAVES.completadas) ?? []);
-    setVistos(leerLocal<string[]>(CLAVES.vistos) ?? []);
-    setRepasados(leerLocal<string[]>(CLAVES.repasados) ?? []);
-    setLeccionDeseada(leerLocal<string>(CLAVES.leccionDeseada));
-    // La conversación sobrevive a una recarga o a cambiar de app. Una respuesta
-    // que se estaba escribiendo cuando se cerró la página queda como detenida.
-    const restaurar = (clave: string) =>
-      (leerSesion<MensajeChat[]>(clave) ?? []).map((m) =>
-        m.estado === "escribiendo" ? { ...m, estado: "detenido" as const } : m,
+    let vigente = true;
+    void (async () => {
+      const sesion = await api<OpcionesEntrada & { cuenta: Usuario | null }>("/api/sesion").catch(() => null);
+      if (!vigente) return;
+      const cuenta = sesion?.cuenta ?? null;
+      setOpcionesEntrada(sesion ? { google: sesion.google, demo: sesion.demo } : { google: false, demo: null });
+      quedarseCon(cuenta);
+      setUsuario(cuenta);
+      // Al volver de Google llega ?google=…: se avisa y se quita de la dirección.
+      const url = new URL(window.location.href);
+      const google = url.searchParams.get("google");
+      if (google) {
+        url.searchParams.delete("google");
+        window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+        if (AVISOS_GOOGLE[google]) {
+          setAvisoEntrada(AVISOS_GOOGLE[google]);
+          if (!cuenta) setPidiendoUsuario(true);
+        }
+      }
+
+      // Antes había una sola membresía (de Finanzas Claras); ahora hay una por comunidad.
+      const guardadas = leerLocal<Membresia | Record<string, Membresia>>(CLAVES.membresia);
+      setMembresias(
+        !guardadas ? {} : "metodo" in guardadas ? { [COMUNIDAD_PRINCIPAL]: guardadas as Membresia } : (guardadas as Record<string, Membresia>),
       );
-    setChat(restaurar(CLAVES.chat));
-    setChatGeneral(restaurar(CLAVES.chatGeneral));
-    setCursoId(leerLocal<string>(CLAVES.curso) ?? CURSO_PRINCIPAL);
-    setListo(true);
+      const pendiente = leerLocal<Pago>(CLAVES.pagoPendiente);
+      // Una ficha vencida ya no sirve para pagar: se descarta.
+      if (pendiente && (!pendiente.venceEn || Date.parse(pendiente.venceEn) > Date.now())) {
+        setPagoPendiente(pendiente);
+      } else if (pendiente) {
+        guardarLocal(CLAVES.pagoPendiente, null);
+      }
+      setCompletadas(leerLocal<string[]>(CLAVES.completadas) ?? []);
+      setVistos(leerLocal<string[]>(CLAVES.vistos) ?? []);
+      setRepasados(leerLocal<string[]>(CLAVES.repasados) ?? []);
+      setLeccionDeseada(leerLocal<string>(CLAVES.leccionDeseada));
+      // La conversación sobrevive a una recarga o a cambiar de app. Una respuesta
+      // que se estaba escribiendo cuando se cerró la página queda como detenida.
+      const restaurar = (clave: string) =>
+        (leerSesion<MensajeChat[]>(clave) ?? []).map((m) =>
+          m.estado === "escribiendo" ? { ...m, estado: "detenido" as const } : m,
+        );
+      setChat(restaurar(CLAVES.chat));
+      setChatGeneral(restaurar(CLAVES.chatGeneral));
+      setCursoId(leerLocal<string>(CLAVES.curso) ?? CURSO_PRINCIPAL);
+      setListo(true);
+    })();
     api<EstadoPlataforma>("/api/estado")
       .then(setEstado)
       .catch(() => setEstado({ iaActiva: false, modelo: null }));
+    return () => {
+      vigente = false;
+    };
   }, []);
 
-  // La coach también ve sus cursos subidos a la página sin publicar.
-  const usuarioActual = useRef<Usuario | null>(null);
-  usuarioActual.current = usuario;
   // Solo cuenta la última carga: una respuesta vieja no pisa el catálogo.
   const cargaCatalogo = useRef(0);
   const recargarCatalogo = useCallback(async () => {
     const esta = ++cargaCatalogo.current;
-    const u = usuarioActual.current;
-    const deCoach = u?.rol === "coach" ? `?autor=${encodeURIComponent(u.nombre)}` : "";
     const [lista, directorio] = await Promise.all([
-      api<ResumenCurso[]>(`/api/cursos${deCoach}`, deCoach ? { headers: { "X-Rol": "coach" } } : undefined).catch(
-        () => null,
-      ),
+      api<ResumenCurso[]>("/api/cursos").catch(() => null),
       api<ComunidadDirectorio[]>("/api/comunidades").catch(() => null),
     ]);
     if (esta !== cargaCatalogo.current) return;
@@ -278,15 +336,26 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   }, [listo, usuario?.nombre, usuario?.rol, recargarCatalogo]);
 
   const guardarUsuario = useCallback((u: Usuario) => {
-    const completo = { ...u, desde: u.desde ?? new Date().toISOString() };
-    setUsuario(completo);
-    guardarLocal(CLAVES.usuario, completo);
+    if (quedarseCon(u)) {
+      // Entró otra persona: lo que recordaba el navegador era de la anterior.
+      setMembresias({});
+      setCompletadas([]);
+      setVistos([]);
+      setRepasados([]);
+      setPagoPendiente(null);
+      setLeccionDeseada(null);
+      setChat([]);
+      setChatGeneral([]);
+    }
+    setUsuario(u);
+    setAvisoEntrada(null);
     setPidiendoUsuario(false);
   }, []);
 
-  // En el prototipo todo vive en el navegador: al salir se borra lo de esa
-  // persona para que quien entre después no herede su avance ni su membresía.
+  // El avance y la membresía de prueba viven en el navegador: al salir se
+  // borran para que quien entre después no los herede.
   const cerrarSesion = useCallback(() => {
+    void api("/api/sesion", { method: "DELETE" }).catch(() => undefined);
     for (const clave of [
       CLAVES.usuario,
       CLAVES.membresia,
@@ -315,12 +384,13 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     setPidiendoUsuario(false);
   }, []);
 
-  // Inscripción del alumno (comunidad y cursos), guardada en el servidor.
+  // Inscripción (comunidades y cursos), guardada en el servidor. Una coach
+  // también la tiene en las comunidades de otras empresas.
   useEffect(() => {
     setInscripcion(null);
-    if (!listo || usuario?.rol !== "alumno") return;
+    if (!listo || !usuario) return;
     let vigente = true;
-    api<EstadoInscripcion>(`/api/inscripcion?autor=${encodeURIComponent(usuario.nombre)}`)
+    api<EstadoInscripcion>("/api/inscripcion")
       .then((e) => vigente && setInscripcion(e))
       .catch(() => vigente && setInscripcion({ comunidades: [], cursos: [] }));
     return () => {
@@ -338,7 +408,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
       setInscripcion(
         await api<EstadoInscripcion>("/api/inscripcion", {
           method: "POST",
-          json: { autor: usuario.nombre, accion, ...extra },
+          json: { accion, ...extra },
         }),
       );
     },
@@ -397,23 +467,22 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
 
   // El avance también se guarda en el servidor: la coach lo ve en su matriz,
   // el examen final lo revisa y el alumno lo recupera al volver a entrar.
-  const enviarProgreso = useCallback((nombre: string, lista: string[]) => {
-    void api("/api/progreso", { method: "POST", json: { autor: nombre, completadas: lista } }).catch(() => {
+  const enviarProgreso = useCallback((lista: string[]) => {
+    void api("/api/progreso", { method: "POST", json: { completadas: lista } }).catch(() => {
       // sin conexión: el navegador lo conserva y se reenvía en el siguiente cambio
     });
   }, []);
 
   useEffect(() => {
     if (!listo || usuario?.rol !== "alumno") return;
-    const nombre = usuario.nombre;
     let vigente = true;
-    api<{ completadas: string[] }>(`/api/progreso?autor=${encodeURIComponent(nombre)}`)
+    api<{ completadas: string[] }>("/api/progreso")
       .then(({ completadas: remotas }) => {
         if (!vigente) return;
         setCompletadas((locales) => [...new Set([...locales, ...remotas])]);
         const union = [...new Set([...(leerLocal<string[]>(CLAVES.completadas) ?? []), ...remotas])];
         guardarLocal(CLAVES.completadas, union);
-        if (union.length !== remotas.length) enviarProgreso(nombre, union);
+        if (union.length !== remotas.length) enviarProgreso(union);
       })
       .catch(() => {
         // sin conexión: se queda con lo que recuerda el navegador
@@ -428,7 +497,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
       const nuevo = completadas.includes(id) ? completadas.filter((x) => x !== id) : [...completadas, id];
       setCompletadas(nuevo);
       guardarLocal(CLAVES.completadas, nuevo);
-      if (usuario?.rol === "alumno") enviarProgreso(usuario.nombre, nuevo);
+      if (usuario?.rol === "alumno") enviarProgreso(nuevo);
     },
     [completadas, usuario, enviarProgreso],
   );
@@ -459,14 +528,30 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     [datos],
   );
 
-  const esCoach = usuario?.rol === "coach";
+  // La coach entra a todo lo de su empresa sin unirse ni pagar; en las demás es como cualquier alumno.
+  const empresaDe = useCallback(
+    (comunidad: string) =>
+      (datos?.comunidad.id === comunidad ? datos.comunidad.empresa : undefined) ??
+      cursos.find((c) => c.comunidad === comunidad)?.empresa ??
+      comunidades.find((c) => c.id === comunidad)?.empresa ??
+      "merkatics",
+    [datos, cursos, comunidades],
+  );
+  const esCoachDe = useCallback(
+    (comunidad: string) => usuario?.rol === "coach" && usuario.empresa === empresaDe(comunidad),
+    [usuario?.rol, usuario?.empresa, empresaDe],
+  );
+  const coachAqui = esCoachDe(comunidadId);
   const inscritoEn = useCallback(
-    (curso: string) => esCoach || Boolean(inscripcion?.cursos.includes(curso)),
-    [esCoach, inscripcion],
+    (curso: string) => {
+      const comunidad = cursos.find((c) => c.id === curso)?.comunidad;
+      return (!!comunidad && esCoachDe(comunidad)) || Boolean(inscripcion?.cursos.includes(curso));
+    },
+    [cursos, esCoachDe, inscripcion],
   );
   const enLaComunidad = useCallback(
-    (comunidad: string) => esCoach || Boolean(inscripcion?.comunidades.includes(comunidad)),
-    [esCoach, inscripcion],
+    (comunidad: string) => esCoachDe(comunidad) || Boolean(inscripcion?.comunidades.includes(comunidad)),
+    [esCoachDe, inscripcion],
   );
   const membresiaEn = useCallback((comunidad: string) => membresias[comunidad] ?? null, [membresias]);
   const membresia = membresias[comunidadId] ?? null;
@@ -496,6 +581,10 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     usuario,
     guardarUsuario,
     cerrarSesion,
+    opcionesEntrada,
+    avisoEntrada,
+    marcaPagina,
+    fijarMarcaPagina,
     // Sin sesión se ve la página para visitantes; la entrada se abre desde sus botones.
     pidiendoUsuario,
     setPidiendoUsuario,
@@ -516,8 +605,10 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     cambiarCurso,
     comunidadId,
     cambiarComunidad,
-    inscripcionLista: !usuario || esCoach || inscripcion !== null,
+    inscripcionLista: !usuario || coachAqui || inscripcion !== null,
     enComunidad: enLaComunidad(comunidadId),
+    coachAqui,
+    esCoachDe,
     enLaComunidad,
     inscritoEn,
     unirmeAComunidad,
@@ -529,7 +620,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     membresiaEn,
     pagoPendiente,
     guardarPagoPendiente,
-    tieneAcceso: usuario?.rol === "coach" || membresia !== null,
+    tieneAcceso: coachAqui || membresia !== null,
     completadas,
     alternarCompletada,
     vistos,

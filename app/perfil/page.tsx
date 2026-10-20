@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
-import { useApp } from "@/components/Contexto";
+import { useApp, type Usuario } from "@/components/Contexto";
 import ExpedienteCurso from "@/components/ExpedienteCurso";
 import { IconoCalendario, IconoComentario, IconoEditar, IconoPregunta, IconoPublicacion } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
@@ -134,23 +134,23 @@ function Actividad({ fechas }: { fechas: string[] }) {
 }
 
 export default function PaginaPerfil() {
-  const { usuario, guardarUsuario, membresiaEn, completadas, lecciones, cursos, inscritoEn, enLaComunidad, cambiarComunidad, comunidades } =
+  const { usuario, guardarUsuario, esCoachDe, membresiaEn, completadas, lecciones, cursos, inscritoEn, enLaComunidad, cambiarComunidad, comunidades } =
     useApp();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [errorCarga, setErrorCarga] = useState(false);
   const [editando, setEditando] = useState(false);
-  const [nombre, setNombre] = useState("");
   const [bio, setBio] = useState("");
+  const [errorBio, setErrorBio] = useState<string | null>(null);
   const [grupo, setGrupo] = useState("todas");
   useTitulo("Tu perfil");
 
   useEffect(() => {
     if (!usuario) return;
     setErrorCarga(false);
-    api<Perfil>(`/api/perfil?autor=${encodeURIComponent(usuario.nombre)}`)
+    api<Perfil>("/api/perfil")
       .then(setPerfil)
       .catch(() => setErrorCarga(true));
-  }, [usuario]);
+  }, [usuario?.nombre]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const contribuciones = useMemo<Contribucion[]>(() => {
     if (!perfil) return [];
@@ -195,20 +195,22 @@ export default function PaginaPerfil() {
   const desde = usuario.desde ? new Date(usuario.desde) : new Date();
   const visibles = grupo === "todas" ? contribuciones : contribuciones.filter((c) => c.comunidad === grupo);
   const estadoMembresia = (comunidad: string) =>
-    usuario.rol === "coach" ? "Coach de la comunidad" : membresiaEn(comunidad) ? "Membresía activa" : "Acceso gratis al módulo 1";
+    esCoachDe(comunidad) ? "Coach de la comunidad" : membresiaEn(comunidad) ? "Membresía activa" : "Acceso gratis al módulo 1";
 
   const abrirEdicion = () => {
-    setNombre(usuario.nombre);
     setBio(usuario.bio ?? "");
+    setErrorBio(null);
     setEditando(true);
   };
 
-  const guardar = (e: FormEvent) => {
+  const guardar = async (e: FormEvent) => {
     e.preventDefault();
-    const limpio = nombre.trim();
-    if (!limpio) return;
-    guardarUsuario({ ...usuario, nombre: limpio.slice(0, 60), bio: bio.trim().slice(0, 160) || undefined });
-    setEditando(false);
+    try {
+      guardarUsuario((await api<{ cuenta: Usuario }>("/api/cuentas", { method: "PATCH", json: { bio } })).cuenta);
+      setEditando(false);
+    } catch (err) {
+      setErrorBio((err as Error).message);
+    }
   };
 
   return (
@@ -248,7 +250,7 @@ export default function PaginaPerfil() {
                     <span className="perfil-membresia-nombre">{c.nombre}</span>
                     <span className="texto-suave">con {c.coach}</span>
                   </span>
-                  <span className={membresiaEn(c.id) || usuario.rol === "coach" ? "pastilla pastilla-ok" : "pastilla"}>
+                  <span className={membresiaEn(c.id) || esCoachDe(c.id) ? "pastilla pastilla-ok" : "pastilla"}>
                     {estadoMembresia(c.id)}
                   </span>
                 </Link>
@@ -263,7 +265,7 @@ export default function PaginaPerfil() {
             {cursos.some((c) => inscritoEn(c.id)) ? (
               cursos
                 .filter((c) => inscritoEn(c.id))
-                .map((c) => <ExpedienteCurso key={c.id} autor={usuario.nombre} curso={c} />)
+                .map((c) => <ExpedienteCurso key={c.id} curso={c} />)
             ) : (
               <p className="vacio">
                 Todavía no estás inscrito en ningún curso. <Link href="/comunidad">Ve a la comunidad</Link> para elegir uno.
@@ -336,10 +338,6 @@ export default function PaginaPerfil() {
           {editando ? (
             <form className="perfil-edicion" onSubmit={guardar}>
               <label className="campo">
-                <span>Nombre</span>
-                <input value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={60} required />
-              </label>
-              <label className="campo">
                 <span>Sobre ti</span>
                 <textarea
                   value={bio}
@@ -350,9 +348,13 @@ export default function PaginaPerfil() {
                 />
               </label>
               <p className="nota" id="bio-cuenta">
-                <span className="cifra">{bio.length}</span> de 160 caracteres. Tus publicaciones anteriores conservan el
-                nombre con el que las firmaste.
+                <span className="cifra">{bio.length}</span> de 160 caracteres.
               </p>
+              {errorBio && (
+                <p className="error" role="alert">
+                  {errorBio}
+                </p>
+              )}
               <div className="fila-acciones">
                 <button type="button" className="boton boton-fantasma boton-chico" onClick={() => setEditando(false)}>
                   Cancelar
@@ -405,7 +407,99 @@ export default function PaginaPerfil() {
             </button>
           )}
         </div>
+        <TuCuenta />
       </aside>
     </div>
+  );
+}
+
+// Los datos de la cuenta: el correo con el que entra y su contraseña. El
+// nombre no cambia, porque firma todo lo que la persona hizo en la plataforma.
+function TuCuenta() {
+  const { usuario, guardarUsuario } = useApp();
+  const [abierta, setAbierta] = useState(false);
+  const [actual, setActual] = useState("");
+  const [nueva, setNueva] = useState("");
+  const [estado, setEstado] = useState<{ ok: boolean; texto: string } | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  if (!usuario) return null;
+  // Quien solo entra con Google no tiene una contraseña que confirmar.
+  const pideActual = usuario.conContrasena || usuario.demo;
+
+  const cambiar = async (e: FormEvent) => {
+    e.preventDefault();
+    setEnviando(true);
+    setEstado(null);
+    try {
+      const { cuenta } = await api<{ cuenta: Usuario }>("/api/cuentas", {
+        method: "PATCH",
+        json: { contrasenaActual: actual, contrasenaNueva: nueva },
+      });
+      guardarUsuario(cuenta);
+      setActual("");
+      setNueva("");
+      setAbierta(false);
+      setEstado({ ok: true, texto: "Listo: tu contraseña cambió y se cerraron tus sesiones en otros equipos." });
+    } catch (err) {
+      setEstado({ ok: false, texto: (err as Error).message });
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <section className="perfil-cuenta" aria-labelledby="cuenta-titulo">
+      <h2 id="cuenta-titulo">Tu cuenta</h2>
+      <p className="perfil-cuenta-correo">{usuario.correo}</p>
+      <p className="nota">
+        {usuario.demo
+          ? "Cuenta de demostración: entra con la contraseña de demo hasta que pongas una propia."
+          : usuario.conGoogle && !usuario.conContrasena
+            ? "Entras con Google. Si quieres, ponle también una contraseña."
+            : usuario.conGoogle
+              ? "Entras con Google o con tu contraseña."
+              : "Entras con tu correo y tu contraseña."}
+      </p>
+      {estado && (
+        <p className={estado.ok ? "nota" : "error"} role={estado.ok ? "status" : "alert"}>
+          {estado.texto}
+        </p>
+      )}
+      {abierta ? (
+        <form className="perfil-edicion" onSubmit={cambiar}>
+          {pideActual && (
+            <label className="campo">
+              <span>Contraseña actual</span>
+              <input type="password" value={actual} onChange={(e) => setActual(e.target.value)} autoComplete="current-password" />
+            </label>
+          )}
+          <label className="campo">
+            <span>Contraseña nueva</span>
+            <input
+              type="password"
+              value={nueva}
+              onChange={(e) => setNueva(e.target.value)}
+              autoComplete="new-password"
+              aria-describedby="contrasena-nueva-nota"
+            />
+            <span className="nota" id="contrasena-nueva-nota">
+              Al menos 8 caracteres.
+            </span>
+          </label>
+          <div className="fila-acciones">
+            <button type="button" className="boton boton-fantasma boton-chico" onClick={() => setAbierta(false)}>
+              Cancelar
+            </button>
+            <button type="submit" className="boton boton-chico" disabled={enviando}>
+              {enviando ? "Guardando…" : "Cambiar contraseña"}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <button type="button" className="enlace enlace-discreto" onClick={() => setAbierta(true)}>
+          {usuario.conContrasena ? "Cambiar mi contraseña" : "Poner una contraseña"}
+        </button>
+      )}
+    </section>
   );
 }

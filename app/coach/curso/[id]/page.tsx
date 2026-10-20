@@ -71,18 +71,13 @@ export default function EditorCurso() {
 
   useEffect(() => {
     if (!autor) return;
-    api<CursoCreado>(`/api/coach/cursos/${id}?autor=${encodeURIComponent(autor)}`, { headers: { "X-Rol": "coach" } })
+    api<CursoCreado>(`/api/coach/cursos/${id}`)
       .then((c) => {
         setGuardado(c);
         setCurso(c);
       })
       .catch((e) => setError((e as Error).message));
-    api<{ comunidades: { id: string; nombre: string; tema: string }[] }>(
-      `/api/coach/comunidades?autor=${encodeURIComponent(autor)}`,
-      {
-        headers: { "X-Rol": "coach" },
-      },
-    )
+    api<{ comunidades: { id: string; nombre: string; tema: string }[] }>("/api/coach/comunidades")
       .then((d) => setComunidades(d.comunidades.map((c) => ({ id: c.id, nombre: c.nombre, tema: c.tema }))))
       .catch(() => setComunidades([]));
     void cargarVideos();
@@ -134,7 +129,6 @@ export default function EditorCurso() {
 
   const lecciones = curso.modulos.flatMap((m) => m.lecciones);
   const guardadas = new Set(guardado?.modulos.flatMap((m) => m.lecciones.map((l) => l.id)) ?? []);
-  const cabeceras = { "X-Rol": "coach" };
 
   const guardar = async (): Promise<CursoCreado | null> => {
     setOcupado("guardar");
@@ -142,8 +136,7 @@ export default function EditorCurso() {
     try {
       const nuevo = await api<CursoCreado>(`/api/coach/cursos/${id}`, {
         method: "PUT",
-        headers: cabeceras,
-        json: { autor, curso },
+        json: { curso },
       });
       setGuardado(nuevo);
       setCurso(nuevo);
@@ -166,8 +159,8 @@ export default function EditorCurso() {
     try {
       const res = await fetch(`/api/coach/cursos/${id}/publicar`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...cabeceras },
-        body: JSON.stringify({ autor, publicar }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ publicar }),
       });
       const datos = (await res.json()) as CursoCreado & { error?: string; faltan?: string[] };
       if (!res.ok) {
@@ -194,8 +187,7 @@ export default function EditorCurso() {
     try {
       await api(`/api/coach/cursos/${id}/comunidad`, {
         method: "POST",
-        headers: cabeceras,
-        json: { autor, comunidad: destino },
+        json: { comunidad: destino },
       });
       setCurso((c) => (c ? { ...c, comunidad: destino } : c));
       setGuardado((g) => (g ? { ...g, comunidad: destino } : g));
@@ -214,8 +206,8 @@ export default function EditorCurso() {
     if (curso.estado !== "publicado" && !curso.enPagina) {
       const res = await fetch(`/api/coach/cursos/${id}/pagina`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...cabeceras },
-        body: JSON.stringify({ autor, enPagina: true }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enPagina: true }),
       }).catch(() => null);
       const datos = res ? ((await res.json().catch(() => ({}))) as CursoCreado & { error?: string }) : null;
       if (!res?.ok || !datos) return setError(datos?.error ?? "No se pudo subir a la página. Revisa tu conexión.");
@@ -231,8 +223,8 @@ export default function EditorCurso() {
   const quitarDeLaPagina = async () => {
     const res = await fetch(`/api/coach/cursos/${id}/pagina`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...cabeceras },
-      body: JSON.stringify({ autor, enPagina: false }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enPagina: false }),
     }).catch(() => null);
     if (!res?.ok) return setError("No se pudo quitar de la página.");
     const datos = (await res.json()) as CursoCreado;
@@ -245,7 +237,7 @@ export default function EditorCurso() {
   const borrar = async () => {
     if (!window.confirm("¿Borrar este borrador? No se puede deshacer.")) return;
     try {
-      await api(`/api/coach/cursos/${id}?autor=${encodeURIComponent(autor)}`, { method: "DELETE", headers: cabeceras });
+      await api(`/api/coach/cursos/${id}`, { method: "DELETE" });
       router.push("/coach/comunidades");
     } catch (e) {
       setError((e as Error).message);
@@ -366,7 +358,6 @@ export default function EditorCurso() {
         <FotoPortada
           de="curso"
           id={curso.id}
-          autor={autor}
           tema={comunidades?.find((c) => c.id === curso.comunidad)?.tema ?? "Otro"}
           foto={curso.foto}
           alCambiar={(foto) => {

@@ -20,7 +20,7 @@ export default function TarjetaPublicacion({
   /** La coach modera: al borrar la publicación, la página la quita de la lista. */
   alBorrar?: (id: number) => void;
 }) {
-  const { usuario, setPidiendoUsuario } = useApp();
+  const { usuario, setPidiendoUsuario, coachAqui } = useApp();
   const [todos, setTodos] = useState(false);
   const [comentario, setComentario] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -32,7 +32,7 @@ export default function TarjetaPublicacion({
   const [recortada, setRecortada] = useState(false);
   const cuerpoRef = useRef<HTMLParagraphElement>(null);
   const campoComentario = useRef<HTMLInputElement>(null);
-  const esCoach = usuario?.rol === "coach";
+  const esCoach = coachAqui;
   // Qué se está por borrar: la publicación ("p") o un comentario (su id).
   const [porBorrar, setPorBorrar] = useState<"p" | number | null>(null);
 
@@ -51,10 +51,7 @@ export default function TarjetaPublicacion({
     if (!usuario) return setPidiendoUsuario(true);
     try {
       alCambiar(
-        await api<Publicacion>(`/api/publicaciones/${p.id}/reaccion`, {
-          method: "POST",
-          json: { autor: usuario.nombre },
-        }),
+        await api<Publicacion>(`/api/publicaciones/${p.id}/reaccion`, { method: "POST" }),
       );
     } catch (err) {
       setError((err as Error).message);
@@ -70,7 +67,7 @@ export default function TarjetaPublicacion({
       alCambiar(
         await api<Publicacion>(`/api/publicaciones/${p.id}/comentarios`, {
           method: "POST",
-          json: { autor: usuario.nombre, rol: usuario.rol, cuerpo: comentario },
+          json: { cuerpo: comentario },
         }),
       );
       setComentario("");
@@ -85,13 +82,12 @@ export default function TarjetaPublicacion({
     setError(null);
     try {
       if (porBorrar === "p") {
-        await api(`/api/publicaciones/${p.id}`, { method: "DELETE", headers: { "X-Rol": "coach" } });
+        await api(`/api/publicaciones/${p.id}`, { method: "DELETE" });
         alBorrar?.(p.id);
       } else if (porBorrar !== null) {
         alCambiar(
           await api<Publicacion>(`/api/publicaciones/${p.id}/comentarios/${porBorrar}`, {
             method: "DELETE",
-            headers: { "X-Rol": "coach" },
           }),
         );
       }

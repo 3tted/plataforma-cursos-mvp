@@ -13,10 +13,10 @@ export const POST = manejar((req: Request, contexto: Contexto) =>
   conPermiso(async () => {
     const { id } = await contexto.params;
     const datos = await leerJson(req);
-    const autor = coachDe(req, datos.autor);
+    const coach = await coachDe(req);
     const publicar = datos.publicar !== false;
     const resultado = await modificar((a) => {
-      const curso = cursoDeCoach(a, id, autor);
+      const curso = cursoDeCoach(a, id, coach);
       const faltan = publicar ? pendientesParaPublicar(curso) : [];
       if (faltan.length) return { faltan };
       curso.estado = publicar ? "publicado" : "borrador";

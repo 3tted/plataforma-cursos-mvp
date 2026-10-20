@@ -32,7 +32,17 @@ npm install
 npm run dev
 ```
 
-Abre http://localhost:3000. Al entrar eliges si pruebas la plataforma **como alumno** o **como coach** (no hay contraseñas).
+Abre http://localhost:3000 y entra con una de las **cuentas de demostración** (aparecen en la pantalla de entrada; todas usan la contraseña `merkatics-demo`) o crea una cuenta de alumno.
+
+### Cuentas, empresas e invitaciones
+
+- **Entrar:** con correo y contraseña (cifrada con scrypt) o con Google. La sesión es una cookie `HttpOnly` y el servidor revisa en cada acción quién es y qué rol tiene; ya no confía en lo que mande el navegador.
+- **Empresas:** cada comunidad y cada curso es de una empresa. Sus coaches solo ven y editan lo de su empresa (comunidades, cursos, alumnos, pagos y preguntas). Las comunidades de ejemplo son de la empresa **Merkatics**.
+- **Ser coach es solo por invitación:** la dueña de una empresa invita coaches desde **Mi empresa** con un enlace (sirve una vez y dura 14 días). El equipo de Merkatics (`equipo@example.com`) invita empresas nuevas. Las cuentas nuevas sin invitación son de alumno.
+- **Página de cada empresa:** `/e/<id>`, con su marca y sus comunidades, para compartirla con sus alumnos.
+- **Olvidé mi contraseña:** el MVP no manda correos; el equipo de Merkatics da una contraseña temporal desde Mi empresa y la persona la cambia en su perfil.
+- **Cuentas de demostración:** `CONTRASENA_DEMO` cambia su contraseña (y deja de mostrarse en la pantalla de entrada); `CUENTAS_DEMO=0` las apaga. La primera vez que corre esta versión, cada coach que ya tenía comunidades queda con una cuenta de demo (`nombre.apellido@example.com`).
+- **Entrar con Google:** crea credenciales OAuth en Google Cloud (tipo "Aplicación web"), autoriza la dirección de regreso `https://<tu-sitio>/api/auth/google/callback` (y `http://localhost:3000/api/auth/google/callback` para local) y pon `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` en `.env.local` o en Vercel. Sin ellas, el botón no aparece.
 
 ### Conectar la IA real
 

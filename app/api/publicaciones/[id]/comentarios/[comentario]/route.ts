@@ -1,19 +1,22 @@
 import { modificar } from "@/lib/almacen";
-import { ErrorDeDatos, error, idNumerico, manejar } from "@/lib/http";
+import { COMUNIDAD_PRINCIPAL } from "@/lib/curso";
+import { ErrorDeDatos, idNumerico, manejar } from "@/lib/http";
+import { coachDe, exigirComunidad } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
 type Contexto = { params: Promise<{ id: string; comentario: string }> };
 
-// La coach puede borrar cualquier comentario de su comunidad (permiso simulado con X-Rol).
+// La coach puede borrar cualquier comentario en las comunidades de su empresa.
 export const DELETE = manejar(async (req: Request, { params }: Contexto) => {
-  if (req.headers.get("x-rol") !== "coach") return error("Solo la coach puede borrar comentarios.", 403);
+  const coach = await coachDe(req);
   const { id, comentario } = await params;
   const idPublicacion = idNumerico(id);
   const idComentario = idNumerico(comentario);
   const publicacion = await modificar((a) => {
     const p = a.publicaciones.find((x) => x.id === idPublicacion);
     if (!p) throw new ErrorDeDatos("La publicación no existe.");
+    exigirComunidad(a, p.comunidad ?? COMUNIDAD_PRINCIPAL, coach);
     const antes = p.comentarios.length;
     p.comentarios = p.comentarios.filter((c) => c.id !== idComentario);
     if (p.comentarios.length === antes) throw new ErrorDeDatos("El comentario no existe.");

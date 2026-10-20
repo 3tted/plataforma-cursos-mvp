@@ -28,6 +28,7 @@ export default function PaginaComunidad() {
     cursosComunidad,
     cursos,
     cambiarComunidad,
+    coachAqui,
   } = useApp();
   // ?id=<comunidad> abre esa comunidad. Si todavía no tiene cursos publicados,
   // solo su coach la ve (vacía, con el botón para agregarle uno).
@@ -42,9 +43,7 @@ export default function PaginaComunidad() {
     window.history.replaceState(null, "", "/comunidad");
     if (cursos.some((c) => c.comunidad === id)) return cambiarComunidad(id);
     if (usuario.rol !== "coach") return;
-    api<{ comunidades: ComunidadCreada[] }>(`/api/coach/comunidades?autor=${encodeURIComponent(usuario.nombre)}`, {
-      headers: { "X-Rol": "coach" },
-    })
+    api<{ comunidades: ComunidadCreada[] }>("/api/coach/comunidades")
       .then((d) => setSinCursos(d.comunidades.find((c) => c.id === id) ?? null))
       .catch(() => undefined);
   }, [cursos, usuario, cambiarComunidad]);
@@ -96,9 +95,8 @@ export default function PaginaComunidad() {
     });
 
   const comunidad = datos?.comunidad;
-  // La coach que creó esta comunidad desde la plataforma puede agregarle cursos desde aquí.
-  const esDuena =
-    usuario?.rol === "coach" && comunidad?.coach === usuario.nombre && !COMUNIDADES.some((c) => c.id === comunidadId);
+  // Las coaches de la empresa de una comunidad creada en la plataforma le agregan cursos desde aquí.
+  const esDuena = coachAqui && !COMUNIDADES.some((c) => c.id === comunidadId);
   const precio = moneda(comunidad?.precio_mensual ?? 490);
   // Un alumno que todavía no publica nada empieza presentándose, como pide el anuncio fijado.
   const primeraVez =

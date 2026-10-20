@@ -14,10 +14,10 @@ export const POST = manejar((req: Request, contexto: Contexto) =>
   conPermiso(async () => {
     const { id } = await contexto.params;
     const datos = await leerJson(req);
-    const autor = coachDe(req, datos.autor);
+    const coach = await coachDe(req);
     const enPagina = datos.enPagina !== false;
     const curso = await modificar((a) => {
-      const c = cursoDeCoach(a, id, autor);
+      const c = cursoDeCoach(a, id, coach);
       if (enPagina) {
         const faltan = [
           !c.comunidad && "elige en qué comunidad va",

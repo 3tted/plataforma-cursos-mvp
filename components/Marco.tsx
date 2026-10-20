@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { useApp } from "./Contexto";
 import Encabezado from "./Encabezado";
-import { AplicarMarca } from "./Marca";
+import { AplicarMarca, LogoDeMarca, useMarcaActiva } from "./Marca";
 import PaginaVisitantes from "./PaginaVisitantes";
 import PiePagina from "./PiePagina";
 
-// Rutas de la plataforma. Cualquier otra es un 404: se muestra aunque no haya
-// sesión (sin sesión, las rutas de la plataforma muestran la página para visitantes).
+// Rutas de la plataforma. Sin sesión muestran la página para visitantes;
+// cualquier otra (un 404, una invitación o la página de una empresa) se ve
+// aunque no haya sesión, con una barra sencilla.
 const RUTAS = [
   /^\/$/,
   /^\/comunidades$/,
@@ -27,17 +28,18 @@ const RUTAS = [
 // para visitantes, que explica qué es y abre la entrada desde sus botones.
 export default function Marco({ children }: { children: ReactNode }) {
   const { listo, usuario } = useApp();
+  const marca = useMarcaActiva();
   const ruta = usePathname();
   const existe = RUTAS.some((r) => r.test(ruta));
   if (!listo) return null;
   if (!usuario && !existe) {
     return (
       <>
+        <AplicarMarca />
         <header className="visitantes-barra">
           <div className="envoltura visitantes-barra-interior">
-            <Link href="/" className="marca" aria-label="Merkatics, inicio">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="marca-logo" src="/merkatics-logo.png" alt="" width={2311} height={544} />
+            <Link href="/" className="marca" aria-label={marca ? `${marca.nombre}, inicio` : "Merkatics, inicio"}>
+              <LogoDeMarca marca={marca} />
             </Link>
           </div>
         </header>

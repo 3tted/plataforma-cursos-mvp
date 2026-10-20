@@ -39,6 +39,9 @@ import {
   UploadSimple,
   VideoCamera,
   X,
+  GoogleLogo,
+  LinkSimple,
+  UserPlus,
 } from "@phosphor-icons/react/ssr";
 
 // Una sola familia de íconos (Phosphor) con el mismo trazo en toda la app.
@@ -93,3 +96,6 @@ export const IconoReintentar = icono(ArrowCounterClockwise);
 export const IconoDescargar = icono(DownloadSimple);
 export const IconoBuscar = icono(MagnifyingGlass);
 export const IconoInicio = icono(House);
+export const IconoGoogle = icono(GoogleLogo, "bold");
+export const IconoEnlace = icono(LinkSimple);
+export const IconoInvitar = icono(UserPlus);

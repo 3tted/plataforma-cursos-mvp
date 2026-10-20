@@ -37,11 +37,10 @@ export default function PaginaMisComunidades() {
   useTitulo("Mis comunidades y cursos");
 
   const autor = usuario?.nombre ?? "";
-  const cabeceras = { "X-Rol": "coach" };
 
   const cargar = useCallback(() => {
     if (!autor) return;
-    api<Datos>(`/api/coach/comunidades?autor=${encodeURIComponent(autor)}`, { headers: { "X-Rol": "coach" } })
+    api<Datos>("/api/coach/comunidades")
       .then((d) => {
         setDatos(d);
         if (d.comunidades.length === 0 && d.cursos.length === 0) setCreando(true);
@@ -74,8 +73,7 @@ export default function PaginaMisComunidades() {
     try {
       await api<ComunidadCreada>("/api/coach/comunidades", {
         method: "POST",
-        headers: cabeceras,
-        json: { autor, ...forma, precio_mensual: Number(forma.precio_mensual) },
+        json: { ...forma, precio_mensual: Number(forma.precio_mensual) },
       });
       setForma(COMUNIDAD_VACIA);
       setCreando(false);
@@ -93,8 +91,7 @@ export default function PaginaMisComunidades() {
     try {
       const curso = await api<CursoCreado>("/api/coach/cursos", {
         method: "POST",
-        headers: cabeceras,
-        json: { autor, comunidad },
+        json: { comunidad },
       });
       router.push(`/coach/curso/${curso.id}`);
     } catch (err) {
@@ -107,7 +104,7 @@ export default function PaginaMisComunidades() {
     setEnviando(`mover:${curso}`);
     setError(null);
     try {
-      await api(`/api/coach/cursos/${curso}/comunidad`, { method: "POST", headers: cabeceras, json: { autor, comunidad } });
+      await api(`/api/coach/cursos/${curso}/comunidad`, { method: "POST", json: { comunidad } });
       cargar();
     } catch (err) {
       setError((err as Error).message);
@@ -144,7 +141,7 @@ export default function PaginaMisComunidades() {
   // "Agregar un curso": a mano, con IA y, en una comunidad, uno que ya hizo.
   const agregarCurso = (comunidad: string) =>
     conIA === comunidad ? (
-      <CrearConIA autor={autor} comunidad={comunidad} alCerrar={() => setConIA(null)} />
+      <CrearConIA comunidad={comunidad} alCerrar={() => setConIA(null)} />
     ) : (
       <div className="agregar-curso">
         <p className="agregar-curso-titulo">{comunidad ? "Agregar un curso a esta comunidad" : "Crear un curso"}</p>

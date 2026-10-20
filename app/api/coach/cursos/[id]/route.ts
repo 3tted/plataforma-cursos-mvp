@@ -11,8 +11,8 @@ type Contexto = { params: Promise<{ id: string }> };
 export const GET = manejar((req: Request, contexto: Contexto) =>
   conPermiso(async () => {
     const { id } = await contexto.params;
-    const autor = coachDe(req, new URL(req.url).searchParams.get("autor"));
-    return Response.json(await consultar((a) => cursoDeCoach(a, id, autor)));
+    const coach = await coachDe(req);
+    return Response.json(await consultar((a) => cursoDeCoach(a, id, coach)));
   }),
 );
 
@@ -21,11 +21,11 @@ export const PUT = manejar((req: Request, contexto: Contexto) =>
   conPermiso(async () => {
     const { id } = await contexto.params;
     const datos = await leerJson(req);
-    const autor = coachDe(req, datos.autor);
+    const coach = await coachDe(req);
     const entrada = datos.curso;
     if (!entrada || typeof entrada !== "object") throw new ErrorDeDatos("Falta el curso.");
     const guardado = await modificar((a) => {
-      const actual = cursoDeCoach(a, id, autor);
+      const actual = cursoDeCoach(a, id, coach);
       const nuevo = aplicarEdicion(a, actual, entrada as Record<string, unknown>);
       a.cursosCoach = (a.cursosCoach ?? []).map((c) => (c.id === id ? nuevo : c));
       return nuevo;
@@ -38,9 +38,9 @@ export const PUT = manejar((req: Request, contexto: Contexto) =>
 export const DELETE = manejar((req: Request, contexto: Contexto) =>
   conPermiso(async () => {
     const { id } = await contexto.params;
-    const autor = coachDe(req, new URL(req.url).searchParams.get("autor"));
+    const coach = await coachDe(req);
     await modificar((a) => {
-      const curso = cursoDeCoach(a, id, autor);
+      const curso = cursoDeCoach(a, id, coach);
       if (curso.estado === "publicado") throw new ErrorDeDatos("Primero despublica el curso para poder borrarlo.");
       a.cursosCoach = (a.cursosCoach ?? []).filter((c) => c.id !== id);
       // Sus presentaciones con IA se van con él.

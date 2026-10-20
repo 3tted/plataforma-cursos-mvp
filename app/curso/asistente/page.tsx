@@ -70,7 +70,7 @@ export default function PaginaAsistenteCurso() {
       let texto = "";
       try {
         const { modo } = await preguntarAlAsistente(
-          { pregunta: limpia, historial, leccion: leccionContexto, autor: usuario?.nombre, miembro: tieneAcceso, curso: cursoId },
+          { pregunta: limpia, historial, leccion: leccionContexto, miembro: tieneAcceso, curso: cursoId },
           abortar.signal,
           (parcial, modoParcial) => {
             texto = parcial;

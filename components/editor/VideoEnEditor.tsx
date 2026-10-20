@@ -42,7 +42,7 @@ export default function VideoEnEditor({
     setGenerando(true);
     const res = await fetch(`/api/presentaciones/${leccion}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Rol": "coach" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(opciones),
     }).catch(() => null);
     setGenerando(false);
@@ -55,7 +55,7 @@ export default function VideoEnEditor({
   };
 
   const quitarPresentacion = async () => {
-    const res = await fetch(`/api/presentaciones/${leccion}`, { method: "DELETE", headers: { "X-Rol": "coach" } }).catch(() => null);
+    const res = await fetch(`/api/presentaciones/${leccion}`, { method: "DELETE" }).catch(() => null);
     if (!res?.ok) return setError("No se pudo quitar la presentación.");
     alCambiar();
   };
@@ -76,7 +76,6 @@ export default function VideoEnEditor({
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", `/api/videos/${leccion}`);
     xhr.setRequestHeader("Content-Type", tipo);
-    xhr.setRequestHeader("X-Rol", "coach");
     xhr.setRequestHeader("X-Nombre-Archivo", encodeURIComponent(archivo.name));
     xhr.upload.onprogress = (e) => e.lengthComputable && setProgreso(e.loaded / e.total);
     xhr.onload = () => {
@@ -99,7 +98,7 @@ export default function VideoEnEditor({
   };
 
   const quitar = async () => {
-    const res = await fetch(`/api/videos/${leccion}`, { method: "DELETE", headers: { "X-Rol": "coach" } }).catch(() => null);
+    const res = await fetch(`/api/videos/${leccion}`, { method: "DELETE" }).catch(() => null);
     if (!res?.ok) return setError("No se pudo quitar el video.");
     alCambiar();
   };

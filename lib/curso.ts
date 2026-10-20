@@ -24,12 +24,12 @@ const IDS_ARCHIVO = Object.keys(ARCHIVOS);
 /** Para leer también los borradores (el editor de la coach y su vista previa). */
 interface Opciones {
   borradores?: boolean;
-  /** Nombre de la coach: suma sus cursos subidos a la página sin publicar. */
-  deCoach?: string;
+  /** Empresa de la coach: suma sus cursos subidos a la página sin publicar. */
+  deEmpresa?: string;
 }
 
-const visible = (c: CursoCreado, { borradores = false, deCoach }: Opciones) =>
-  borradores || c.estado === "publicado" || (!!deCoach && c.autor === deCoach && c.enPagina === true);
+const visible = (c: CursoCreado, { borradores = false, deEmpresa }: Opciones) =>
+  borradores || c.estado === "publicado" || (!!deEmpresa && c.empresa === deEmpresa && c.enPagina === true);
 
 /** El curso que pide el navegador; si no llega o no existe, el principal. */
 export async function idCurso(valor: unknown, opciones: Opciones = {}): Promise<string> {
@@ -79,13 +79,13 @@ async function cargarCursoDeArchivo(id: string): Promise<DatosCurso> {
   return datos;
 }
 
-/** La comunidad que creó una coach, en la forma que usa el resto de la plataforma. */
-/** La marca de la empresa de una coach, si ya la configuró. */
-function marcaDe(a: Almacen, dueno: string): { marca?: MarcaEmpresa } {
-  const e = (a.empresas ?? []).find((x) => x.dueno === dueno);
-  return e ? { marca: { nombre: e.nombre, color: e.color, ...(e.logo ? { logo: e.logo } : {}) } } : {};
+/** La marca de una empresa, si ya eligió su color. */
+export function marcaDe(a: Almacen, empresa: string | undefined): { marca?: MarcaEmpresa } {
+  const e = (a.empresas ?? []).find((x) => x.id === empresa);
+  return e?.color ? { marca: { nombre: e.nombre, color: e.color, ...(e.logo ? { logo: e.logo } : {}) } } : {};
 }
 
+/** La comunidad que creó una coach, en la forma que usa el resto de la plataforma. */
 export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
   const c = (a.comunidadesCoach ?? []).find((x) => x.id === id);
   if (!c) return null;
@@ -97,7 +97,8 @@ export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
     descripcion: c.descripcion,
     ...(c.acerca ? { acerca: c.acerca } : {}),
     ...(c.foto ? { foto: c.foto } : {}),
-    ...marcaDe(a, c.autor),
+    ...(c.empresa ? { empresa: c.empresa } : {}),
+    ...marcaDe(a, c.empresa),
     precio_mensual: c.precio_mensual,
     moneda: c.moneda,
   };
@@ -142,6 +143,7 @@ const sinComunidad = (c: CursoCreado): Comunidad => ({
   descripcion: "",
   precio_mensual: 0,
   moneda: "MXN",
+  ...(c.empresa ? { empresa: c.empresa } : {}),
 });
 
 async function cargarCursosCreados(opciones: Opciones = {}): Promise<DatosCurso[]> {
@@ -263,6 +265,7 @@ export function resumenDe({ curso, comunidad }: DatosCurso): ResumenCurso {
   return {
     id: curso.id,
     comunidad: comunidad.id,
+    empresa: comunidad.empresa ?? "merkatics",
     titulo: curso.titulo,
     subtitulo: curso.subtitulo,
     modulos: modulos.length,

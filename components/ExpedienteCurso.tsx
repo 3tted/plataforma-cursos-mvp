@@ -9,20 +9,20 @@ import { IconoAprobado, IconoExamen } from "./Iconos";
 
 // Expediente del alumno en un curso, en su perfil: avance por módulo, repaso,
 // examen final y estado, con el siguiente paso que le toca.
-export default function ExpedienteCurso({ autor, curso }: { autor: string; curso: ResumenCurso }) {
+export default function ExpedienteCurso({ curso }: { curso: ResumenCurso }) {
   const { completadas, cambiarCurso } = useApp();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
   const [error, setError] = useState(false);
 
   // Se vuelve a pedir cuando cambian las lecciones completadas en este navegador.
   useEffect(() => {
-    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(autor)}&curso=${encodeURIComponent(curso.id)}`)
+    api<Expediente>(`/api/expediente?curso=${encodeURIComponent(curso.id)}`)
       .then((e) => {
         setExpediente(e);
         setError(false);
       })
       .catch(() => setError(true));
-  }, [autor, curso.id, completadas]);
+  }, [curso.id, completadas]);
 
   if (error) return <p className="error">No pudimos cargar tu expediente. Revisa tu conexión y recarga la página.</p>;
   if (!expediente) return <p className="texto-suave">Cargando tu expediente…</p>;

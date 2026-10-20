@@ -1,8 +1,10 @@
-import type { Rol } from "./tipos";
-
 // Utilidades pequeñas para las rutas de la API.
 
 export class ErrorDeDatos extends Error {}
+/** Sin sesión abierta (401). */
+export class SinSesion extends Error {}
+/** Con sesión, pero sin permiso para eso (403). */
+export class SinPermiso extends Error {}
 
 export function error(mensaje: string, status = 400): Response {
   return Response.json({ error: mensaje }, { status });
@@ -33,23 +35,21 @@ export function texto(valor: unknown, campo: string, maximo: number): string {
   return limpio;
 }
 
-export function rol(valor: unknown): Rol {
-  return valor === "coach" ? "coach" : "alumno";
-}
-
 export function idNumerico(valor: string): number {
   const id = Number(valor);
   if (!Number.isInteger(id) || id <= 0) throw new ErrorDeDatos("Identificador no válido.");
   return id;
 }
 
-// Envuelve un manejador para convertir los errores de validación en 400.
+// Envuelve un manejador para convertir los errores de validación en 400 y los de sesión y permiso en 401 y 403.
 export function manejar<A extends unknown[]>(fn: (...args: A) => Promise<Response>) {
   return async (...args: A): Promise<Response> => {
     try {
       return await fn(...args);
     } catch (e) {
       if (e instanceof ErrorDeDatos) return error(e.message);
+      if (e instanceof SinSesion) return error(e.message, 401);
+      if (e instanceof SinPermiso) return error(e.message, 403);
       console.error(e);
       return error("Error interno del servidor.", 500);
     }

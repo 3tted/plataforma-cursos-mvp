@@ -1,6 +1,7 @@
 import { consultar, modificar, nuevoId } from "@/lib/almacen";
 import { COMUNIDAD_PRINCIPAL, idComunidad } from "@/lib/curso";
-import { ErrorDeDatos, leerJson, manejar, rol, texto } from "@/lib/http";
+import { ErrorDeDatos, leerJson, manejar, texto } from "@/lib/http";
+import { cuentaDeReq, empresaDeComunidad } from "@/lib/permisos";
 import { CATEGORIAS, type Categoria, type Publicacion } from "@/lib/tipos";
 
 export const dynamic = "force-dynamic";
@@ -17,20 +18,23 @@ export const GET = manejar(async (req: Request) => {
   return Response.json(ordenadas);
 });
 
+// Publica quien tiene sesión, con su nombre. Firma como coach solo una coach
+// de la empresa dueña de la comunidad (y solo ella publica anuncios).
 export const POST = manejar(async (req: Request) => {
+  const cuenta = await cuentaDeReq(req);
   const datos = await leerJson(req);
   const categoria = datos.categoria as Categoria;
   if (!CATEGORIAS.includes(categoria)) throw new ErrorDeDatos("Categoría no válida.");
-  const autorRol = rol(datos.rol);
   const comunidad = await idComunidad(datos.comunidad);
-  if (categoria === "Anuncios" && autorRol !== "coach") {
-    throw new ErrorDeDatos("Solo la coach puede publicar anuncios.");
-  }
   const nueva = await modificar((a) => {
+    const autorRol = cuenta.rol === "coach" && cuenta.empresa === empresaDeComunidad(a, comunidad) ? "coach" : "alumno";
+    if (categoria === "Anuncios" && autorRol !== "coach") {
+      throw new ErrorDeDatos("Solo la coach de esta comunidad puede publicar anuncios.");
+    }
     const publicacion: Publicacion = {
       id: nuevoId(a),
       comunidad,
-      autor: texto(datos.autor, "autor", 60),
+      autor: cuenta.nombre,
       rol: autorRol,
       categoria,
       titulo: texto(datos.titulo, "titulo", 140),

@@ -42,7 +42,7 @@ export default function RepasoLeccion({
       setResultado(
         await api<ResultadoRepaso>("/api/repaso", {
           method: "POST",
-          json: { autor: usuario.nombre, rol: usuario.rol, leccion: leccion.id, respuestas },
+          json: { leccion: leccion.id, respuestas },
         }),
       );
       alRevisar?.();

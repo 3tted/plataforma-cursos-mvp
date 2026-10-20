@@ -1,55 +1,76 @@
 import { consultar, modificar } from "@/lib/almacen";
-import { cargarCurso, idCurso } from "@/lib/curso";
-import { cargarEvaluaciones, construirMatriz } from "@/lib/evaluaciones";
+import { COMUNIDAD_PRINCIPAL, CURSO_PRINCIPAL, cargarCursos } from "@/lib/curso";
+import { cargarEvaluaciones, construirMatriz, leccionesDelCurso } from "@/lib/evaluaciones";
 import { error, manejar } from "@/lib/http";
+import { coachDe, coachDelCurso, empresaDeDatos } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
 // Matriz de la coach para un curso (?curso=id): el expediente de cada alumno
 // en ese curso y las preguntas que más se fallan.
 export const GET = manejar(async (req: Request) => {
-  const id = await idCurso(new URL(req.url).searchParams.get("curso"));
-  const [curso, ev] = await Promise.all([cargarCurso(id), cargarEvaluaciones(id)]);
+  const { datos: curso } = await coachDelCurso(req, new URL(req.url).searchParams.get("curso"));
+  const id = curso.curso.id;
+  const ev = await cargarEvaluaciones(id);
   return Response.json(await consultar((a) => construirMatriz(a, curso, ev)));
 });
 
-// Quita a un alumno de la matriz: su avance, sus repasos, sus intentos de
-// examen y sus inscripciones (sirve para limpiar alumnos de prueba). Con
-// &todo=1 también borra lo que escribió o hizo en la plataforma: sus
-// preguntas al asistente, sus pagos, sus publicaciones, sus comentarios y sus
-// "Me sirve". Como el resto del MVP, el permiso se simula con el encabezado
-// X-Rol; en la Fase 2 lo valida la sesión.
+// Quita a un alumno de los cursos de la empresa de la coach: su avance en
+// ellos, sus repasos, sus intentos de examen y sus inscripciones (sirve para
+// limpiar alumnos de prueba). Con &todo=1 también borra lo que escribió o hizo
+// en las comunidades de la empresa: sus preguntas al asistente, sus pagos, sus
+// publicaciones, sus comentarios y sus "Me sirve". Lo que tenga en otras
+// empresas no se toca.
 export const DELETE = manejar(async (req: Request) => {
-  if (req.headers.get("x-rol") !== "coach") return error("Solo la coach puede quitar alumnos.", 403);
+  const coach = await coachDe(req);
   const parametros = new URL(req.url).searchParams;
   const autor = parametros.get("autor");
   if (!autor) return error("Falta el nombre del alumno.");
   const todo = parametros.get("todo") === "1";
+  const suyos = (await cargarCursos({ borradores: true })).filter((d) => empresaDeDatos(d) === coach.empresa);
+  const cursos = new Set(suyos.map((d) => d.curso.id));
+  const comunidades = new Set(suyos.map((d) => d.comunidad.id));
+  const lecciones = new Set(suyos.flatMap((d) => leccionesDelCurso(d).flatMap((m) => m.lecciones.map((l) => l.id))));
+  const deCurso = (curso: string | undefined) => cursos.has(curso ?? CURSO_PRINCIPAL);
+  const deComunidad = (comunidad: string | undefined) => comunidades.has(comunidad ?? COMUNIDAD_PRINCIPAL);
+
   const borrados = await modificar((a) => {
-    const total = () =>
-      (a.progreso?.length ?? 0) + (a.repasos?.length ?? 0) + (a.examenes?.length ?? 0) + (a.inscripciones?.length ?? 0);
-    const antes = total();
-    a.progreso = (a.progreso ?? []).filter((p) => p.autor !== autor);
-    a.repasos = (a.repasos ?? []).filter((r) => r.autor !== autor);
-    a.examenes = (a.examenes ?? []).filter((x) => x.autor !== autor);
-    a.inscripciones = (a.inscripciones ?? []).filter((i) => i.autor !== autor);
-    let otros = 0;
-    if (todo) {
-      const contar = <T,>(lista: T[], queda: (x: T) => boolean) => {
-        const filtrada = lista.filter(queda);
-        otros += lista.length - filtrada.length;
-        return filtrada;
-      };
-      a.preguntas = contar(a.preguntas, (p) => p.autor !== autor);
-      a.pagos = contar(a.pagos, (p) => p.autor !== autor);
-      a.publicaciones = contar(a.publicaciones, (p) => p.autor !== autor).map((p) => ({
-        ...p,
-        comentarios: contar(p.comentarios, (c) => c.autor !== autor),
-        reacciones: contar(p.reacciones, (r) => r !== autor),
-      }));
+    let total = 0;
+    const contar = <T,>(lista: T[], queda: (x: T) => boolean) => {
+      const filtrada = lista.filter(queda);
+      total += lista.length - filtrada.length;
+      return filtrada;
+    };
+    for (const p of a.progreso ?? []) {
+      if (p.autor !== autor) continue;
+      p.completadas = contar(p.completadas, (l) => !lecciones.has(l));
     }
-    return antes - total() + otros;
+    a.repasos = contar(a.repasos ?? [], (r) => r.autor !== autor || !lecciones.has(r.leccion));
+    a.examenes = contar(a.examenes ?? [], (x) => x.autor !== autor || !deCurso(x.curso));
+    for (const i of a.inscripciones ?? []) {
+      if (i.autor !== autor) continue;
+      i.cursos = contar(i.cursos, (c) => !cursos.has(c));
+      if (i.comunidades) i.comunidades = contar(i.comunidades, (c) => !comunidades.has(c));
+      if (i.comunidad && comunidades.has(COMUNIDAD_PRINCIPAL)) {
+        delete i.comunidad;
+        total++;
+      }
+    }
+    if (todo) {
+      a.preguntas = contar(a.preguntas, (q) => q.autor !== autor || !deCurso(q.curso));
+      a.pagos = contar(a.pagos, (p) => p.autor !== autor || !deComunidad(p.comunidad));
+      a.publicaciones = contar(a.publicaciones, (p) => p.autor !== autor || !deComunidad(p.comunidad)).map((p) =>
+        deComunidad(p.comunidad)
+          ? {
+              ...p,
+              comentarios: contar(p.comentarios, (c) => c.autor !== autor),
+              reacciones: contar(p.reacciones, (r) => r !== autor),
+            }
+          : p,
+      );
+    }
+    return total;
   });
-  if (borrados === 0) return error("No encontramos a ese alumno en la matriz.", 404);
+  if (borrados === 0) return error("No encontramos a ese alumno en tus cursos.", 404);
   return Response.json({ borrados });
 });

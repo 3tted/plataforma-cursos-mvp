@@ -1,6 +1,7 @@
 import { consultar } from "@/lib/almacen";
 import { COMUNIDAD_PRINCIPAL, CURSO_PRINCIPAL, cargarCursos } from "@/lib/curso";
-import { error, manejar } from "@/lib/http";
+import { manejar } from "@/lib/http";
+import { cuentaDeReq } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
@@ -8,8 +9,7 @@ export const dynamic = "force-dynamic";
 // y preguntas al asistente. En el MVP no hay cuentas, así que se busca por el
 // nombre con el que firma; en la Fase 2 se busca por el id del usuario.
 export const GET = manejar(async (req: Request) => {
-  const autor = new URL(req.url).searchParams.get("autor")?.trim();
-  if (!autor) return error("Falta el nombre de la persona.");
+  const autor = (await cuentaDeReq(req)).nombre;
 
   // Cada aporte dice de qué comunidad es, para filtrarlos en el perfil.
   const comunidadDeCurso = new Map((await cargarCursos()).map((c) => [c.curso.id, c.comunidad.id]));

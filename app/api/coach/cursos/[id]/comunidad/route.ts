@@ -13,10 +13,10 @@ export const POST = manejar((req: Request, contexto: Contexto) =>
   conPermiso(async () => {
     const { id } = await contexto.params;
     const datos = await leerJson(req);
-    const autor = coachDe(req, datos.autor);
+    const coach = await coachDe(req);
     const curso = await modificar((a) => {
-      const c = cursoDeCoach(a, id, autor);
-      const destino = destinoDeCurso(a, datos.comunidad, autor);
+      const c = cursoDeCoach(a, id, coach);
+      const destino = destinoDeCurso(a, datos.comunidad, coach);
       if (destino !== c.comunidad && c.estado === "publicado") {
         throw new ErrorDeDatos("Despublica el curso para cambiarlo de comunidad.");
       }

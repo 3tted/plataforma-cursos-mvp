@@ -8,15 +8,15 @@ import { coachDe, comunidadDeCoach, conPermiso } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
-// Las comunidades de una coach y sus cursos (borradores y publicados).
+// Las comunidades de la empresa de la coach y sus cursos (borradores y publicados).
 export const GET = manejar((req: Request) =>
   conPermiso(async () => {
-    const autor = coachDe(req, new URL(req.url).searchParams.get("autor"));
+    const coach = await coachDe(req);
     const datos = await consultar((a) => {
-      const comunidades = (a.comunidadesCoach ?? []).filter((c) => c.autor === autor);
+      const comunidades = (a.comunidadesCoach ?? []).filter((c) => c.empresa === coach.empresa);
       // Sus cursos: los que están en sus comunidades y los que todavía no tienen una.
       const cursos = (a.cursosCoach ?? [])
-        .filter((c) => c.autor === autor)
+        .filter((c) => c.empresa === coach.empresa)
         .map((c) => ({
           id: c.id,
           comunidad: c.comunidad,
@@ -36,10 +36,10 @@ export const GET = manejar((req: Request) =>
 // Crea una comunidad nueva de la coach.
 export const POST = manejar((req: Request) =>
   conPermiso(async () => {
+    const coach = await coachDe(req);
     const datos = await leerJson(req);
-    const autor = coachDe(req, datos.autor);
     const comunidad = await modificar((a) => {
-      const nueva = nuevaComunidad(a, autor, datos);
+      const nueva = nuevaComunidad(a, coach, datos);
       (a.comunidadesCoach ??= []).push(nueva);
       return nueva;
     });
@@ -51,11 +51,11 @@ export const POST = manejar((req: Request) =>
 // precio y su título. El id (y con él su dirección) no cambia.
 export const PATCH = manejar((req: Request) =>
   conPermiso(async () => {
+    const coach = await coachDe(req);
     const datos = await leerJson(req);
-    const autor = coachDe(req, datos.autor);
     const campos = camposDeComunidad(datos);
     const comunidad = await modificar((a) => {
-      const c = comunidadDeCoach(a, datos.id, autor);
+      const c = comunidadDeCoach(a, datos.id, coach);
       Object.assign(c, campos);
       if (!campos.acerca) delete c.acerca;
       return c;
@@ -70,9 +70,9 @@ export const PATCH = manejar((req: Request) =>
 export const DELETE = manejar((req: Request) =>
   conPermiso(async () => {
     const parametros = new URL(req.url).searchParams;
-    const autor = coachDe(req, parametros.get("autor"));
+    const coach = await coachDe(req);
     const { videos, borrado } = await modificar((a) => {
-      const comunidad = comunidadDeCoach(a, parametros.get("id"), autor);
+      const comunidad = comunidadDeCoach(a, parametros.get("id"), coach);
       const cursos = (a.cursosCoach ?? []).filter((c) => c.comunidad === comunidad.id);
       const ids = new Set(cursos.map((c) => c.id));
       const lecciones = new Set(cursos.flatMap((c) => c.modulos.flatMap((m) => m.lecciones.map((l) => l.id))));

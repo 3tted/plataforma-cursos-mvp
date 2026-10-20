@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 export const POST = manejar((req: Request) =>
   conPermiso(async () => {
     const datos = await leerJson(req);
-    const autor = coachDe(req, datos.autor);
+    const coach = await coachDe(req);
     const curso = await modificar((a) => {
-      const nuevo = nuevoCurso(a, autor, destinoDeCurso(a, datos.comunidad, autor));
+      const nuevo = nuevoCurso(a, coach, destinoDeCurso(a, datos.comunidad, coach));
       (a.cursosCoach ??= []).push(nuevo);
       return nuevo;
     });

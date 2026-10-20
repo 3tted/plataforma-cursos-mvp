@@ -45,7 +45,6 @@ export default function PaginaLeccion() {
     cursos,
     cursoId,
     cambiarCurso,
-    usuario,
     vistos,
     marcarVisto,
     repasados,
@@ -53,6 +52,7 @@ export default function PaginaLeccion() {
     inscripcionLista,
     enComunidad,
     inscritoEn,
+    coachAqui,
   } = useApp();
   const evaluaciones = useEvaluaciones();
   // El sello se anima solo cuando la alumna marca la lección, no al volver a abrirla.
@@ -139,7 +139,7 @@ export default function PaginaLeccion() {
   // Ruta del alumno en cada lección: el video completo, luego el repaso, y con
   // eso la lección se completa sola. Las lecciones se abren en orden. La coach
   // revisa todo libremente y lo ya completado no se vuelve a pedir.
-  const esAlumno = usuario?.rol !== "coach";
+  const esAlumno = !coachAqui;
   const guiado = esAlumno && !leccion.deCoach && !hecha;
   const enOrdenLeccion = (idLeccion: string) => {
     const i = base.findIndex((l) => l.id === idLeccion);

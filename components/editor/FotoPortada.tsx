@@ -32,14 +32,12 @@ async function reducir(archivo: File): Promise<Blob> {
 export default function FotoPortada({
   de,
   id,
-  autor,
   tema,
   foto,
   alCambiar,
 }: {
   de: "comunidad" | "curso";
   id: string;
-  autor: string;
   tema: string;
   foto: string | undefined;
   alCambiar: (foto: string | undefined) => void;
@@ -47,7 +45,7 @@ export default function FotoPortada({
   const entrada = useRef<HTMLInputElement>(null);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const ruta = `/api/fotos/${de}-${id}?autor=${encodeURIComponent(autor)}`;
+  const ruta = `/api/fotos/${de}-${id}`;
 
   const subir = async (archivo: File) => {
     if (!archivo.type.startsWith("image/")) return setError("Ese archivo no es una foto.");
@@ -57,7 +55,7 @@ export default function FotoPortada({
       const blob = await reducir(archivo).catch(() => {
         throw new Error("No pudimos abrir esa foto. Prueba con una JPG o PNG.");
       });
-      const res = await fetch(ruta, { method: "PUT", headers: { "Content-Type": "image/jpeg", "X-Rol": "coach" }, body: blob });
+      const res = await fetch(ruta, { method: "PUT", headers: { "Content-Type": "image/jpeg" }, body: blob });
       const datos = (await res.json().catch(() => ({}))) as { foto?: string; error?: string };
       if (!res.ok || !datos.foto) throw new Error(datos.error ?? "No se pudo subir la foto. Inténtalo de nuevo.");
       alCambiar(datos.foto);
@@ -70,7 +68,7 @@ export default function FotoPortada({
 
   const quitar = async () => {
     setError(null);
-    const res = await fetch(ruta, { method: "DELETE", headers: { "X-Rol": "coach" } }).catch(() => null);
+    const res = await fetch(ruta, { method: "DELETE" }).catch(() => null);
     if (!res?.ok) return setError("No se pudo quitar la foto.");
     alCambiar(undefined);
   };

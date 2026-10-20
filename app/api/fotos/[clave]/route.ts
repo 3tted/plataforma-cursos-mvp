@@ -1,13 +1,13 @@
 import { borrarFoto, guardarFoto, leerFoto, modificar } from "@/lib/almacen";
 import { error, manejar } from "@/lib/http";
-import { coachDe, comunidadDeCoach, conPermiso, cursoDeCoach, empresaDeCoach } from "@/lib/permisos";
+import { coachDe, comunidadDeCoach, conPermiso, cursoDeCoach, empresaDeCoach, SinPermiso } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
 // Fotos que sube la coach: la portada de una comunidad ("comunidad-<id>") o de
 // un curso ("curso-<id>"), y el logo de su empresa ("empresa-<id>"). El
 // navegador ya la manda reducida (JPEG las portadas, PNG el logo).
-// Como el resto del MVP, el permiso se simula con X-Rol y el nombre de la coach.
+// Solo una coach de la empresa dueña la cambia (el logo, solo su dueña).
 
 type Contexto = { params: Promise<{ clave: string }> };
 
@@ -32,16 +32,17 @@ function tipoDeFoto(b: Buffer): string | null {
 async function anotar(req: Request, clave: string, url: string | null) {
   const p = partes(clave);
   if (!p) return null;
-  const autor = coachDe(req, new URL(req.url).searchParams.get("autor"));
+  const coach = await coachDe(req);
   await modificar((a) => {
     if (p.de === "empresa") {
-      const empresa = empresaDeCoach(a, p.id, autor);
+      const empresa = empresaDeCoach(a, coach, { dueno: true });
+      if (empresa.id !== p.id) throw new SinPermiso("Ese logo es de otra empresa.");
       if (url) empresa.logo = url;
       else delete empresa.logo;
       empresa.actualizadaEn = new Date().toISOString();
       return;
     }
-    const dueno = p.de === "curso" ? cursoDeCoach(a, p.id, autor) : comunidadDeCoach(a, p.id, autor);
+    const dueno = p.de === "curso" ? cursoDeCoach(a, p.id, coach) : comunidadDeCoach(a, p.id, coach);
     if (url) dueno.foto = url;
     else delete dueno.foto;
     if (p.de === "curso") (dueno as { actualizadoEn: string }).actualizadoEn = new Date().toISOString();

@@ -22,7 +22,7 @@ export default function AsistenteEnLinea({
   leccion: string;
   alCerrar: () => void;
 }) {
-  const { usuario, tieneAcceso, cursoId } = useApp();
+  const { tieneAcceso, cursoId } = useApp();
   const [mensajes, setMensajes] = useState<MensajeChat[]>([]);
   const [entrada, setEntrada] = useState("");
   const [enCurso, setEnCurso] = useState(false);
@@ -44,7 +44,6 @@ export default function AsistenteEnLinea({
           pregunta: texto,
           historial: historial.filter((m) => m.estado !== "error").map(({ role, content }) => ({ role, content })),
           leccion,
-          autor: usuario?.nombre,
           miembro: tieneAcceso,
           curso: cursoId,
         },

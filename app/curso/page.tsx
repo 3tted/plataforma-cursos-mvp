@@ -43,6 +43,7 @@ export default function PaginaCurso() {
     enComunidad,
     inscritoEn,
     fotoDe,
+    coachAqui,
   } = useApp();
   const evaluaciones = useEvaluaciones();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
@@ -54,7 +55,7 @@ export default function PaginaCurso() {
     setExpediente(null);
     setAbiertos({});
     if (usuario?.rol !== "alumno") return;
-    api<Expediente>(`/api/expediente?autor=${encodeURIComponent(usuario.nombre)}&curso=${encodeURIComponent(cursoId)}`)
+    api<Expediente>(`/api/expediente?curso=${encodeURIComponent(cursoId)}`)
       .then(setExpediente)
       .catch(() => undefined);
   }, [usuario, cursoId]);
@@ -108,7 +109,7 @@ export default function PaginaCurso() {
   const moduloActual = siguiente?.modulo.id ?? curso.modulos[0]?.id;
   const estaAbierto = (id: string) => abiertos[id] ?? id === moduloActual;
   // La coach revisa el curso: no tiene avance ni examen que presentar.
-  const esCoach = usuario?.rol === "coach";
+  const esCoach = coachAqui;
   const conVideo = base.filter((l) => l.video).length;
   const foto = fotoDe(curso.id);
 
@@ -274,7 +275,7 @@ export default function PaginaCurso() {
                         // Para el alumno, cada lección se abre al terminar la anterior.
                         const indice = base.findIndex((b) => b.id === l.id);
                         const enEspera =
-                          usuario?.rol !== "coach" &&
+                          !esCoach &&
                           !l.deCoach &&
                           !hecha &&
                           !bloqueada &&
@@ -358,9 +359,9 @@ export default function PaginaCurso() {
               <Link href="/perfil" className="boton boton-secundario boton-chico">
                 Ver mi expediente
               </Link>
-            ) : terminado || usuario?.rol === "coach" ? (
+            ) : terminado || esCoach ? (
               <Link href="/curso/examen" className="boton boton-chico">
-                {usuario?.rol === "coach" ? "Ver el examen" : "Presentar el examen"}
+                {esCoach ? "Ver el examen" : "Presentar el examen"}
               </Link>
             ) : (
               <span className="pastilla">

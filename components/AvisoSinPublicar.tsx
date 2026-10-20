@@ -9,7 +9,7 @@ import { IconoEditar } from "./Iconos";
 // solo ella lo ve. En la portada del curso lleva el botón para publicarlo; en
 // las lecciones, una línea que lo recuerda.
 export default function AvisoSinPublicar({ compacto = false }: { compacto?: boolean }) {
-  const { datos, lecciones, usuario, recargarCurso, recargarCatalogo } = useApp();
+  const { datos, lecciones, recargarCurso, recargarCatalogo, coachAqui } = useApp();
   const [publicando, setPublicando] = useState(false);
   const [faltan, setFaltan] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export default function AvisoSinPublicar({ compacto = false }: { compacto?: bool
       </div>
     );
   }
-  if (usuario?.rol !== "coach" || !datos?.curso.sinPublicar) return null;
+  if (!coachAqui || !datos?.curso.sinPublicar) return null;
   const id = datos.curso.id;
 
   if (compacto) {
@@ -45,8 +45,8 @@ export default function AvisoSinPublicar({ compacto = false }: { compacto?: bool
     setFaltan([]);
     const res = await fetch(`/api/coach/cursos/${id}/publicar`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Rol": "coach" },
-      body: JSON.stringify({ autor: usuario.nombre, publicar: true }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ publicar: true }),
     }).catch(() => null);
     setPublicando(false);
     const respuesta = res ? ((await res.json().catch(() => ({}))) as { error?: string; faltan?: string[] }) : null;

@@ -56,7 +56,13 @@ export function camposDeComunidad(datos: Record<string, unknown>): CamposComunid
 }
 
 /** Valida los datos de una comunidad nueva y la arma. */
-export function nuevaComunidad(a: Almacen, autor: string, datos: Record<string, unknown>): ComunidadCreada {
+/** Quién crea: la coach y su empresa (la comunidad o el curso quedan en esa empresa). */
+export interface Creadora {
+  nombre: string;
+  empresa: string;
+}
+
+export function nuevaComunidad(a: Almacen, { nombre: autor, empresa }: Creadora, datos: Record<string, unknown>): ComunidadCreada {
   const { nombre, descripcion, acerca, tema, precio_mensual, coach_titulo } = camposDeComunidad(datos);
   const base = slug(nombre) || "comunidad";
   const usados = new Set([...COMUNIDADES.map((c) => c.id), ...(a.comunidadesCoach ?? []).map((c) => c.id)]);
@@ -73,12 +79,18 @@ export function nuevaComunidad(a: Almacen, autor: string, datos: Record<string, 
     precio_mensual,
     moneda: "MXN",
     autor,
+    empresa,
     creadaEn: new Date().toISOString(),
   };
 }
 
 /** Un borrador nuevo con un módulo y una lección vacíos, listo para editar. Puede nacer sin comunidad (""). */
-export function nuevoCurso(a: Almacen, autor: string, comunidad: string, origen: CursoCreado["origen"] = "manual"): CursoCreado {
+export function nuevoCurso(
+  a: Almacen,
+  { nombre: autor, empresa }: Creadora,
+  comunidad: string,
+  origen: CursoCreado["origen"] = "manual",
+): CursoCreado {
   const ahora = new Date().toISOString();
   return {
     id: `c${nuevoId(a)}`,
@@ -93,6 +105,7 @@ export function nuevoCurso(a: Almacen, autor: string, comunidad: string, origen:
     modulos: [{ id: "M1", titulo: "", lecciones: [leccionVacia(a)] }],
     examen: [],
     autor,
+    empresa,
     creadoEn: ahora,
     actualizadoEn: ahora,
   };

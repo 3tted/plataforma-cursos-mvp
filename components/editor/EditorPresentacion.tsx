@@ -143,7 +143,7 @@ export default function EditorPresentacion({
     setError(null);
     const res = await fetch(`/api/presentaciones/${leccion}/diapositiva`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Rol": "coach" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ diapositivas: lista.map(aDiapositiva), indice: elegida, indicacion }),
     }).catch(() => null);
     setRehaciendo(false);
@@ -167,7 +167,7 @@ export default function EditorPresentacion({
     setError(null);
     const res = await fetch(`/api/presentaciones/${leccion}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", "X-Rol": "coach" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ diapositivas: lista.map(aDiapositiva) }),
     }).catch(() => null);
     if (!res?.ok) {

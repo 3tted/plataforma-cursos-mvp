@@ -1,14 +1,17 @@
 import { Redis } from "@upstash/redis";
 import { promises as fs } from "fs";
 import path from "path";
+import { migrarACuentas } from "./cuentas";
 import type {
   Categoria,
   Comentario,
   ComunidadCreada,
+  Cuenta,
   CursoCreado,
   Empresa,
   Inscripcion,
   IntentoExamen,
+  Invitacion,
   IntentoRepaso,
   LeccionCoach,
   Pago,
@@ -17,6 +20,7 @@ import type {
   ProgresoAlumno,
   Publicacion,
   Rol,
+  Sesion,
   VideoLeccion,
 } from "./tipos";
 
@@ -50,6 +54,10 @@ export interface Almacen {
   presentaciones?: Presentacion[];
   /** Empresas (tenants) con su marca. Opcional: llegó después. */
   empresas?: Empresa[];
+  /** Cuentas, sesiones abiertas e invitaciones. Opcionales: llegaron con el login (ver lib/cuentas.ts). */
+  cuentas?: Cuenta[];
+  sesiones?: Sesion[];
+  invitaciones?: Invitacion[];
 }
 
 const DIRECTORIO =
@@ -132,6 +140,7 @@ async function sembrar(): Promise<Almacen> {
     repasos: [],
     examenes: [],
   };
+  migrarACuentas(almacen);
   return almacen;
 }
 
@@ -303,6 +312,7 @@ async function cargar(): Promise<{ almacen: Almacen; version: string | null; cam
   }
   if (await sumarMuestrasNuevas(almacen)) cambiado = true;
   if (await sumarSemillasNuevas(almacen)) cambiado = true;
+  if (migrarACuentas(almacen)) cambiado = true;
   return { almacen, version, cambiado };
 }
 

@@ -1,8 +1,9 @@
 import { consultar, modificar, type Almacen } from "@/lib/almacen";
 import { COMUNIDAD_PRINCIPAL, cargarCursos, idComunidad, idCurso } from "@/lib/curso";
 import { completadasDe, examenesDelCurso, leccionesDelCurso } from "@/lib/evaluaciones";
-import { error, leerJson, manejar, texto } from "@/lib/http";
+import { error, leerJson, manejar } from "@/lib/http";
 import type { DatosCurso, EstadoInscripcion } from "@/lib/tipos";
+import { cuentaDeReq } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
@@ -38,15 +39,15 @@ function estadoDe(a: Almacen, cursos: DatosCurso[], autor: string): EstadoInscri
 }
 
 export const GET = manejar(async (req: Request) => {
-  const autor = new URL(req.url).searchParams.get("autor")?.trim();
-  if (!autor) return error("Falta el nombre del alumno.");
+  const autor = (await cuentaDeReq(req)).nombre;
   const cursos = await cargarCursos();
   return Response.json(await consultar((a) => estadoDe(a, cursos, autor)));
 });
 
 export const POST = manejar(async (req: Request) => {
   const datos = await leerJson(req);
-  const autor = texto(datos.autor, "autor", 60);
+  const cuenta = await cuentaDeReq(req);
+  const autor = cuenta.nombre;
   const accion = datos.accion;
   if (accion !== "comunidad" && accion !== "curso") return error('La acción debe ser "comunidad" o "curso".');
   const cursos = await cargarCursos();

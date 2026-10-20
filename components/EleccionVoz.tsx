@@ -27,7 +27,7 @@ export default function EleccionVoz({
     setError(null);
     const res = await fetch(`/api/presentaciones/${leccion}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "X-Rol": "coach" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ conVoz: nuevo }),
     }).catch(() => null);
     if (!res?.ok) {

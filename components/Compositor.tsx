@@ -14,7 +14,7 @@ export default function Compositor({
   /** Alumno sin publicaciones propias todavía: se propone presentarse primero. */
   primeraVez?: boolean;
 }) {
-  const { usuario, borrador, setBorrador, setPidiendoUsuario, comunidadId } = useApp();
+  const { usuario, borrador, setBorrador, setPidiendoUsuario, comunidadId, coachAqui } = useApp();
   const [abierto, setAbierto] = useState(false);
   const [categoria, setCategoria] = useState<Categoria>("Dudas");
   const [titulo, setTitulo] = useState("");
@@ -24,7 +24,7 @@ export default function Compositor({
   const [error, setError] = useState<string | null>(null);
   const botonAbrir = useRef<HTMLButtonElement>(null);
   const estuvoAbierto = useRef(false);
-  const esCoach = usuario?.rol === "coach";
+  const esCoach = coachAqui;
 
   // Un borrador llega desde el asistente ("Llevar a la comunidad") o del panel.
   useEffect(() => {
@@ -54,8 +54,6 @@ export default function Compositor({
         method: "POST",
         json: {
           comunidad: comunidadId,
-          autor: usuario.nombre,
-          rol: usuario.rol,
           categoria,
           titulo,
           cuerpo,

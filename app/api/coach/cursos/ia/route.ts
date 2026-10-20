@@ -24,10 +24,10 @@ export const POST = manejar((req: Request) =>
     const forma = await req.formData().catch(() => {
       throw new ErrorDeDatos("No recibimos el documento. Inténtalo de nuevo.");
     });
-    const autor = coachDe(req, forma.get("autor"));
+    const coach = await coachDe(req);
     const comunidad = String(forma.get("comunidad") ?? "");
     // Antes de gastar en la IA, que la comunidad (si eligió una) sea de esta coach.
-    await consultar((a) => destinoDeCurso(a, comunidad, autor));
+    await consultar((a) => destinoDeCurso(a, comunidad, coach));
 
     const archivo = forma.get("archivo");
     const pegado = String(forma.get("texto") ?? "");
@@ -49,7 +49,7 @@ export const POST = manejar((req: Request) =>
     const { propuesta, aviso } = await proponerCurso(doc, indicaciones, medidas);
 
     const curso = await modificar((a) => {
-      const borrador = aplicarEdicion(a, nuevoCurso(a, autor, destinoDeCurso(a, comunidad, autor), "ia"), comoEdicion(propuesta));
+      const borrador = aplicarEdicion(a, nuevoCurso(a, coach, destinoDeCurso(a, comunidad, coach), "ia"), comoEdicion(propuesta));
       (a.cursosCoach ??= []).push(borrador);
       return borrador;
     });

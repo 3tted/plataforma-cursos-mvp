@@ -9,6 +9,7 @@ import Arcos from "@/components/Arcos";
 import Markdown from "@/components/Markdown";
 import MatrizAlumnos from "@/components/MatrizAlumnos";
 import SelectorCurso from "@/components/SelectorCurso";
+import { useCursosDeMiEmpresa } from "@/components/useMiEmpresa";
 import { useTitulo } from "@/components/useTitulo";
 import { api, fechaCorta, hace, moneda } from "@/lib/cliente";
 import { agrupar } from "@/lib/preguntas";
@@ -26,7 +27,6 @@ export default function PaginaCoach() {
     setBorrador,
     cursoId,
     cambiarCurso,
-    cursos,
     comunidades,
     comunidadId,
     cambiarComunidad,
@@ -40,6 +40,8 @@ export default function PaginaCoach() {
   const [agregada, setAgregada] = useState<string | null>(null);
   const [porBorrar, setPorBorrar] = useState<number | null>(null);
   useTitulo("Panel de coach");
+  // El panel es solo de lo de su empresa.
+  const { mios: cursos, activoEsMio } = useCursosDeMiEmpresa();
 
   // Todo el panel es del curso elegido arriba (y de su comunidad). Si cambia
   // antes de que llegue el resumen anterior, ese ya no se muestra.
@@ -54,8 +56,8 @@ export default function PaginaCoach() {
 
   useEffect(() => {
     setResumen(null);
-    if (usuario?.rol === "coach") cargar();
-  }, [usuario, cargar]);
+    if (usuario?.rol === "coach" && activoEsMio) cargar();
+  }, [usuario, cargar, activoEsMio]);
 
   const grupos = useMemo(() => agrupar(resumen?.preguntas ?? []).slice(0, 12), [resumen]);
 
@@ -65,8 +67,24 @@ export default function PaginaCoach() {
         <h1>Esta vista es para la coach</h1>
         <p className="texto-suave">
           Aquí la coach ve qué preguntan sus alumnos al asistente, qué lecciones generan más dudas y los pagos. Para
-          verla, cierra sesión y entra con el rol de coach.
+          verla, entra con una cuenta de coach.
         </p>
+      </div>
+    );
+  }
+
+  // Sin cursos de su empresa en la página todavía, no hay nada que resumir.
+  if (!activoEsMio) {
+    return (
+      <div className="pagina-estrecha">
+        <h1>Panel de coach</h1>
+        <p className="texto-suave">
+          Aquí verás qué preguntan tus alumnos, qué lecciones generan más dudas y los pagos de tus comunidades. Empieza
+          por crear tu comunidad y subir su primer curso a la página.
+        </p>
+        <Link href="/coach/comunidades" className="boton">
+          Crear una comunidad o un curso
+        </Link>
       </div>
     );
   }

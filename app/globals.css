@@ -9190,3 +9190,95 @@ button.tarjeta-comunidad-enlace {
 .pendiente .enlace {
   font-size: var(--t-small);
 }
+
+/* ---------- Menú de la comunidad (components/MenuComunidad.tsx) ---------- */
+
+.menu-comunidad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 14px;
+}
+
+.menu-comunidad-nombre {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.menu-comunidad-nombre:hover {
+  color: var(--acento-texto);
+}
+
+.menu-comunidad-opciones {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  background: var(--superficie);
+  scrollbar-width: none;
+}
+
+.menu-comunidad-opcion {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--tinta-2);
+  font-size: var(--t-small);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.menu-comunidad-opcion:hover {
+  background: var(--superficie-2);
+  color: var(--tinta);
+}
+
+.menu-comunidad-opcion[aria-current="page"] {
+  background: var(--acento);
+  color: var(--acento-tinta);
+}
+
+.menu-comunidad-opcion:focus-visible,
+.menu-comunidad-nombre:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Migas de pan de la lección: comunidad › curso › módulo */
+.migas ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 6px;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-small);
+  color: var(--tinta-2);
+}
+
+.migas li + li::before {
+  content: "›";
+  margin-right: 4px;
+  color: var(--tinta-3);
+}
+
+.migas a {
+  color: var(--tinta-2);
+  font-weight: 600;
+}
+
+.migas a:hover {
+  color: var(--acento-texto);
+}
+
+.migas [aria-current="page"] {
+  color: var(--tinta);
+  font-weight: 600;
+}

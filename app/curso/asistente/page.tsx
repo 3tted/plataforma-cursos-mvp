@@ -7,6 +7,7 @@ import Avatar from "@/components/Avatar";
 import { useApp, type MensajeChat } from "@/components/Contexto";
 import { IconoAsistente, IconoCerrar, IconoComunidad, IconoDetener, IconoEnviar } from "@/components/Iconos";
 import Markdown from "@/components/Markdown";
+import MenuComunidad from "@/components/MenuComunidad";
 import { useTitulo } from "@/components/useTitulo";
 import { preguntarAlAsistente } from "@/lib/cliente";
 
@@ -180,6 +181,7 @@ export default function PaginaAsistenteCurso() {
 
   return (
     <div className="pagina-asistente">
+      <MenuComunidad />
       <header className="asistente-cabecera">
         <div className="cabecera-pagina">
           <h1>Asistente del curso</h1>

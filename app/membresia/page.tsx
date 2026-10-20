@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "@/components/Contexto";
+import MenuComunidad from "@/components/MenuComunidad";
 import CodigoBarras from "@/components/CodigoBarras";
-import { IconoCheck, IconoCopiar, IconoDescargar, IconoEnviar, IconoFlechaDer, IconoFlechaIzq } from "@/components/Iconos";
+import { IconoCheck, IconoCopiar, IconoDescargar, IconoEnviar, IconoFlechaDer } from "@/components/Iconos";
 import { useTitulo } from "@/components/useTitulo";
 import { agrupar, api, fechaCorta, moneda } from "@/lib/cliente";
 import type { MetodoPago, Pago } from "@/lib/tipos";
@@ -191,9 +192,7 @@ export default function PaginaMembresia() {
 
   return (
     <div className="pagina-membresia">
-      <Link href={`/c/${comunidadId}`} className="volver">
-        <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
-      </Link>
+      <MenuComunidad />
       <header className="membresia-cabecera portada">
         <h1>Membresía de {comunidad?.nombre ?? "Finanzas Claras"}</h1>
         <p className="precio precio-grande">

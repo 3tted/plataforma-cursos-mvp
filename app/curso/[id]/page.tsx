@@ -279,6 +279,17 @@ export default function PaginaLeccion() {
       <article className="leccion">
         <AvisoSinPublicar compacto />
         {!leccion.deCoach && <EnlaceEditarCurso texto="Editar lección" className="leccion-editar" />}
+        <nav className="migas" aria-label="Estás en">
+          <ol>
+            <li>
+              <Link href={`/c/${datos.comunidad.id}`}>{datos.comunidad.nombre}</Link>
+            </li>
+            <li>
+              {esVisitante ? <span>{datos.curso.titulo}</span> : <Link href="/curso">{datos.curso.titulo}</Link>}
+            </li>
+            <li aria-current="page">{leccion.deCoach ? "Lección de la coach" : `Módulo ${numeroModulo}`}</li>
+          </ol>
+        </nav>
         <h1>{leccion.titulo}</h1>
         <p className="leccion-meta">
           <span className="cita-id" title="Así aparece esta lección en las respuestas del asistente">

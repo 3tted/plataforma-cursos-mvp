@@ -11,11 +11,11 @@ import {
   IconoCandado,
   IconoCheck,
   IconoExamen,
-  IconoFlechaIzq,
   IconoPlay,
   IconoVideo,
 } from "@/components/Iconos";
 import BotonInscribirse from "@/components/BotonInscribirse";
+import MenuComunidad from "@/components/MenuComunidad";
 import SelectorCurso from "@/components/SelectorCurso";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
 import { useTitulo } from "@/components/useTitulo";
@@ -80,9 +80,7 @@ export default function PaginaCurso() {
   }
   const volver = (
     <>
-      <Link href={`/c/${comunidadId}`} className="volver">
-        <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
-      </Link>
+      <MenuComunidad />
       <SelectorCurso activo={cursoId} alElegir={cambiarCurso} conAvance={usuario?.rol === "alumno"} />
     </>
   );

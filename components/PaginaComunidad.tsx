@@ -9,6 +9,7 @@ import { IconoAsistente, IconoEditar, IconoFlechaIzq } from "@/components/Iconos
 import PreguntaRapida from "@/components/PreguntaRapida";
 import CursosComunidad from "@/components/CursosComunidad";
 import TarjetaPublicacion from "@/components/TarjetaPublicacion";
+import MenuComunidad from "@/components/MenuComunidad";
 import PresentacionComunidad from "@/components/PresentacionComunidad";
 import { useTitulo } from "@/components/useTitulo";
 import { api, moneda } from "@/lib/cliente";
@@ -157,6 +158,7 @@ export default function PaginaComunidad({ id }: { id: string }) {
         <Link href="/comunidades" className="volver">
           <IconoFlechaIzq width={16} height={16} /> Todas las comunidades
         </Link>
+        <MenuComunidad />
         <PresentacionComunidad miembros={miembros} publicaciones={publicaciones} esDuena={esDuena} />
 
         {/* En celular los cursos van aquí, en una fila que se desliza de lado. */}

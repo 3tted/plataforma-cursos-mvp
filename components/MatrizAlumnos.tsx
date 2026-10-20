@@ -90,7 +90,7 @@ export default function MatrizAlumnos({ curso }: { curso: string }) {
   const tituloDe = (id: string) => matriz?.titulos[id] ?? id;
 
   return (
-    <section className="tarjeta matriz" aria-labelledby="matriz-titulo">
+    <section id="matriz" className="tarjeta matriz ancla" aria-labelledby="matriz-titulo">
       <div className="matriz-cabecera">
         <div>
           <h2 id="matriz-titulo">Avance de tus alumnos</h2>

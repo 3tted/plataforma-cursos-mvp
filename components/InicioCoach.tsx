@@ -109,7 +109,7 @@ export default function InicioCoach() {
         <div className="inicio-bloque-cabecera">
           <h2 id="mis-cursos-titulo">Mis cursos</h2>
           <Link href="/coach/comunidades" className="enlace inicio-ver-todo">
-            Mis comunidades <IconoFlechaDer width={15} height={15} />
+            Comunidades y cursos <IconoFlechaDer width={15} height={15} />
           </Link>
         </div>
         <ul className="inicio-cursos">
@@ -134,7 +134,7 @@ export default function InicioCoach() {
             );
           })}
           <li>
-            <Link href="/coach/comunidades" className="inicio-curso inicio-curso-nuevo">
+            <Link href="/coach/comunidades?crear=comunidad" className="inicio-curso inicio-curso-nuevo">
               <span className="inicio-curso-cuerpo">
                 <span className="ficha-nombre">Crear una comunidad o un curso</span>
                 <span className="texto-suave">
@@ -154,7 +154,7 @@ export default function InicioCoach() {
         <section className="tarjeta inicio-bloque" aria-labelledby="alumnos-titulo">
           <div className="inicio-bloque-cabecera">
             <h2 id="alumnos-titulo">Tus alumnos</h2>
-            <Link href="/coach" className="enlace inicio-ver-todo">
+            <Link href="/coach#matriz" className="enlace inicio-ver-todo">
               Ver la matriz <IconoFlechaDer width={15} height={15} />
             </Link>
           </div>
@@ -184,7 +184,7 @@ export default function InicioCoach() {
         <section className="tarjeta inicio-bloque" aria-labelledby="sin-resolver-titulo">
           <div className="inicio-bloque-cabecera">
             <h2 id="sin-resolver-titulo">Preguntas sin resolver</h2>
-            <Link href="/coach" className="enlace inicio-ver-todo">
+            <Link href="/coach#preguntas" className="enlace inicio-ver-todo">
               Ver todas <IconoFlechaDer width={15} height={15} />
             </Link>
           </div>

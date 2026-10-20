@@ -106,7 +106,7 @@ export default function PaginaComunidad() {
     return (
       <div className="comunidad-vacia">
         <Link href="/coach/comunidades" className="volver">
-          <IconoFlechaIzq width={16} height={16} /> Mis comunidades y cursos
+          <IconoFlechaIzq width={16} height={16} /> Comunidades y cursos
         </Link>
         <header className="portada">
           <Arcos />

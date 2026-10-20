@@ -137,6 +137,9 @@ export default function PaginaMembresia() {
         <p className="texto-suave">
           Como coach tienes acceso completo a ella. Para probar el flujo de pago, entra con una cuenta de alumno.
         </p>
+        <Link href="/comunidad" className="boton boton-secundario">
+          Volver a la comunidad
+        </Link>
       </div>
     );
   }

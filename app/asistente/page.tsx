@@ -160,8 +160,8 @@ export default function PaginaAsistenteGeneral() {
             </span>
             <p>
               Soy una IA de uso general: te ayudo a redactar, a pensar ideas para tu negocio o a entender un tema. No
-              uso el contenido de los cursos; para dudas de una lección está el{" "}
-              <Link href="/curso/asistente">asistente del curso</Link>, que responde con las lecciones y las cita.
+              uso el contenido de los cursos; para dudas de una lección está el asistente del curso, que responde con
+              las lecciones y las cita.
             </p>
             <div className="sugerencias">
               {SUGERENCIAS.map((q) => (

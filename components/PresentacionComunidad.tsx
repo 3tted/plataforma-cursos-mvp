@@ -213,6 +213,10 @@ export default function PresentacionComunidad({
         </li>
         <li>
           <Avatar nombre={comunidad.coach} tamaño={24} coach /> Por {comunidad.coach}
+          {" · "}
+          <Link href={`/e/${comunidad.empresa ?? "merkatics"}`} className="enlace">
+            {comunidad.empresaNombre ?? "Merkatics"}
+          </Link>
         </li>
       </ul>
 

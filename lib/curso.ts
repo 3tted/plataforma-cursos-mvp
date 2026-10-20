@@ -85,6 +85,11 @@ export function marcaDe(a: Almacen, empresa: string | undefined): { marca?: Marc
   return e?.color ? { marca: { nombre: e.nombre, color: e.color, ...(e.logo ? { logo: e.logo } : {}) } } : {};
 }
 
+function empresaNombreDe(a: Almacen, empresa: string | undefined): { empresaNombre?: string } {
+  const e = (a.empresas ?? []).find((x) => x.id === empresa);
+  return e ? { empresaNombre: e.nombre } : {};
+}
+
 /** La comunidad que creó una coach, en la forma que usa el resto de la plataforma. */
 export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
   const c = (a.comunidadesCoach ?? []).find((x) => x.id === id);
@@ -98,6 +103,7 @@ export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
     ...(c.acerca ? { acerca: c.acerca } : {}),
     ...(c.foto ? { foto: c.foto } : {}),
     ...(c.empresa ? { empresa: c.empresa } : {}),
+    ...empresaNombreDe(a, c.empresa),
     ...marcaDe(a, c.empresa),
     precio_mensual: c.precio_mensual,
     moneda: c.moneda,

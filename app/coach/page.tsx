@@ -8,6 +8,7 @@ import { IconoBorrar, IconoComunidad } from "@/components/Iconos";
 import Arcos from "@/components/Arcos";
 import Markdown from "@/components/Markdown";
 import MatrizAlumnos from "@/components/MatrizAlumnos";
+import NavCoach from "@/components/NavCoach";
 import SelectorCurso from "@/components/SelectorCurso";
 import { useCursosDeMiEmpresa } from "@/components/useMiEmpresa";
 import { useTitulo } from "@/components/useTitulo";
@@ -61,6 +62,11 @@ export default function PaginaCoach() {
 
   const grupos = useMemo(() => agrupar(resumen?.preguntas ?? []).slice(0, 12), [resumen]);
 
+  // Desde el inicio se llega a una sección (#matriz, #preguntas) que aparece cuando llega el resumen.
+  useEffect(() => {
+    if (resumen && window.location.hash) document.querySelector(window.location.hash)?.scrollIntoView({ block: "start" });
+  }, [resumen]);
+
   if (usuario?.rol !== "coach") {
     return (
       <div className="pagina-estrecha">
@@ -76,15 +82,18 @@ export default function PaginaCoach() {
   // Sin cursos de su empresa en la página todavía, no hay nada que resumir.
   if (!activoEsMio) {
     return (
-      <div className="pagina-estrecha">
-        <h1>Panel de coach</h1>
-        <p className="texto-suave">
-          Aquí verás qué preguntan tus alumnos, qué lecciones generan más dudas y los pagos de tus comunidades. Empieza
-          por crear tu comunidad y subir su primer curso a la página.
-        </p>
-        <Link href="/coach/comunidades" className="boton">
-          Crear una comunidad o un curso
-        </Link>
+      <div className="pagina-coach">
+        <NavCoach />
+        <div className="pagina-estrecha">
+          <h1>Resumen</h1>
+          <p className="texto-suave">
+            Aquí verás qué preguntan tus alumnos, qué lecciones generan más dudas y los pagos de tus comunidades. Empieza
+            por crear tu comunidad y subir su primer curso a la página.
+          </p>
+          <Link href="/coach/comunidades?crear=comunidad" className="boton">
+            Crear mi comunidad
+          </Link>
+        </div>
       </div>
     );
   }
@@ -140,18 +149,14 @@ export default function PaginaCoach() {
 
   return (
     <div className="pagina-coach">
+      <NavCoach />
       <header className="portada">
         <Arcos />
         <h1>Hola, {usuario.nombre.split(" ")[0]}</h1>
         <p className="portada-texto">Lo que pasa en tu comunidad y lo que tus alumnos le preguntan al asistente.</p>
-        <div className="portada-acciones">
-          <Link href="/coach/comunidades" className="boton boton-secundario">
-            Crear una comunidad o un curso
-          </Link>
-          <Link href="/coach/empresa" className="boton boton-fantasma-borde">
-            Mi empresa: marca y equipo
-          </Link>
-        </div>
+        <Link href="/coach/comunidades?crear=comunidad" className="boton boton-secundario portada-accion">
+          Crear una comunidad
+        </Link>
       </header>
 
       <section className="tarjeta panel-alcance" aria-label="Comunidad y curso del panel">
@@ -230,7 +235,7 @@ export default function PaginaCoach() {
       <MatrizAlumnos curso={cursoId} />
 
       <div className="rejilla-coach">
-        <section className="tarjeta" aria-labelledby="preguntas-titulo">
+        <section id="preguntas" className="tarjeta ancla" aria-labelledby="preguntas-titulo">
           <h2 id="preguntas-titulo">Preguntas recientes de tus alumnos</h2>
           {resumen && grupos.length === 0 && (
             <p className="vacio">

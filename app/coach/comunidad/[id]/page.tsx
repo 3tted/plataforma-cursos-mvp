@@ -66,7 +66,7 @@ export default function EditarComunidad() {
 
   const volver = (
     <Link href="/coach/comunidades" className="volver">
-      <IconoFlechaIzq width={16} height={16} /> Mis comunidades y cursos
+      <IconoFlechaIzq width={16} height={16} /> Comunidades y cursos
     </Link>
   );
 

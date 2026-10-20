@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useApp } from "@/components/Contexto";
 import CamposComunidad, { COMUNIDAD_VACIA } from "@/components/editor/CamposComunidad";
 import CrearConIA from "@/components/editor/CrearConIA";
+import { COMUNIDADES } from "@/lib/comunidades";
+import NavCoach from "@/components/NavCoach";
 import { IconoAsistenteGeneral, IconoEditar, IconoFlechaDer } from "@/components/Iconos";
 import PortadaTema from "@/components/PortadaTema";
 import { useTitulo } from "@/components/useTitulo";
@@ -25,7 +27,7 @@ const SUELTOS = "";
 // ponerlo en una comunidad (para publicarlo tiene que estar en una).
 export default function PaginaMisComunidades() {
   const router = useRouter();
-  const { usuario } = useApp();
+  const { usuario, comunidades, cursos, cambiarComunidad, cambiarCurso } = useApp();
   const [datos, setDatos] = useState<Datos | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creando, setCreando] = useState(false);
@@ -34,7 +36,9 @@ export default function PaginaMisComunidades() {
   const [enviando, setEnviando] = useState<string | null>(null);
   // Dónde está abierto el formulario de IA (una comunidad o SUELTOS).
   const [conIA, setConIA] = useState<string | null>(null);
-  useTitulo("Mis comunidades y cursos");
+  useTitulo("Comunidades y cursos");
+  // Las que vienen con la plataforma (de la empresa Merkatics): se manejan aquí, pero su contenido no se edita.
+  const deLaPlataforma = usuario?.empresa === "merkatics" ? COMUNIDADES.map((c) => c.id) : [];
 
   const autor = usuario?.nombre ?? "";
 
@@ -43,10 +47,11 @@ export default function PaginaMisComunidades() {
     api<Datos>("/api/coach/comunidades")
       .then((d) => {
         setDatos(d);
-        if (d.comunidades.length === 0 && d.cursos.length === 0) setCreando(true);
+        const pedido = new URLSearchParams(window.location.search).get("crear") === "comunidad";
+        if (pedido || (d.comunidades.length === 0 && d.cursos.length === 0 && deLaPlataforma.length === 0)) setCreando(true);
       })
       .catch((e) => setError((e as Error).message));
-  }, [autor]);
+  }, [autor, deLaPlataforma.length]);
 
   useEffect(cargar, [cargar]);
 
@@ -204,9 +209,10 @@ export default function PaginaMisComunidades() {
 
   return (
     <div className="mis-comunidades">
+      <NavCoach />
       <header className="cabecera-pagina mis-comunidades-cabecera">
         <div>
-          <h1>Mis comunidades y cursos</h1>
+          <h1>Comunidades y cursos</h1>
           <p className="texto-suave">
             Crea primero tu comunidad y luego sus cursos, o al revés. Un curso se queda como borrador hasta que lo
             publicas, y para publicarlo tiene que estar en una comunidad.
@@ -228,9 +234,6 @@ export default function PaginaMisComunidades() {
           >
             Crear curso
           </button>
-          <Link href="/coach/empresa" className="boton boton-fantasma-borde">
-            Mi empresa
-          </Link>
         </div>
       </header>
 
@@ -270,6 +273,53 @@ export default function PaginaMisComunidades() {
           {agregarCurso(SUELTOS)}
         </section>
       )}
+
+      {datos &&
+        deLaPlataforma.map((id) => {
+          const c = comunidades.find((x) => x.id === id);
+          if (!c) return null;
+          const suyos = cursos.filter((x) => x.comunidad === id);
+          return (
+            <section key={id} id={`tarjeta-${id}`} className="tarjeta mi-comunidad" aria-labelledby={`comunidad-${id}`}>
+              <div className="mi-comunidad-cabecera">
+                <PortadaTema tema={c.tema} clave={id} foto={c.foto} className="mi-comunidad-portada" alt={`Portada de la comunidad «${c.nombre}»`} />
+                <div className="mi-comunidad-datos">
+                  <h2 id={`comunidad-${id}`}>{c.nombre}</h2>
+                  <p className="texto-suave">{c.descripcion}</p>
+                  <p className="mi-comunidad-meta texto-suave">
+                    {c.tema} · De la plataforma: su texto y sus cursos vienen con Merkatics y no se editan aquí. A sus
+                    lecciones sí les subes videos y presentaciones, y en la comunidad publicas anuncios y moderas.
+                  </p>
+                  <div className="mi-comunidad-enlaces">
+                    <Link href="/comunidad" className="enlace mi-comunidad-ver" onClick={() => cambiarComunidad(id)}>
+                      Ver la comunidad <IconoFlechaDer width={15} height={15} />
+                    </Link>
+                    <Link href="/coach" className="enlace mi-comunidad-ver" onClick={() => cambiarComunidad(id)}>
+                      Ver su resumen <IconoFlechaDer width={15} height={15} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+              <h3>Cursos</h3>
+              <ul className="mis-cursos">
+                {suyos.map((x) => (
+                  <li key={x.id}>
+                    <Link href="/curso" className="mi-curso" onClick={() => cambiarCurso(x.id)}>
+                      <span className="mi-curso-titulo">{x.titulo}</span>
+                      <span className="texto-suave mi-curso-meta">
+                        <span className="cifra">{x.lecciones.length}</span> lecciones · <span className="cifra">{x.minutos}</span> min
+                      </span>
+                      <span className="pastilla pastilla-ok">Publicado</span>
+                      <span className="mi-curso-editar" aria-hidden="true">
+                        <IconoFlechaDer width={16} height={16} />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
 
       {datos?.comunidades.map((c) => {
         const suyos = datos.cursos.filter((x) => x.comunidad === c.id);

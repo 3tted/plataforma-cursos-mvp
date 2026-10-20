@@ -103,7 +103,7 @@ export default function EditorCurso() {
       <div className="pagina-estrecha">
         <p className="error">{error}</p>
         <Link href="/coach/comunidades" className="volver">
-          <IconoFlechaIzq width={16} height={16} /> Mis comunidades
+          <IconoFlechaIzq width={16} height={16} /> Comunidades y cursos
         </Link>
       </div>
     ) : (
@@ -251,7 +251,7 @@ export default function EditorCurso() {
     <div className="editor-curso">
       <div className="editor-barra">
         <Link href="/coach/comunidades" className="volver">
-          <IconoFlechaIzq width={16} height={16} /> Mis comunidades y cursos
+          <IconoFlechaIzq width={16} height={16} /> Comunidades y cursos
         </Link>
         <span className={curso.estado === "publicado" ? "pastilla pastilla-ok" : "pastilla"}>
           {curso.estado === "publicado" ? "Publicado" : curso.enPagina ? "En la página · sin publicar" : "Borrador"}

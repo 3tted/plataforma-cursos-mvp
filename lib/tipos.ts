@@ -18,6 +18,8 @@ export interface Comunidad {
   marca?: MarcaEmpresa;
   /** Empresa dueña; sin el dato, la de Merkatics (las comunidades de ejemplo). */
   empresa?: string;
+  /** Nombre de la empresa dueña (para enlazar su página, /e/<empresa>). */
+  empresaNombre?: string;
   precio_mensual: number;
   moneda: string;
 }

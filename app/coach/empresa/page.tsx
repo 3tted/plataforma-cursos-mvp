@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Arcos from "@/components/Arcos";
 import { useApp } from "@/components/Contexto";
-import { IconoFlechaDer, IconoFlechaIzq, IconoSubir } from "@/components/Iconos";
+import { IconoFlechaDer, IconoSubir } from "@/components/Iconos";
 import EquipoEmpresa from "@/components/EquipoEmpresa";
+import NavCoach from "@/components/NavCoach";
 import { useTitulo } from "@/components/useTitulo";
 import { api } from "@/lib/cliente";
 import { COLOR_MERKATICS, normalizarColor, tonosDeMarca, variablesDeMarca } from "@/lib/marca";
@@ -155,9 +156,7 @@ export default function PaginaMiEmpresa() {
 
   return (
     <div className="mi-empresa">
-      <Link href="/coach/comunidades" className="volver">
-        <IconoFlechaIzq width={16} height={16} /> Mis comunidades y cursos
-      </Link>
+      <NavCoach />
       <header className="cabecera-pagina mi-empresa-cabecera">
         <div>
           <h1>Mi empresa</h1>

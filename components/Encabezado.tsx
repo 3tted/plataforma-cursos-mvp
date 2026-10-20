@@ -34,7 +34,7 @@ export default function Encabezado() {
       activo: ruta === "/curso/asistente" || ruta === "/asistente",
     },
     ...(usuario?.rol === "coach"
-      ? [{ href: "/coach", texto: "Panel de coach", corto: "Panel", Icono: IconoPanel, activo: ruta === "/coach" }]
+      ? [{ href: "/coach", texto: "Panel de coach", corto: "Panel", Icono: IconoPanel, activo: ruta.startsWith("/coach") }]
       : []),
   ];
 

@@ -9126,3 +9126,67 @@ button.tarjeta-comunidad-enlace {
   vertical-align: middle;
   border-radius: 4px;
 }
+
+/* ---------- Panel de coach en pestañas (app/coach/page.tsx) ---------- */
+
+.panel-seccion {
+  display: grid;
+  gap: 18px;
+}
+
+.pendientes-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pendiente {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 14px;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.pendiente:hover {
+  border-color: var(--linea-fuerte);
+}
+
+.pendiente:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.pendiente-cifra {
+  grid-row: span 2;
+  font-family: var(--fuente-display);
+  font-size: var(--t-cifra-destacada);
+  font-weight: 700;
+  color: var(--acento-texto);
+}
+
+/* En cero no hay nada que atender: el número se apaga */
+.pendiente-cifra[data-cero="true"] {
+  color: var(--tinta-3);
+}
+
+.pendiente-texto {
+  font-weight: 600;
+}
+
+.pendiente .enlace {
+  font-size: var(--t-small);
+}

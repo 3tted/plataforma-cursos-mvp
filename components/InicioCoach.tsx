@@ -154,7 +154,7 @@ export default function InicioCoach() {
         <section className="tarjeta inicio-bloque" aria-labelledby="alumnos-titulo">
           <div className="inicio-bloque-cabecera">
             <h2 id="alumnos-titulo">Tus alumnos</h2>
-            <Link href="/coach#matriz" className="enlace inicio-ver-todo">
+            <Link href="/coach#alumnos" className="enlace inicio-ver-todo">
               Ver la matriz <IconoFlechaDer width={15} height={15} />
             </Link>
           </div>

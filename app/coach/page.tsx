@@ -12,10 +12,23 @@ import SelectorCurso from "@/components/SelectorCurso";
 import { useCursosDeMiEmpresa } from "@/components/useMiEmpresa";
 import { useTitulo } from "@/components/useTitulo";
 import { api, fechaCorta, hace, moneda } from "@/lib/cliente";
-import { agrupar } from "@/lib/preguntas";
-import type { LeccionCoach, ResumenCoach } from "@/lib/tipos";
+import { agrupar, sinResolver } from "@/lib/preguntas";
+import type { LeccionCoach, MatrizAlumnos as Matriz, ResumenCoach } from "@/lib/tipos";
 
 const NOMBRE_METODO = { oxxo: "OXXO", spei: "SPEI", mercadopago: "Mercado Pago" } as const;
+
+// El resumen se reparte en pestañas para no tener nueve bloques en un solo
+// scroll. Cada una tiene su dirección (#alumnos, #preguntas…) para llegar
+// directo desde el inicio.
+const SECCIONES = [
+  { id: "resumen", texto: "Resumen" },
+  { id: "alumnos", texto: "Alumnos" },
+  { id: "preguntas", texto: "Preguntas" },
+  { id: "contenido", texto: "Contenido" },
+  { id: "pagos", texto: "Pagos" },
+] as const;
+type Seccion = (typeof SECCIONES)[number]["id"];
+const esSeccion = (v: string): v is Seccion => SECCIONES.some((x) => x.id === v);
 
 export default function PaginaCoach() {
   const router = useRouter();
@@ -61,10 +74,35 @@ export default function PaginaCoach() {
 
   const grupos = useMemo(() => agrupar(resumen?.preguntas ?? []).slice(0, 12), [resumen]);
 
-  // Desde el inicio se llega a una sección (#matriz, #preguntas) que aparece cuando llega el resumen.
+  // La pestaña sale de la dirección (#alumnos…) y se anota en ella al cambiar.
+  const [seccion, setSeccion] = useState<Seccion>("resumen");
   useEffect(() => {
-    if (resumen && window.location.hash) document.querySelector(window.location.hash)?.scrollIntoView({ block: "start" });
-  }, [resumen]);
+    const leer = () => {
+      const h = window.location.hash.slice(1);
+      setSeccion(esSeccion(h) ? h : h === "matriz" ? "alumnos" : "resumen");
+    };
+    leer();
+    window.addEventListener("hashchange", leer);
+    return () => window.removeEventListener("hashchange", leer);
+  }, []);
+  const irA = (s: Seccion) => {
+    setSeccion(s);
+    window.history.replaceState(null, "", s === "resumen" ? "/coach" : `/coach#${s}`);
+  };
+
+  // Para las alertas del resumen: cuántos alumnos del curso necesitan apoyo.
+  const [apoyo, setApoyo] = useState<number | null>(null);
+  useEffect(() => {
+    setApoyo(null);
+    if (usuario?.rol !== "coach" || !activoEsMio) return;
+    let vigente = true;
+    api<Matriz>(`/api/coach/alumnos?curso=${encodeURIComponent(cursoId)}`)
+      .then((m) => vigente && setApoyo(m.alumnos.filter((a) => a.estado === "requiere-apoyo").length))
+      .catch(() => undefined);
+    return () => {
+      vigente = false;
+    };
+  }, [usuario?.rol, activoEsMio, cursoId]);
 
   if (usuario?.rol !== "coach") {
     return (
@@ -146,6 +184,30 @@ export default function PaginaCoach() {
   const delCurso = lecciones.filter((l) => !l.deCoach);
   const conVideo = delCurso.filter((l) => l.video).length;
   const faltan = delCurso.filter((l) => !l.video);
+  const pendientesPago = resumen?.pagos.filter((p) => p.estado !== "pagado").length ?? 0;
+  const dudas = resumen ? sinResolver(agrupar(resumen.preguntas)).length : 0;
+  // Las alertas del resumen, cada una lleva a su pestaña.
+  const alertas: { seccion: Seccion; total: number; texto: string; accion: string }[] = [
+    {
+      seccion: "alumnos",
+      total: apoyo ?? 0,
+      texto: apoyo === 1 ? "alumno requiere apoyo" : "alumnos requieren apoyo",
+      accion: "Ver alumnos",
+    },
+    { seccion: "preguntas", total: dudas, texto: dudas === 1 ? "duda sin resolver" : "dudas sin resolver", accion: dudas ? "Responder" : "Ver preguntas" },
+    {
+      seccion: "contenido",
+      total: faltan.length,
+      texto: faltan.length === 1 ? "lección sin video" : "lecciones sin video",
+      accion: "Ver contenido",
+    },
+    {
+      seccion: "pagos",
+      total: pendientesPago,
+      texto: pendientesPago === 1 ? "ficha de pago pendiente" : "fichas de pago pendientes",
+      accion: "Ver pagos",
+    },
+  ];
 
   return (
     <div className="pagina-coach">
@@ -202,250 +264,308 @@ export default function PaginaCoach() {
         </div>
       )}
 
-      <section aria-label="Resumen">
-        <dl className="datos-coach">
-          <div>
-            <dt>Preguntas sobre el curso (7 días)</dt>
-            <dd className="cifra">{resumen?.preguntasSemana ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
-          </div>
-          <div>
-            <dt>Miembros activos de la comunidad</dt>
-            <dd className="cifra">{resumen?.miembros ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
-          </div>
-          <div>
-            <dt>Publicaciones en la comunidad</dt>
-            <dd className="cifra">{resumen?.publicaciones ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
-          </div>
-          <div>
-            <dt>Membresías pagadas</dt>
-            <dd className="cifra">{resumen ? pagados : <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
-          </div>
-          <div>
-            <dt>Ingresos (simulados)</dt>
-            <dd className="cifra">{resumen ? moneda(resumen.ingresosSimulados) : <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <MatrizAlumnos curso={cursoId} />
-
-      <div className="rejilla-coach">
-        <section id="preguntas" className="tarjeta ancla" aria-labelledby="preguntas-titulo">
-          <h2 id="preguntas-titulo">Preguntas recientes de tus alumnos</h2>
-          {resumen && grupos.length === 0 && (
-            <p className="vacio">
-              Todavía no hay preguntas. <Link href="/curso/asistente">Haz una de prueba</Link> para ver cómo aparece aquí.
-            </p>
-          )}
-          <ul className="lista-preguntas">
-            {grupos.map((g) => (
-              <li key={g.clave} className="grupo-pregunta">
-                <div className="grupo-pregunta-cabecera">
-                  {g.veces > 1 && (
-                    <span className="grupo-pregunta-conteo">
-                      <span className="cifra">{g.veces}</span> veces
-                    </span>
-                  )}
-                  <div>
-                    <p className="pregunta-texto">{g.pregunta}</p>
-                    <p className="texto-suave pregunta-meta">
-                      {g.personas === 1 ? g.ultima.autor : `${g.personas} personas`} · {hace(g.ultima.creadaEn)}
-                    </p>
-                  </div>
-                </div>
-                {g.citas.length > 0 ? (
-                  <div className="citas">
-                    {g.citas.map((id) => (
-                      <Link key={id} className="cita" href={`/curso/${id}`} title={tituloDe(id)}>
-                        <span className="cita-id">{id}</span>
-                        <span className="cita-titulo">{tituloDe(id)}</span>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="nota">El curso no cubre esta pregunta: buena candidata para responderla tú.</p>
-                )}
-                {g.ultima.respuesta && (
-                  <details>
-                    <summary>Ver qué respondió el asistente</summary>
-                    <Markdown texto={g.ultima.respuesta} className="prosa prosa-chat" conFuentes />
-                  </details>
-                )}
-                <div className="grupo-pregunta-acciones">
-                  <button type="button" className="accion" onClick={() => responderEnComunidad(g.pregunta, g.veces)}>
-                    <IconoComunidad width={15} height={15} />
-                    Responder en la comunidad
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="tarjeta" aria-labelledby="consultadas-titulo">
-          <h2 id="consultadas-titulo">Lecciones más consultadas</h2>
-          <p className="texto-suave">
-            Las lecciones que el asistente cita más al responder. Muchas citas suelen indicar un tema que conviene reforzar.
-          </p>
-          {resumen && resumen.leccionesConsultadas.length === 0 && <p className="vacio">Sin datos todavía.</p>}
-          <ul className="barras">
-            {resumen?.leccionesConsultadas.map((l) => (
-              <li key={l.id}>
-                <span className="barra-etiqueta">
-                  <span className="cita-id">{l.id}</span> {tituloDe(l.id)}
-                </span>
-                <span className="barra-pista">
-                  <span className="barra-relleno" style={{ width: `${(l.total / maxConsultas) * 100}%` }} />
-                </span>
-                <span className="barra-valor">{l.total}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      <div className="pestanas panel-pestanas" role="tablist" aria-label="Partes del panel">
+        {SECCIONES.map((x) => (
+          <button
+            key={x.id}
+            type="button"
+            role="tab"
+            id={`pestana-${x.id}`}
+            aria-controls={`panel-${x.id}`}
+            aria-selected={seccion === x.id}
+            className="pestana"
+            onClick={() => irA(x.id)}
+          >
+            {x.texto}
+          </button>
+        ))}
       </div>
 
-      <section className="tarjeta" aria-labelledby="videos-titulo">
-        <h2 id="videos-titulo">Videos de tus lecciones</h2>
-        <p className="texto-suave">
-          <span className="cifra">{conVideo}</span> de <span className="cifra">{delCurso.length}</span> lecciones
-          tienen video{faltan.length === 0 ? "." : "; abajo, las que todavía no."} Para subir o cambiar uno, abre la lección.
-        </p>
-        {faltan.length > 0 && (
-          <ul className="videos-lista">
-            {faltan.map((l) => (
-              <li key={l.id}>
-                <Link href={`/curso/${l.id}`}>
-                  <span className="cita-id">{l.id}</span> {l.titulo}
-                </Link>
-                <span className="pastilla">{l.presentacion ? "Con presentación" : "Sin video"}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="tarjeta" aria-labelledby="propia-titulo">
-        <h2 id="propia-titulo">Prueba el asistente con tu propio contenido</h2>
-        {datos ? (
-          <>
-            <p className="texto-suave">
-              Pega el texto o la transcripción de una lección tuya. Se agrega a «{datos.curso.titulo}» y el asistente
-              empieza a responder con ella al momento.
-            </p>
-            <form className="formulario-leccion" onSubmit={agregarLeccion}>
-              <label className="campo">
-                <span>Título de la lección</span>
-                <input
-                  id="leccion-titulo"
-                  value={titulo}
-                  onChange={(e) => setTitulo(e.target.value)}
-                  maxLength={120}
-                  placeholder="Por ejemplo: Cómo negociar con proveedores"
-                  required
-                />
-              </label>
-              <label className="campo">
-                <span>Contenido o transcripción</span>
-                <textarea
-                  id="leccion-contenido"
-                  value={contenido}
-                  onChange={(e) => setContenido(e.target.value)}
-                  maxLength={20000}
-                  rows={8}
-                  placeholder="Pega aquí el texto de tu lección…"
-                  required
-                />
-              </label>
-              <div className="fila-acciones">
-                <span className="nota cifra">{contenido.length.toLocaleString("es-MX")} / 20,000 caracteres</span>
-                <button type="submit" className="boton" disabled={guardando}>
-                  {guardando ? "Agregando…" : "Agregar al curso"}
-                </button>
+      {seccion === "resumen" && (
+        <div role="tabpanel" id="panel-resumen" aria-labelledby="pestana-resumen" className="panel-seccion">
+          <section aria-label="Resumen">
+            <dl className="datos-coach">
+              <div>
+                <dt>Preguntas sobre el curso (7 días)</dt>
+                <dd className="cifra">{resumen?.preguntasSemana ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
               </div>
-            </form>
-            {agregada && (
-              <p className="aviso aviso-ok" role="status">
-                <span>
-                  Listo: la lección ya está en el curso como <span className="cita-id">{agregada}</span>.{" "}
-                  <Link href={`/curso/${agregada}`}>Ábrela</Link> o <Link href="/curso/asistente">pregúntale al asistente</Link>{" "}
-                  sobre ella.
-                </span>
-              </p>
-            )}
-            {resumen && resumen.leccionesCoach.length > 0 && (
-              <ul className="lecciones-propias">
-                {resumen.leccionesCoach.map((l) => (
-                  <li key={l.id}>
-                    <Link href={`/curso/C${l.id}`}>
-                      <span className="cita-id">C{l.id}</span> {l.titulo}
-                    </Link>
-                    <span className="texto-suave">{fechaCorta(l.creadaEn)}</span>
-                    {porBorrar === l.id ? (
-                      <span className="confirmacion" role="group" aria-label={`Confirmar que quitas ${l.titulo}`}>
-                        ¿Quitarla del curso?
-                        <button type="button" className="boton boton-chico" onClick={() => borrarLeccion(l.id)}>
-                          Sí, quitar
-                        </button>
-                        <button type="button" className="boton boton-chico boton-fantasma" onClick={() => setPorBorrar(null)}>
-                          Cancelar
-                        </button>
+              <div>
+                <dt>Miembros activos de la comunidad</dt>
+                <dd className="cifra">{resumen?.miembros ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
+              </div>
+              <div>
+                <dt>Publicaciones en la comunidad</dt>
+                <dd className="cifra">{resumen?.publicaciones ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
+              </div>
+              <div>
+                <dt>Membresías pagadas</dt>
+                <dd className="cifra">{resumen ? pagados : <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
+              </div>
+              <div>
+                <dt>Ingresos (simulados)</dt>
+                <dd className="cifra">{resumen ? moneda(resumen.ingresosSimulados) : <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
+              </div>
+            </dl>
+          </section>
+          <section className="tarjeta" aria-labelledby="pendientes-titulo">
+            <h2 id="pendientes-titulo">Lo que te toca atender</h2>
+            {!resumen ? (
+              <p className="texto-suave">Revisando…</p>
+            ) : (
+              <ul className="pendientes-lista">
+                {alertas.map((a) => (
+                  <li key={a.seccion}>
+                    <button type="button" className="pendiente" onClick={() => irA(a.seccion)}>
+                      <span className="pendiente-cifra cifra" data-cero={a.total === 0}>
+                        {a.total}
                       </span>
-                    ) : (
-                      <button
-                        type="button"
-                        className="boton-icono boton-icono-chico"
-                        onClick={() => setPorBorrar(l.id)}
-                        aria-label={`Quitar la lección ${l.titulo}`}
-                        title="Quitar del curso"
-                      >
-                        <IconoBorrar width={15} height={15} />
-                      </button>
-                    )}
+                      <span className="pendiente-texto">{a.texto}</span>
+                      <span className="enlace">{a.accion}</span>
+                    </button>
                   </li>
                 ))}
               </ul>
             )}
-          </>
-        ) : (
-          <p className="texto-suave">Cargando el curso…</p>
-        )}
-      </section>
+          </section>
+        </div>
+      )}
 
-      <section className="tarjeta" aria-labelledby="pagos-titulo">
-        <h2 id="pagos-titulo">Pagos (simulados)</h2>
-        {resumen && resumen.pagos.length === 0 ? (
-          <p className="vacio">Todavía no hay pagos. Entra como alumno y prueba la membresía.</p>
-        ) : (
-          <div className="tabla-desplazable">
-            <table className="tabla-pagos">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Alumno</th>
-                  <th>Método</th>
-                  <th>Monto</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {resumen?.pagos.map((p) => (
-                  <tr key={p.id}>
-                    <td>{fechaCorta(p.creadoEn)}</td>
-                    <td>{p.autor}</td>
-                    <td>{NOMBRE_METODO[p.metodo]}</td>
-                    <td className="numero">{moneda(p.monto)}</td>
-                    <td>
-                      <span className={p.estado === "pagado" ? "pastilla pastilla-ok" : "pastilla"}>
-                        {p.estado === "pagado" ? "Pagado" : "Pendiente"}
-                      </span>
-                    </td>
-                  </tr>
+      {seccion === "alumnos" && (
+        <div role="tabpanel" id="panel-alumnos" aria-labelledby="pestana-alumnos" className="panel-seccion">
+          <MatrizAlumnos curso={cursoId} />
+        </div>
+      )}
+
+      {seccion === "preguntas" && (
+        <div role="tabpanel" id="panel-preguntas" aria-labelledby="pestana-preguntas" className="panel-seccion">
+          <div className="rejilla-coach">
+            <section className="tarjeta" aria-labelledby="preguntas-titulo">
+              <h2 id="preguntas-titulo">Preguntas recientes de tus alumnos</h2>
+              {resumen && grupos.length === 0 && (
+                <p className="vacio">
+                  Todavía no hay preguntas. <Link href="/curso/asistente">Haz una de prueba</Link> para ver cómo aparece aquí.
+                </p>
+              )}
+              <ul className="lista-preguntas">
+                {grupos.map((g) => (
+                  <li key={g.clave} className="grupo-pregunta">
+                    <div className="grupo-pregunta-cabecera">
+                      {g.veces > 1 && (
+                        <span className="grupo-pregunta-conteo">
+                          <span className="cifra">{g.veces}</span> veces
+                        </span>
+                      )}
+                      <div>
+                        <p className="pregunta-texto">{g.pregunta}</p>
+                        <p className="texto-suave pregunta-meta">
+                          {g.personas === 1 ? g.ultima.autor : `${g.personas} personas`} · {hace(g.ultima.creadaEn)}
+                        </p>
+                      </div>
+                    </div>
+                    {g.citas.length > 0 ? (
+                      <div className="citas">
+                        {g.citas.map((id) => (
+                          <Link key={id} className="cita" href={`/curso/${id}`} title={tituloDe(id)}>
+                            <span className="cita-id">{id}</span>
+                            <span className="cita-titulo">{tituloDe(id)}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="nota">El curso no cubre esta pregunta: buena candidata para responderla tú.</p>
+                    )}
+                    {g.ultima.respuesta && (
+                      <details>
+                        <summary>Ver qué respondió el asistente</summary>
+                        <Markdown texto={g.ultima.respuesta} className="prosa prosa-chat" conFuentes />
+                      </details>
+                    )}
+                    <div className="grupo-pregunta-acciones">
+                      <button type="button" className="accion" onClick={() => responderEnComunidad(g.pregunta, g.veces)}>
+                        <IconoComunidad width={15} height={15} />
+                        Responder en la comunidad
+                      </button>
+                    </div>
+                  </li>
                 ))}
-              </tbody>
-            </table>
+              </ul>
+            </section>
+
+            <section className="tarjeta" aria-labelledby="consultadas-titulo">
+              <h2 id="consultadas-titulo">Lecciones más consultadas</h2>
+              <p className="texto-suave">
+                Las lecciones que el asistente cita más al responder. Muchas citas suelen indicar un tema que conviene reforzar.
+              </p>
+              {resumen && resumen.leccionesConsultadas.length === 0 && <p className="vacio">Sin datos todavía.</p>}
+              <ul className="barras">
+                {resumen?.leccionesConsultadas.map((l) => (
+                  <li key={l.id}>
+                    <span className="barra-etiqueta">
+                      <span className="cita-id">{l.id}</span> {tituloDe(l.id)}
+                    </span>
+                    <span className="barra-pista">
+                      <span className="barra-relleno" style={{ width: `${(l.total / maxConsultas) * 100}%` }} />
+                    </span>
+                    <span className="barra-valor">{l.total}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </div>
-        )}
-      </section>
+        </div>
+      )}
+
+      {seccion === "contenido" && (
+        <div role="tabpanel" id="panel-contenido" aria-labelledby="pestana-contenido" className="panel-seccion">
+          <section className="tarjeta" aria-labelledby="videos-titulo">
+            <h2 id="videos-titulo">Videos de tus lecciones</h2>
+            <p className="texto-suave">
+              <span className="cifra">{conVideo}</span> de <span className="cifra">{delCurso.length}</span> lecciones
+              tienen video{faltan.length === 0 ? "." : "; abajo, las que todavía no."} Para subir o cambiar uno, abre la lección.
+            </p>
+            {faltan.length > 0 && (
+              <ul className="videos-lista">
+                {faltan.map((l) => (
+                  <li key={l.id}>
+                    <Link href={`/curso/${l.id}`}>
+                      <span className="cita-id">{l.id}</span> {l.titulo}
+                    </Link>
+                    <span className="pastilla">{l.presentacion ? "Con presentación" : "Sin video"}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="tarjeta" aria-labelledby="propia-titulo">
+            <h2 id="propia-titulo">Prueba el asistente con tu propio contenido</h2>
+            {datos ? (
+              <>
+                <p className="texto-suave">
+                  Pega el texto o la transcripción de una lección tuya. Se agrega a «{datos.curso.titulo}» y el asistente
+                  empieza a responder con ella al momento.
+                </p>
+                <form className="formulario-leccion" onSubmit={agregarLeccion}>
+                  <label className="campo">
+                    <span>Título de la lección</span>
+                    <input
+                      id="leccion-titulo"
+                      value={titulo}
+                      onChange={(e) => setTitulo(e.target.value)}
+                      maxLength={120}
+                      placeholder="Por ejemplo: Cómo negociar con proveedores"
+                      required
+                    />
+                  </label>
+                  <label className="campo">
+                    <span>Contenido o transcripción</span>
+                    <textarea
+                      id="leccion-contenido"
+                      value={contenido}
+                      onChange={(e) => setContenido(e.target.value)}
+                      maxLength={20000}
+                      rows={8}
+                      placeholder="Pega aquí el texto de tu lección…"
+                      required
+                    />
+                  </label>
+                  <div className="fila-acciones">
+                    <span className="nota cifra">{contenido.length.toLocaleString("es-MX")} / 20,000 caracteres</span>
+                    <button type="submit" className="boton" disabled={guardando}>
+                      {guardando ? "Agregando…" : "Agregar al curso"}
+                    </button>
+                  </div>
+                </form>
+                {agregada && (
+                  <p className="aviso aviso-ok" role="status">
+                    <span>
+                      Listo: la lección ya está en el curso como <span className="cita-id">{agregada}</span>.{" "}
+                      <Link href={`/curso/${agregada}`}>Ábrela</Link> o <Link href="/curso/asistente">pregúntale al asistente</Link>{" "}
+                      sobre ella.
+                    </span>
+                  </p>
+                )}
+                {resumen && resumen.leccionesCoach.length > 0 && (
+                  <ul className="lecciones-propias">
+                    {resumen.leccionesCoach.map((l) => (
+                      <li key={l.id}>
+                        <Link href={`/curso/C${l.id}`}>
+                          <span className="cita-id">C{l.id}</span> {l.titulo}
+                        </Link>
+                        <span className="texto-suave">{fechaCorta(l.creadaEn)}</span>
+                        {porBorrar === l.id ? (
+                          <span className="confirmacion" role="group" aria-label={`Confirmar que quitas ${l.titulo}`}>
+                            ¿Quitarla del curso?
+                            <button type="button" className="boton boton-chico" onClick={() => borrarLeccion(l.id)}>
+                              Sí, quitar
+                            </button>
+                            <button type="button" className="boton boton-chico boton-fantasma" onClick={() => setPorBorrar(null)}>
+                              Cancelar
+                            </button>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="boton-icono boton-icono-chico"
+                            onClick={() => setPorBorrar(l.id)}
+                            aria-label={`Quitar la lección ${l.titulo}`}
+                            title="Quitar del curso"
+                          >
+                            <IconoBorrar width={15} height={15} />
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            ) : (
+              <p className="texto-suave">Cargando el curso…</p>
+            )}
+          </section>
+
+        </div>
+      )}
+
+      {seccion === "pagos" && (
+        <div role="tabpanel" id="panel-pagos" aria-labelledby="pestana-pagos" className="panel-seccion">
+          <section className="tarjeta" aria-labelledby="pagos-titulo">
+            <h2 id="pagos-titulo">Pagos (simulados)</h2>
+            {resumen && resumen.pagos.length === 0 ? (
+              <p className="vacio">Todavía no hay pagos. Entra como alumno y prueba la membresía.</p>
+            ) : (
+              <div className="tabla-desplazable">
+                <table className="tabla-pagos">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Alumno</th>
+                      <th>Método</th>
+                      <th>Monto</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resumen?.pagos.map((p) => (
+                      <tr key={p.id}>
+                        <td>{fechaCorta(p.creadoEn)}</td>
+                        <td>{p.autor}</td>
+                        <td>{NOMBRE_METODO[p.metodo]}</td>
+                        <td className="numero">{moneda(p.monto)}</td>
+                        <td>
+                          <span className={p.estado === "pagado" ? "pastilla pastilla-ok" : "pastilla"}>
+                            {p.estado === "pagado" ? "Pagado" : "Pendiente"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 }

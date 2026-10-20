@@ -144,9 +144,14 @@ export default function PaginaCoach() {
         <Arcos />
         <h1>Hola, {usuario.nombre.split(" ")[0]}</h1>
         <p className="portada-texto">Lo que pasa en tu comunidad y lo que tus alumnos le preguntan al asistente.</p>
-        <Link href="/coach/comunidades" className="boton boton-secundario portada-accion">
-          Crear una comunidad o un curso
-        </Link>
+        <div className="portada-acciones">
+          <Link href="/coach/comunidades" className="boton boton-secundario">
+            Crear una comunidad o un curso
+          </Link>
+          <Link href="/coach/empresa" className="boton boton-fantasma-borde">
+            Mi empresa: marca y equipo
+          </Link>
+        </div>
       </header>
 
       <section className="tarjeta panel-alcance" aria-label="Comunidad y curso del panel">

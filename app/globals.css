@@ -5917,6 +5917,15 @@ button.tarjeta-comunidad-enlace {
   margin-top: 6px;
 }
 
+.portada-acciones {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-self: start;
+  margin-top: 6px;
+}
+
 /* ---------- Mis comunidades (coach) ---------- */
 
 .mis-comunidades {

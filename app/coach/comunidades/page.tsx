@@ -208,8 +208,9 @@ export default function PaginaMisComunidades() {
     );
 
   return (
-    <div className="mis-comunidades">
+    <>
       <NavCoach />
+      <div className="mis-comunidades">
       <header className="cabecera-pagina mis-comunidades-cabecera">
         <div>
           <h1>Comunidades y cursos</h1>
@@ -352,6 +353,7 @@ export default function PaginaMisComunidades() {
           </section>
         );
       })}
-    </div>
+      </div>
+    </>
   );
 }

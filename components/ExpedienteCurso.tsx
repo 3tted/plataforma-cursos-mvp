@@ -110,7 +110,7 @@ export default function ExpedienteCurso({ curso }: { curso: ResumenCurso }) {
         ) : estado === "requiere-apoyo" ? (
           <>
             <p className="texto-suave">Usaste tus intentos. Tu coach puede ayudarte a repasar.</p>
-            <Link href="/comunidad" className="boton boton-chico boton-secundario">
+            <Link href={`/c/${curso.comunidad}`} className="boton boton-chico boton-secundario">
               Pedir apoyo en la comunidad
             </Link>
           </>

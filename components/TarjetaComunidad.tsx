@@ -9,15 +9,8 @@ import { useApp } from "./Contexto";
 // Tarjeta de una comunidad en el directorio y en el inicio: portada por tema,
 // curso(s), coach y tamaño. Las comunidades reales se abren; las de ejemplo
 // solo se muestran.
-export default function TarjetaComunidad({
-  comunidad: c,
-  alElegir,
-}: {
-  comunidad: ComunidadDirectorio;
-  /** En vez de abrir la comunidad, hace esto (la página para visitantes pide entrar primero). */
-  alElegir?: (id: string) => void;
-}) {
-  const { cursos, enLaComunidad, cambiarComunidad } = useApp();
+export default function TarjetaComunidad({ comunidad: c }: { comunidad: ComunidadDirectorio }) {
+  const { cursos, enLaComunidad } = useApp();
   const real = c.estado === "activa";
   const suyos = cursos.filter((x) => x.comunidad === c.id);
   const lecciones = real ? suyos.reduce((s, x) => s + x.lecciones.length, 0) : c.lecciones;
@@ -56,12 +49,8 @@ export default function TarjetaComunidad({
 
   return (
     <li className="tarjeta-comunidad" data-real={real}>
-      {real && alElegir ? (
-        <button type="button" className="tarjeta-comunidad-enlace" onClick={() => alElegir(c.id)}>
-          {cuerpo}
-        </button>
-      ) : real ? (
-        <Link href="/comunidad" className="tarjeta-comunidad-enlace" onClick={() => cambiarComunidad(c.id)}>
+      {real ? (
+        <Link href={`/c/${c.id}`} className="tarjeta-comunidad-enlace">
           {cuerpo}
         </Link>
       ) : (

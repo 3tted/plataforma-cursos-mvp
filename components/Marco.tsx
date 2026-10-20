@@ -9,15 +9,14 @@ import { AplicarMarca, LogoDeMarca, useMarcaActiva } from "./Marca";
 import PaginaVisitantes from "./PaginaVisitantes";
 import PiePagina from "./PiePagina";
 
-// Rutas de la plataforma. Sin sesión muestran la página para visitantes;
-// cualquier otra (un 404, una invitación o la página de una empresa) se ve
-// aunque no haya sesión, con una barra sencilla.
+// Rutas que piden cuenta: sin sesión muestran la página para visitantes.
+// Las demás se ven aunque no haya sesión, con una barra sencilla: el
+// directorio, cada comunidad (/c/<id>), el asistente del curso, la página de
+// una empresa, una invitación o un 404.
 const RUTAS = [
   /^\/$/,
-  /^\/comunidades$/,
-  /^\/comunidad$/,
   /^\/cursos$/,
-  /^\/curso(\/[^/]+)?$/,
+  /^\/curso(\/(?!asistente$)[^/]+)?$/,
   /^\/membresia$/,
   /^\/asistente$/,
   /^\/perfil$/,
@@ -27,7 +26,7 @@ const RUTAS = [
 // Con sesión se ve la plataforma (barra, página y pie); sin sesión, la página
 // para visitantes, que explica qué es y abre la entrada desde sus botones.
 export default function Marco({ children }: { children: ReactNode }) {
-  const { listo, usuario } = useApp();
+  const { listo, usuario, pedirEntrada } = useApp();
   const marca = useMarcaActiva();
   const ruta = usePathname();
   const existe = RUTAS.some((r) => r.test(ruta));
@@ -41,6 +40,14 @@ export default function Marco({ children }: { children: ReactNode }) {
             <Link href="/" className="marca" aria-label={marca ? `${marca.nombre}, inicio` : "Merkatics, inicio"}>
               <LogoDeMarca marca={marca} />
             </Link>
+            <nav className="visitantes-cuenta" aria-label="Cuenta">
+              <Link href="/comunidades" className="enlace enlace-discreto">
+                Comunidades
+              </Link>
+              <button type="button" className="boton boton-chico" onClick={() => pedirEntrada()}>
+                Entrar
+              </button>
+            </nav>
           </div>
         </header>
         <main id="contenido" className="envoltura contenido">

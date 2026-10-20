@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
@@ -32,8 +31,7 @@ const FUNCIONES = [
 // qué comunidades hay y una invitación para coaches. Sus botones abren la
 // entrada (sin contraseña).
 export default function PaginaVisitantes() {
-  const router = useRouter();
-  const { pedirEntrada, cambiarComunidad, comunidades } = useApp();
+  const { pedirEntrada, comunidades } = useApp();
   const abiertas = comunidades.filter((c) => c.estado === "activa");
 
   // Menú del celular: se cierra con Escape, al tocar fuera o al elegir algo.
@@ -60,13 +58,6 @@ export default function PaginaVisitantes() {
   const entrar = () => {
     setMenu(false);
     pedirEntrada();
-  };
-
-  // Elegir una comunidad: después de entrar, la persona llega a ella.
-  const elegirComunidad = (id: string) => {
-    cambiarComunidad(id);
-    router.push("/comunidad");
-    pedirEntrada("alumno");
   };
 
   return (
@@ -176,7 +167,7 @@ export default function PaginaVisitantes() {
           </div>
           <ul className="proximas-lista">
             {abiertas.map((c) => (
-              <TarjetaComunidad key={c.id} comunidad={c} alElegir={elegirComunidad} />
+              <TarjetaComunidad key={c.id} comunidad={c} />
             ))}
           </ul>
         </section>

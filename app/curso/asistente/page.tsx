@@ -26,6 +26,7 @@ export default function PaginaAsistenteCurso() {
     setBorrador,
     tieneAcceso,
     cursoId,
+    comunidadId,
   } = useApp();
   const [entrada, setEntrada] = useState("");
   const [enCurso, setEnCurso] = useState(false);
@@ -162,7 +163,7 @@ export default function PaginaAsistenteCurso() {
       titulo: pregunta.length > 140 ? pregunta.slice(0, 137) + "…" : pregunta,
       cuerpo: `${pregunta}\n\n(Se lo pregunté al asistente del curso, pero me gustaría la opinión de la coach y de la comunidad.)`,
     });
-    router.push("/comunidad");
+    router.push(`/c/${comunidadId}`);
   };
 
   // Sin membresía, las sugerencias salen de las lecciones gratis: así la primera

@@ -10,7 +10,7 @@ import { useApp } from "./Contexto";
 // comunidad: la comunidad, sus cursos, sus lecciones, su asistente y su
 // membresía. El directorio, el inicio y el panel de coach siguen con la marca
 // de Merkatics, porque reúnen a varias empresas.
-const RUTAS_CON_MARCA = /^\/(comunidad|curso|membresia)(\/|$)/;
+const RUTAS_CON_MARCA = /^\/(c|comunidad|curso|membresia)(\/|$)/;
 const RUTA_EMPRESA = /^\/e\/[^/]+$/;
 
 /** La marca de la comunidad (o de la empresa) que se está viendo, o null (marca de Merkatics). */

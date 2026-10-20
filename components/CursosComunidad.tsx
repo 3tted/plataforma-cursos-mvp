@@ -11,8 +11,9 @@ import { notaGratis } from "@/lib/cliente";
 // botón (inscribirse, empezar o continuar). En la columna de al lado del feed
 // van en lista; en celular, en una fila que se desliza de lado arriba del feed.
 export default function CursosComunidad({ fila = false }: { fila?: boolean }) {
-  const { usuario, cursosComunidad, cursoId, cambiarCurso, completadas, inscritoEn, inscripcionLista, temaDe } = useApp();
-  const esAlumno = usuario?.rol === "alumno";
+  const { cursosComunidad, cursoId, cambiarCurso, completadas, inscritoEn, inscripcionLista, temaDe, coachAqui } = useApp();
+  // Avance de alumno: para quien no es coach de esta comunidad (incluye visitantes, que no llevan avance).
+  const esAlumno = !coachAqui;
   if (cursosComunidad.length === 0) return null;
 
   return (
@@ -22,19 +23,30 @@ export default function CursosComunidad({ fila = false }: { fila?: boolean }) {
       </h2>
       <ul data-pocos={cursosComunidad.length <= 3}>
         {cursosComunidad.map((c) => {
-          const inscrito = !esAlumno || (inscripcionLista && inscritoEn(c.id));
+          const inscrito = inscripcionLista && inscritoEn(c.id);
           const hechas = c.lecciones.filter((id) => completadas.includes(id)).length;
           const siguiente = c.lecciones.find((id) => !completadas.includes(id));
           const total = c.lecciones.length;
           return (
             <li key={c.id} className="curso-comunidad" aria-current={c.id === cursoId ? "true" : undefined}>
-              <Link href="/curso" className="curso-comunidad-portada" onClick={() => cambiarCurso(c.id)} tabIndex={-1} aria-hidden="true">
-                <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} />
-              </Link>
-              <div className="curso-comunidad-cuerpo">
-                <Link href="/curso" className="curso-comunidad-nombre" onClick={() => cambiarCurso(c.id)}>
-                  {c.titulo}
+              {/* Solo quien está inscrito entra al temario; los demás empiezan con el botón. */}
+              {inscrito ? (
+                <Link href="/curso" className="curso-comunidad-portada" onClick={() => cambiarCurso(c.id)} tabIndex={-1} aria-hidden="true">
+                  <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt={`Portada del curso «${c.titulo}»`} />
                 </Link>
+              ) : (
+                <span className="curso-comunidad-portada" aria-hidden="true">
+                  <PortadaTema tema={temaDe(c.comunidad)} clave={c.id} alt="" />
+                </span>
+              )}
+              <div className="curso-comunidad-cuerpo">
+                {inscrito ? (
+                  <Link href="/curso" className="curso-comunidad-nombre" onClick={() => cambiarCurso(c.id)}>
+                    {c.titulo}
+                  </Link>
+                ) : (
+                  <span className="curso-comunidad-nombre">{c.titulo}</span>
+                )}
                 {!c.publicado && <span className="pastilla pastilla-pendiente curso-comunidad-estado">Sin publicar</span>}
                 <p className="curso-comunidad-meta texto-suave">
                   <span className="cifra">{total}</span> {total === 1 ? "lección" : "lecciones"} · <span className="cifra">{c.minutos}</span>{" "}

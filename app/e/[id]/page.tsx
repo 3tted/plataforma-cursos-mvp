@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useApp } from "@/components/Contexto";
 import TarjetaComunidad from "@/components/TarjetaComunidad";
@@ -20,8 +20,7 @@ interface DatosEmpresa {
 // alumnos. Lleva su marca y muestra sus comunidades; se ve aunque no haya sesión.
 export default function PaginaEmpresa() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
-  const { usuario, comunidades, fijarMarcaPagina, cambiarComunidad, pedirEntrada } = useApp();
+  const { usuario, comunidades, fijarMarcaPagina, pedirEntrada } = useApp();
   const [empresa, setEmpresa] = useState<DatosEmpresa | null>(null);
   const [error, setError] = useState<string | null>(null);
   useTitulo(empresa?.nombre ?? "Empresa");
@@ -58,13 +57,6 @@ export default function PaginaEmpresa() {
     .map((c) => comunidades.find((x) => x.id === c))
     .filter((c): c is NonNullable<typeof c> => !!c);
 
-  // Sin sesión, elegir una comunidad pide entrar primero y después lleva a ella.
-  const elegir = (comunidad: string) => {
-    cambiarComunidad(comunidad);
-    router.push("/comunidad");
-    pedirEntrada("alumno");
-  };
-
   return (
     <div className="pagina-empresa">
       <header className="pagina-empresa-cabecera">
@@ -89,7 +81,7 @@ export default function PaginaEmpresa() {
       {suyas.length > 0 && (
         <ul className="directorio-grupo-lista">
           {suyas.map((c) => (
-            <TarjetaComunidad key={c.id} comunidad={c} alElegir={usuario ? undefined : elegir} />
+            <TarjetaComunidad key={c.id} comunidad={c} />
           ))}
         </ul>
       )}

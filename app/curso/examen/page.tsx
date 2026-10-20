@@ -21,7 +21,7 @@ import type { Expediente, ResultadoExamen } from "@/lib/tipos";
 
 export default function PaginaExamen() {
   const router = useRouter();
-  const { usuario, datos, lecciones, completadas, tieneAcceso, setBorrador, cursoId, coachAqui } = useApp();
+  const { usuario, datos, lecciones, completadas, tieneAcceso, setBorrador, cursoId, coachAqui, comunidadId } = useApp();
   const evaluaciones = useEvaluaciones();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
   const [respuestas, setRespuestas] = useState<(number | null)[]>([]);
@@ -91,7 +91,7 @@ export default function PaginaExamen() {
       titulo: `Aprobé «${datos.curso.titulo}»`,
       cuerpo: "Lo que más me sirvió del curso fue…",
     });
-    router.push("/comunidad");
+    router.push(`/c/${comunidadId}`);
   };
 
   const cabecera = (
@@ -282,7 +282,7 @@ export default function PaginaExamen() {
                 <IconoComunidad width={16} height={16} /> Compartir mi logro
               </button>
             ) : (
-              <Link href="/comunidad" className="boton">
+              <Link href={`/c/${comunidadId}`} className="boton">
                 Ir a la comunidad
               </Link>
             )}

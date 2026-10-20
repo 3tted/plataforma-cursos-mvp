@@ -134,7 +134,7 @@ function Actividad({ fechas }: { fechas: string[] }) {
 }
 
 export default function PaginaPerfil() {
-  const { usuario, guardarUsuario, esCoachDe, membresiaEn, completadas, lecciones, cursos, inscritoEn, enLaComunidad, cambiarComunidad, comunidades } =
+  const { usuario, guardarUsuario, esCoachDe, membresiaEn, completadas, lecciones, cursos, inscritoEn, enLaComunidad, cambiarComunidad, comunidades, comunidadId } =
     useApp();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [errorCarga, setErrorCarga] = useState(false);
@@ -162,7 +162,7 @@ export default function PaginaPerfil() {
         texto: p.titulo,
         contexto: `Publicación en ${p.categoria}`,
         fecha: p.creadaEn,
-        enlace: "/comunidad",
+        enlace: `/c/${p.comunidad}`,
       })),
       ...perfil.comentarios.map((c) => ({
         clave: `c${c.id}`,
@@ -171,7 +171,7 @@ export default function PaginaPerfil() {
         texto: c.cuerpo,
         contexto: `Comentario en «${c.publicacion}»`,
         fecha: c.creadoEn,
-        enlace: "/comunidad",
+        enlace: `/c/${c.comunidad}`,
       })),
       ...perfil.preguntas.map((q) => ({
         clave: `q${q.id}`,
@@ -237,7 +237,7 @@ export default function PaginaPerfil() {
           <ul className="perfil-membresias">
             {suyas.map((c) => (
               <li key={c.id}>
-                <Link href="/comunidad" className="perfil-membresia" onClick={() => cambiarComunidad(c.id)}>
+                <Link href={`/c/${c.id}`} className="perfil-membresia">
                   <span className="perfil-membresia-sello" aria-hidden="true">
                     {c.nombre
                       .split(" ")
@@ -268,7 +268,7 @@ export default function PaginaPerfil() {
                 .map((c) => <ExpedienteCurso key={c.id} curso={c} />)
             ) : (
               <p className="vacio">
-                Todavía no estás inscrito en ningún curso. <Link href="/comunidad">Ve a la comunidad</Link> para elegir uno.
+                Todavía no estás inscrito en ningún curso. <Link href={`/c/${comunidadId}`}>Ve a la comunidad</Link> para elegir uno.
               </p>
             )}
           </section>
@@ -296,7 +296,7 @@ export default function PaginaPerfil() {
               <p className="texto-suave">
                 Preséntate en la comunidad, comenta una publicación o hazle una pregunta al asistente: todo aparece aquí.
               </p>
-              <Link href="/comunidad" className="boton boton-chico">
+              <Link href={`/c/${comunidadId}`} className="boton boton-chico">
                 Ir a la comunidad
               </Link>
             </div>

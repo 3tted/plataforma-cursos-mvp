@@ -137,7 +137,7 @@ export default function PaginaMembresia() {
         <p className="texto-suave">
           Como coach tienes acceso completo a ella. Para probar el flujo de pago, entra con una cuenta de alumno.
         </p>
-        <Link href="/comunidad" className="boton boton-secundario">
+        <Link href={`/c/${comunidadId}`} className="boton boton-secundario">
           Volver a la comunidad
         </Link>
       </div>
@@ -193,7 +193,7 @@ export default function PaginaMembresia() {
 
   return (
     <div className="pagina-membresia">
-      <Link href="/comunidad" className="volver">
+      <Link href={`/c/${comunidadId}`} className="volver">
         <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
       </Link>
       <header className="membresia-cabecera portada">

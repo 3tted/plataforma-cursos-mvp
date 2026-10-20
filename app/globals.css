@@ -9110,3 +9110,11 @@ button.tarjeta-comunidad-enlace {
     animation: none;
   }
 }
+
+/* Barra sencilla de las páginas públicas (comunidad, directorio, asistente): ir al directorio y entrar */
+.visitantes-cuenta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: auto;
+}

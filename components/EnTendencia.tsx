@@ -17,7 +17,7 @@ import TarjetaComunidad from "./TarjetaComunidad";
 const MINIMO_PARA_MOSTRAR = 10;
 
 export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: string }) {
-  const { cursos, inscritoEn, enLaComunidad, cambiarCurso, cambiarComunidad, comunidades: COMUNIDADES, temaDe } = useApp();
+  const { cursos, inscritoEn, enLaComunidad, cambiarCurso, comunidades: COMUNIDADES, temaDe } = useApp();
   const [tendencias, setTendencias] = useState<Tendencias | null>(null);
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export default function EnTendencia({ titulo = "En tendencia" }: { titulo?: stri
                     </>
                   )}
                 </p>
-                <Link href="/comunidad" className="boton boton-chico" onClick={() => cambiarComunidad(comunidad.id)}>
+                <Link href={`/c/${comunidad.id}`} className="boton boton-chico">
                   Ver la comunidad <IconoFlechaDer width={15} height={15} />
                 </Link>
               </div>

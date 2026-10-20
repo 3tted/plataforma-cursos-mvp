@@ -137,7 +137,7 @@ export default function PaginaCoach() {
       titulo: pregunta.length > 140 ? pregunta.slice(0, 137) + "…" : pregunta,
       cuerpo: `${veces > 1 ? `Esta pregunta me la hicieron ${veces} veces en el asistente.` : "Me hicieron esta pregunta en el asistente."} Mi respuesta:\n\n`,
     });
-    router.push("/comunidad");
+    router.push(`/c/${comunidadId}`);
   };
 
   const tituloDe = (id: string) => resumen?.titulos[id] ?? lecciones.find((l) => l.id === id)?.titulo ?? id;

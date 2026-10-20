@@ -23,7 +23,7 @@ export default function Encabezado() {
       corto: "Comunidades",
       Icono: IconoComunidad,
       // El curso vive dentro de su comunidad: también marca este enlace.
-      activo: (ruta.startsWith("/comunidad") || ruta.startsWith("/curso")) && ruta !== "/curso/asistente",
+      activo: (ruta.startsWith("/c/") || ruta.startsWith("/comunidad") || ruta.startsWith("/curso")) && ruta !== "/curso/asistente",
     },
     // Abre el asistente del curso; el general queda enlazado desde ahí.
     {

@@ -111,7 +111,7 @@ export default function EditarComunidad() {
       {volver}
       <header className="cabecera-pagina">
         <h1>Editar comunidad</h1>
-        <Link href={`/comunidad?id=${encodeURIComponent(comunidad.id)}`} className="enlace">
+        <Link href={`/c/${comunidad.id}`} className="enlace">
           Ver la comunidad <IconoFlechaDer width={15} height={15} />
         </Link>
       </header>

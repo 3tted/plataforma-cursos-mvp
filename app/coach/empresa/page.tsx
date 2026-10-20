@@ -168,7 +168,7 @@ export default function PaginaMiEmpresa() {
           </p>
         </div>
         {comunidad && (
-          <Link href={`/comunidad?id=${encodeURIComponent(comunidad)}`} className="enlace mi-empresa-ver">
+          <Link href={`/c/${comunidad}`} className="enlace mi-empresa-ver">
             Ver mi comunidad <IconoFlechaDer width={15} height={15} />
           </Link>
         )}

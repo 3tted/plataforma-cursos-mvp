@@ -27,7 +27,8 @@ export default function PresentacionComunidad({
   publicaciones: Publicacion[] | null;
   esDuena: boolean;
 }) {
-  const { datos, cursosComunidad, comunidadId, enComunidad, unirmeAComunidad, temaDe, usuario, inscripcionLista } = useApp();
+  const { datos, cursosComunidad, comunidadId, enComunidad, unirmeAComunidad, temaDe, usuario, inscripcionLista, pedirEntrada } =
+    useApp();
   const comunidad = datos?.comunidad;
   const tema = temaDe(comunidadId);
 
@@ -48,6 +49,7 @@ export default function PresentacionComunidad({
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const unirme = async () => {
+    if (!usuario) return pedirEntrada("alumno");
     setEnviando(true);
     setError(null);
     try {
@@ -123,7 +125,7 @@ export default function PresentacionComunidad({
           {primerCurso ? (
             <BotonInscribirse curso={primerCurso.id} empezar />
           ) : (
-            <button type="button" className="boton" onClick={unirme} disabled={enviando || !usuario}>
+            <button type="button" className="boton" onClick={unirme} disabled={enviando}>
               {enviando ? "Uniéndote…" : "Unirme gratis a la comunidad"}
             </button>
           )}

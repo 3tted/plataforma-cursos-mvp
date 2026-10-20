@@ -24,7 +24,7 @@ export default function PublicacionesRecientes({ titulo, cuantas = 3 }: { titulo
     <section className="tarjeta inicio-bloque" aria-labelledby="recientes-titulo">
       <div className="inicio-bloque-cabecera">
         <h2 id="recientes-titulo">{titulo}</h2>
-        <Link href="/comunidad" className="enlace inicio-ver-todo">
+        <Link href={`/c/${comunidadId}`} className="enlace inicio-ver-todo">
           Ir a la comunidad <IconoFlechaDer width={15} height={15} />
         </Link>
       </div>
@@ -34,7 +34,7 @@ export default function PublicacionesRecientes({ titulo, cuantas = 3 }: { titulo
       <ul className="inicio-lista">
         {publicaciones?.map((p) => (
           <li key={p.id}>
-            <Link href="/comunidad" className="inicio-publicacion">
+            <Link href={`/c/${comunidadId}`} className="inicio-publicacion">
               <Avatar nombre={p.autor} tamaño={34} coach={p.rol === "coach"} />
               <span className="inicio-publicacion-texto">
                 <span className="inicio-publicacion-titulo">{p.titulo}</span>

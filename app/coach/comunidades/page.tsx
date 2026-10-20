@@ -292,7 +292,7 @@ export default function PaginaMisComunidades() {
                     lecciones sí les subes videos y presentaciones, y en la comunidad publicas anuncios y moderas.
                   </p>
                   <div className="mi-comunidad-enlaces">
-                    <Link href="/comunidad" className="enlace mi-comunidad-ver" onClick={() => cambiarComunidad(id)}>
+                    <Link href={`/c/${id}`} className="enlace mi-comunidad-ver">
                       Ver la comunidad <IconoFlechaDer width={15} height={15} />
                     </Link>
                     <Link href="/coach" className="enlace mi-comunidad-ver" onClick={() => cambiarComunidad(id)}>
@@ -337,7 +337,7 @@ export default function PaginaMisComunidades() {
                   {publicados === 0 && " · Aparece en el directorio al publicar su primer curso"}
                 </p>
                 <div className="mi-comunidad-enlaces">
-                  <Link href={`/comunidad?id=${encodeURIComponent(c.id)}`} className="enlace mi-comunidad-ver">
+                  <Link href={`/c/${c.id}`} className="enlace mi-comunidad-ver">
                     Ver la comunidad <IconoFlechaDer width={15} height={15} />
                   </Link>
                   <Link href={`/coach/comunidad/${encodeURIComponent(c.id)}`} className="enlace mi-comunidad-ver">

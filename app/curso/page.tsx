@@ -44,6 +44,7 @@ export default function PaginaCurso() {
     inscritoEn,
     fotoDe,
     coachAqui,
+    comunidadId,
   } = useApp();
   const evaluaciones = useEvaluaciones();
   const [expediente, setExpediente] = useState<Expediente | null>(null);
@@ -65,7 +66,7 @@ export default function PaginaCurso() {
   const router = useRouter();
   const fuera = !!datos && inscripcionLista && !enComunidad;
   useEffect(() => {
-    if (fuera) router.replace("/comunidad");
+    if (fuera) router.replace(`/c/${comunidadId}`);
   }, [fuera, router]);
 
   if (errorDatos && !datos) {
@@ -80,7 +81,7 @@ export default function PaginaCurso() {
   }
   const volver = (
     <>
-      <Link href="/comunidad" className="volver">
+      <Link href={`/c/${comunidadId}`} className="volver">
         <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
       </Link>
       <SelectorCurso activo={cursoId} alElegir={cambiarCurso} conAvance={usuario?.rol === "alumno"} />

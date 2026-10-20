@@ -153,6 +153,8 @@ export default function PaginaMiEmpresa() {
   };
 
   const nombreVisible = nombre.trim() || empresa?.nombre || "";
+  // Sin logo propio, la barra lleva el nombre de la empresa; Merkatics, su logo de siempre.
+  const logoVisible = empresa?.logo ?? (empresa?.id === "merkatics" ? "/merkatics-logo.png" : undefined);
 
   return (
     <div className="mi-empresa">
@@ -272,9 +274,9 @@ export default function PaginaMiEmpresa() {
             <section className="tarjeta mi-empresa-logo" aria-labelledby="logo-titulo">
               <h2 id="logo-titulo">Logo</h2>
               <div className="mi-empresa-logo-vista">
-                {empresa.logo ? (
+                {logoVisible ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={empresa.logo} alt={`Logo de ${nombreVisible}`} />
+                  <img src={logoVisible} alt={`Logo de ${nombreVisible}`} />
                 ) : (
                   <span className="texto-suave">Sin logo: la barra muestra el nombre de tu empresa.</span>
                 )}
@@ -298,7 +300,7 @@ export default function PaginaMiEmpresa() {
                   />
                   <div className="foto-portada-botones">
                     <button type="button" className="boton boton-chico boton-fantasma-borde" onClick={() => entrada.current?.click()} disabled={subiendo}>
-                      <IconoSubir width={15} height={15} /> {subiendo ? "Subiendo…" : empresa.logo ? "Cambiar logo" : "Subir logo"}
+                      <IconoSubir width={15} height={15} /> {subiendo ? "Subiendo…" : logoVisible ? "Cambiar logo" : "Subir logo"}
                     </button>
                     {empresa.logo && !subiendo && (
                       <button type="button" className="enlace enlace-discreto" onClick={() => void quitarLogo()}>
@@ -316,9 +318,9 @@ export default function PaginaMiEmpresa() {
             <h2 id="previa-titulo">Así lo verán tus alumnos</h2>
             <div className="previa-marco" aria-hidden="true">
               <div className="previa-barra">
-                {empresa.logo ? (
+                {logoVisible ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={empresa.logo} alt="" className="previa-logo" />
+                  <img src={logoVisible} alt="" className="previa-logo" />
                 ) : (
                   <span className="marca-nombre-empresa">{nombreVisible}</span>
                 )}

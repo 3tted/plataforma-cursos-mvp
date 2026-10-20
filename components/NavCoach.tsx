@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // Las tres partes del área de coach, con las mismas pestañas arriba de cada
-// una: el resumen de lo que pasa, lo que crea (comunidades y cursos) y su
+// una: el panel con lo que pasa, lo que crea (comunidades y cursos) y su
 // empresa (marca, equipo e invitaciones).
 const PESTANAS = [
-  { href: "/coach", texto: "Resumen", activa: (r: string) => r === "/coach" },
+  { href: "/coach", texto: "Panel", activa: (r: string) => r === "/coach" },
   {
     href: "/coach/comunidades",
     texto: "Comunidades y cursos",

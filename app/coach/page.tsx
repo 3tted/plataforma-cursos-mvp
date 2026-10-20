@@ -122,7 +122,7 @@ export default function PaginaCoach() {
       <div className="pagina-coach">
         <NavCoach />
         <div className="pagina-estrecha">
-          <h1>Resumen</h1>
+          <h1>Panel de coach</h1>
           <p className="texto-suave">
             Aquí verás qué preguntan tus alumnos, qué lecciones generan más dudas y los pagos de tus comunidades. Empieza
             por crear tu comunidad y subir su primer curso a la página.

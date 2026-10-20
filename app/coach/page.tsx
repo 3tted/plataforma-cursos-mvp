@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useApp } from "@/components/Contexto";
 import { IconoBorrar, IconoComunidad } from "@/components/Iconos";
-import Arcos from "@/components/Arcos";
 import Markdown from "@/components/Markdown";
 import MatrizAlumnos from "@/components/MatrizAlumnos";
 import NavCoach from "@/components/NavCoach";
@@ -146,12 +145,12 @@ export default function PaginaCoach() {
   // Las lecciones del curso; las que la coach pega abajo son de texto, para probar el asistente.
   const delCurso = lecciones.filter((l) => !l.deCoach);
   const conVideo = delCurso.filter((l) => l.video).length;
+  const faltan = delCurso.filter((l) => !l.video);
 
   return (
     <div className="pagina-coach">
       <NavCoach />
       <header className="portada">
-        <Arcos />
         <h1>Hola, {usuario.nombre.split(" ")[0]}</h1>
         <p className="portada-texto">Lo que pasa en tu comunidad y lo que tus alumnos le preguntan al asistente.</p>
         <Link href="/coach/comunidades?crear=comunidad" className="boton boton-secundario portada-accion">
@@ -192,10 +191,6 @@ export default function PaginaCoach() {
             <p className="panel-alcance-unico">{datos?.curso.titulo ?? "…"}</p>
           )}
         </div>
-        <p className="nota">
-          Todo lo de abajo es de lo que elijas aquí: el avance, las preguntas y los videos, del curso; los miembros, las
-          publicaciones y los pagos, de su comunidad.
-        </p>
       </section>
 
       {error && (
@@ -210,24 +205,24 @@ export default function PaginaCoach() {
       <section aria-label="Resumen">
         <dl className="datos-coach">
           <div>
-            <dt>Preguntas al asistente (7 días)</dt>
-            <dd className="cifra">{resumen?.preguntasSemana ?? "…"}</dd>
+            <dt>Preguntas sobre el curso (7 días)</dt>
+            <dd className="cifra">{resumen?.preguntasSemana ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
           </div>
           <div>
-            <dt>Miembros activos</dt>
-            <dd className="cifra">{resumen?.miembros ?? "…"}</dd>
+            <dt>Miembros activos de la comunidad</dt>
+            <dd className="cifra">{resumen?.miembros ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
           </div>
           <div>
-            <dt>Publicaciones</dt>
-            <dd className="cifra">{resumen?.publicaciones ?? "…"}</dd>
+            <dt>Publicaciones en la comunidad</dt>
+            <dd className="cifra">{resumen?.publicaciones ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
           </div>
           <div>
-            <dt>Pagos confirmados</dt>
-            <dd className="cifra">{resumen ? pagados : "…"}</dd>
+            <dt>Membresías pagadas</dt>
+            <dd className="cifra">{resumen ? pagados : <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
           </div>
           <div>
             <dt>Ingresos (simulados)</dt>
-            <dd className="cifra">{resumen ? moneda(resumen.ingresosSimulados) : "…"}</dd>
+            <dd className="cifra">{resumen ? moneda(resumen.ingresosSimulados) : <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
           </div>
         </dl>
       </section>
@@ -313,18 +308,20 @@ export default function PaginaCoach() {
         <h2 id="videos-titulo">Videos de tus lecciones</h2>
         <p className="texto-suave">
           <span className="cifra">{conVideo}</span> de <span className="cifra">{delCurso.length}</span> lecciones
-          tienen video. Para subir o cambiar uno, abre la lección.
+          tienen video{faltan.length === 0 ? "." : "; abajo, las que todavía no."} Para subir o cambiar uno, abre la lección.
         </p>
-        <ul className="videos-lista">
-          {delCurso.map((l) => (
-            <li key={l.id}>
-              <Link href={`/curso/${l.id}`}>
-                <span className="cita-id">{l.id}</span> {l.titulo}
-              </Link>
-              <span className={l.video ? "pastilla pastilla-ok" : "pastilla"}>{l.video ? "Con video" : "Sin video"}</span>
-            </li>
-          ))}
-        </ul>
+        {faltan.length > 0 && (
+          <ul className="videos-lista">
+            {faltan.map((l) => (
+              <li key={l.id}>
+                <Link href={`/curso/${l.id}`}>
+                  <span className="cita-id">{l.id}</span> {l.titulo}
+                </Link>
+                <span className="pastilla">{l.presentacion ? "Con presentación" : "Sin video"}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="tarjeta" aria-labelledby="propia-titulo">

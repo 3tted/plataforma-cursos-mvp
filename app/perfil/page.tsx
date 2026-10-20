@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
 import { useApp, type Usuario } from "@/components/Contexto";
 import ExpedienteCurso from "@/components/ExpedienteCurso";
@@ -331,7 +330,6 @@ export default function PaginaPerfil() {
 
       <aside className="perfil-tarjeta" aria-label="Tu perfil">
         <div className="perfil-portada">
-          <Arcos />
           <Avatar nombre={usuario.nombre} tamaño={112} coach={usuario.rol === "coach"} />
         </div>
         <div className="perfil-datos">

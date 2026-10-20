@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import Arcos from "@/components/Arcos";
 import { useApp } from "@/components/Contexto";
 import CodigoBarras from "@/components/CodigoBarras";
 import { IconoCheck, IconoCopiar, IconoDescargar, IconoEnviar, IconoFlechaDer, IconoFlechaIzq } from "@/components/Iconos";
@@ -148,7 +147,6 @@ export default function PaginaMembresia() {
     return (
       <div className="pagina-estrecha">
         <div className="tarjeta exito">
-          <Arcos />
           <span className="exito-icono">
             <IconoCheck width={26} height={26} />
           </span>
@@ -197,7 +195,6 @@ export default function PaginaMembresia() {
         <IconoFlechaIzq width={16} height={16} /> Volver a la comunidad
       </Link>
       <header className="membresia-cabecera portada">
-        <Arcos />
         <h1>Membresía de {comunidad?.nombre ?? "Finanzas Claras"}</h1>
         <p className="precio precio-grande">
           {precio} <span>MXN al mes</span>

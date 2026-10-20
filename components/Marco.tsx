@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useApp } from "./Contexto";
 import Encabezado from "./Encabezado";
 import { AplicarMarca, LogoDeMarca, useMarcaActiva } from "./Marca";
@@ -76,13 +76,22 @@ export default function Marco({ children }: { children: ReactNode }) {
 }
 
 // El aviso breve del contexto: abajo de la pantalla, se va solo a los 7 segundos.
+// Se cierra al ir a otra página, salvo justo después de avisar (por ejemplo,
+// "Te inscribiste" y luego se abre la lección).
 function AvisoFlotante() {
   const { aviso, avisar } = useApp();
+  const ruta = usePathname();
   useEffect(() => {
     if (!aviso) return;
     const id = setTimeout(() => avisar(null), 7000);
     return () => clearTimeout(id);
   }, [aviso, avisar]);
+  const rutaAnterior = useRef(ruta);
+  useEffect(() => {
+    if (ruta === rutaAnterior.current) return;
+    rutaAnterior.current = ruta;
+    if (aviso && Date.now() - aviso.id > 1500) avisar(null);
+  }, [ruta, aviso, avisar]);
   return (
     <div className="aviso-flotante-zona" role="status" aria-live="polite">
       {aviso && (

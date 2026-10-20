@@ -91,8 +91,8 @@ export default function PresentacionComunidad({
         <li>
           <IconoBillete width={18} height={18} />
           <span>
-            Unirte a la comunidad es gratis. Cada curso tiene su módulo 1 gratis; el resto se desbloquea con la membresía
-            de {precio} al mes.
+            Unirte a la comunidad es gratis. Cada curso tiene su módulo 1 gratis; el resto se desbloquea con la
+            membresía.
           </span>
         </li>
       </ul>
@@ -235,7 +235,7 @@ export default function PresentacionComunidad({
           <IconoBillete width={20} height={20} /> Membresía {precio}/mes
         </li>
         <li>
-          <IconoComunidad width={20} height={20} /> <span className="cifra">{miembros ?? "…"}</span>{" "}
+          <IconoComunidad width={20} height={20} /> <span className="cifra">{miembros ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</span>{" "}
           {miembros === 1 ? "miembro" : "miembros"}
         </li>
         <li>

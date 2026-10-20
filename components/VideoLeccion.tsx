@@ -4,7 +4,6 @@ import { useRef, useState, type DragEvent } from "react";
 import { fechaCorta } from "@/lib/cliente";
 import { MAX_BYTES_VIDEO, tipoDeVideo, tamañoLegible } from "@/lib/reglas-video";
 import type { Leccion, OpcionesPresentacion } from "@/lib/tipos";
-import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
 import { acentoSobreOscuro } from "@/lib/marca";
 import { posterDeVideo } from "@/lib/poster";
@@ -374,7 +373,6 @@ export default function VideoLeccion({
     if (leccion.deCoach) return null;
     return (
       <div className="video">
-        <Arcos className="arcos-video" />
         <p className="video-titulo">Esta lección todavía no tiene video</p>
         <p className="video-texto">Todo lo que dice está escrito abajo y en su transcripción.</p>
       </div>
@@ -394,7 +392,6 @@ export default function VideoLeccion({
       onDragLeave={() => setArrastrando(false)}
       onDrop={alSoltar}
     >
-      <Arcos className="arcos-video" />
       {selector}
       {estado === "subiendo" ? (
         <>

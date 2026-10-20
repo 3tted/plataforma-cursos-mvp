@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import Arcos from "@/components/Arcos";
 import { useApp } from "@/components/Contexto";
 import {
   IconoAprobado,
@@ -96,7 +95,6 @@ export default function PaginaExamen() {
 
   const cabecera = (
     <header className="portada examen-portada">
-      <Arcos />
       <Link href="/curso" className="volver">
         <IconoFlechaIzq width={16} height={16} /> Todo el curso
       </Link>

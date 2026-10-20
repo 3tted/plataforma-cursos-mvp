@@ -3445,6 +3445,13 @@ button.boton:disabled:hover {
   background: var(--superficie);
 }
 
+/* Cada número abajo de su etiqueta, alineados aunque una etiqueta ocupe dos renglones */
+.datos-coach > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 .datos-coach dt {
   font-size: var(--t-caption);
   font-weight: 600;
@@ -3700,14 +3707,6 @@ button.boton:disabled:hover {
   padding: 28px;
   border-radius: var(--radio-ventana);
   background: var(--superficie);
-}
-
-.modal > :not(.arcos) {
-  position: relative;
-}
-
-.modal .arcos-modal {
-  width: 118px;
 }
 
 .modal h2 {
@@ -8274,14 +8273,13 @@ button.tarjeta-comunidad-enlace {
 }
 
 /* Aviso breve abajo de la pantalla (al inscribirse, por ejemplo) */
+/* Arriba a la derecha, debajo de la barra: no tapa el campo de comentar ni la barra fija de la lección */
 .aviso-flotante-zona {
   position: fixed;
-  left: 50%;
-  /* Arriba de la barra de "Siguiente lección" */
-  bottom: 96px;
+  top: calc(var(--alto-barra) + 12px);
+  right: 16px;
   z-index: 80;
-  width: min(560px, calc(100vw - 32px));
-  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 32px));
   pointer-events: none;
 }
 
@@ -8328,7 +8326,7 @@ button.tarjeta-comunidad-enlace {
 @keyframes aviso-flotante-entra {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(-8px);
   }
 }
 
@@ -8338,10 +8336,11 @@ button.tarjeta-comunidad-enlace {
   }
 }
 
-/* En celular, también arriba de la barra de navegación de abajo */
+/* En celular, a todo lo ancho, debajo de la barra de arriba */
 @media (max-width: 760px) {
   .aviso-flotante-zona {
-    bottom: calc(96px + env(safe-area-inset-bottom));
+    left: 16px;
+    width: auto;
   }
 }
 
@@ -9117,4 +9116,13 @@ button.tarjeta-comunidad-enlace {
   align-items: center;
   gap: 18px;
   margin-left: auto;
+}
+
+/* Cifra que todavía no llega: un bloque del tamaño del número, en vez de "…" */
+.esqueleto-cifra {
+  display: inline-block;
+  width: 2.2em;
+  height: 0.85em;
+  vertical-align: middle;
+  border-radius: 4px;
 }

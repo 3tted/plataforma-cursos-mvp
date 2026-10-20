@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
 import { useApp } from "@/components/Contexto";
 import {
@@ -119,7 +118,6 @@ export default function PaginaCurso() {
       {volver}
       <AvisoSinPublicar />
       <header className="curso-portada">
-        <Arcos />
         <div className="curso-portada-textos">
           {foto && (
             // eslint-disable-next-line @next/next/no-img-element -- fotos ya ligeras

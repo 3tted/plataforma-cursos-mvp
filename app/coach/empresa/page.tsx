@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
-import Arcos from "@/components/Arcos";
 import { useApp } from "@/components/Contexto";
 import { IconoFlechaDer, IconoSubir } from "@/components/Iconos";
 import EquipoEmpresa from "@/components/EquipoEmpresa";
@@ -328,7 +327,6 @@ export default function PaginaMiEmpresa() {
                 <span className="previa-nav">Asistente</span>
               </div>
               <div className="previa-cuerpo">
-                <Arcos />
                 <p className="previa-etiqueta">Lección 1 · Módulo 1</p>
                 <p className="previa-titulo">Tu primer curso</p>
                 <div className="progreso">

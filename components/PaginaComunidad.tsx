@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Arcos from "@/components/Arcos";
 import Avatar from "@/components/Avatar";
 import Compositor from "@/components/Compositor";
 import { useApp } from "@/components/Contexto";
@@ -116,7 +115,6 @@ export default function PaginaComunidad({ id }: { id: string }) {
           <IconoFlechaIzq width={16} height={16} /> Comunidades y cursos
         </Link>
         <header className="portada">
-          <Arcos />
           <h1>{sinCursos.nombre}</h1>
           <p className="portada-texto">{sinCursos.descripcion}</p>
           <div className="portada-accion presentacion-duena">
@@ -238,11 +236,11 @@ export default function PaginaComunidad({ id }: { id: string }) {
           <dl className="datos-comunidad">
             <div>
               <dt>Miembros activos</dt>
-              <dd>{miembros ?? "…"}</dd>
+              <dd>{miembros ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
             </div>
             <div>
               <dt>Cursos</dt>
-              <dd>{cursosComunidad.length || "…"}</dd>
+              <dd>{cursosComunidad.length || <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</dd>
             </div>
           </dl>
         </section>

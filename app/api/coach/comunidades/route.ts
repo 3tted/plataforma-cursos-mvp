@@ -1,6 +1,7 @@
 import { borrarFoto, consultar, modificar } from "@/lib/almacen";
 import { borrarArchivoDeVideo } from "@/lib/videos";
 import { iaDisponible } from "@/lib/asistente";
+import { videoConIA } from "@/lib/curso-video";
 import { camposDeComunidad, nuevaComunidad } from "@/lib/creacion";
 import { leerJson, manejar } from "@/lib/http";
 import { coachDe, comunidadDeCoach, conPermiso } from "@/lib/permisos";
@@ -26,7 +27,7 @@ export const GET = manejar((req: Request) =>
           lecciones: c.modulos.reduce((s, m) => s + m.lecciones.length, 0),
           actualizadoEn: c.actualizadoEn,
         }));
-      return { comunidades, cursos, ia: iaDisponible() };
+      return { comunidades, cursos, ia: iaDisponible(), iaVideo: videoConIA() };
     });
     return Response.json(datos);
   }),

@@ -6,9 +6,10 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useApp } from "@/components/Contexto";
 import CamposComunidad, { COMUNIDAD_VACIA } from "@/components/editor/CamposComunidad";
 import CrearConIA from "@/components/editor/CrearConIA";
+import CrearDesdeVideo from "@/components/editor/CrearDesdeVideo";
 import { COMUNIDADES } from "@/lib/comunidades";
 import NavCoach from "@/components/NavCoach";
-import { IconoAsistenteGeneral, IconoEditar, IconoFlechaDer } from "@/components/Iconos";
+import { IconoAsistenteGeneral, IconoEditar, IconoFlechaDer, IconoVideo } from "@/components/Iconos";
 import PortadaTema from "@/components/PortadaTema";
 import { useTitulo } from "@/components/useTitulo";
 import { api, hace, moneda } from "@/lib/cliente";
@@ -17,7 +18,7 @@ import type { ComunidadCreada, CursoCreado } from "@/lib/tipos";
 type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "estado" | "origen" | "actualizadoEn" | "enPagina"> & {
   lecciones: number;
 };
-type Datos = { comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean };
+type Datos = { comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean; iaVideo: boolean };
 
 /** Clave de la sección de cursos que todavía no están en una comunidad. */
 const SUELTOS = "";
@@ -34,8 +35,8 @@ export default function PaginaMisComunidades() {
   const [verSueltos, setVerSueltos] = useState(false);
   const [forma, setForma] = useState(COMUNIDAD_VACIA);
   const [enviando, setEnviando] = useState<string | null>(null);
-  // Dónde está abierto el formulario de IA (una comunidad o SUELTOS).
-  const [conIA, setConIA] = useState<string | null>(null);
+  // Dónde está abierto el formulario de IA (una comunidad o SUELTOS) y con qué material.
+  const [conIA, setConIA] = useState<{ comunidad: string; desde: "documento" | "video" } | null>(null);
   useTitulo("Comunidades y cursos");
   // Las que vienen con la plataforma (de la empresa Merkatics): se manejan aquí, pero su contenido no se edita.
   const deLaPlataforma = usuario?.empresa === "merkatics" ? COMUNIDADES.map((c) => c.id) : [];
@@ -145,8 +146,12 @@ export default function PaginaMisComunidades() {
 
   // "Agregar un curso": a mano, con IA y, en una comunidad, uno que ya hizo.
   const agregarCurso = (comunidad: string) =>
-    conIA === comunidad ? (
-      <CrearConIA comunidad={comunidad} alCerrar={() => setConIA(null)} />
+    conIA?.comunidad === comunidad ? (
+      conIA.desde === "video" ? (
+        <CrearDesdeVideo comunidad={comunidad} alCerrar={() => setConIA(null)} />
+      ) : (
+        <CrearConIA comunidad={comunidad} alCerrar={() => setConIA(null)} />
+      )
     ) : (
       <div className="agregar-curso">
         <p className="agregar-curso-titulo">{comunidad ? "Agregar un curso a esta comunidad" : "Crear un curso"}</p>
@@ -164,7 +169,19 @@ export default function PaginaMisComunidades() {
             </span>
             <IconoFlechaDer width={16} height={16} />
           </button>
-          <button type="button" className="opcion-agregar" onClick={() => setConIA(comunidad)} disabled={!datos?.ia}>
+          <button type="button" className="opcion-agregar" onClick={() => setConIA({ comunidad, desde: "video" })} disabled={!datos?.iaVideo}>
+            <IconoVideo width={22} height={22} />
+            <span>
+              <strong>Con IA, a partir de tu video</strong>
+              <span className="texto-suave">
+                {datos?.iaVideo
+                  ? "Sube una clase grabada y la IA la divide en lecciones. Tus alumnos te ven a ti explicando."
+                  : "Necesita Gemini conectado en el servidor (GEMINI_API_KEY)."}
+              </span>
+            </span>
+            <IconoFlechaDer width={16} height={16} />
+          </button>
+          <button type="button" className="opcion-agregar" onClick={() => setConIA({ comunidad, desde: "documento" })} disabled={!datos?.ia}>
             <IconoAsistenteGeneral width={22} height={22} />
             <span>
               <strong>Con IA, a partir de un documento</strong>

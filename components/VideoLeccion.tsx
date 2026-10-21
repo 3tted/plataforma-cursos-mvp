@@ -2,13 +2,14 @@
 
 import { useRef, useState, type DragEvent } from "react";
 import { fechaCorta } from "@/lib/cliente";
-import { MAX_BYTES_VIDEO, tipoDeVideo, tamañoLegible } from "@/lib/reglas-video";
-import { SubidaCancelada, subirVideo, type SubidaDeVideo } from "@/lib/subir-video";
+import { MAX_BYTES_VIDEO, reloj, tipoDeVideo, tamañoLegible } from "@/lib/reglas-video";
+import { SubidaCancelada, destinoDeLeccion, subirVideo, type SubidaDeVideo } from "@/lib/subir-video";
 import type { Leccion, OpcionesPresentacion } from "@/lib/tipos";
 import { useApp } from "./Contexto";
 import { acentoSobreOscuro } from "@/lib/marca";
 import { posterDeVideo } from "@/lib/poster";
 import { IconoAsistenteGeneral, IconoSubir } from "./Iconos";
+import ControlesTramo from "./ControlesTramo";
 import EleccionVoz from "./EleccionVoz";
 import PresentacionLeccion from "./PresentacionLeccion";
 import EditorPresentacion from "./editor/EditorPresentacion";
@@ -47,6 +48,9 @@ export default function VideoLeccion({
   const terminado = useRef(false);
   const [avisoAdelantar, setAvisoAdelantar] = useState(false);
   const subida = useRef<SubidaDeVideo | null>(null);
+  // El reproductor y su marco, para los controles de una lección que es un tramo de un video.
+  const [reproductor, setReproductor] = useState<HTMLVideoElement | null>(null);
+  const marco = useRef<HTMLDivElement>(null);
   const [generando, setGenerando] = useState(false);
   // Recién generada: se le pide a la coach que la revise y elija si lleva voz.
   const [recienGenerada, setRecienGenerada] = useState(false);
@@ -107,7 +111,7 @@ export default function VideoLeccion({
     setArchivoEnCurso(archivo.name);
     setEstado("subiendo");
     setAnuncio(`Subiendo ${archivo.name}.`);
-    const nueva = subirVideo(leccion.id, archivo, tipo, !!plataforma?.videosEnLaNube, setProgreso);
+    const nueva = subirVideo(destinoDeLeccion(leccion.id), archivo, tipo, !!plataforma?.videosEnLaNube, setProgreso);
     subida.current = nueva;
     nueva.listo.then(
       async () => {
@@ -195,52 +199,69 @@ export default function VideoLeccion({
 
   // ---------------------------------------------------------------- con video
   if (leccion.video && estado !== "subiendo") {
+    // Lección de un curso armado desde un video: solo se ve su tramo, con controles propios.
+    const tramo = leccion.video.fin !== undefined ? { inicio: leccion.video.inicio ?? 0, fin: leccion.video.fin } : null;
     return (
       <figure className="video-leccion">
-        <video
-          key={leccion.video.url}
-          className="video-reproductor"
-          controls
-          preload="metadata"
-          playsInline
-          src={leccion.video.url}
-          poster={posterDeVideo(numero ? `Lección ${numero}` : "Lección", leccion.titulo, acentoSobreOscuro(datos?.comunidad.marca?.color))}
-          aria-label={`Video de la lección «${leccion.titulo}»`}
-          onLoadedMetadata={() => {
-            visto.current = 0;
-            terminado.current = false;
-            setAvisoAdelantar(false);
-          }}
-          onTimeUpdate={(e) => {
-            const v = e.currentTarget;
-            // Solo cuenta lo que avanzó reproduciéndose, no un salto.
-            const paso = Math.max(2, v.playbackRate * 0.75);
-            if (!v.seeking && v.currentTime <= visto.current + paso) visto.current = Math.max(visto.current, v.currentTime);
-            if (!terminado.current && v.duration && visto.current >= v.duration - 1) {
-              terminado.current = true;
-              alTerminar?.();
-            }
-          }}
-          onSeeking={(e) => {
-            const v = e.currentTarget;
-            if (sinAdelantar && v.currentTime > visto.current + 1) {
-              v.currentTime = visto.current;
-              setAvisoAdelantar(true);
-            }
-          }}
-          onRateChange={(e) => {
-            // Hasta 2x: más rápido ya no es ver el video.
-            if (sinAdelantar && e.currentTarget.playbackRate > 2) e.currentTarget.playbackRate = 2;
-          }}
-          onEnded={(e) => {
-            if (!terminado.current && (!sinAdelantar || visto.current >= e.currentTarget.duration - 2)) {
-              terminado.current = true;
-              alTerminar?.();
-            }
-          }}
-        >
-          Tu navegador no puede reproducir este video. La transcripción está al final de la lección.
-        </video>
+        <div className="video-marco" ref={marco}>
+          <video
+            key={leccion.video.url}
+            ref={setReproductor}
+            className="video-reproductor"
+            controls={!tramo}
+            onClick={tramo ? (e) => (e.currentTarget.paused ? void e.currentTarget.play().catch(() => {}) : e.currentTarget.pause()) : undefined}
+            preload="metadata"
+            playsInline
+            src={tramo ? `${leccion.video.url}#t=${tramo.inicio},${tramo.fin}` : leccion.video.url}
+            poster={posterDeVideo(numero ? `Lección ${numero}` : "Lección", leccion.titulo, acentoSobreOscuro(datos?.comunidad.marca?.color))}
+            aria-label={`Video de la lección «${leccion.titulo}»`}
+            onLoadedMetadata={(e) => {
+              visto.current = tramo?.inicio ?? 0;
+              terminado.current = false;
+              setAvisoAdelantar(false);
+              if (tramo) e.currentTarget.currentTime = tramo.inicio;
+            }}
+            onPlay={(e) => {
+              // Al volver a darle play al final del tramo, empieza de nuevo.
+              if (tramo && e.currentTarget.currentTime >= tramo.fin - 0.5) e.currentTarget.currentTime = tramo.inicio;
+            }}
+            onTimeUpdate={(e) => {
+              const v = e.currentTarget;
+              const fin = tramo ? Math.min(tramo.fin, v.duration || tramo.fin) : v.duration;
+              // Solo cuenta lo que avanzó reproduciéndose, no un salto.
+              const paso = Math.max(2, v.playbackRate * 0.75);
+              if (!v.seeking && v.currentTime <= visto.current + paso) visto.current = Math.max(visto.current, v.currentTime);
+              if (tramo && v.currentTime >= tramo.fin && !v.paused) v.pause();
+              if (!terminado.current && fin && visto.current >= fin - 1) {
+                terminado.current = true;
+                alTerminar?.();
+              }
+            }}
+            onSeeking={(e) => {
+              const v = e.currentTarget;
+              // Fuera del tramo de la lección no se puede ir.
+              if (tramo && v.currentTime < tramo.inicio - 0.5) v.currentTime = tramo.inicio;
+              else if (tramo && v.currentTime > tramo.fin) v.currentTime = tramo.fin;
+              if (sinAdelantar && v.currentTime > visto.current + 1) {
+                v.currentTime = visto.current;
+                setAvisoAdelantar(true);
+              }
+            }}
+            onRateChange={(e) => {
+              // Hasta 2x: más rápido ya no es ver el video.
+              if (sinAdelantar && e.currentTarget.playbackRate > 2) e.currentTarget.playbackRate = 2;
+            }}
+            onEnded={(e) => {
+              if (!terminado.current && (!sinAdelantar || visto.current >= e.currentTarget.duration - 2)) {
+                terminado.current = true;
+                alTerminar?.();
+              }
+            }}
+          >
+            Tu navegador no puede reproducir este video. La transcripción está al final de la lección.
+          </video>
+          {tramo && <ControlesTramo video={reproductor} marco={marco} inicio={tramo.inicio} fin={tramo.fin} />}
+        </div>
         {sinAdelantar && (
           <p className="video-aviso texto-suave" role="status">
             {avisoAdelantar
@@ -252,7 +273,14 @@ export default function VideoLeccion({
           <figcaption className="video-coach">
             {selector}
             <span className="video-archivo texto-suave">
-              {leccion.video.nombre} · subido el {fechaCorta(leccion.video.subidoEn)}
+              {leccion.video.nombre}
+              {tramo && (
+                <>
+                  {" "}
+                  · del <span className="cifra">{reloj(tramo.inicio)}</span> al <span className="cifra">{reloj(tramo.fin)}</span>
+                </>
+              )}{" "}
+              · subido el {fechaCorta(leccion.video.subidoEn)}
             </span>
             {confirmandoQuitar ? (
               <span className="confirmacion" role="group" aria-label="Confirmar que quitas el video">

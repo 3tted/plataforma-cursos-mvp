@@ -44,11 +44,13 @@ export interface PropuestaCurso {
     contenido: string;
     preguntas_sugeridas: string[];
     repaso: PreguntaPropuesta[];
+    /** Solo en los cursos armados desde un video: lo que dice la coach en la lección. */
+    transcripcion?: string;
   }[];
   examen: (PreguntaPropuesta & { leccion: number })[];
 }
 
-interface PreguntaPropuesta {
+export interface PreguntaPropuesta {
   enunciado: string;
   opciones: string[];
   correcta: number;
@@ -167,7 +169,7 @@ Reglas:
 
 Valores por defecto, solo para lo que la coach no indique: de 2 a 12 lecciones según el largo del documento (un documento corto da un curso corto), 2 preguntas de repaso por lección y de 5 a 10 preguntas en el examen.`;
 
-const PREGUNTA = {
+export const PREGUNTA = {
   type: "object",
   properties: {
     enunciado: { type: "string" },
@@ -180,7 +182,7 @@ const PREGUNTA = {
 };
 
 /** Cantidad exacta en el esquema (Gemini la respeta al generar; Claude no acepta estos límites). */
-const exacto = (n: number | undefined, conLimites: boolean) => (conLimites && n !== undefined ? { minItems: n, maxItems: n } : {});
+export const exacto = (n: number | undefined, conLimites: boolean) => (conLimites && n !== undefined ? { minItems: n, maxItems: n } : {});
 
 function esquema(m: Medidas, conLimites: boolean) {
   return {
@@ -224,7 +226,7 @@ function esquema(m: Medidas, conLimites: boolean) {
   };
 }
 
-function cantidades(m: Medidas): string[] {
+export function cantidades(m: Medidas): string[] {
   return [
     m.lecciones !== undefined && `exactamente ${m.lecciones} ${m.lecciones === 1 ? "lección" : "lecciones"} en total`,
     m.repaso !== undefined &&
@@ -262,7 +264,7 @@ function diferencias(p: PropuestaCurso, m: Medidas): string[] {
 }
 
 /** Si sobran preguntas, se quitan las últimas (eso no necesita otra vuelta a la IA). */
-function recortar(p: PropuestaCurso, m: Medidas): PropuestaCurso {
+export function recortar(p: PropuestaCurso, m: Medidas): PropuestaCurso {
   return {
     ...p,
     lecciones: p.lecciones.map((l) => (m.repaso !== undefined ? { ...l, repaso: (l.repaso ?? []).slice(0, m.repaso) } : l)),
@@ -293,7 +295,7 @@ function leer(texto: string): PropuestaCurso {
 
 /** Pide la propuesta a la IA configurada. Lanza ErrorDeDatos con un mensaje para la coach. */
 /** Para la coach, si al final no se juntó todo lo que pidió (null si sí). */
-function avisoDeCantidades(p: PropuestaCurso, m: Medidas): string | null {
+export function avisoDeCantidades(p: PropuestaCurso, m: Medidas): string | null {
   const partes: string[] = [];
   if (m.lecciones !== undefined && p.lecciones.length < m.lecciones) {
     partes.push(`pediste ${m.lecciones} lecciones y la IA armó ${p.lecciones.length}`);
@@ -307,7 +309,7 @@ function avisoDeCantidades(p: PropuestaCurso, m: Medidas): string | null {
   }
   if (!partes.length) return null;
   const texto = partes.join("; ");
-  return `${texto[0].toUpperCase()}${texto.slice(1)}: tu documento no daba para más. Agrega lo que falte aquí abajo.`;
+  return `${texto[0].toUpperCase()}${texto.slice(1)}: tu material no daba para más. Agrega lo que falte aquí abajo.`;
 }
 
 export async function proponerCurso(
@@ -349,7 +351,7 @@ export async function proponerCurso(
 }
 
 // Para armar un curso conviene el modelo más capaz; Lite queda de respaldo.
-const MODELOS_GEMINI = ["gemini-flash-latest", "gemini-flash-lite-latest"];
+export const MODELOS_GEMINI = ["gemini-flash-latest", "gemini-flash-lite-latest"];
 
 async function conGemini(doc: Documento, turnos: Turno[], medidas: Medidas, limite: number): Promise<string> {
   const cliente = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY });
@@ -492,7 +494,7 @@ export function comoEdicion(p: PropuestaCurso): Record<string, unknown> {
       duracion_min: l.duracion_min,
       resumen: l.resumen,
       contenido: l.contenido,
-      transcripcion: "",
+      transcripcion: l.transcripcion ?? "",
       preguntas_sugeridas: l.preguntas_sugeridas,
       repaso: (l.repaso ?? []).map(pregunta),
     });

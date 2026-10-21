@@ -22,3 +22,20 @@ export function tamañoLegible(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toLocaleString("es-MX", { maximumFractionDigits: 1 })} MB`;
   return `${Math.max(1, Math.round(bytes / 1024)).toLocaleString("es-MX")} KB`;
 }
+
+/** 370 → "6:10"; 3750 → "1:02:30". */
+export function reloj(segundos: number): string {
+  const s = Math.max(0, Math.round(segundos));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const seg = String(s % 60).padStart(2, "0");
+  return h ? `${h}:${String(m).padStart(2, "0")}:${seg}` : `${m}:${seg}`;
+}
+
+/** "6:10" → 370; "1:02:30" → 3750 (undefined si no se entiende). */
+export function segundos(v: unknown): number | undefined {
+  if (typeof v === "number") return Number.isFinite(v) && v >= 0 ? v : undefined;
+  const texto = String(v ?? "").trim();
+  if (!/^\d+(:\d{1,2}){0,2}$/.test(texto)) return undefined;
+  return texto.split(":").map(Number).reduce((total, n) => total * 60 + n, 0);
+}

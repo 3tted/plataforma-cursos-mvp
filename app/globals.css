@@ -9697,3 +9697,54 @@ button.tarjeta-comunidad-enlace {
 .perfil-cuenta-empresa {
   margin-top: 6px;
 }
+
+/* Tramo del video de una lección (curso armado desde un video) */
+.editor-tramo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 12px;
+  margin-top: 8px;
+}
+
+.editor-tramo .campo {
+  width: 7.5rem;
+}
+
+.editor-tramo-acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.editor-tramo .error {
+  flex-basis: 100%;
+}
+
+/* Video de una lección que es un tramo de un video más largo: controles propios
+   (los de la presentación con IA) con el tiempo de la lección. */
+.video-marco {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radio-hoja);
+}
+
+.video-marco:fullscreen {
+  display: grid;
+  place-items: center;
+  border-radius: 0;
+  background: #000;
+}
+
+.video-marco:fullscreen .video-reproductor {
+  height: 100%;
+  border-radius: 0;
+  background: #000;
+}
+
+.video-tramo-barra {
+  transition: opacity 0.2s;
+}
+
+.video-marco:has(.video-reproductor:not(:paused)):not(:hover):not(:focus-within) .video-tramo-barra {
+  opacity: 0;
+}

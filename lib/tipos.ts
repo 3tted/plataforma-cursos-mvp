@@ -35,7 +35,7 @@ export interface Leccion {
   transcripcion: string;
   deCoach?: boolean;
   /** Video que subió la coach; sin él, la lección se lee en texto y transcripción. */
-  video?: { url: string; tipo: string; nombre: string; subidoEn: string };
+  video?: { url: string; tipo: string; nombre: string; subidoEn: string; inicio?: number; fin?: number };
   /** Presentación con IA (diapositivas narradas con la voz del dispositivo), si no hay video. */
   presentacion?: { diapositivas: Diapositiva[]; creadaEn: string; conVoz: boolean; opciones?: OpcionesPresentacion };
 }
@@ -76,12 +76,34 @@ export interface VideoLeccion {
   leccion: string;
   /** Nombre del archivo en el disco (o su ruta en Vercel Blob). */
   archivo: string;
-  /** Con Vercel Blob: la url pública del archivo (el reproductor va directo ahí). */
+  /** Con Vercel Blob: la url del archivo (el reproductor va directo ahí). */
   url?: string;
   tipo: string;
   bytes: number;
   nombreOriginal: string;
   subidoEn: string;
+  /**
+   * Tramo del video que es de esta lección, en segundos (sin el dato: todo el
+   * video). Las lecciones de un curso armado desde un video comparten el archivo.
+   */
+  inicio?: number;
+  fin?: number;
+}
+
+/** Video que la coach sube para que la IA arme un curso con él (ver lib/curso-video.ts). */
+export interface VideoFuente {
+  id: string;
+  empresa: string;
+  archivo: string;
+  url?: string;
+  tipo: string;
+  bytes: number;
+  nombreOriginal: string;
+  subidoEn: string;
+  /** Lo que dura, en segundos (lo mide el navegador antes de subirlo). */
+  duracion?: number;
+  /** El video ya subido a Gemini para que lo vea ("files/…"). */
+  gemini?: string;
 }
 
 export interface Modulo {

@@ -21,6 +21,7 @@ import type {
   Publicacion,
   Rol,
   Sesion,
+  VideoFuente,
   VideoLeccion,
 } from "./tipos";
 
@@ -37,6 +38,8 @@ export interface Almacen {
   pagos: Pago[];
   /** Opcional: los almacenes creados antes de que existieran los videos no lo traen. */
   videos?: VideoLeccion[];
+  /** Videos subidos para armar un curso con IA, mientras se arma. */
+  fuentesVideo?: VideoFuente[];
   /** Opcionales por la misma razón: llegaron con el repaso y el examen final. */
   progreso?: ProgresoAlumno[];
   repasos?: IntentoRepaso[];

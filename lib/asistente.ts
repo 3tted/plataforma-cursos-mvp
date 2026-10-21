@@ -25,7 +25,7 @@ const MODELOS_CON_RESPALDO = new Set(["claude-opus-5-5", "claude-opus-5", "claud
 export type ProveedorIA = "claude" | "gemini";
 
 const claveClaude = () => Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-const claveGemini = () => Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+export const claveGemini = () => Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
 
 // Flash-Lite empieza a responder en menos de un segundo y casi nunca está
 // saturado; Flash queda de respaldo (ver lib/asistente-gemini.ts).

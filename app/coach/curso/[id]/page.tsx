@@ -35,7 +35,7 @@ export default function EditorCurso() {
   const { usuario, cambiarCurso, recargarCatalogo, recargarCurso } = useApp();
   const [guardado, setGuardado] = useState<CursoCreado | null>(null);
   const [curso, setCurso] = useState<CursoCreado | null>(null);
-  const [videos, setVideos] = useState<Record<string, { nombre: string; url: string }>>({});
+  const [videos, setVideos] = useState<Record<string, { nombre: string; url: string; inicio?: number; fin?: number }>>({});
   // La presentación con IA de cada lección (si tiene).
   const [presentaciones, setPresentaciones] = useState<Record<string, NonNullable<Leccion["presentacion"]>>>({});
   const [ocupado, setOcupado] = useState<"guardar" | "publicar" | null>(null);
@@ -60,9 +60,9 @@ export default function EditorCurso() {
   const cargarVideos = useCallback(async () => {
     const datos = await api<DatosCurso>(`/api/curso?curso=${encodeURIComponent(id)}&borrador=1`).catch(() => null);
     if (!datos || datos.curso.id !== id) return;
-    const lista: Record<string, { nombre: string; url: string }> = {};
+    const lista: Record<string, { nombre: string; url: string; inicio?: number; fin?: number }> = {};
     for (const m of datos.curso.modulos)
-      for (const l of m.lecciones) if (l.video) lista[l.id] = { nombre: l.video.nombre, url: l.video.url };
+      for (const l of m.lecciones) if (l.video) lista[l.id] = { nombre: l.video.nombre, url: l.video.url, inicio: l.video.inicio, fin: l.video.fin };
     setVideos(lista);
     const conPresentacion: Record<string, NonNullable<Leccion["presentacion"]>> = {};
     for (const m of datos.curso.modulos) for (const l of m.lecciones) if (l.presentacion) conPresentacion[l.id] = l.presentacion;

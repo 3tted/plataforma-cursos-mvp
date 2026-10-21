@@ -229,6 +229,7 @@ export async function cargarCurso(id: string = CURSO_PRINCIPAL, opciones: Opcion
               tipo: video.tipo,
               nombre: video.nombreOriginal,
               subidoEn: video.subidoEn,
+              ...(video.fin !== undefined ? { inicio: video.inicio ?? 0, fin: video.fin } : {}),
             },
           };
         }),

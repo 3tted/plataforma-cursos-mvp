@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { api, fechaCorta } from "@/lib/cliente";
+import { api, fechaCorta, hace } from "@/lib/cliente";
+import type { SolicitudCoach } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
 import { IconoCopiar, IconoEnlace, IconoInvitar } from "./Iconos";
@@ -35,6 +36,7 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
   const [correoOlvido, setCorreoOlvido] = useState("");
   const [temporal, setTemporal] = useState<{ nombre: string; correo: string; contrasena: string } | null>(null);
   const [origen, setOrigen] = useState("");
+  const [solicitudes, setSolicitudes] = useState<SolicitudCoach[] | null>(null);
 
   const cargar = useCallback(() => {
     api<{ equipo: Miembro[]; invitaciones: InvitacionVista[] }>("/api/invitaciones")
@@ -45,6 +47,29 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
     setOrigen(window.location.origin);
     cargar();
   }, [cargar]);
+
+  // Solo el equipo de Merkatics ve las solicitudes de acceso de los coaches.
+  const esEquipo = usuario?.admin === true;
+  const cargarSolicitudes = useCallback(() => {
+    api<SolicitudCoach[]>("/api/solicitudes")
+      .then(setSolicitudes)
+      .catch((e) => setError((e as Error).message));
+  }, []);
+  useEffect(() => {
+    if (esEquipo) cargarSolicitudes();
+  }, [esEquipo, cargarSolicitudes]);
+
+  const atender = async (id: string, accion: "invitar" | "descartar") => {
+    setError(null);
+    try {
+      const s = await api<SolicitudCoach>("/api/solicitudes", { method: "PATCH", json: { id, accion } });
+      cargarSolicitudes();
+      cargar();
+      if (accion === "invitar" && s.invitacion) void copiar(enlaceDe(s.invitacion), s.invitacion);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
 
   const enlaceDe = (codigo: string) => `${origen}/invitacion/${codigo}`;
   const pagina = `${origen}/e/${empresa}`;
@@ -192,6 +217,63 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
       {usuario?.admin && (
         <section className="tarjeta" aria-labelledby="merkatics-titulo">
           <h2 id="merkatics-titulo">Equipo de Merkatics</h2>
+          <div className="equipo-invitar">
+            <h3>Solicitudes de coaches</h3>
+            <p className="texto-suave">
+              Lo que piden en la página «Para coaches». Modo demostración: no llega ningún correo; desde aquí creas su
+              invitación y se la compartes por el medio que dejaron.
+            </p>
+            {!solicitudes ? (
+              <p className="texto-suave">Cargando solicitudes…</p>
+            ) : solicitudes.length === 0 ? (
+              <p className="vacio">Todavía no hay solicitudes.</p>
+            ) : (
+              <ul className="solicitudes-lista">
+                {solicitudes.map((s) => (
+                  <li key={s.id} className="solicitud" data-estado={s.estado}>
+                    <div className="solicitud-cabecera">
+                      <strong>
+                        {s.nombre}
+                        {s.empresa ? ` · ${s.empresa}` : ""}
+                      </strong>
+                      <span className="nota">{hace(s.creadaEn)}</span>
+                    </div>
+                    <p className="texto-suave">
+                      Enseña: {s.tema} · {s.alumnos === "Todavía ninguno" ? "todavía sin alumnos" : `${s.alumnos} alumnos`} ·
+                      Contacto: <span className="cifra">{s.contacto}</span>
+                    </p>
+                    {s.mensaje && <p className="nota">«{s.mensaje}»</p>}
+                    <div className="solicitud-acciones">
+                      {s.estado === "invitada" && s.invitacion ? (
+                        <>
+                          <span className="pastilla pastilla-ok">Invitada</span>
+                          <code className="enlace-copiable">{enlaceDe(s.invitacion)}</code>
+                          <button
+                            type="button"
+                            className="boton boton-chico boton-fantasma-borde"
+                            onClick={() => void copiar(enlaceDe(s.invitacion!), s.invitacion!)}
+                          >
+                            <IconoCopiar width={15} height={15} /> {copiado === s.invitacion ? "Copiado" : "Copiar"}
+                          </button>
+                        </>
+                      ) : s.estado === "descartada" ? (
+                        <span className="pastilla">Descartada</span>
+                      ) : (
+                        <>
+                          <button type="button" className="boton boton-chico" onClick={() => void atender(s.id, "invitar")}>
+                            <IconoInvitar width={15} height={15} /> Crear su invitación
+                          </button>
+                          <button type="button" className="enlace enlace-discreto" onClick={() => void atender(s.id, "descartar")}>
+                            Descartar
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div className="equipo-invitar">
             <h3>Invitar una empresa nueva</h3>
             <p className="texto-suave">Quien abre el enlace crea su cuenta y queda como dueña de una empresa nueva.</p>

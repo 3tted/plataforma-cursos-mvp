@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Arcos from "./Arcos";
 import { useApp } from "./Contexto";
@@ -182,9 +183,9 @@ export default function PaginaVisitantes() {
             <li>Cobros en pesos, sin depender de tarjeta</li>
             <li>Ves quién aprobó y qué temas cuestan más</li>
           </ul>
-          <button type="button" className="boton" onClick={() => pedirEntrada("coach")}>
+          <Link href="/coaches" className="boton">
             Quiero vender mis cursos
-          </button>
+          </Link>
         </section>
       </main>
 

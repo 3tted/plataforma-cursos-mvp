@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { api } from "@/lib/cliente";
 import type { CuentaPublica } from "@/lib/tipos";
@@ -139,8 +140,12 @@ export default function Bienvenida() {
           {avisoEntrada && <p className="aviso-entrada">{avisoEntrada}</p>}
           {rolSugerido === "coach" && (
             <p className="aviso-entrada">
-              Para ser coach necesitas una invitación: la manda la dueña de tu empresa o el equipo de Merkatics. Abre su
-              enlace para crear tu cuenta de coach.
+              Para ser coach necesitas una invitación: la manda la dueña de tu empresa o el equipo de Merkatics. Si ya la
+              tienes, abre su enlace; si no,{" "}
+              <Link href="/coaches" onClick={() => setPidiendoUsuario(false)}>
+                pide acceso aquí
+              </Link>
+              .
             </p>
           )}
 

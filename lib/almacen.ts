@@ -21,6 +21,7 @@ import type {
   Publicacion,
   Rol,
   Sesion,
+  SolicitudCoach,
   VideoLeccion,
 } from "./tipos";
 
@@ -58,6 +59,8 @@ export interface Almacen {
   cuentas?: Cuenta[];
   sesiones?: Sesion[];
   invitaciones?: Invitacion[];
+  /** Solicitudes de acceso de coaches (/coaches). Opcional: llegó después. */
+  solicitudes?: SolicitudCoach[];
 }
 
 const DIRECTORIO =

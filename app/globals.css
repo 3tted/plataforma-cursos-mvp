@@ -9343,3 +9343,182 @@ button.tarjeta-comunidad-enlace {
     width: clamp(28px, 26%, 72px);
   }
 }
+
+/* ---------- Para coaches: propuesta y solicitud de acceso (/coaches) ---------- */
+
+.pagina-coaches {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.coaches-propuesta {
+  display: grid;
+  gap: 16px;
+}
+
+.coaches-etiqueta {
+  font-family: var(--fuente-display);
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--acento-texto);
+}
+
+.coaches-texto {
+  max-width: 54ch;
+  font-size: var(--t-title);
+  color: var(--tinta-2);
+}
+
+.coaches-ventajas {
+  display: grid;
+  gap: 14px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.coaches-ventajas li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.coaches-ventajas li > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.coaches-ventaja-icono {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  color: var(--coral-dark);
+}
+
+.coaches-subtitulo {
+  margin-top: 12px;
+}
+
+.coaches-pasos {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.coaches-pasos li::marker {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  color: var(--acento-texto);
+}
+
+.coaches-forma form,
+.coaches-enviada {
+  display: grid;
+  gap: 14px;
+}
+
+.coaches-forma {
+  position: sticky;
+  top: calc(var(--alto-barra) + 20px);
+}
+
+.coaches-alumnos {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.coaches-alumnos legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: var(--t-caption);
+  font-weight: 700;
+}
+
+.coaches-alumnos-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.coaches-alumnos-opciones button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1.5px solid var(--linea-fuerte);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--t-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.coaches-alumnos-opciones button[aria-pressed="true"] {
+  border-color: var(--coral-dark);
+  background: var(--coral-dark);
+  color: var(--white);
+}
+
+.coaches-alumnos-opciones button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 860px) {
+  .pagina-coaches {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .coaches-forma {
+    position: static;
+  }
+}
+
+/* Solicitudes de coaches en Mi empresa (equipo de Merkatics) */
+.solicitudes-lista {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  width: 100%;
+}
+
+.solicitud {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-control);
+}
+
+.solicitud[data-estado="descartada"] {
+  opacity: 0.6;
+}
+
+.solicitud-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.solicitud-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}

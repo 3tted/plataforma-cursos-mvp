@@ -233,6 +233,32 @@ export interface Invitacion {
   usadaEn?: string;
 }
 
+/**
+ * Solicitud de acceso de un coach (/coaches). En el MVP no se manda ningún
+ * mensaje: queda guardada y el equipo de Merkatics la ve en Mi empresa, desde
+ * donde crea la invitación y la comparte a mano.
+ */
+export interface SolicitudCoach {
+  id: string;
+  nombre: string;
+  /** Correo o WhatsApp para responderle. */
+  contacto: string;
+  /** Nombre de su negocio o marca (opcional). */
+  empresa?: string;
+  /** Qué enseña. */
+  tema: string;
+  /** Cuántos alumnos tiene hoy, en rangos ("Todavía ninguno", "1 a 50"…). */
+  alumnos: string;
+  mensaje?: string;
+  creadaEn: string;
+  estado: "nueva" | "invitada" | "descartada";
+  /** Código de la invitación que se le creó. */
+  invitacion?: string;
+}
+
+/** Opciones de "¿Cuántos alumnos tienes hoy?" en la solicitud de acceso. */
+export const RANGOS_ALUMNOS = ["Todavía ninguno", "1 a 50", "51 a 200", "Más de 200"];
+
 /** Lo que el navegador sabe de la cuenta con sesión abierta. */
 export interface CuentaPublica {
   nombre: string;

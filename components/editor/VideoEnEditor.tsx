@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { MAX_BYTES_VIDEO, reloj, segundos, tamañoLegible, tipoDeVideo } from "@/lib/reglas-video";
 import { SubidaCancelada, destinoDeLeccion, subirVideo } from "@/lib/subir-video";
 import type { Leccion, OpcionesPresentacion } from "@/lib/tipos";
-import { useApp } from "../Contexto";
 import EleccionVoz from "../EleccionVoz";
 import EditorPresentacion from "./EditorPresentacion";
 import FormaPresentacionIA from "./FormaPresentacionIA";
@@ -30,7 +29,6 @@ export default function VideoEnEditor({
   sinGuardar: boolean;
   alCambiar: () => void;
 }) {
-  const { estado } = useApp();
   const entrada = useRef<HTMLInputElement>(null);
   const [progreso, setProgreso] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +75,7 @@ export default function VideoEnEditor({
     }
     setError(null);
     setProgreso(0);
-    subirVideo(destinoDeLeccion(leccion), archivo, tipo, !!estado?.videosEnLaNube, setProgreso).listo.then(
+    subirVideo(destinoDeLeccion(leccion), archivo, tipo, setProgreso).listo.then(
       () => {
         setProgreso(null);
         alCambiar();

@@ -126,10 +126,13 @@ export async function borrarArchivoDeVideo(video: { archivo: string; url?: strin
 
 const REGLAS = { allowedContentTypes: Object.keys(TIPOS_VIDEO), maximumSizeInBytes: MAX_BYTES_VIDEO };
 
-/** GET <base>/subir: cómo subir aquí (almacenamiento público o privado, con o sin clave). */
+/**
+ * GET <base>/subir: cómo subir aquí. Sin Blob, al servidor ({ nube: false });
+ * con Blob, si el almacenamiento es público o privado y si hay clave.
+ */
 export async function formaDeSubir(): Promise<Response> {
-  if (!videosEnLaNube()) return error("Este servidor guarda los videos en su disco: súbelo de la forma normal.");
-  return Response.json({ acceso: await accesoDeLaNube(), firmada: !conClaveDeBlob() });
+  if (!videosEnLaNube()) return Response.json({ nube: false });
+  return Response.json({ nube: true, acceso: await accesoDeLaNube(), firmada: !conClaveDeBlob() });
 }
 
 /**

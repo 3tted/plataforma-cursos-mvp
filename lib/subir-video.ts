@@ -31,13 +31,34 @@ export function subirVideo(
   destino: DestinoDeVideo,
   archivo: File,
   tipo: string,
-  enLaNube: boolean,
   alAvanzar: (fraccion: number) => void,
   /** Lo que dura (segundos), si ya se midió. */
   duracion?: number,
 ): SubidaDeVideo {
-  return enLaNube ? aBlob(destino, archivo, tipo, alAvanzar, duracion) : alServidor(destino, archivo, tipo, alAvanzar, duracion);
+  const control = new AbortController();
+  let cancelarAlServidor: (() => void) | null = null;
+  const listo = (async () => {
+    // Primero se le pregunta al servidor cómo subir: a Blob (público o privado, con o sin clave) o a él mismo.
+    const forma = await fetch(`${destino.base}/subir`, { signal: control.signal }).catch(() => null);
+    if (control.signal.aborted) throw new SubidaCancelada();
+    if (!forma) throw new Error(SIN_CONEXION);
+    const datos = (await forma.json().catch(() => ({}))) as FormaDeSubir & { error?: string };
+    if (!forma.ok) throw new Error(datos.error ?? GENERICO);
+    if (datos.nube && datos.acceso) return aBlob(destino, archivo, tipo, alAvanzar, duracion, datos, control.signal);
+    const alServidor = aServidor(destino, archivo, tipo, alAvanzar, duracion);
+    cancelarAlServidor = alServidor.cancelar;
+    return alServidor.listo;
+  })();
+  return {
+    listo,
+    cancelar: () => {
+      control.abort();
+      cancelarAlServidor?.();
+    },
+  };
 }
+
+type FormaDeSubir = { nube?: boolean; acceso?: "public" | "private"; firmada?: boolean };
 
 /** Cuánto dura un video, leyendo solo su encabezado (null si el navegador no lo puede abrir). */
 export function medirDuracion(archivo: File): Promise<number | null> {
@@ -62,47 +83,44 @@ async function respuesta(res: Response | null): Promise<unknown> {
   return datos;
 }
 
-function aBlob(destino: DestinoDeVideo, archivo: File, tipo: string, alAvanzar: (f: number) => void, duracion?: number): SubidaDeVideo {
-  const control = new AbortController();
-  const listo = (async () => {
-    // Primero, cómo subir aquí: almacenamiento público o privado, con o sin clave.
-    const forma = await fetch(`${destino.base}/subir`).catch(() => null);
-    if (!forma) throw new Error(SIN_CONEXION);
-    const datos = (await forma.json().catch(() => ({}))) as { acceso?: "public" | "private"; firmada?: boolean; error?: string };
-    if (!forma.ok || !datos.acceso) throw new Error(datos.error ?? GENERICO);
-    if (control.signal.aborted) throw new SubidaCancelada();
-
-    let url: string;
-    try {
-      const subida = datos.firmada ? uploadPresigned : upload;
-      const subido = await subida(`${destino.enLaNube}.${TIPOS_VIDEO[tipo]}`, archivo, {
-        access: datos.acceso,
-        handleUploadUrl: `${destino.base}/subir`,
-        contentType: tipo,
-        // Con clave, en partes (y reintentando las que fallen) a partir de 50 MB.
-        multipart: !datos.firmada && archivo.size > 50 * 1024 * 1024,
-        abortSignal: control.signal,
-        onUploadProgress: ({ percentage }) => alAvanzar(percentage / 100),
-      });
-      url = subido.url;
-    } catch (e) {
-      if (control.signal.aborted) throw new SubidaCancelada();
-      console.error("Subida a Vercel Blob", e);
-      throw new Error(GENERICO);
-    }
-    return respuesta(
-      await fetch(destino.base, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, nombre: archivo.name, ...(duracion ? { duracion } : {}) }),
-      }).catch(() => null),
-    );
-  })();
-  return { listo, cancelar: () => control.abort() };
+async function aBlob(
+  destino: DestinoDeVideo,
+  archivo: File,
+  tipo: string,
+  alAvanzar: (f: number) => void,
+  duracion: number | undefined,
+  forma: FormaDeSubir,
+  senal: AbortSignal,
+): Promise<unknown> {
+  let url: string;
+  try {
+    const subida = forma.firmada ? uploadPresigned : upload;
+    const subido = await subida(`${destino.enLaNube}.${TIPOS_VIDEO[tipo]}`, archivo, {
+      access: forma.acceso!,
+      handleUploadUrl: `${destino.base}/subir`,
+      contentType: tipo,
+      // Con clave, en partes (y reintentando las que fallen) a partir de 50 MB.
+      multipart: !forma.firmada && archivo.size > 50 * 1024 * 1024,
+      abortSignal: senal,
+      onUploadProgress: ({ percentage }) => alAvanzar(percentage / 100),
+    });
+    url = subido.url;
+  } catch (e) {
+    if (senal.aborted) throw new SubidaCancelada();
+    console.error("Subida a Vercel Blob", e);
+    throw new Error(GENERICO);
+  }
+  return respuesta(
+    await fetch(destino.base, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url, nombre: archivo.name, ...(duracion ? { duracion } : {}) }),
+    }).catch(() => null),
+  );
 }
 
 // XMLHttpRequest en vez de fetch: es la única forma de mostrar el avance de una subida.
-function alServidor(destino: DestinoDeVideo, archivo: File, tipo: string, alAvanzar: (f: number) => void, duracion?: number): SubidaDeVideo {
+function aServidor(destino: DestinoDeVideo, archivo: File, tipo: string, alAvanzar: (f: number) => void, duracion?: number): SubidaDeVideo {
   const xhr = new XMLHttpRequest();
   const listo = new Promise<unknown>((resolver, rechazar) => {
     xhr.open("PUT", destino.base);

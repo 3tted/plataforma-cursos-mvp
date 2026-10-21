@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { MAX_BYTES_VIDEO, reloj, tamañoLegible, tipoDeVideo } from "@/lib/reglas-video";
 import { SubidaCancelada, medirDuracion, subirVideo, type SubidaDeVideo } from "@/lib/subir-video";
 import type { CursoCreado } from "@/lib/tipos";
-import { useApp } from "../Contexto";
 import { IconoAsistenteGeneral, IconoSubir } from "../Iconos";
 
 /** Hasta dos horas: más que eso no cabe completo en lo que la IA puede ver y escribir de una vez. */
@@ -22,7 +21,6 @@ const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // subir el video.
 export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: string; alCerrar: () => void }) {
   const router = useRouter();
-  const { estado } = useApp();
   const entrada = useRef<HTMLInputElement>(null);
   const subida = useRef<SubidaDeVideo | null>(null);
   const activo = useRef(true);
@@ -36,13 +34,13 @@ export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: st
   const [progreso, setProgreso] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    activo.current = true;
+    return () => {
       activo.current = false;
       subida.current?.cancelar();
-    },
-    [],
-  );
+    };
+  }, []);
 
   const soltar = (id: string | null) => {
     if (id) void fetch(`${BASE}?fuente=${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
@@ -126,7 +124,7 @@ export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: st
     const tipo = tipoDeVideo(archivo.name, archivo.type)!;
     setProgreso(0);
     setPaso("subiendo");
-    const nueva = subirVideo({ base: BASE, enLaNube: "videos/fuente" }, archivo, tipo, !!estado?.videosEnLaNube, setProgreso, duracion ?? undefined);
+    const nueva = subirVideo({ base: BASE, enLaNube: "videos/fuente" }, archivo, tipo, setProgreso, duracion ?? undefined);
     subida.current = nueva;
     try {
       const { id } = (await nueva.listo) as { id: string };

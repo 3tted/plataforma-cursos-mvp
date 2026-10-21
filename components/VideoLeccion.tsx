@@ -111,7 +111,7 @@ export default function VideoLeccion({
     setArchivoEnCurso(archivo.name);
     setEstado("subiendo");
     setAnuncio(`Subiendo ${archivo.name}.`);
-    const nueva = subirVideo(destinoDeLeccion(leccion.id), archivo, tipo, !!plataforma?.videosEnLaNube, setProgreso);
+    const nueva = subirVideo(destinoDeLeccion(leccion.id), archivo, tipo, setProgreso);
     subida.current = nueva;
     nueva.listo.then(
       async () => {

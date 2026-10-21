@@ -498,6 +498,12 @@ function TuCuenta() {
           {usuario.conContrasena ? "Cambiar mi contraseña" : "Poner una contraseña"}
         </button>
       )}
+      {/* Un alumno que quiere enseñar abre su empresa con esta misma cuenta. */}
+      {usuario.rol === "alumno" && (
+        <p className="nota perfil-cuenta-empresa">
+          ¿Quieres enseñar? <Link href="/registra-tu-empresa">Registra tu empresa</Link> con esta misma cuenta.
+        </p>
+      )}
     </section>
   );
 }

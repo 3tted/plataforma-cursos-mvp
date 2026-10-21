@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 // Pie de página oscuro (grafito), igual en la plataforma y en la página para
 // visitantes. Términos, Privacidad y Contacto se agregan cuando tengan página.
 export default function PiePagina({ fondoApp = false }: { fondoApp?: boolean }) {
@@ -12,6 +14,9 @@ export default function PiePagina({ fondoApp = false }: { fondoApp?: boolean }) 
           width={2311}
           height={544}
         />
+        <nav className="pie-enlaces" aria-label="Para empresas">
+          <Link href="/registra-tu-empresa">Registra tu empresa</Link>
+        </nav>
         <p className="pie-derechos">© 2026 Merkatics Growth Operating System</p>
       </div>
     </footer>

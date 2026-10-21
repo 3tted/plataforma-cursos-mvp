@@ -42,6 +42,7 @@ import {
   GoogleLogo,
   LinkSimple,
   UserPlus,
+  Buildings,
 } from "@phosphor-icons/react/ssr";
 
 // Una sola familia de íconos (Phosphor) con el mismo trazo en toda la app.
@@ -99,3 +100,4 @@ export const IconoInicio = icono(House);
 export const IconoGoogle = icono(GoogleLogo, "bold");
 export const IconoEnlace = icono(LinkSimple);
 export const IconoInvitar = icono(UserPlus);
+export const IconoEmpresa = icono(Buildings);

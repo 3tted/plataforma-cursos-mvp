@@ -13,6 +13,15 @@ export default function Encabezado() {
   const { usuario, cerrarSesion } = useApp();
   // Dentro de una comunidad con marca, la barra lleva el logo (o el nombre) de su empresa.
   const marca = useMarcaActiva();
+  // Su rol: alumno, o el que tiene en su empresa (dueño, administrador o coach).
+  const rolVisible =
+    usuario?.rol !== "coach"
+      ? "Alumno"
+      : usuario.rolEmpresa === "dueno"
+        ? "Dueño"
+        : usuario.rolEmpresa === "admin"
+          ? "Administrador"
+          : "Coach";
 
   // El mismo menú para alumno y coach; la coach suma su panel.
   const enlaces = [
@@ -71,12 +80,12 @@ export default function Encabezado() {
                 href="/perfil"
                 className="usuario"
                 aria-current={ruta === "/perfil" ? "page" : undefined}
-                aria-label={`Tu perfil: ${usuario.nombre}, ${usuario.rol === "coach" ? "coach" : "alumno"}`}
+                aria-label={`Tu perfil: ${usuario.nombre}, ${rolVisible.toLowerCase()}`}
               >
                 <Avatar nombre={usuario.nombre} tamaño={34} coach={usuario.rol === "coach"} />
                 <span className="usuario-textos" aria-hidden="true">
                   <span className="usuario-nombre">{usuario.nombre}</span>
-                  <span className="usuario-rol">{usuario.rol === "coach" ? "Coach" : "Alumno"}</span>
+                  <span className="usuario-rol">{rolVisible}</span>
                 </span>
               </Link>
               <button

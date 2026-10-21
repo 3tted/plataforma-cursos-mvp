@@ -288,6 +288,28 @@ main:focus {
   }
 }
 
+.pie-enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.pie-enlaces a {
+  color: var(--white);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pie-enlaces a:hover {
+  color: var(--coral);
+  text-decoration: underline;
+}
+
+.pie-enlaces a:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+
 .pie-derechos {
   flex-basis: 100%;
   padding-top: 16px;
@@ -9600,4 +9622,78 @@ button.tarjeta-comunidad-enlace {
 
 .tabla-empresas td .nota {
   display: inline;
+}
+
+/* Crear cuenta: qué quiere hacer cada quien (components/Bienvenida.tsx) */
+.entrada-tipos {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entrada-tipo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+  border: 1.5px solid var(--linea-fuerte);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.entrada-tipo:hover {
+  border-color: var(--coral-dark);
+}
+
+.entrada-tipo:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.entrada-tipo > span {
+  display: grid;
+  gap: 2px;
+}
+
+.entrada-tipo-icono {
+  color: var(--coral-dark);
+}
+
+.entrada-tipo-titulo {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+}
+
+.entrada-tipo-detalle {
+  color: var(--tinta-2);
+  font-size: var(--t-small);
+}
+
+.entrada-otra {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  font-size: var(--t-small);
+}
+
+.entrada-subtitulo {
+  margin-top: 4px;
+  font-family: var(--fuente-display);
+  font-size: var(--t-small);
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.perfil-cuenta-empresa {
+  margin-top: 6px;
 }

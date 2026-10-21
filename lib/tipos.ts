@@ -74,7 +74,10 @@ export interface Presentacion {
 /** Registro de un video subido (el archivo vive en DATA_DIR/videos). */
 export interface VideoLeccion {
   leccion: string;
+  /** Nombre del archivo en el disco (o su ruta en Vercel Blob). */
   archivo: string;
+  /** Con Vercel Blob: la url pública del archivo (el reproductor va directo ahí). */
+  url?: string;
   tipo: string;
   bytes: number;
   nombreOriginal: string;
@@ -384,6 +387,8 @@ export interface EstadoPlataforma {
   modelo: string | null;
   /** "redis": datos compartidos entre las copias del servidor; "archivo": en el disco de esta copia. */
   almacen?: "redis" | "archivo";
+  /** Los videos se suben a Vercel Blob (sin el límite de 4 MB de las peticiones). */
+  videosEnLaNube?: boolean;
 }
 
 export interface ResumenCoach {

@@ -1,6 +1,5 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { DIRECTORIO_VIDEOS, borrarFoto, consultar, modificar } from "@/lib/almacen";
+import { borrarFoto, consultar, modificar } from "@/lib/almacen";
+import { borrarArchivoDeVideo } from "@/lib/videos";
 import { iaDisponible } from "@/lib/asistente";
 import { camposDeComunidad, nuevaComunidad } from "@/lib/creacion";
 import { leerJson, manejar } from "@/lib/http";
@@ -97,7 +96,7 @@ export const DELETE = manejar((req: Request) =>
       return { videos, borrado: { comunidad: comunidad.id, cursos: [...ids] } };
     });
     await Promise.all([
-      ...videos.map((v) => fs.rm(path.join(DIRECTORIO_VIDEOS, v.archivo), { force: true })),
+      ...videos.map(borrarArchivoDeVideo),
       borrarFoto(`comunidad-${borrado.comunidad}`),
       ...borrado.cursos.map((c) => borrarFoto(`curso-${c}`)),
     ]);

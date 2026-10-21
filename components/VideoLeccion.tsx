@@ -3,6 +3,7 @@
 import { useRef, useState, type DragEvent } from "react";
 import { fechaCorta } from "@/lib/cliente";
 import { MAX_BYTES_VIDEO, tipoDeVideo, tamañoLegible } from "@/lib/reglas-video";
+import { SubidaCancelada, subirVideo, type SubidaDeVideo } from "@/lib/subir-video";
 import type { Leccion, OpcionesPresentacion } from "@/lib/tipos";
 import { useApp } from "./Contexto";
 import { acentoSobreOscuro } from "@/lib/marca";
@@ -31,7 +32,7 @@ export default function VideoLeccion({
   sinAdelantar?: boolean;
   alTerminar?: () => void;
 }) {
-  const { recargarCurso, datos, coachAqui } = useApp();
+  const { recargarCurso, datos, coachAqui, estado: plataforma } = useApp();
   const esCoach = coachAqui;
   const [estado, setEstado] = useState<Estado>("inactivo");
   const [progreso, setProgreso] = useState(0);
@@ -45,7 +46,7 @@ export default function VideoLeccion({
   const visto = useRef(0);
   const terminado = useRef(false);
   const [avisoAdelantar, setAvisoAdelantar] = useState(false);
-  const subida = useRef<XMLHttpRequest | null>(null);
+  const subida = useRef<SubidaDeVideo | null>(null);
   const [generando, setGenerando] = useState(false);
   // Recién generada: se le pide a la coach que la revise y elija si lleva voz.
   const [recienGenerada, setRecienGenerada] = useState(false);
@@ -100,48 +101,29 @@ export default function VideoLeccion({
         `El video pesa ${tamañoLegible(archivo.size)} y el máximo es ${tamañoLegible(MAX_BYTES_VIDEO)}. Expórtalo en menor calidad o recórtalo.`,
       );
     }
-    // XMLHttpRequest en vez de fetch: es la única forma de mostrar el avance de una subida.
-    const xhr = new XMLHttpRequest();
-    subida.current = xhr;
-    xhr.open("PUT", `/api/videos/${leccion.id}`);
-    xhr.setRequestHeader("Content-Type", tipo);
-    xhr.setRequestHeader("X-Nombre-Archivo", encodeURIComponent(archivo.name));
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) setProgreso(e.loaded / e.total);
-    };
-    xhr.onload = async () => {
-      subida.current = null;
-      if (xhr.status >= 200 && xhr.status < 300) {
-        await recargarCurso();
-        setEstado("inactivo");
-        setMensaje(null);
-        setAnuncio("Video subido. Ya se puede ver en la lección.");
-      } else {
-        let texto: string | undefined;
-        try {
-          texto = (JSON.parse(xhr.responseText) as { error?: string }).error;
-        } catch {
-          // respuesta sin JSON
-        }
-        fallo(texto ?? "No se pudo subir el video. Inténtalo de nuevo.");
-      }
-    };
-    xhr.onerror = () => {
-      subida.current = null;
-      fallo("Se cortó la conexión mientras subía el video. Revisa tu internet e inténtalo de nuevo.");
-    };
-    xhr.onabort = () => {
-      subida.current = null;
-      setEstado("inactivo");
-      setAnuncio("Subida cancelada.");
-    };
     setConfirmandoQuitar(false);
     setMensaje(null);
     setProgreso(0);
     setArchivoEnCurso(archivo.name);
     setEstado("subiendo");
     setAnuncio(`Subiendo ${archivo.name}.`);
-    xhr.send(archivo);
+    const nueva = subirVideo(leccion.id, archivo, tipo, !!plataforma?.videosEnLaNube, setProgreso);
+    subida.current = nueva;
+    nueva.listo.then(
+      async () => {
+        subida.current = null;
+        await recargarCurso();
+        setEstado("inactivo");
+        setMensaje(null);
+        setAnuncio("Video subido. Ya se puede ver en la lección.");
+      },
+      (e: Error) => {
+        subida.current = null;
+        if (!(e instanceof SubidaCancelada)) return fallo(e.message);
+        setEstado("inactivo");
+        setAnuncio("Subida cancelada.");
+      },
+    );
   };
 
   const quitar = async () => {
@@ -199,7 +181,7 @@ export default function VideoLeccion({
         </span>
         <span className="cifra">{Math.round(progreso * 100)}%</span>
       </p>
-      <button type="button" className="enlace enlace-discreto" onClick={() => subida.current?.abort()}>
+      <button type="button" className="enlace enlace-discreto" onClick={() => subida.current?.cancelar()}>
         Cancelar subida
       </button>
     </div>
@@ -428,9 +410,11 @@ export default function VideoLeccion({
             ¿Sin video todavía? La IA arma diapositivas con el texto de la lección y la voz del dispositivo las narra.
           </p>
           {error}
-          <p className="nota video-nota-prototipo">
-            En el prototipo el video se guarda en la computadora donde corre la plataforma, no en internet.
-          </p>
+          {!plataforma?.videosEnLaNube && (
+            <p className="nota video-nota-prototipo">
+              En el prototipo el video se guarda en la computadora donde corre la plataforma, no en internet.
+            </p>
+          )}
         </>
       )}
       {avisoLector}

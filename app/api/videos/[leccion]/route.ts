@@ -1,19 +1,21 @@
 import { createReadStream, promises as fs } from "fs";
 import path from "path";
 import { Readable } from "stream";
+import { head } from "@vercel/blob";
 import { DIRECTORIO_VIDEOS, consultar, modificar, rutaDelVideo } from "@/lib/almacen";
 import { cursoDeLeccion } from "@/lib/curso";
 import { coachDeLaLeccion } from "@/lib/permisos";
-import { error, manejar } from "@/lib/http";
+import { error, leerJson, manejar } from "@/lib/http";
 import { MAX_BYTES_VIDEO, TIPOS_VIDEO, tamañoLegible } from "@/lib/reglas-video";
 import type { VideoLeccion } from "@/lib/tipos";
+import { borrarArchivoDeVideo, esUrlDeBlob, rutaEnLaNube, videosEnLaNube } from "@/lib/videos";
 
 export const dynamic = "force-dynamic";
 
-// Videos de lección del prototipo. Se guardan como archivos en DATA_DIR/videos
-// (en local, la carpeta .data/videos). En la Fase 2 se van a un almacenamiento
-// de objetos o a un servicio de video; en Vercel el disco es temporal y el
-// cuerpo de una petición no puede pasar de unos 4 MB.
+// Videos de lección. Con Vercel Blob conectado, el navegador los sube directo
+// a Blob (ver ./subir) y aquí solo se anotan; el reproductor va a su url. Sin
+// Blob (en local), llegan aquí y se guardan como archivos en DATA_DIR/videos
+// (la carpeta .data/videos).
 //
 // Subirlo o quitarlo es solo para las coaches de la empresa dueña del curso.
 
@@ -42,6 +44,8 @@ export const GET = manejar(async (req: Request, contexto: Contexto) => {
   const leccion = await leccionExistente(contexto);
   const video = leccion ? await videoDe(leccion) : undefined;
   if (!video) return error("Esta lección no tiene video.", 404);
+  // En Vercel Blob: el reproductor sigue a su url (Blob también responde por rangos).
+  if (video.url) return Response.redirect(video.url, 302);
 
   const ruta = await rutaDelVideo(video);
   const { size } = await fs.stat(ruta).catch(() => ({ size: -1 }));
@@ -83,6 +87,9 @@ export const PUT = manejar(async (req: Request, contexto: Contexto) => {
   const leccion = await leccionExistente(contexto);
   if (!leccion) return error("No encontramos esa lección.", 404);
   await coachDeLaLeccion(req, leccion);
+
+  // Ya subido a Vercel Blob desde el navegador: solo se anota ({ url, nombre }).
+  if ((req.headers.get("content-type") ?? "").startsWith("application/json")) return anotarDeBlob(req, leccion);
 
   const tipo = (req.headers.get("content-type") ?? "").split(";")[0].trim();
   const extension = TIPOS_VIDEO[tipo];
@@ -150,10 +157,41 @@ export const PUT = manejar(async (req: Request, contexto: Contexto) => {
     a.videos = [...lista.filter((v) => v.leccion !== leccion), nuevo];
     return previo;
   });
-  // El video reemplazado ya no se usa: se borra del disco.
-  if (anterior) await fs.rm(path.join(DIRECTORIO_VIDEOS, anterior.archivo), { force: true });
+  // El video reemplazado ya no se usa: se borra.
+  if (anterior) await borrarArchivoDeVideo(anterior);
   return Response.json(nuevo, { status: 201 });
 });
+
+/** Anota un video que el navegador ya subió a Vercel Blob, revisando en Blob que sea de esta lección y sea video. */
+async function anotarDeBlob(req: Request, leccion: string): Promise<Response> {
+  if (!videosEnLaNube()) return error("Este servidor no tiene Vercel Blob conectado.");
+  const datos = await leerJson(req);
+  if (!esUrlDeBlob(datos.url)) return error("Esa dirección no es de un video subido a la plataforma.");
+  const info = await head(datos.url).catch(() => null);
+  if (!info) return error("No encontramos el video subido. Inténtalo de nuevo.", 404);
+  if (!info.pathname.startsWith(`${rutaEnLaNube(leccion)}.`)) return error("Ese video no es de esta lección.", 403);
+  const tipo = info.contentType.split(";")[0].trim();
+  if (!TIPOS_VIDEO[tipo]) return error("Sube el video en MP4, WebM o MOV.", 415);
+  if (info.size > MAX_BYTES_VIDEO) return error(`El video pesa más de ${tamañoLegible(MAX_BYTES_VIDEO)}.`, 413);
+  const nombre = typeof datos.nombre === "string" && datos.nombre.trim() ? datos.nombre.trim().slice(0, 120) : "video";
+  const nuevo: VideoLeccion = {
+    leccion,
+    archivo: info.pathname,
+    url: info.url,
+    tipo,
+    bytes: info.size,
+    nombreOriginal: nombre,
+    subidoEn: new Date().toISOString(),
+  };
+  const anterior = await modificar((a) => {
+    const lista = a.videos ?? [];
+    const previo = lista.find((v) => v.leccion === leccion);
+    a.videos = [...lista.filter((v) => v.leccion !== leccion), nuevo];
+    return previo;
+  });
+  if (anterior && anterior.url !== nuevo.url) await borrarArchivoDeVideo(anterior);
+  return Response.json(nuevo, { status: 201 });
+}
 
 // ---------------------------------------------------------------- DELETE
 export const DELETE = manejar(async (req: Request, contexto: Contexto) => {
@@ -165,6 +203,6 @@ export const DELETE = manejar(async (req: Request, contexto: Contexto) => {
     a.videos = lista.filter((v) => v.leccion !== leccion);
     return lista.find((v) => v.leccion === leccion);
   });
-  if (quitado) await fs.rm(path.join(DIRECTORIO_VIDEOS, quitado.archivo), { force: true });
+  if (quitado) await borrarArchivoDeVideo(quitado);
   return new Response(null, { status: 204 });
 });

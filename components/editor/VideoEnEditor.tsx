@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 import { MAX_BYTES_VIDEO, tamañoLegible, tipoDeVideo } from "@/lib/reglas-video";
+import { SubidaCancelada, subirVideo } from "@/lib/subir-video";
 import type { Leccion, OpcionesPresentacion } from "@/lib/tipos";
+import { useApp } from "../Contexto";
 import EleccionVoz from "../EleccionVoz";
 import EditorPresentacion from "./EditorPresentacion";
 import FormaPresentacionIA from "./FormaPresentacionIA";
@@ -27,6 +29,7 @@ export default function VideoEnEditor({
   sinGuardar: boolean;
   alCambiar: () => void;
 }) {
+  const { estado } = useApp();
   const entrada = useRef<HTMLInputElement>(null);
   const [progreso, setProgreso] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,29 +75,16 @@ export default function VideoEnEditor({
     }
     setError(null);
     setProgreso(0);
-    // XMLHttpRequest para poder mostrar el avance de la subida.
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", `/api/videos/${leccion}`);
-    xhr.setRequestHeader("Content-Type", tipo);
-    xhr.setRequestHeader("X-Nombre-Archivo", encodeURIComponent(archivo.name));
-    xhr.upload.onprogress = (e) => e.lengthComputable && setProgreso(e.loaded / e.total);
-    xhr.onload = () => {
-      setProgreso(null);
-      if (xhr.status >= 200 && xhr.status < 300) return alCambiar();
-      let mensaje = "No se pudo subir el video. Inténtalo de nuevo.";
-      try {
-        mensaje = (JSON.parse(xhr.responseText) as { error?: string }).error ?? mensaje;
-      } catch {
-        // respuesta sin JSON (por ejemplo, el límite de tamaño del servidor)
-        if (xhr.status === 413) mensaje = "El video es demasiado pesado para el servidor publicado. Prueba con uno más corto.";
-      }
-      setError(mensaje);
-    };
-    xhr.onerror = () => {
-      setProgreso(null);
-      setError("Se cortó la conexión mientras subía el video.");
-    };
-    xhr.send(archivo);
+    subirVideo(leccion, archivo, tipo, !!estado?.videosEnLaNube, setProgreso).listo.then(
+      () => {
+        setProgreso(null);
+        alCambiar();
+      },
+      (e: Error) => {
+        setProgreso(null);
+        if (!(e instanceof SubidaCancelada)) setError(e.message);
+      },
+    );
   };
 
   const quitar = async () => {

@@ -170,6 +170,15 @@ export async function permisoDeSubir(req: Request, prefijo: string, revisar: () 
   return Response.json(respuesta);
 }
 
+/**
+ * ¿El archivo en Blob es `<prefijo>.<ext>`? Blob le agrega un sufijo al azar
+ * antes de la extensión: "videos/fuente.mp4" queda "videos/fuente-a1B2c3.mp4".
+ */
+function esDeAqui(pathname: string, prefijo: string): boolean {
+  if (!pathname.startsWith(prefijo)) return false;
+  return /^(-[A-Za-z0-9]+)?\.[a-z0-9]+$/.test(pathname.slice(prefijo.length));
+}
+
 /** Un video recibido: guardado en el disco o ya en Blob. */
 export interface VideoRecibido {
   archivo: string;
@@ -202,7 +211,7 @@ export async function recibirVideo(req: Request, nombre: string, prefijo: string
     if (!esUrlDeBlob(datos.url)) return error("Esa dirección no es de un video subido a la plataforma.");
     const info = await head(datos.url).catch(() => null);
     if (!info) return error("No encontramos el video subido. Inténtalo de nuevo.", 404);
-    if (!info.pathname.startsWith(`${prefijo}.`)) return error("Ese video no es de aquí.", 403);
+    if (!esDeAqui(info.pathname, prefijo)) return error("Ese video no es de aquí.", 403);
     const tipo = info.contentType.split(";")[0].trim();
     if (!TIPOS_VIDEO[tipo]) return error("Sube el video en MP4, WebM o MOV.", 415);
     if (info.size > MAX_BYTES_VIDEO) return error(DEMASIADO_PESADO, 413);

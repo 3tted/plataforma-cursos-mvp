@@ -8,7 +8,7 @@ import { coachDeLaLeccion } from "@/lib/permisos";
 import { error, leerJson, manejar } from "@/lib/http";
 import { MAX_BYTES_VIDEO, TIPOS_VIDEO, tamañoLegible } from "@/lib/reglas-video";
 import type { VideoLeccion } from "@/lib/tipos";
-import { borrarArchivoDeVideo, esUrlDeBlob, rutaEnLaNube, videosEnLaNube } from "@/lib/videos";
+import { borrarArchivoDeVideo, esUrlDeBlob, rutaEnLaNube, urlParaVer, videosEnLaNube } from "@/lib/videos";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +45,7 @@ export const GET = manejar(async (req: Request, contexto: Contexto) => {
   const video = leccion ? await videoDe(leccion) : undefined;
   if (!video) return error("Esta lección no tiene video.", 404);
   // En Vercel Blob: el reproductor sigue a su url (Blob también responde por rangos).
-  if (video.url) return Response.redirect(video.url, 302);
+  if (video.url) return Response.redirect(await urlParaVer({ ...video, url: video.url }), 302);
 
   const ruta = await rutaDelVideo(video);
   const { size } = await fs.stat(ruta).catch(() => ({ size: -1 }));

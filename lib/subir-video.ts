@@ -3,7 +3,7 @@
 // límite de 4 MB de las peticiones al servidor) y luego se anota en la
 // lección. Sin Blob, va al servidor como hasta ahora.
 
-import { upload } from "@vercel/blob/client";
+import { upload, uploadPresigned } from "@vercel/blob/client";
 import { TIPOS_VIDEO } from "./reglas-video";
 
 export interface SubidaDeVideo {
@@ -31,14 +31,22 @@ export function subirVideo(
 function aBlob(leccion: string, archivo: File, tipo: string, alAvanzar: (f: number) => void): SubidaDeVideo {
   const control = new AbortController();
   const listo = (async () => {
+    // Primero, cómo subir aquí: almacenamiento público o privado, con o sin clave.
+    const forma = await fetch(`/api/videos/${leccion}/subir`).catch(() => null);
+    if (!forma) throw new Error(SIN_CONEXION);
+    const datos = (await forma.json().catch(() => ({}))) as { acceso?: "public" | "private"; firmada?: boolean; error?: string };
+    if (!forma.ok || !datos.acceso) throw new Error(datos.error ?? GENERICO);
+    if (control.signal.aborted) throw new SubidaCancelada();
+
     let url: string;
     try {
-      const subido = await upload(`videos/${leccion}.${TIPOS_VIDEO[tipo]}`, archivo, {
-        access: "public",
+      const subida = datos.firmada ? uploadPresigned : upload;
+      const subido = await subida(`videos/${leccion}.${TIPOS_VIDEO[tipo]}`, archivo, {
+        access: datos.acceso,
         handleUploadUrl: `/api/videos/${leccion}/subir`,
         contentType: tipo,
-        // En partes (y reintentando las que fallen) a partir de 50 MB.
-        multipart: archivo.size > 50 * 1024 * 1024,
+        // Con clave, en partes (y reintentando las que fallen) a partir de 50 MB.
+        multipart: !datos.firmada && archivo.size > 50 * 1024 * 1024,
         abortSignal: control.signal,
         onUploadProgress: ({ percentage }) => alAvanzar(percentage / 100),
       });

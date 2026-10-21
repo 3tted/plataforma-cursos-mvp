@@ -11,7 +11,7 @@ import { urlParaVer } from "./videos";
 
 // La coach sube un video suyo (una clase grabada) y la IA arma el curso con
 // él: lo divide en lecciones con su tramo (del minuto tal al tal), escribe los
-// apuntes y la transcripción de cada una, el repaso y el examen. El archivo no
+// apuntes de cada una, el repaso y el examen. El archivo no
 // se corta: cada lección guarda su tramo del mismo video y el reproductor solo
 // muestra esa parte. Así el alumno ve a la coach, no solo diapositivas.
 //
@@ -19,7 +19,7 @@ import { urlParaVer } from "./videos";
 // sube a Gemini, que lo procesa unos minutos, y después se le pide el curso
 // por partes, cada una corta (Vercel corta cada petición a los 5 minutos):
 //   1. la estructura: ve el video completo y propone las lecciones con su tramo;
-//   2. cada lección: ve solo su tramo y escribe apuntes, transcripción y repaso;
+//   2. cada lección: ve solo su tramo y escribe apuntes y repaso;
 //   3. el examen: a partir de los apuntes, sin volver a ver el video.
 // Lo avanzado se guarda; el navegador va llamando hasta que el curso está
 // listo (ver la ruta /api/coach/cursos/video).
@@ -125,8 +125,7 @@ Por defecto, más o menos una lección por cada 4 a 10 minutos de video según c
 const INSTRUCCIONES_LECCION = `${BASE}
 
 Ahora ves solo el tramo del video de una lección y escribes sus textos.
-- "contenido" son los apuntes de la lección en Markdown (## para subtítulos, **negritas**, listas), de 100 a 300 palabras: las ideas clave que explica la coach en este tramo, para repasar después de verlo. No es la transcripción.
-- "transcripcion" es lo que dice la coach en este tramo, palabra por palabra, quitando muletillas y repeticiones, en párrafos.
+- "contenido" son los apuntes de la lección en Markdown (## para subtítulos, **negritas**, listas), de 100 a 300 palabras: las ideas clave que explica la coach en este tramo, para repasar después de verlo. Escríbelos con tus palabras; no copies lo que dice la coach palabra por palabra.
 - "preguntas_sugeridas": 2 o 3 preguntas que un alumno le haría al asistente sobre esta lección.
 - "repaso": preguntas sobre esta lección. Cada una con 3 o 4 opciones, una sola correcta ("correcta" es el índice desde 0), opciones incorrectas creíbles, y una "explicacion" breve de por qué la correcta lo es. Por defecto, 2 preguntas.`;
 
@@ -167,11 +166,10 @@ function esquemaLeccion(m: Medidas, conLimites: boolean) {
     type: "object",
     properties: {
       contenido: TEXTO,
-      transcripcion: TEXTO,
       preguntas_sugeridas: LISTA,
       repaso: { type: "array", ...exacto(m.repaso, conLimites), items: PREGUNTA },
     },
-    required: ["contenido", "transcripcion", "preguntas_sugeridas", "repaso"],
+    required: ["contenido", "preguntas_sugeridas", "repaso"],
   };
 }
 
@@ -204,7 +202,6 @@ export interface EstructuraCursoVideo {
 
 export interface TextosLeccionVideo {
   contenido: string;
-  transcripcion: string;
   preguntas_sugeridas: string[];
   repaso: PreguntaPropuesta[];
 }
@@ -321,7 +318,7 @@ export async function proponerEstructura(video: VideoEnGemini, t: TrabajoCursoVi
   };
 }
 
-/** 2. Ve solo el tramo de una lección y escribe sus apuntes, transcripción y repaso. */
+/** 2. Ve solo el tramo de una lección y escribe sus apuntes y repaso. */
 export async function escribirLeccion(video: VideoEnGemini, t: TrabajoCursoVideo, i: number, limiteMs: number): Promise<TextosLeccionVideo> {
   const e = t.estructura!;
   const l = e.lecciones[i];
@@ -336,7 +333,6 @@ export async function escribirLeccion(video: VideoEnGemini, t: TrabajoCursoVideo
   const repaso = Array.isArray(r.repaso) ? r.repaso : [];
   return {
     contenido: r.contenido ?? "",
-    transcripcion: r.transcripcion ?? "",
     preguntas_sugeridas: Array.isArray(r.preguntas_sugeridas) ? r.preguntas_sugeridas : [],
     repaso: t.medidas.repaso !== undefined ? repaso.slice(0, t.medidas.repaso) : repaso,
   };
@@ -378,7 +374,8 @@ export function comoPropuesta(t: TrabajoCursoVideo): { propuesta: PropuestaCurso
         resumen: l.resumen,
         duracion_min: Math.max(1, Math.round((l.fin - l.inicio) / 60)),
         contenido: t.lecciones?.[i]?.contenido ?? "",
-        transcripcion: t.lecciones?.[i]?.transcripcion ?? "",
+        // Sin transcripción textual: con videos de terceros Gemini se niega a copiarla y responde vacío.
+        transcripcion: "",
         preguntas_sugeridas: t.lecciones?.[i]?.preguntas_sugeridas ?? [],
         repaso: t.lecciones?.[i]?.repaso ?? [],
       })),

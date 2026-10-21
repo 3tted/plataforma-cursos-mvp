@@ -16,7 +16,7 @@ type Paso = "elegir" | "subiendo" | "viendo" | "dividiendo" | "escribiendo" | "e
 const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // La coach sube una clase grabada y la IA arma el curso con ella: cada lección
-// es un tramo del video, con sus apuntes, transcripción y repaso. Al terminar
+// es un tramo del video, con sus apuntes y repaso. Al terminar
 // abre el borrador en el editor. Si la IA falla, se reintenta sin volver a
 // subir el video.
 export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: string; alCerrar: () => void }) {
@@ -205,7 +205,7 @@ export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: st
       </div>
       <p className="texto-suave">
         Sube una clase que grabaste. La IA la ve completa, la divide en lecciones (cada una con su tramo del video) y escribe
-        los apuntes, la transcripción, el repaso y el examen. Tus alumnos te ven a ti explicando. Queda como borrador para que
+        los apuntes, el repaso y el examen. Tus alumnos te ven a ti explicando. Queda como borrador para que
         lo revises.
       </p>
 

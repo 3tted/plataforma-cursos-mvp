@@ -3,7 +3,7 @@ import { EMPRESA_MERKATICS } from "./cuentas";
 import { cursoDeLeccion, cargarCurso, idCurso } from "./curso";
 import { ErrorDeDatos, SinPermiso, SinSesion } from "./http";
 import { cuentaDe } from "./sesion";
-import type { ComunidadCreada, Cuenta, CursoCreado, DatosCurso, Empresa } from "./tipos";
+import type { ComunidadCreada, Cuenta, CursoCreado, DatosCurso, Empresa, RolEmpresa } from "./tipos";
 
 // Permisos: el servidor sabe quién hace cada petición por su sesión (cookie),
 // nunca por lo que diga el navegador. Las coaches solo manejan lo de su
@@ -17,8 +17,11 @@ export interface Coach {
   cuenta: Cuenta;
   nombre: string;
   empresa: string;
-  /** Dueña de la empresa: cambia la marca e invita coaches. */
+  rolEmpresa: RolEmpresa;
+  /** Dueño de la empresa: no se le puede quitar y puede pasarla a otra persona. */
   dueno: boolean;
+  /** Dueño o administrador: maneja el equipo, las invitaciones y la marca. */
+  administra: boolean;
 }
 
 /** La cuenta con sesión abierta (o un 401 si no hay). */
@@ -30,7 +33,15 @@ export async function cuentaDeReq(req: Request): Promise<Cuenta> {
 
 export function comoCoach(cuenta: Cuenta): Coach {
   if (cuenta.rol !== "coach" || !cuenta.empresa) throw new SinPermiso("Esta acción es solo para coaches.");
-  return { cuenta, nombre: cuenta.nombre, empresa: cuenta.empresa, dueno: cuenta.rolEmpresa === "dueno" };
+  const rolEmpresa = cuenta.rolEmpresa ?? "coach";
+  return {
+    cuenta,
+    nombre: cuenta.nombre,
+    empresa: cuenta.empresa,
+    rolEmpresa,
+    dueno: rolEmpresa === "dueno",
+    administra: rolEmpresa === "dueno" || rolEmpresa === "admin",
+  };
 }
 
 /** La coach que hace la petición (o un error si no es coach). */
@@ -59,11 +70,13 @@ export function comunidadDeCoach(a: Almacen, id: unknown, coach: Coach): Comunid
   return c;
 }
 
-/** La empresa de la coach; con `dueno`, solo si la coach es su dueña. */
-export function empresaDeCoach(a: Almacen, coach: Coach, { dueno = false } = {}): Empresa {
+/** La empresa de la coach; con `administrar`, solo si es su dueño o un administrador. */
+export function empresaDeCoach(a: Almacen, coach: Coach, { administrar = false } = {}): Empresa {
   const e = (a.empresas ?? []).find((x) => x.id === coach.empresa);
   if (!e) throw new ErrorDeDatos("No encontramos tu empresa.");
-  if (dueno && !coach.dueno) throw new SinPermiso("Solo la dueña de la empresa puede hacer esto.");
+  if (administrar && !coach.administra) {
+    throw new SinPermiso("Solo el dueño o un administrador de la empresa puede hacer esto.");
+  }
   return e;
 }
 

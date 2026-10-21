@@ -21,6 +21,8 @@ const ARCHIVOS: Record<string, string> = {
   "ventas-whatsapp": "cursos/ventas-whatsapp.json",
 };
 const IDS_ARCHIVO = Object.keys(ARCHIVOS);
+/** Cuántos cursos viajan con la plataforma (los de la empresa Merkatics). */
+export const CURSOS_DE_ARCHIVO = IDS_ARCHIVO.length;
 
 /** Para leer también los borradores (el editor de la coach y su vista previa). */
 interface Opciones {

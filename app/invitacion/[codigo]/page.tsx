@@ -12,6 +12,7 @@ import type { CuentaPublica } from "@/lib/tipos";
 interface Info {
   vigente: boolean;
   tipo?: "coach" | "empresa";
+  rol?: "admin" | "coach";
   empresa?: string | null;
   creadaPor?: string;
 }
@@ -93,7 +94,7 @@ export default function PaginaInvitacion() {
       ? info.empresa
         ? `Te invitaron a abrir ${info.empresa} en Merkatics`
         : "Te invitaron a abrir tu empresa en Merkatics"
-      : `Te invitaron a ser coach de ${info.empresa ?? "una empresa"}`;
+      : `Te invitaron a ser ${info.rol === "admin" ? "administrador" : "coach"} de ${info.empresa ?? "una empresa"}`;
 
   return (
     <div className="pagina-estrecha invitacion">
@@ -101,16 +102,18 @@ export default function PaginaInvitacion() {
       <p className="texto-suave">
         Te invita {info.creadaPor}.{" "}
         {info.tipo === "empresa"
-          ? "Serás la dueña de la empresa: pones su marca, creas sus comunidades y cursos e invitas a tus coaches."
-          : "Vas a crear y editar las comunidades y los cursos de la empresa, y ver el avance de sus alumnos."}
+          ? "Serás el dueño de la empresa: pones su marca, creas sus comunidades y cursos e invitas a tu equipo."
+          : info.rol === "admin"
+            ? "Como administrador manejas la empresa con su dueño: su equipo, sus invitaciones, su marca, sus comunidades y sus cursos."
+            : "Vas a crear y editar las comunidades y los cursos de la empresa, y ver el avance de sus alumnos y los pagos."}
       </p>
 
       {usuario ? (
         usuario.rol === "coach" ? (
           <div className="tarjeta invitacion-tarjeta">
             <p>
-              Tu cuenta (<strong>{usuario.nombre}</strong>) ya es de coach en una empresa. Para aceptar esta invitación,
-              sal y crea otra cuenta con otro correo.
+              Tu cuenta (<strong>{usuario.nombre}</strong>) ya es del equipo de una empresa. Para aceptar esta
+              invitación, sal y crea otra cuenta con otro correo.
             </p>
             <button type="button" className="boton boton-secundario" onClick={cerrarSesion}>
               Salir de mi cuenta
@@ -119,8 +122,8 @@ export default function PaginaInvitacion() {
         ) : (
           <div className="tarjeta invitacion-tarjeta">
             <p>
-              Entraste como <strong>{usuario.nombre}</strong>. Al aceptar, tu cuenta pasa a ser de coach; lo que hiciste
-              como alumno se queda igual.
+              Entraste como <strong>{usuario.nombre}</strong>. Al aceptar, tu cuenta entra al equipo de la empresa; lo que
+              hiciste como alumno se queda igual.
             </p>
             {error && (
               <p className="error" role="alert">
@@ -134,7 +137,7 @@ export default function PaginaInvitacion() {
         )
       ) : (
         <form className="tarjeta invitacion-tarjeta" onSubmit={crear} noValidate>
-          <h2>Crea tu cuenta de coach</h2>
+          <h2>Crea tu cuenta</h2>
           <label className="campo">
             <span>Tu nombre</span>
             <input value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={60} autoComplete="name" />
@@ -162,7 +165,7 @@ export default function PaginaInvitacion() {
             </p>
           )}
           <button type="submit" className="boton boton-bloque" disabled={enviando}>
-            {enviando ? "Creando tu cuenta…" : "Crear mi cuenta de coach"}
+            {enviando ? "Creando tu cuenta…" : "Crear mi cuenta"}
           </button>
           {opcionesEntrada?.google && (
             <a

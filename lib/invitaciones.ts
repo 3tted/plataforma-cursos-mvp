@@ -4,14 +4,19 @@ import { idEmpresaLibre } from "./cuentas";
 import { ErrorDeDatos } from "./http";
 import type { Cuenta, Invitacion } from "./tipos";
 
-// Ser coach es solo por invitación. La dueña de una empresa invita coaches a
-// su empresa; el equipo de Merkatics invita a quien abrirá una empresa nueva.
+// Entrar al equipo de una empresa es por invitación: su dueño o un
+// administrador invita coaches y administradores. El equipo de Merkatics
+// también puede invitar a quien abrirá una empresa nueva (aunque cualquiera
+// puede registrar la suya en /registra-tu-empresa).
 // La invitación es un enlace que se comparte a mano (el MVP no manda correos)
 // y sirve una sola vez.
 
 const DURACION_MS = 14 * 24 * 3_600_000;
 
-export function nuevaInvitacion(a: Almacen, datos: Pick<Invitacion, "tipo" | "empresa" | "nombreEmpresa" | "creadaPor">): Invitacion {
+export function nuevaInvitacion(
+  a: Almacen,
+  datos: Pick<Invitacion, "tipo" | "empresa" | "rol" | "nombreEmpresa" | "creadaPor">,
+): Invitacion {
   const ahora = Date.now();
   const invitacion: Invitacion = {
     codigo: randomBytes(12).toString("base64url"),
@@ -34,14 +39,14 @@ export function invitacionVigente(a: Almacen, codigo: unknown): Invitacion {
   return i;
 }
 
-/** Convierte la cuenta en coach: de la empresa que invita o dueña de una empresa nueva. */
+/** Mete la cuenta al equipo de la empresa que invita (con su rol) o la hace dueña de una empresa nueva. */
 export function aceptarInvitacion(a: Almacen, i: Invitacion, cuenta: Cuenta): void {
   if (cuenta.rol === "coach") {
-    throw new ErrorDeDatos("Tu cuenta ya es de coach en una empresa. Para entrar a otra, crea otra cuenta con otro correo.");
+    throw new ErrorDeDatos("Tu cuenta ya es del equipo de una empresa. Para entrar a otra, crea otra cuenta con otro correo.");
   }
   const ahora = new Date().toISOString();
   if (i.tipo === "coach") {
-    Object.assign(cuenta, { rol: "coach", empresa: i.empresa, rolEmpresa: "coach" });
+    Object.assign(cuenta, { rol: "coach", empresa: i.empresa, rolEmpresa: i.rol ?? "coach" });
   } else {
     const nombre = i.nombreEmpresa || cuenta.nombre;
     const id = idEmpresaLibre(a, nombre);

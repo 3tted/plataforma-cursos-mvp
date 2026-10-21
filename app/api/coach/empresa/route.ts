@@ -5,14 +5,14 @@ import { coachDe, empresaDeCoach } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
-// La empresa de la coach con sesión y su marca (nombre, color y logo). Todas
-// sus coaches la ven; solo la dueña la cambia. La marca se aplica en sus
+// La empresa de quien tiene sesión y su marca (nombre, color y logo). Todo
+// su equipo la ve; la cambian el dueño y los administradores. La marca se aplica en sus
 // comunidades, sus cursos, sus lecciones y en su página (/e/<id>).
 export const GET = manejar(async (req: Request) => {
   const coach = await coachDe(req);
   const empresa = await consultar((a) => empresaDeCoach(a, coach));
   // Sin color todavía: se propone el de Merkatics (y la marca de Merkatics sigue hasta que guarde).
-  return Response.json({ ...empresa, color: empresa.color ?? COLOR_MERKATICS, conMarca: !!empresa.color, puedeEditar: coach.dueno });
+  return Response.json({ ...empresa, color: empresa.color ?? COLOR_MERKATICS, conMarca: !!empresa.color, puedeEditar: coach.administra });
 });
 
 // Guarda nombre y color: { nombre, color }.
@@ -24,7 +24,7 @@ export const PUT = manejar(async (req: Request) => {
   const color = normalizarColor(datos.color);
   if (!color) throw new ErrorDeDatos("Elige un color válido, por ejemplo #2563eb.");
   const empresa = await modificar((a) =>
-    Object.assign(empresaDeCoach(a, coach, { dueno: true }), { nombre, color, actualizadaEn: new Date().toISOString() }),
+    Object.assign(empresaDeCoach(a, coach, { administrar: true }), { nombre, color, actualizadaEn: new Date().toISOString() }),
   );
   return Response.json({ ...empresa, conMarca: true, puedeEditar: true });
 });

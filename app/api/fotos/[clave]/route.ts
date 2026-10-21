@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 // Fotos que sube la coach: la portada de una comunidad ("comunidad-<id>") o de
 // un curso ("curso-<id>"), y el logo de su empresa ("empresa-<id>"). El
 // navegador ya la manda reducida (JPEG las portadas, PNG el logo).
-// Solo una coach de la empresa dueña la cambia (el logo, solo su dueña).
+// Solo alguien del equipo de la empresa dueña la cambia (el logo, su dueño o un administrador).
 
 type Contexto = { params: Promise<{ clave: string }> };
 
@@ -35,7 +35,7 @@ async function anotar(req: Request, clave: string, url: string | null) {
   const coach = await coachDe(req);
   await modificar((a) => {
     if (p.de === "empresa") {
-      const empresa = empresaDeCoach(a, coach, { dueno: true });
+      const empresa = empresaDeCoach(a, coach, { administrar: true });
       if (empresa.id !== p.id) throw new SinPermiso("Ese logo es de otra empresa.");
       if (url) empresa.logo = url;
       else delete empresa.logo;

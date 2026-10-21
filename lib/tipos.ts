@@ -165,24 +165,34 @@ export interface CursoCreado {
 }
 
 /**
- * Empresa (tenant): dueña de comunidades y cursos, con su marca. Sus coaches
- * son las cuentas con `empresa` igual a su id; una de ellas es la dueña.
+ * Empresa (tenant): dueña de comunidades y cursos, con su marca. Su equipo
+ * son las cuentas con `empresa` igual a su id, cada una con su rol: dueño,
+ * administrador o coach.
  */
 export interface Empresa {
   id: string;
-  /** Nombre de la cuenta dueña (la que cambia la marca e invita coaches). */
+  /** Nombre de la cuenta dueña. */
   dueno: string;
   nombre: string;
   /** Color principal en hex (#rrggbb); sin él, la marca de Merkatics. Los demás tonos se calculan (lib/marca.ts). */
   color?: string;
   /** Logo (url de /api/fotos). */
   logo?: string;
+  /** A qué se dedica (lo escribe quien la registra). */
+  giro?: string;
+  /** Cuántos alumnos tenía al registrarse (un rango de RANGOS_ALUMNOS). */
+  alumnosAprox?: string;
   creadaEn: string;
   actualizadaEn: string;
 }
 
-/** Rol de una coach dentro de su empresa. */
-export type RolEmpresa = "dueno" | "coach";
+/**
+ * Rol dentro de la empresa. El dueño y el administrador la manejan (equipo,
+ * roles, invitaciones y marca); solo el dueño no se puede quitar y puede
+ * pasarle la empresa a otra persona. El coach enseña: ve y edita todo el
+ * contenido, los alumnos y los pagos, y modera las comunidades.
+ */
+export type RolEmpresa = "dueno" | "admin" | "coach";
 
 /**
  * Cuenta de una persona. El nombre no se repite: es con el que se firma todo
@@ -224,6 +234,8 @@ export interface Invitacion {
   tipo: "coach" | "empresa";
   /** La empresa a la que entra (tipo "coach"). */
   empresa?: string;
+  /** Con qué rol entra a esa empresa (tipo "coach"); sin el dato, coach. */
+  rol?: "admin" | "coach";
   /** Nombre propuesto para la empresa nueva (tipo "empresa"). */
   nombreEmpresa?: string;
   creadaPor: string;
@@ -233,30 +245,7 @@ export interface Invitacion {
   usadaEn?: string;
 }
 
-/**
- * Solicitud de acceso de un coach (/coaches). En el MVP no se manda ningún
- * mensaje: queda guardada y el equipo de Merkatics la ve en Mi empresa, desde
- * donde crea la invitación y la comparte a mano.
- */
-export interface SolicitudCoach {
-  id: string;
-  nombre: string;
-  /** Correo o WhatsApp para responderle. */
-  contacto: string;
-  /** Nombre de su negocio o marca (opcional). */
-  empresa?: string;
-  /** Qué enseña. */
-  tema: string;
-  /** Cuántos alumnos tiene hoy, en rangos ("Todavía ninguno", "1 a 50"…). */
-  alumnos: string;
-  mensaje?: string;
-  creadaEn: string;
-  estado: "nueva" | "invitada" | "descartada";
-  /** Código de la invitación que se le creó. */
-  invitacion?: string;
-}
-
-/** Opciones de "¿Cuántos alumnos tienes hoy?" en la solicitud de acceso. */
+/** Opciones de "¿Cuántos alumnos tienes hoy?" al registrar una empresa. */
 export const RANGOS_ALUMNOS = ["Todavía ninguno", "1 a 50", "51 a 200", "Más de 200"];
 
 /** Lo que el navegador sabe de la cuenta con sesión abierta. */
@@ -265,8 +254,11 @@ export interface CuentaPublica {
   correo: string;
   rol: Rol;
   empresa?: string;
-  /** Dueña de su empresa: cambia la marca e invita coaches. */
+  rolEmpresa?: RolEmpresa;
+  /** Dueño de su empresa: no se le puede quitar y puede pasarle la empresa a otra persona. */
   dueno: boolean;
+  /** Dueño o administrador: maneja el equipo, las invitaciones y la marca. */
+  administra: boolean;
   admin: boolean;
   /** Tiene contraseña propia (las de Google o demo pueden no tenerla). */
   conContrasena: boolean;

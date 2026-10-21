@@ -15,7 +15,7 @@ type EmpresaVista = Empresa & {
   color: string;
   /** Ya eligió su color: sus comunidades se ven con su marca. */
   conMarca: boolean;
-  /** Solo la dueña cambia la marca. */
+  /** El dueño y los administradores cambian la marca. */
   puedeEditar: boolean;
 };
 
@@ -181,7 +181,7 @@ export default function PaginaMiEmpresa() {
             <form className="tarjeta forma-comunidad" onSubmit={guardar} noValidate>
               <h2>Nombre y color</h2>
               {!puedeEditar && (
-                <p className="nota">Solo {empresa.dueno}, la dueña de la empresa, cambia su nombre, su color y su logo.</p>
+                <p className="nota">El nombre, el color y el logo los cambian el dueño ({empresa.dueno}) y los administradores.</p>
               )}
               <fieldset className="mi-empresa-campos" disabled={!puedeEditar}>
                 <label className="campo">
@@ -346,7 +346,7 @@ export default function PaginaMiEmpresa() {
         </div>
       )}
 
-      {empresa && <EquipoEmpresa empresa={empresa.id} dueno={puedeEditar} />}
+      {empresa && <EquipoEmpresa empresa={empresa.id} administra={puedeEditar} />}
     </div>
   );
 }

@@ -9522,3 +9522,82 @@ button.tarjeta-comunidad-enlace {
   align-items: center;
   gap: 10px 14px;
 }
+
+/* Registra tu empresa: grupos del formulario y quién hace qué */
+.coaches-grupo {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.coaches-grupo > legend {
+  margin-bottom: 4px;
+  padding: 0;
+  font-family: var(--fuente-display);
+  font-size: var(--t-small);
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.coaches-roles {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.coaches-roles > div {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.coaches-roles dt {
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.coaches-roles dd {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .coaches-roles > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+
+/* Equipo de la empresa: rol de cada quien y acciones */
+.equipo-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 14px;
+}
+
+.equipo-rol {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--t-small);
+}
+
+.equipo-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tabla-empresas td .nota {
+  display: inline;
+}

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { api, fechaCorta, hace } from "@/lib/cliente";
-import type { SolicitudCoach } from "@/lib/tipos";
+import { api, fechaCorta } from "@/lib/cliente";
+import type { RolEmpresa } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
 import { IconoCopiar, IconoEnlace, IconoInvitar } from "./Iconos";
@@ -11,32 +11,50 @@ import { IconoCopiar, IconoEnlace, IconoInvitar } from "./Iconos";
 interface Miembro {
   nombre: string;
   correo: string;
-  dueno: boolean;
+  rolEmpresa: RolEmpresa;
 }
 
 interface InvitacionVista {
   codigo: string;
   tipo: "coach" | "empresa";
+  rol: "admin" | "coach";
   nombreEmpresa?: string;
   creadaPor: string;
   venceEn: string;
 }
 
-// Debajo de "Mi empresa": la dirección de la empresa para compartir, su
-// equipo de coaches y las invitaciones (ser coach es solo por invitación).
-// Al equipo de Merkatics también le toca invitar empresas nuevas y dar
-// contraseñas temporales a quien olvidó la suya.
-export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; dueno: boolean }) {
+interface EmpresaRegistrada {
+  id: string;
+  nombre: string;
+  dueno: string;
+  giro?: string;
+  alumnosAprox?: string;
+  creadaEn: string;
+  equipo: number;
+  comunidades: number;
+  cursos: number;
+}
+
+const NOMBRE_ROL: Record<RolEmpresa, string> = { dueno: "Dueño", admin: "Administrador", coach: "Coach" };
+
+// Debajo de "Mi empresa": la dirección de la empresa para compartir, su equipo
+// con su rol y las invitaciones. El dueño y los administradores invitan,
+// cambian roles y quitan gente (menos al dueño); solo el dueño le pasa la
+// empresa a otra persona. Al equipo de Merkatics le toca ver todas las
+// empresas, invitar empresas nuevas y dar contraseñas temporales.
+export default function EquipoEmpresa({ empresa, administra }: { empresa: string; administra: boolean }) {
   const { usuario } = useApp();
   const [datos, setDatos] = useState<{ equipo: Miembro[]; invitaciones: InvitacionVista[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
-  const [creando, setCreando] = useState<"coach" | "empresa" | null>(null);
+  const [creando, setCreando] = useState<"coach" | "admin" | "empresa" | null>(null);
   const [nombreEmpresa, setNombreEmpresa] = useState("");
   const [correoOlvido, setCorreoOlvido] = useState("");
   const [temporal, setTemporal] = useState<{ nombre: string; correo: string; contrasena: string } | null>(null);
+  const [empresas, setEmpresas] = useState<EmpresaRegistrada[] | null>(null);
   const [origen, setOrigen] = useState("");
-  const [solicitudes, setSolicitudes] = useState<SolicitudCoach[] | null>(null);
+  const esEquipoMerkatics = usuario?.admin === true;
+  const soyDueno = usuario?.dueno === true;
 
   const cargar = useCallback(() => {
     api<{ equipo: Miembro[]; invitaciones: InvitacionVista[] }>("/api/invitaciones")
@@ -47,29 +65,12 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
     setOrigen(window.location.origin);
     cargar();
   }, [cargar]);
-
-  // Solo el equipo de Merkatics ve las solicitudes de acceso de los coaches.
-  const esEquipo = usuario?.admin === true;
-  const cargarSolicitudes = useCallback(() => {
-    api<SolicitudCoach[]>("/api/solicitudes")
-      .then(setSolicitudes)
-      .catch((e) => setError((e as Error).message));
-  }, []);
   useEffect(() => {
-    if (esEquipo) cargarSolicitudes();
-  }, [esEquipo, cargarSolicitudes]);
-
-  const atender = async (id: string, accion: "invitar" | "descartar") => {
-    setError(null);
-    try {
-      const s = await api<SolicitudCoach>("/api/solicitudes", { method: "PATCH", json: { id, accion } });
-      cargarSolicitudes();
-      cargar();
-      if (accion === "invitar" && s.invitacion) void copiar(enlaceDe(s.invitacion), s.invitacion);
-    } catch (e) {
-      setError((e as Error).message);
-    }
-  };
+    if (!esEquipoMerkatics) return;
+    api<EmpresaRegistrada[]>("/api/empresas")
+      .then(setEmpresas)
+      .catch((e) => setError((e as Error).message));
+  }, [esEquipoMerkatics]);
 
   const enlaceDe = (codigo: string) => `${origen}/invitacion/${codigo}`;
   const pagina = `${origen}/e/${empresa}`;
@@ -84,13 +85,13 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
     }
   };
 
-  const invitar = async (tipo: "coach" | "empresa") => {
+  const invitar = async (tipo: "coach" | "admin" | "empresa") => {
     setCreando(tipo);
     setError(null);
     try {
       const nueva = await api<InvitacionVista>("/api/invitaciones", {
         method: "POST",
-        json: tipo === "empresa" ? { tipo, nombreEmpresa } : { tipo },
+        json: tipo === "empresa" ? { tipo, nombreEmpresa } : { tipo: "coach", rol: tipo },
       });
       if (tipo === "empresa") setNombreEmpresa("");
       cargar();
@@ -110,6 +111,31 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
     } catch (e) {
       setError((e as Error).message);
     }
+  };
+
+  // Cambios en el equipo: rol, quitar o pasarle la empresa.
+  const alEquipo = async (pedido: () => Promise<unknown>) => {
+    setError(null);
+    try {
+      await pedido();
+      cargar();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+  const cambiarRol = (m: Miembro, rol: "admin" | "coach") =>
+    alEquipo(() => api("/api/coach/equipo", { method: "PATCH", json: { correo: m.correo, rol } }));
+  const quitar = (m: Miembro) => {
+    if (!window.confirm(`¿Quitar a ${m.nombre} del equipo? Su cuenta sigue, pero ya no entra como parte de la empresa.`)) return;
+    void alEquipo(() => api(`/api/coach/equipo?correo=${encodeURIComponent(m.correo)}`, { method: "DELETE" }));
+  };
+  const pasarEmpresa = (m: Miembro) => {
+    if (!window.confirm(`¿Pasarle la empresa a ${m.nombre}? Será el nuevo dueño y tú te quedas como administrador.`)) return;
+    // Tu rol cambia: se recarga para que toda la página lo refleje.
+    void alEquipo(async () => {
+      await api("/api/coach/equipo", { method: "POST", json: { correo: m.correo } });
+      window.location.reload();
+    });
   };
 
   const restablecer = async (e: FormEvent) => {
@@ -134,7 +160,8 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
             <span className="invitaciones-texto">
               <code className="enlace-copiable">{enlaceDe(i.codigo)}</code>
               <span className="nota">
-                {i.nombreEmpresa ? `${i.nombreEmpresa} · ` : ""}Sin usar · vence el {fechaCorta(i.venceEn)}
+                {i.tipo === "coach" ? `Para ${NOMBRE_ROL[i.rol].toLowerCase()} · ` : i.nombreEmpresa ? `${i.nombreEmpresa} · ` : ""}
+                Sin usar · vence el {fechaCorta(i.venceEn)}
               </span>
             </span>
             <span className="invitaciones-acciones">
@@ -177,106 +204,130 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
 
       <section className="tarjeta" aria-labelledby="equipo-titulo">
         <h2 id="equipo-titulo">Equipo</h2>
+        <p className="texto-suave">
+          Todo el equipo ve y edita las comunidades y los cursos, ve a los alumnos y los pagos, y modera. El dueño y los
+          administradores, además, manejan el equipo y la marca.
+        </p>
         {!datos ? (
           <p className="texto-suave">Cargando tu equipo…</p>
         ) : (
           <ul className="equipo-lista">
-            {datos.equipo.map((m) => (
-              <li key={m.correo}>
-                <Avatar nombre={m.nombre} tamaño={32} coach />
-                <span className="equipo-datos">
-                  <span className="equipo-nombre">
-                    {m.nombre}
-                    {m.nombre === usuario?.nombre && <span className="texto-suave"> (tú)</span>}
+            {datos.equipo.map((m) => {
+              const yo = m.nombre === usuario?.nombre;
+              const editable = administra && !yo && m.rolEmpresa !== "dueno";
+              return (
+                <li key={m.correo}>
+                  <Avatar nombre={m.nombre} tamaño={32} coach />
+                  <span className="equipo-datos">
+                    <span className="equipo-nombre">
+                      {m.nombre}
+                      {yo && <span className="texto-suave"> (tú)</span>}
+                    </span>
+                    <span className="nota">{m.correo}</span>
                   </span>
-                  <span className="nota">{m.correo}</span>
-                </span>
-                <span className="pastilla">{m.dueno ? "Dueña" : "Coach"}</span>
-              </li>
-            ))}
+                  {editable ? (
+                    <span className="equipo-acciones">
+                      <label className="sr-only" htmlFor={`rol-${m.correo}`}>
+                        Rol de {m.nombre}
+                      </label>
+                      <select
+                        id={`rol-${m.correo}`}
+                        className="equipo-rol"
+                        value={m.rolEmpresa}
+                        onChange={(e) => void cambiarRol(m, e.target.value as "admin" | "coach")}
+                      >
+                        <option value="admin">Administrador</option>
+                        <option value="coach">Coach</option>
+                      </select>
+                      {soyDueno && (
+                        <button type="button" className="enlace enlace-discreto" onClick={() => pasarEmpresa(m)}>
+                          Pasarle la empresa
+                        </button>
+                      )}
+                      <button type="button" className="enlace enlace-discreto" onClick={() => quitar(m)}>
+                        Quitar
+                      </button>
+                    </span>
+                  ) : (
+                    <span className="pastilla">{NOMBRE_ROL[m.rolEmpresa]}</span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
 
-        {dueno ? (
+        {administra ? (
           <div className="equipo-invitar">
-            <h3>Invitar coaches</h3>
+            <h3>Invitar al equipo</h3>
             <p className="texto-suave">
-              Crea un enlace y mándalo por WhatsApp o por correo. Sirve una sola vez y dura 14 días: quien lo abre crea
-              su cuenta de coach en tu empresa.
+              Crea un enlace y mándalo por WhatsApp o por correo. Sirve una sola vez y dura 14 días: quien lo abre crea su
+              cuenta y entra a tu empresa con ese rol.
             </p>
-            <button type="button" className="boton boton-secundario" onClick={() => void invitar("coach")} disabled={creando !== null}>
-              <IconoInvitar width={17} height={17} /> {creando === "coach" ? "Creando…" : "Crear enlace de invitación"}
-            </button>
+            <div className="equipo-botones">
+              <button type="button" className="boton boton-secundario" onClick={() => void invitar("coach")} disabled={creando !== null}>
+                <IconoInvitar width={17} height={17} /> {creando === "coach" ? "Creando…" : "Invitar coach"}
+              </button>
+              <button type="button" className="boton boton-fantasma-borde" onClick={() => void invitar("admin")} disabled={creando !== null}>
+                <IconoInvitar width={17} height={17} /> {creando === "admin" ? "Creando…" : "Invitar administrador"}
+              </button>
+            </div>
             {lista("coach")}
           </div>
         ) : (
-          <p className="nota">Para sumar a otra coach, pídele a la dueña de tu empresa que la invite.</p>
+          <p className="nota">Para sumar a alguien al equipo, pídeselo al dueño o a un administrador de tu empresa.</p>
         )}
       </section>
 
-      {usuario?.admin && (
+      {esEquipoMerkatics && (
         <section className="tarjeta" aria-labelledby="merkatics-titulo">
           <h2 id="merkatics-titulo">Equipo de Merkatics</h2>
           <div className="equipo-invitar">
-            <h3>Solicitudes de coaches</h3>
+            <h3>Empresas registradas</h3>
             <p className="texto-suave">
-              Lo que piden en la página «Para coaches». Modo demostración: no llega ningún correo; desde aquí creas su
-              invitación y se la compartes por el medio que dejaron.
+              Todas las empresas de la plataforma. Modo demostración: se activan al registrarse; en la versión real se
+              revisarían antes.
             </p>
-            {!solicitudes ? (
-              <p className="texto-suave">Cargando solicitudes…</p>
-            ) : solicitudes.length === 0 ? (
-              <p className="vacio">Todavía no hay solicitudes.</p>
+            {!empresas ? (
+              <p className="texto-suave">Cargando empresas…</p>
             ) : (
-              <ul className="solicitudes-lista">
-                {solicitudes.map((s) => (
-                  <li key={s.id} className="solicitud" data-estado={s.estado}>
-                    <div className="solicitud-cabecera">
-                      <strong>
-                        {s.nombre}
-                        {s.empresa ? ` · ${s.empresa}` : ""}
-                      </strong>
-                      <span className="nota">{hace(s.creadaEn)}</span>
-                    </div>
-                    <p className="texto-suave">
-                      Enseña: {s.tema} · {s.alumnos === "Todavía ninguno" ? "todavía sin alumnos" : `${s.alumnos} alumnos`} ·
-                      Contacto: <span className="cifra">{s.contacto}</span>
-                    </p>
-                    {s.mensaje && <p className="nota">«{s.mensaje}»</p>}
-                    <div className="solicitud-acciones">
-                      {s.estado === "invitada" && s.invitacion ? (
-                        <>
-                          <span className="pastilla pastilla-ok">Invitada</span>
-                          <code className="enlace-copiable">{enlaceDe(s.invitacion)}</code>
-                          <button
-                            type="button"
-                            className="boton boton-chico boton-fantasma-borde"
-                            onClick={() => void copiar(enlaceDe(s.invitacion!), s.invitacion!)}
-                          >
-                            <IconoCopiar width={15} height={15} /> {copiado === s.invitacion ? "Copiado" : "Copiar"}
-                          </button>
-                        </>
-                      ) : s.estado === "descartada" ? (
-                        <span className="pastilla">Descartada</span>
-                      ) : (
-                        <>
-                          <button type="button" className="boton boton-chico" onClick={() => void atender(s.id, "invitar")}>
-                            <IconoInvitar width={15} height={15} /> Crear su invitación
-                          </button>
-                          <button type="button" className="enlace enlace-discreto" onClick={() => void atender(s.id, "descartar")}>
-                            Descartar
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="tabla-desplazable">
+                <table className="tabla-pagos tabla-empresas">
+                  <thead>
+                    <tr>
+                      <th>Empresa</th>
+                      <th>Dueño</th>
+                      <th>Equipo</th>
+                      <th>Comunidades</th>
+                      <th>Cursos</th>
+                      <th>Registro</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {empresas.map((e) => (
+                      <tr key={e.id}>
+                        <td>
+                          <Link href={`/e/${e.id}`}>{e.nombre}</Link>
+                          {e.giro && <span className="nota"> · {e.giro}</span>}
+                        </td>
+                        <td>{e.dueno}</td>
+                        <td className="numero">{e.equipo}</td>
+                        <td className="numero">{e.comunidades}</td>
+                        <td className="numero">{e.cursos}</td>
+                        <td>{fechaCorta(e.creadaEn)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
           <div className="equipo-invitar">
-            <h3>Invitar una empresa nueva</h3>
-            <p className="texto-suave">Quien abre el enlace crea su cuenta y queda como dueña de una empresa nueva.</p>
+            <h3>Invitar a alguien a abrir su empresa</h3>
+            <p className="texto-suave">
+              Cualquiera puede registrar su empresa en «Registra tu empresa». Si prefieres mandarle un enlace, quien lo
+              abre crea su cuenta y queda como dueño de una empresa nueva.
+            </p>
             <form
               className="equipo-forma"
               onSubmit={(e) => {
@@ -285,7 +336,7 @@ export default function EquipoEmpresa({ empresa, dueno }: { empresa: string; due
               }}
             >
               <label className="campo">
-                <span>Nombre de la empresa (opcional; la dueña lo puede cambiar)</span>
+                <span>Nombre de la empresa (opcional; el dueño lo puede cambiar)</span>
                 <input value={nombreEmpresa} onChange={(e) => setNombreEmpresa(e.target.value)} maxLength={60} />
               </label>
               <button type="submit" className="boton boton-secundario" disabled={creando !== null}>

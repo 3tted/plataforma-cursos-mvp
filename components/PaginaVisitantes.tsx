@@ -183,8 +183,8 @@ export default function PaginaVisitantes() {
             <li>Cobros en pesos, sin depender de tarjeta</li>
             <li>Ves quién aprobó y qué temas cuestan más</li>
           </ul>
-          <Link href="/coaches" className="boton">
-            Quiero vender mis cursos
+          <Link href="/registra-tu-empresa" className="boton">
+            Registra tu empresa
           </Link>
         </section>
       </main>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 // Título desde el servidor (la página es de cliente y no puede exportar metadata).
-export const metadata: Metadata = { title: "Para coaches" };
+export const metadata: Metadata = { title: "Registra tu empresa" };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;

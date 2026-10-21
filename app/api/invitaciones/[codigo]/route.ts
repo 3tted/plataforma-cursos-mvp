@@ -19,6 +19,7 @@ export const GET = manejar(async (_req: Request, { params }: Contexto) => {
       return {
         vigente: vigente(i),
         tipo: i.tipo,
+        rol: i.rol ?? "coach",
         empresa: i.tipo === "coach" ? (empresa?.nombre ?? null) : (i.nombreEmpresa ?? null),
         creadaPor: i.creadaPor,
       };

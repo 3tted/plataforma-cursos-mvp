@@ -140,10 +140,10 @@ export default function Bienvenida() {
           {avisoEntrada && <p className="aviso-entrada">{avisoEntrada}</p>}
           {rolSugerido === "coach" && (
             <p className="aviso-entrada">
-              Para ser coach necesitas una invitación: la manda la dueña de tu empresa o el equipo de Merkatics. Si ya la
-              tienes, abre su enlace; si no,{" "}
-              <Link href="/coaches" onClick={() => setPidiendoUsuario(false)}>
-                pide acceso aquí
+              Para entrar al equipo de una empresa necesitas la invitación que te manda su dueño o un administrador:
+              abre su enlace. Si quieres abrir tu propia empresa,{" "}
+              <Link href="/registra-tu-empresa" onClick={() => setPidiendoUsuario(false)}>
+                regístrala aquí
               </Link>
               .
             </p>

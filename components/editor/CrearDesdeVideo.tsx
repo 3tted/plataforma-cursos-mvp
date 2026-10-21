@@ -11,7 +11,7 @@ import { IconoAsistenteGeneral, IconoSubir } from "../Iconos";
 const MAX_SEGUNDOS = 2 * 60 * 60;
 const BASE = "/api/coach/cursos/video";
 
-type Paso = "elegir" | "subiendo" | "viendo" | "armando";
+type Paso = "elegir" | "subiendo" | "viendo" | "dividiendo" | "escribiendo" | "examen";
 
 const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -32,6 +32,8 @@ export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: st
   const [cantidades, setCantidades] = useState({ lecciones: "", repaso: "", examen: "" });
   const [paso, setPaso] = useState<Paso>("elegir");
   const [progreso, setProgreso] = useState(0);
+  // Cuántas lecciones lleva escritas la IA.
+  const [lecciones, setLecciones] = useState({ hechas: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,12 +71,16 @@ export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: st
     alCerrar();
   };
 
-  /** Llama a la IA hasta que el curso queda armado (mientras procesa el video responde 202). */
+  /**
+   * Llama hasta que el curso queda armado. Mientras tanto el servidor responde
+   * 202 con lo que va: procesando el video, escribiendo las lecciones o el examen.
+   */
   const armar = async (id: string) => {
     setPaso("viendo");
+    let ultimo = "procesando";
     for (;;) {
-      // Si una vuelta tarda, es que ya está escribiendo el curso.
-      const aviso = setTimeout(() => activo.current && setPaso("armando"), 12_000);
+      // Si una vuelta tarda justo después de procesar el video, es que ya está dividiendo la clase.
+      const aviso = setTimeout(() => activo.current && ultimo === "procesando" && setPaso("dividiendo"), 12_000);
       const res = await fetch(BASE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,11 +88,25 @@ export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: st
       }).catch(() => null);
       clearTimeout(aviso);
       if (!activo.current) return;
-      const datos = res ? ((await res.json().catch(() => ({}))) as Partial<CursoCreado> & { error?: string; aviso?: string | null }) : {};
+      const datos = res
+        ? ((await res.json().catch(() => ({}))) as Partial<CursoCreado> & {
+            error?: string;
+            aviso?: string | null;
+            paso?: string;
+            hechas?: number;
+            total?: number;
+          })
+        : {};
       if (res?.status === 202) {
-        setPaso("viendo");
-        await espera(5_000);
-        if (!activo.current) return;
+        ultimo = datos.paso ?? "procesando";
+        if (ultimo === "procesando") {
+          setPaso("viendo");
+          await espera(5_000);
+          if (!activo.current) return;
+        } else {
+          setLecciones({ hechas: datos.hechas ?? 0, total: datos.total ?? 0 });
+          setPaso(ultimo === "examen" ? "examen" : "escribiendo");
+        }
         continue;
       }
       if (!res?.ok || !datos.id) {
@@ -144,7 +164,9 @@ export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: st
     const textos: Record<Exclude<Paso, "elegir">, string> = {
       subiendo: `Subiendo tu video… ${Math.round(progreso * 100)}%`,
       viendo: "La IA está viendo tu video…",
-      armando: "Dividiendo tu clase en lecciones y escribiendo los apuntes…",
+      dividiendo: "Dividiendo tu clase en lecciones…",
+      escribiendo: `Escribiendo las lecciones: ${lecciones.hechas} de ${lecciones.total} listas…`,
+      examen: "Armando el examen final…",
     };
     return (
       <div className="crear-ia crear-ia-trabajando" role="status" aria-live="polite">
@@ -162,7 +184,7 @@ export default function CrearDesdeVideo({ comunidad, alCerrar }: { comunidad: st
         <p className="nota">
           {paso === "subiendo"
             ? "No cierres esta página mientras sube."
-            : "Un video de media hora suele tardar de 2 a 4 minutos. No cierres esta página."}
+            : "Un video de media hora suele tardar de 3 a 6 minutos. No cierres esta página: si algo falla, sigue donde se quedó."}
         </p>
         {paso === "subiendo" && (
           <button type="button" className="enlace enlace-discreto" onClick={() => subida.current?.cancelar()}>

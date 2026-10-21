@@ -1,7 +1,17 @@
 import { consultar, modificar, nuevoId } from "@/lib/almacen";
 import { aplicarEdicion, nuevoCurso } from "@/lib/creacion";
-import { comoEdicion, juntarMedidas, medidasDelTexto } from "@/lib/curso-ia";
-import { borrarDeGemini, estadoEnGemini, proponerCursoDeVideo, subirAGemini, videoConIA } from "@/lib/curso-video";
+import { avisoDeCantidades, comoEdicion, juntarMedidas, medidasDelTexto } from "@/lib/curso-ia";
+import {
+  borrarDeGemini,
+  comoPropuesta,
+  escribirExamen,
+  escribirLeccion,
+  estadoEnGemini,
+  proponerEstructura,
+  subirAGemini,
+  videoConIA,
+  type TrabajoCursoVideo,
+} from "@/lib/curso-video";
 import { ErrorDeDatos, leerJson, manejar } from "@/lib/http";
 import { coachDe, conPermiso, destinoDeCurso, type Coach } from "@/lib/permisos";
 import type { Almacen } from "@/lib/almacen";
@@ -14,9 +24,10 @@ export const maxDuration = 300;
 
 // Curso desde un video: la coach sube una clase grabada (PUT, igual que el
 // video de una lección) y luego el navegador llama a POST hasta que el curso
-// queda armado. Cada llamada avanza un paso: mandar el video a Gemini,
-// esperar a que lo procese (responde 202) y pedirle el curso (201, el
-// borrador). Si falla, la coach reintenta sin volver a subir el video.
+// queda armado. Cada llamada avanza lo que cabe en ella: mandar el video a
+// Gemini, esperar a que lo procese y pedirle el curso por partes (responde 202
+// con el avance), hasta guardar el borrador (201). Lo avanzado se guarda: si
+// falla, la coach reintenta y sigue donde se quedó, sin volver a subir el video.
 
 function fuenteDe(a: Almacen, id: unknown, coach: Coach): VideoFuente {
   const f = (a.fuentesVideo ?? []).find((x) => x.id === id);
@@ -43,6 +54,7 @@ export const PUT = manejar((req: Request) =>
 // ---------------------------------------------------------------- POST: armar el curso
 export const POST = manejar((req: Request) =>
   conPermiso(async () => {
+    const inicio = Date.now();
     const coach = await coachDe(req);
     const datos = await leerJson(req);
     const comunidad = String(datos.comunidad ?? "");
@@ -69,7 +81,7 @@ export const POST = manejar((req: Request) =>
     }
     if (enGemini.estado === "procesando" || !enGemini.uri) return Response.json({ paso: "procesando" }, { status: 202 });
 
-    // 3. Pedirle el curso y guardarlo como borrador, cada lección con su tramo del video.
+    // 3. Pedirle el curso por partes (estructura, cada lección, examen), guardando lo avanzado.
     const indicaciones = String(datos.indicaciones ?? "").trim().slice(0, 500);
     const campo = (k: string) => {
       const v = String(datos[k] ?? "").trim();
@@ -79,11 +91,47 @@ export const POST = manejar((req: Request) =>
       { lecciones: campo("lecciones"), repaso: campo("repaso"), examen: campo("examen") },
       medidasDelTexto(indicaciones),
     );
-    const { propuesta, tramos, aviso } = await proponerCursoDeVideo(
-      { uri: enGemini.uri, tipo: fuente.tipo, nombre: fuente.nombreOriginal, duracion: fuente.duracion },
-      indicaciones,
-      medidas,
-    );
+    // Si la coach cambió lo que pidió, se empieza de nuevo (el video ya está en Gemini).
+    const previo = fuente.trabajo as TrabajoCursoVideo | undefined;
+    const t: TrabajoCursoVideo =
+      previo && previo.indicaciones === indicaciones && JSON.stringify(previo.medidas) === JSON.stringify(medidas)
+        ? previo
+        : { indicaciones, medidas };
+    const video = { uri: enGemini.uri, tipo: fuente.tipo, nombre: fuente.nombreOriginal, duracion: fuente.duracion };
+    const guardar = () => anotar({ trabajo: t });
+    const faltan = () => (t.lecciones ?? []).flatMap((x, i) => (x ? [] : [i]));
+    const avance = (paso: "escribiendo" | "examen") =>
+      Response.json({ paso, hechas: (t.lecciones ?? []).filter(Boolean).length, total: t.lecciones?.length ?? 0 }, { status: 202 });
+    // Se empieza otra parte solo si cabe antes de que Vercel corte la petición.
+    const cabe = () => Date.now() - inicio < 120_000;
+
+    if (!t.estructura) {
+      t.estructura = await proponerEstructura(video, t, 230_000);
+      t.lecciones = t.estructura.lecciones.map(() => null);
+      await guardar();
+      if (!cabe()) return avance("escribiendo");
+    }
+    while (faltan().length && cabe()) {
+      // De tres en tres; las que fallen se vuelven a pedir en la siguiente vuelta.
+      const tanda = faltan().slice(0, 3);
+      const hechas = await Promise.allSettled(tanda.map((i) => escribirLeccion(video, t, i, 120_000)));
+      hechas.forEach((r, k) => {
+        if (r.status === "fulfilled") t.lecciones![tanda[k]] = r.value;
+      });
+      await guardar();
+      const fallo = hechas.find((r): r is PromiseRejectedResult => r.status === "rejected");
+      if (fallo && hechas.every((r) => r.status === "rejected")) throw fallo.reason;
+    }
+    if (faltan().length) return avance("escribiendo");
+    if (!t.examen) {
+      if (Date.now() - inicio > 150_000) return avance("examen");
+      t.examen = await escribirExamen(t, 120_000);
+      await guardar();
+    }
+
+    // 4. Guardarlo como borrador, cada lección con su tramo del video.
+    const { propuesta, tramos } = comoPropuesta(t);
+    const aviso = avisoDeCantidades(propuesta, medidas);
     const curso = await modificar((a) => {
       const borrador = aplicarEdicion(a, nuevoCurso(a, coach, destinoDeCurso(a, comunidad, coach), "ia"), comoEdicion(propuesta));
       (a.cursosCoach ??= []).push(borrador);

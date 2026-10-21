@@ -104,6 +104,8 @@ export interface VideoFuente {
   duracion?: number;
   /** El video ya subido a Gemini para que lo vea ("files/…"). */
   gemini?: string;
+  /** Lo que la IA ya armó del curso (ver TrabajoCursoVideo en lib/curso-video.ts). */
+  trabajo?: unknown;
 }
 
 export interface Modulo {

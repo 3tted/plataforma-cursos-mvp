@@ -32,7 +32,16 @@ export function contrasenaDemoPublica(): string | null {
 }
 
 /** Cuentas ficticias para presentar la plataforma. Correos de example.com (reservado, no llega a nadie). */
-export const CUENTAS_DEMO: { nombre: string; correo: string; rol: Rol; rolEmpresa?: RolEmpresa; admin?: boolean; detalle: string }[] = [
+/** Con `empresa`, la cuenta es de una empresa de ejemplo y se crea al sembrarla (lib/ejemplos.ts). */
+export const CUENTAS_DEMO: {
+  nombre: string;
+  correo: string;
+  rol: Rol;
+  rolEmpresa?: RolEmpresa;
+  admin?: boolean;
+  empresa?: string;
+  detalle: string;
+}[] = [
   {
     nombre: "Equipo Merkatics",
     correo: "equipo@example.com",
@@ -54,6 +63,14 @@ export const CUENTAS_DEMO: { nombre: string; correo: string; rol: Rol; rolEmpres
     rol: "coach",
     rolEmpresa: "coach",
     detalle: "Coach de Vende por WhatsApp",
+  },
+  {
+    nombre: "Gabo Orpinel",
+    correo: "gabo.orpinel@example.com",
+    rol: "coach",
+    rolEmpresa: "dueno",
+    empresa: "increase",
+    detalle: "Dueño de INCREASE (Radar de Liderazgo)",
   },
   { nombre: "Lucía Herrera", correo: "lucia.herrera@example.com", rol: "alumno", detalle: "Alumna" },
 ];
@@ -163,7 +180,7 @@ export function migrarACuentas(a: Almacen): boolean {
   const merkatics =
     a.empresas.find((e) => e.id === EMPRESA_MERKATICS) ?? empresa(EMPRESA_MERKATICS, "Merkatics", "Equipo Merkatics");
 
-  for (const d of CUENTAS_DEMO) {
+  for (const d of CUENTAS_DEMO.filter((x) => !x.empresa)) {
     a.cuentas.push({
       id: nuevoIdCuenta(),
       correo: d.correo,

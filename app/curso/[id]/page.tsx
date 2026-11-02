@@ -16,6 +16,7 @@ import {
   IconoSello,
 } from "@/components/Iconos";
 import BotonInscribirse from "@/components/BotonInscribirse";
+import DiagnosticoRadar from "@/components/DiagnosticoRadar";
 import Markdown from "@/components/Markdown";
 import PreguntaRapida from "@/components/PreguntaRapida";
 import RepasoLeccion from "@/components/RepasoLeccion";
@@ -25,6 +26,7 @@ import VideoLeccion from "@/components/VideoLeccion";
 import AvisoSinPublicar from "@/components/AvisoSinPublicar";
 import EnlaceEditarCurso from "@/components/EnlaceEditarCurso";
 import { moneda, parteGratis } from "@/lib/cliente";
+import { partirLeccion } from "@/lib/diagnosticos";
 
 type Pestana = "resumen" | "transcripcion" | "repaso";
 
@@ -402,7 +404,13 @@ export default function PaginaLeccion() {
               aria-labelledby={pestanas.length > 1 ? "pestana-resumen" : undefined}
               hidden={pestana !== "resumen"}
             >
-              <Markdown texto={leccion.contenido} nivelTitulos={2} />
+              {partirLeccion(leccion.contenido).map((parte, i) =>
+                "diagnostico" in parte ? (
+                  <DiagnosticoRadar key={i} id={parte.diagnostico} />
+                ) : (
+                  <Markdown key={i} texto={parte.texto} nivelTitulos={2} />
+                ),
+              )}
             </div>
             {leccion.transcripcion && (
               <div

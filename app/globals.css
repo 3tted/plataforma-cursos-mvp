@@ -9748,3 +9748,326 @@ button.tarjeta-comunidad-enlace {
 .video-marco:has(.video-reproductor:not(:paused)):not(:hover):not(:focus-within) .video-tramo-barra {
   opacity: 0;
 }
+
+/* ---------- Diagnóstico de autoevaluación en una lección (Radar de liderazgo) ---------- */
+
+.diagnostico {
+  display: grid;
+  gap: 28px;
+  margin: 28px 0;
+}
+
+.diagnostico-encabezado {
+  display: grid;
+  gap: 12px;
+  padding: 20px 22px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+}
+
+.diagnostico-encabezado h2,
+.diagnostico-encabezado p {
+  margin: 0;
+}
+
+.diagnostico-escala {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-small);
+}
+
+.diagnostico-escala li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.diagnostico-valor {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--superficie-2);
+  font-weight: 700;
+}
+
+.diagnostico-avance {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: var(--t-small);
+}
+
+.diagnostico-barra {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  overflow: hidden;
+}
+
+.diagnostico-barra > span {
+  display: block;
+  height: 100%;
+  background: var(--progreso);
+  transform-origin: left;
+  transition: transform 0.2s;
+}
+
+.diagnostico-dimension {
+  display: grid;
+  gap: 16px;
+}
+
+.diagnostico-dimension h3 {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin: 0;
+}
+
+.diagnostico-dimension h3 .cifra {
+  color: var(--acento-texto);
+}
+
+.diagnostico-pregunta {
+  margin: -8px 0 0;
+  color: var(--tinta-2);
+  font-style: italic;
+}
+
+.diagnostico-afirmacion {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.diagnostico-afirmacion legend {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 0;
+  margin-bottom: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.diagnostico-opciones {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.diagnostico-opciones label {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.diagnostico-opciones label:hover {
+  border-color: var(--acento);
+}
+
+.diagnostico-opciones input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.diagnostico-opciones label:has(input:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.diagnostico-opciones label > .cifra {
+  font-weight: 700;
+  font-size: var(--t-title);
+}
+
+.diagnostico-opcion-texto {
+  font-size: var(--t-caption);
+  color: var(--tinta-2);
+  line-height: 1.2;
+}
+
+.diagnostico-opciones label[data-elegida="true"] {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--acento-tinta);
+}
+
+.diagnostico-opciones label[data-elegida="true"] .diagnostico-opcion-texto {
+  color: var(--acento-tinta);
+}
+
+.diagnostico-subtotal {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--linea);
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.diagnostico-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.diagnostico-aviso {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--peligro);
+  font-size: var(--t-small);
+}
+
+.diagnostico-resultado {
+  display: grid;
+  gap: 20px;
+  scroll-margin-top: 90px;
+}
+
+.diagnostico-resultado h3,
+.diagnostico-resultado h4 {
+  margin: 0;
+}
+
+.diagnostico-resultado-cuerpo {
+  display: grid;
+  gap: 20px;
+}
+
+.diagnostico-grafica {
+  justify-self: center;
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  overflow: visible;
+}
+
+.radar-anillo {
+  fill: none;
+  stroke: var(--linea);
+}
+
+.radar-eje {
+  stroke: var(--linea-fuerte);
+}
+
+.radar-figura {
+  fill: var(--coral);
+  fill-opacity: 0.22;
+  stroke: var(--acento);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.radar-punto {
+  fill: var(--acento);
+}
+
+.radar-etiqueta {
+  fill: var(--tinta);
+  font-family: var(--fuente-display);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.radar-cifra {
+  fill: var(--acento-texto);
+}
+
+.diagnostico-puntos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diagnostico-puntos li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  padding: 10px 12px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+}
+
+.diagnostico-puntos li[data-baja="true"] {
+  box-shadow: inset 3px 0 0 var(--acento);
+}
+
+.diagnostico-puntos li > span:first-child {
+  font-weight: 600;
+}
+
+.diagnostico-puntos .cifra {
+  font-weight: 700;
+}
+
+.diagnostico-banda {
+  grid-column: 1 / -1;
+  color: var(--tinta-2);
+  font-size: var(--t-caption);
+}
+
+.diagnostico-total {
+  margin: 14px 0 4px;
+  font-weight: 700;
+}
+
+.diagnostico-empezar {
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+}
+
+.diagnostico-empezar p {
+  margin: 0;
+}
+
+.diagnostico-nota {
+  margin: 0;
+  font-size: var(--t-caption);
+}
+
+@media (max-width: 760px) {
+  .diagnostico-puntos {
+    grid-template-columns: 1fr;
+  }
+
+  /* La gráfica se encoge en el teléfono: las etiquetas crecen para leerse. */
+  .radar-etiqueta {
+    font-size: 20px;
+  }
+
+  .diagnostico-opcion-texto {
+    display: none;
+  }
+
+  .diagnostico-opciones label {
+    padding: 10px 4px;
+  }
+}

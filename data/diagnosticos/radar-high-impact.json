@@ -1,0 +1,80 @@
+{
+  "id": "radar-high-impact",
+  "titulo": "Radar de Liderazgo High Impact™",
+  "instrucciones": "Responde según tu comportamiento habitual durante los últimos 30 días, no según cómo te gustaría liderar.",
+  "escala": [
+    { "valor": 1, "texto": "Casi nunca", "detalle": "Es una brecha frecuente." },
+    { "valor": 2, "texto": "Pocas veces", "detalle": "Lo consigo de manera inconsistente." },
+    { "valor": 3, "texto": "Algunas veces", "detalle": "Mi desempeño es variable." },
+    { "valor": 4, "texto": "Frecuentemente", "detalle": "Es una fortaleza habitual." },
+    { "valor": 5, "texto": "Casi siempre", "detalle": "Es una práctica consistente." }
+  ],
+  "dimensiones": [
+    {
+      "id": "claridad",
+      "nombre": "Claridad y dirección",
+      "corto": "Claridad",
+      "descripcion": "La capacidad de definir prioridades, decidir con intención y distinguir lo urgente de lo trascendente.",
+      "pregunta": "¿Diriges tu negocio o simplemente respondes a lo que sucede?",
+      "afirmaciones": [
+        "Tengo claridad sobre los resultados que realmente impulsarán el crecimiento de mi negocio.",
+        "Distingo las decisiones estratégicas de las actividades que solo consumen mi tiempo.",
+        "Tomo decisiones oportunas incluso cuando no dispongo de toda la información.",
+        "Mis prioridades semanales están alineadas con una dirección de largo plazo."
+      ]
+    },
+    {
+      "id": "mentalidad",
+      "nombre": "Mentalidad y autoliderazgo",
+      "corto": "Mentalidad",
+      "descripcion": "La capacidad de gestionar patrones personales, responder ante la presión y convertir obstáculos en aprendizaje.",
+      "pregunta": "¿Tu mentalidad impulsa tu crecimiento o lo condiciona?",
+      "afirmaciones": [
+        "Identifico cuándo el miedo, la duda o la necesidad de control están influyendo en mis decisiones.",
+        "Puedo gestionar mis emociones sin trasladar automáticamente mi tensión al equipo.",
+        "Cuando cometo un error, extraigo aprendizajes y ajusto mi comportamiento.",
+        "Mantengo la disciplina para ejecutar decisiones importantes aun cuando pierdo motivación o comodidad."
+      ]
+    },
+    {
+      "id": "comunicacion",
+      "nombre": "Comunicación e influencia",
+      "corto": "Comunicación",
+      "descripcion": "La capacidad de generar acuerdos, abordar conversaciones difíciles y movilizar a otros sin depender exclusivamente de la autoridad.",
+      "pregunta": "¿Tu liderazgo genera compromiso o dependencia?",
+      "afirmaciones": [
+        "Comunico expectativas, responsabilidades y resultados esperados con claridad.",
+        "Abordo las conversaciones incómodas antes de que se conviertan en problemas mayores.",
+        "Escucho perspectivas diferentes y las utilizo para mejorar mis decisiones.",
+        "Consigo acuerdos y compromiso sin tener que perseguir constantemente a las personas."
+      ]
+    },
+    {
+      "id": "vision",
+      "nombre": "Visión y expansión",
+      "corto": "Visión",
+      "descripcion": "La capacidad de anticipar escenarios, desarrollar talento y construir una organización que no dependa de una sola persona.",
+      "pregunta": "¿Estás construyendo un negocio que pueda crecer más allá de ti?",
+      "afirmaciones": [
+        "Anticipo escenarios y preparo alternativas antes de que aparezcan los problemas.",
+        "Desarrollo personas capaces de asumir mayores responsabilidades y tomar decisiones.",
+        "Identifico procesos y decisiones que hoy dependen demasiado de mí.",
+        "Dedico tiempo a construir oportunidades futuras, además de atender la operación actual."
+      ]
+    }
+  ],
+  "porDimension": [
+    { "desde": 4, "hasta": 8, "texto": "Brecha prioritaria" },
+    { "desde": 9, "hasta": 12, "texto": "En desarrollo" },
+    { "desde": 13, "hasta": 16, "texto": "Fortaleza funcional" },
+    { "desde": 17, "hasta": 20, "texto": "Fortaleza consistente" }
+  ],
+  "global": [
+    { "desde": 16, "hasta": 32, "texto": "Necesitas identificar y atender varias brechas prioritarias." },
+    { "desde": 33, "hasta": 48, "texto": "Tu liderazgo está en una etapa de desarrollo e integración." },
+    { "desde": 49, "hasta": 64, "texto": "Tienes bases funcionales que puedes convertir en mayor impacto." },
+    { "desde": 65, "hasta": 80, "texto": "Tus respuestas reflejan prácticas consistentes que conviene contrastar con resultados reales." }
+  ],
+  "regla": "No te quedes con el promedio. La dimensión con menor puntuación puede ofrecerte una hipótesis útil sobre dónde comenzar, pero debes contrastarla con hechos: decisiones demoradas, conflictos recurrentes, objetivos incumplidos o dependencia operativa del empresario.",
+  "aviso": "Escala de autoevaluación creada para este producto piloto. No constituye una prueba psicométrica validada ni permite diagnosticar por sí sola la capacidad real de liderazgo."
+}

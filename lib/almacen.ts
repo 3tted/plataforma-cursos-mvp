@@ -2,6 +2,7 @@ import { Redis } from "@upstash/redis";
 import { promises as fs } from "fs";
 import path from "path";
 import { migrarACuentas } from "./cuentas";
+import { sumarEjemplos } from "./ejemplos";
 import type {
   Categoria,
   Comentario,
@@ -50,6 +51,8 @@ export interface Almacen {
   muestras?: string[];
   /** Comunidades cuyas publicaciones de bienvenida ya se sembraron. */
   semillas?: string[];
+  /** Empresas de ejemplo ya sembradas (lib/ejemplos.ts), para no volver a poner una que se borró. */
+  ejemplos?: string[];
   /** Comunidades y cursos que crean las coaches desde la plataforma. */
   comunidadesCoach?: ComunidadCreada[];
   cursosCoach?: CursoCreado[];
@@ -144,6 +147,7 @@ async function sembrar(): Promise<Almacen> {
     examenes: [],
   };
   migrarACuentas(almacen);
+  await sumarEjemplos(almacen);
   return almacen;
 }
 
@@ -316,6 +320,7 @@ async function cargar(): Promise<{ almacen: Almacen; version: string | null; cam
   if (await sumarMuestrasNuevas(almacen)) cambiado = true;
   if (await sumarSemillasNuevas(almacen)) cambiado = true;
   if (migrarACuentas(almacen)) cambiado = true;
+  if (await sumarEjemplos(almacen)) cambiado = true;
   return { almacen, version, cambiado };
 }
 

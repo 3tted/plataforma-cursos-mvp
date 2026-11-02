@@ -1,0 +1,136 @@
+{
+  "_nota": "Empresa de ejemplo que se siembra una sola vez en el almacén (lib/ejemplos.ts): INCREASE, con su comunidad y el Radar de Liderazgo High Impact como curso. Queda como cualquier empresa creada en la plataforma: su dueño la edita desde su panel. El precio de la membresía es provisional.",
+  "empresa": {
+    "id": "increase",
+    "nombre": "INCREASE",
+    "dueno": "Gabo Orpinel",
+    "color": "#1f2d54",
+    "logo": "/empresas/increase-logo.png",
+    "giro": "Coaching de liderazgo para emprendedores y empresarios"
+  },
+  "comunidad": {
+    "id": "liderazgo-high-impact",
+    "nombre": "Liderazgo High Impact",
+    "coach": "Gabo Orpinel",
+    "coach_titulo": "Coach de liderazgo · INCREASE",
+    "descripcion": "Diagnóstico y entrenamiento de liderazgo para emprendedores y empresarios que quieren llevar sus resultados al siguiente nivel.",
+    "acerca": "Para emprendedores y empresarios que han descubierto que trabajar más no siempre significa avanzar más. Empieza con el Radar de Liderazgo High Impact™: identifica tu principal brecha de liderazgo y sal con una ruta práctica de evolución para los próximos siete días. En INCREASE trabajamos claridad estratégica, autoliderazgo, comunicación de impacto y capacidad de expansión.",
+    "tema": "Liderazgo",
+    "precio_mensual": 490,
+    "moneda": "MXN"
+  },
+  "curso": {
+    "titulo": "Radar de Liderazgo High Impact™",
+    "subtitulo": "Diagnóstico de liderazgo y expansión de potencial: identifica tu principal brecha y sal con una ruta de 7 días.",
+    "aprenderas": [
+      "Evaluar tu liderazgo en cuatro dimensiones: claridad, mentalidad, comunicación y visión",
+      "Ver tu resultado en una gráfica de radar y saber qué significa cada puntuación",
+      "Identificar la dimensión por la que conviene empezar",
+      "Convertir tu resultado en conciencia con el Espejo Ejecutivo™",
+      "Seguir un plan de acción de siete días con evidencia de avance"
+    ],
+    "requisitos": "Ninguno. Unos 20 minutos para responder con honestidad, pensando en los últimos 30 días.",
+    "preguntas_sugeridas": [
+      "¿Qué evalúa el Radar High Impact?",
+      "¿Cómo interpreto mi puntuación?",
+      "¿Por dónde empiezo si tengo dos dimensiones bajas?",
+      "¿Qué hago el día 1 del plan?"
+    ],
+    "modulos": [
+      {
+        "titulo": "Tu diagnóstico",
+        "lecciones": [
+          {
+            "titulo": "¿Tu liderazgo está preparado para el siguiente nivel?",
+            "archivo": "ejemplos/increase/01-arquitectura.md",
+            "duracion_min": 4,
+            "resumen": "Qué evalúa el Radar de Liderazgo High Impact™ y sus cuatro dimensiones: claridad, mentalidad, comunicación y visión."
+          },
+          {
+            "titulo": "Responde tu Radar High Impact™",
+            "archivo": "ejemplos/increase/02-cuestionario.md",
+            "duracion_min": 10,
+            "resumen": "Dieciséis afirmaciones del 1 al 5, cuatro por dimensión. Al terminar ves tu radar y por dónde empezar."
+          },
+          {
+            "titulo": "Cómo interpretar tu puntuación",
+            "archivo": "ejemplos/increase/03-interpretacion.md",
+            "duracion_min": 4,
+            "resumen": "Qué significa tu puntuación en cada dimensión y en total, y la regla INCREASE para leer tu resultado."
+          }
+        ]
+      },
+      {
+        "titulo": "De la conciencia a la acción",
+        "lecciones": [
+          {
+            "titulo": "El Espejo Ejecutivo™",
+            "archivo": "ejemplos/increase/04-espejo.md",
+            "duracion_min": 8,
+            "resumen": "Cinco preguntas por escrito para convertir tu resultado en conciencia sobre tu forma actual de liderar."
+          },
+          {
+            "titulo": "Tu plan de acción de 7 días",
+            "archivo": "ejemplos/increase/05-plan.md",
+            "duracion_min": 6,
+            "resumen": "Un ejercicio diario de 15 a 25 minutos, empezando por tu dimensión más baja, con evidencia observable de avance."
+          },
+          {
+            "titulo": "Siguiente paso: Sesión de Claridad Estratégica",
+            "archivo": "ejemplos/increase/06-siguiente-paso.md",
+            "duracion_min": 2,
+            "resumen": "Valida tu ruta en una sesión de 30 minutos y define qué entrenamiento se ajusta a tu siguiente etapa."
+          }
+        ]
+      }
+    ],
+    "examen": [
+      {
+        "enunciado": "¿Cuántas dimensiones de liderazgo evalúa el Radar High Impact™?",
+        "opciones": ["Dos", "Cuatro", "Seis", "Dieciséis"],
+        "correcta": 1,
+        "explicacion": "Son cuatro: claridad y dirección, mentalidad y autoliderazgo, comunicación e influencia, y visión y expansión."
+      },
+      {
+        "enunciado": "¿Entre qué valores puede quedar la puntuación de cada dimensión?",
+        "opciones": ["Entre 0 y 10", "Entre 1 y 5", "Entre 4 y 20", "Entre 16 y 80"],
+        "correcta": 2,
+        "explicacion": "Cada dimensión tiene cuatro afirmaciones calificadas del 1 al 5, así que suma entre 4 y 20. El total va de 16 a 80."
+      },
+      {
+        "enunciado": "Si una dimensión suma 10 puntos, ¿cómo se interpreta?",
+        "opciones": ["Brecha prioritaria", "En desarrollo", "Fortaleza funcional", "Fortaleza consistente"],
+        "correcta": 1,
+        "explicacion": "De 9 a 12 puntos la dimensión está en desarrollo."
+      },
+      {
+        "enunciado": "Según la regla de interpretación INCREASE, ¿qué haces con tu dimensión más baja?",
+        "opciones": [
+          "La tomas como diagnóstico definitivo de tu liderazgo",
+          "La ignoras y te quedas con el promedio",
+          "La tomas como hipótesis de dónde comenzar y la contrastas con hechos",
+          "La comparas con la de otros empresarios"
+        ],
+        "correcta": 2,
+        "explicacion": "No te quedes con el promedio: la dimensión más baja es una hipótesis útil sobre dónde empezar, que debes contrastar con hechos como decisiones demoradas u objetivos incumplidos."
+      },
+      {
+        "enunciado": "¿Cuál es la intención del Espejo Ejecutivo™?",
+        "opciones": [
+          "Culpabilizar al empresario por sus resultados",
+          "Reconocer el espacio entre el líder que hoy eres y el que tu siguiente etapa exige",
+          "Calificar el desempeño del equipo",
+          "Sustituir el plan de acción de siete días"
+        ],
+        "correcta": 1,
+        "explicacion": "La intención no es culpabilizar, sino reconocer el espacio entre el líder que hoy estás siendo y el líder que tu siguiente etapa exige."
+      },
+      {
+        "enunciado": "¿Qué deben producir las acciones del plan de siete días?",
+        "opciones": ["Evidencia observable", "Más horas de trabajo", "Un nuevo cuestionario", "Una calificación más alta en el Radar"],
+        "correcta": 0,
+        "explicacion": "El participante prioriza su dimensión más baja y elige acciones que produzcan evidencia observable, como una conversación realizada o una responsabilidad transferida."
+      }
+    ]
+  }
+}

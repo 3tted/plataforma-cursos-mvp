@@ -1,16 +1,18 @@
 // Utilidades de la interfaz (se ejecutan en el navegador).
 
 import type { Curso, EstadoAlumno } from "./tipos";
-import { etiquetaGratis } from "./gratis";
+import { etiquetaGratis, TODO_GRATIS } from "./gratis";
 
 /** Qué parte del curso se ve sin membresía, dicho como frase corta. */
 export function parteGratis(curso: Curso): string {
   const etiqueta = etiquetaGratis(curso.modulos);
+  if (etiqueta === TODO_GRATIS) return "Todo el curso es gratis.";
   return etiqueta ? `${etiqueta}; el resto, con la membresía.` : "Todo el curso es con la membresía.";
 }
 
 /** Debajo del botón de un curso: "Módulo 1 gratis · resto con membresía". */
 export function notaGratis(etiqueta: string): string {
+  if (etiqueta === TODO_GRATIS) return TODO_GRATIS;
   return etiqueta ? `${etiqueta} · resto con membresía` : "Todo con membresía";
 }
 

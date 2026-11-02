@@ -200,6 +200,12 @@ export default function PaginaLeccion() {
     alternarCompletada(leccion.id);
   };
 
+  const completarYSeguir = () => {
+    completar();
+    if (siguienteBloqueada) router.push(enlaceMembresia(siguiente.id));
+    else router.push(siguiente ? `/curso/${siguiente.id}` : "/curso/examen");
+  };
+
   return (
     <div className="rejilla-leccion" data-con-barra={!bloqueada && enOrden && inscrito}>
       <nav className="indice-lecciones" aria-label="Lecciones del curso">
@@ -621,9 +627,14 @@ export default function PaginaLeccion() {
                   </>
                 )}
               </button>
-              {guiado ? (
-                <button type="button" className="boton" disabled title={pendiente ?? "Marca la lección como completada"}>
+              {guiado && pendiente ? (
+                <button type="button" className="boton" disabled title={pendiente}>
                   Siguiente lección <IconoFlechaDer width={16} height={16} />
+                </button>
+              ) : guiado ? (
+                // Sin nada pendiente (una lección de solo texto): seguir la completa y abre lo que sigue.
+                <button type="button" className="boton" onClick={completarYSeguir}>
+                  {siguiente ? "Siguiente lección" : "Ir al examen final"} <IconoFlechaDer width={16} height={16} />
                 </button>
               ) : cursoTerminado ? (
                 <Link href="/curso/examen" className="boton">

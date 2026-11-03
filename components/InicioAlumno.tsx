@@ -190,7 +190,15 @@ export default function InicioAlumno() {
           <p className="inicio-etiqueta">
             {terminado ? "Último paso" : hechas === 0 ? "Empieza aquí" : "Continúa donde te quedaste"}
           </p>
-          {terminado ? (
+          {terminado && expediente?.sinExamen ? (
+            <>
+              <h2 id="continuar-titulo">¡Terminaste el curso!</h2>
+              <p className="texto-suave">Completaste todas sus lecciones. Queda en tu expediente.</p>
+              <Link href="/perfil" className="boton">
+                Ver mi expediente <IconoFlechaDer width={16} height={16} />
+              </Link>
+            </>
+          ) : terminado ? (
             <>
               <h2 id="continuar-titulo">{examen?.aprobado ? "¡Aprobaste el curso!" : "Examen final"}</h2>
               <p className="texto-suave">
@@ -253,18 +261,20 @@ export default function InicioAlumno() {
                   : "—"}
               </strong>
             </li>
-            <li>
-              Examen final:{" "}
-              <strong>
-                {examen?.aprobado
-                  ? `Aprobado (${examen.mejorPuntaje}%)`
-                  : examen && examen.intentos > 0
-                    ? `${examen.intentos} de ${examen.intentosMaximos} intentos`
-                    : terminado
-                      ? "Disponible"
-                      : "Al terminar las lecciones"}
-              </strong>
-            </li>
+            {!expediente?.sinExamen && (
+              <li>
+                Examen final:{" "}
+                <strong>
+                  {examen?.aprobado
+                    ? `Aprobado (${examen.mejorPuntaje}%)`
+                    : examen && examen.intentos > 0
+                      ? `${examen.intentos} de ${examen.intentosMaximos} intentos`
+                      : terminado
+                        ? "Disponible"
+                        : "Al terminar las lecciones"}
+                </strong>
+              </li>
+            )}
           </ul>
           <Link href="/perfil" className="enlace inicio-ver-todo">
             Ver mi expediente <IconoFlechaDer width={15} height={15} />

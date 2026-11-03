@@ -32,6 +32,20 @@ export interface AgendaComunidad {
   enlace?: string;
 }
 
+/** El avance de un alumno en un plan por días (por ejemplo, el plan de 7 días de INCREASE). */
+export interface AvancePlan {
+  id: number;
+  plan: string;
+  leccion: string;
+  curso: string;
+  /** Id de la cuenta del alumno. */
+  cuenta: string;
+  autor: string;
+  correo: string;
+  dias: { hecho: boolean; evidencia: string }[];
+  actualizadoEn: string;
+}
+
 /** El resultado de un alumno en un diagnóstico (por ejemplo, el Radar de INCREASE). */
 export interface ResultadoDiagnostico {
   id: number;
@@ -92,6 +106,14 @@ export interface EntregaPractica {
   archivo?: { nombre: string; tipo: string; bytes: number; ruta: string; url?: string };
   enviadaEn: string;
   actualizadaEn: string;
+  /** Comentario del equipo de la empresa. Si el alumno la cambia después, vuelve a quedar por revisar. */
+  respuesta?: RespuestaPractica;
+}
+
+export interface RespuestaPractica {
+  texto: string;
+  autor: string;
+  fecha: string;
 }
 
 /** Una entrega como la ve el navegador: el archivo se descarga por la API, con permiso. */
@@ -103,6 +125,9 @@ export interface EntregaVista {
   archivo?: { nombre: string; tipo: string; bytes: number; url: string };
   enviadaEn: string;
   actualizadaEn: string;
+  respuesta?: RespuestaPractica;
+  /** Sin comentario del equipo, o cambiada después del último. */
+  porRevisar: boolean;
 }
 
 /** Una diapositiva de la presentación de una lección. */
@@ -192,6 +217,8 @@ export interface Curso {
   sinPublicar?: boolean;
   /** Foto de portada que subió la coach (url de /api/fotos). */
   foto?: string;
+  /** La coach lo dejó sin examen final: se termina al completar las lecciones. */
+  sinExamen?: boolean;
 }
 
 export interface DatosCurso {
@@ -250,6 +277,8 @@ export interface CursoCreado {
   preguntas_sugeridas: string[];
   modulos: ModuloCreado[];
   examen: PreguntaCurso[];
+  /** La coach lo deja sin examen final (las preguntas que tenga se guardan por si lo vuelve a activar). */
+  sinExamen?: boolean;
   autor: string;
   /** Empresa del curso (la de la coach que lo creó). Opcional: llegó con las cuentas. */
   empresa?: string;
@@ -394,6 +423,8 @@ export interface ResumenCurso {
   publicado: boolean;
   /** Foto de portada que subió la coach. */
   foto?: string;
+  /** Sin examen final. */
+  sinExamen?: boolean;
 }
 
 export type Categoria = "Anuncios" | "Dudas" | "Logros" | "Presentaciones" | "General";
@@ -603,6 +634,8 @@ export interface Expediente {
     aprobado: boolean;
     aprobadoEn: string | null;
   };
+  /** El curso no tiene examen final: se termina (y cuenta como aprobado) al completar las lecciones. */
+  sinExamen?: boolean;
   ultimaActividad: string | null;
 }
 

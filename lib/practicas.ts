@@ -84,8 +84,13 @@ export async function responderArchivoPractica(archivo: NonNullable<EntregaPract
   });
 }
 
+/** Sin comentario del equipo, o el alumno la cambió después del último. */
+export const porRevisar = (e: EntregaPractica) => !e.respuesta || e.actualizadaEn > e.respuesta.fecha;
+
 export function vistaDeEntrega(e: EntregaPractica): EntregaVista {
   return {
+    porRevisar: porRevisar(e),
+    ...(e.respuesta ? { respuesta: e.respuesta } : {}),
     id: e.id,
     leccion: e.leccion,
     autor: e.autor,

@@ -233,6 +233,7 @@ export function aplicarEdicion(a: Almacen, actual: CursoCreado, entrada: Record<
     preguntas_sugeridas: lista(entrada.preguntas_sugeridas, 4, 200),
     modulos,
     examen: (Array.isArray(entrada.examen) ? entrada.examen : []).slice(0, MAX_PREGUNTAS).map((p) => pregunta(a, p, "KF", ids)),
+    sinExamen: entrada.sinExamen === true || undefined,
     actualizadoEn: new Date().toISOString(),
   };
 }
@@ -261,6 +262,8 @@ export function pendientesParaPublicar(c: CursoCreado): string[] {
       if (problema) faltan.push(`Repaso de ${nombre}, pregunta ${j + 1}: ${problema}`);
     });
   });
+  // Sin examen final, sus preguntas (si quedaron) no se revisan: no se presentan.
+  if (c.sinExamen) return faltan;
   if (c.examen.length === 0) faltan.push("El examen final necesita al menos una pregunta.");
   c.examen.forEach((p, j) => {
     const problema = problemaDePregunta(p);

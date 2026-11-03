@@ -378,16 +378,8 @@ export default function VideoLeccion({
   }
 
   // ---------------------------------------------------------------- sin video, alumno
-  if (!esCoach) {
-    // Las lecciones que la coach pega desde su panel son de texto: sin aviso de video.
-    if (leccion.deCoach) return null;
-    return (
-      <div className="video">
-        <p className="video-titulo">Esta lección todavía no tiene video</p>
-        <p className="video-texto">Todo lo que dice está escrito abajo y en su transcripción.</p>
-      </div>
-    );
-  }
+  // Una lección sin video ni presentación es de lectura: el alumno va directo al texto.
+  if (!esCoach) return null;
 
   // ---------------------------------------------------------------- sin video (o subiendo), coach
   return (

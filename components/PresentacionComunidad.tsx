@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { moneda } from "@/lib/cliente";
+import { moneda, todoGratis } from "@/lib/cliente";
 import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import BotonInscribirse from "./BotonInscribirse";
@@ -64,11 +64,14 @@ export default function PresentacionComunidad({
   const primerCurso = cursosComunidad[0];
   const precio = moneda(comunidad.precio_mensual);
   const totalLecciones = cursosComunidad.reduce((s, c) => s + c.lecciones.length, 0);
+  // Si todos sus cursos son gratis completos, no se habla de membresía.
+  const gratis = todoGratis(cursosComunidad);
+  const conExamen = cursosComunidad.length === 0 || cursosComunidad.some((c) => !c.sinExamen);
 
   const obtienes = [
     cursosComunidad.length > 0 &&
-      `${cursosComunidad.length} ${cursosComunidad.length === 1 ? "curso" : "cursos"} en video (${totalLecciones} lecciones): ${cursosComunidad.map((c) => c.titulo).join(", ")}`,
-    "Repaso al final de cada lección y examen para terminar cada curso",
+      `${cursosComunidad.length} ${cursosComunidad.length === 1 ? "curso" : "cursos"} (${totalLecciones} lecciones): ${cursosComunidad.map((c) => c.titulo).join(", ")}`,
+    conExamen && "Repaso al final de cada lección y examen para terminar cada curso",
     "Asistente de IA que te responde con las lecciones y te dice de cuál sale la respuesta",
     `La comunidad: dudas, logros y anuncios de ${comunidad.coach.split(" ")[0]}`,
   ].filter((x): x is string => Boolean(x));
@@ -91,8 +94,9 @@ export default function PresentacionComunidad({
         <li>
           <IconoBillete width={18} height={18} />
           <span>
-            Unirte a la comunidad es gratis. Cada curso tiene su módulo 1 gratis; el resto se desbloquea con la
-            membresía.
+            {gratis
+              ? "Unirte a la comunidad y tomar sus cursos completos es gratis."
+              : "Unirte a la comunidad es gratis. Cada curso tiene su módulo 1 gratis; el resto se desbloquea con la membresía."}
           </span>
         </li>
       </ul>
@@ -131,7 +135,7 @@ export default function PresentacionComunidad({
           )}
           <p className="nota">
             {primerCurso
-              ? `Te une a la comunidad, te inscribe a «${primerCurso.titulo}» y abre su lección 1. El módulo 1 es gratis.`
+              ? `Te une a la comunidad, te inscribe a «${primerCurso.titulo}» y abre su lección 1. ${gratis ? "Todo el curso es gratis." : "El módulo 1 es gratis."}`
               : "Unirte es gratis. Cuando la comunidad publique su primer curso, podrás tomar su módulo 1 sin pagar."}
           </p>
           {error && (
@@ -232,7 +236,7 @@ export default function PresentacionComunidad({
 
       <ul className="presentacion-datos">
         <li>
-          <IconoBillete width={20} height={20} /> Membresía {precio}/mes
+          <IconoBillete width={20} height={20} /> {gratis ? "Gratis" : `Membresía ${precio}/mes`}
         </li>
         <li>
           <IconoComunidad width={20} height={20} /> <span className="cifra">{miembros ?? <span className="esqueleto esqueleto-cifra" aria-label="Cargando" />}</span>{" "}

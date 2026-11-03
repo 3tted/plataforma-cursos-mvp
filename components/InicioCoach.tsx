@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ESTADO_ALUMNO, api, hace } from "@/lib/cliente";
 import { agrupar, sinResolver } from "@/lib/preguntas";
-import type { MatrizAlumnos, ResumenCoach } from "@/lib/tipos";
+import type { EntregaVista, MatrizAlumnos, ResumenCoach } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import { useApp } from "./Contexto";
 import { IconoComunidad, IconoFlechaDer } from "./Iconos";
@@ -25,6 +25,17 @@ export default function InicioCoach() {
   const [resumen, setResumen] = useState<ResumenCoach | null>(null);
   const [matrices, setMatrices] = useState<MatrizAlumnos[] | null>(null);
   const [error, setError] = useState(false);
+  // Prácticas que entregan sus alumnos (las que esperan su comentario primero).
+  const [practicas, setPracticas] = useState<{
+    entregas: (EntregaVista & { titulos: { leccion: string; curso: string } })[];
+    porRevisar: number;
+  } | null>(null);
+
+  useEffect(() => {
+    api<NonNullable<typeof practicas>>("/api/practica?pendientes=1")
+      .then(setPracticas)
+      .catch(() => setPracticas(null));
+  }, []);
 
   // Lo de la comunidad que se muestra ("Esto pasa hoy en…"), contado igual que en el panel.
   useEffect(() => {
@@ -213,6 +224,39 @@ export default function InicioCoach() {
           </ul>
         </section>
       </div>
+
+      {practicas && practicas.entregas.length > 0 && (
+        <section className="tarjeta inicio-bloque" aria-labelledby="practicas-titulo">
+          <div className="inicio-bloque-cabecera">
+            <h2 id="practicas-titulo">
+              Prácticas por revisar <span className="cifra">{practicas.porRevisar}</span>
+            </h2>
+          </div>
+          <p className="texto-suave">Lo que entregan tus alumnos en las lecciones con práctica. Ábrela y déjales un comentario.</p>
+          <ul className="inicio-lista">
+            {practicas.entregas.slice(0, 6).map((e) => (
+              <li key={e.id} className="inicio-alumno">
+                <Avatar nombre={e.autor} tamaño={34} />
+                <span className="inicio-publicacion-texto">
+                  <span className="inicio-publicacion-titulo">{e.autor}</span>
+                  <span className="texto-suave inicio-meta">
+                    {e.titulos.leccion} · {e.titulos.curso} · {hace(e.actualizadaEn)}
+                  </span>
+                </span>
+                {e.porRevisar ? (
+                  <Link href={`/curso/${e.leccion}`} className="pastilla pastilla-pendiente">
+                    Revisar
+                  </Link>
+                ) : (
+                  <Link href={`/curso/${e.leccion}`} className="pastilla">
+                    Comentada
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <PublicacionesRecientes titulo="Lo último en tu comunidad" />
     </div>

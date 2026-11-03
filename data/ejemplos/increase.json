@@ -80,7 +80,7 @@
             "duracion_min": 6,
             "resumen": "Un ejercicio diario de 15 a 25 minutos, empezando por tu dimensión más baja, con evidencia observable de avance.",
             "practica": {
-              "instrucciones": "Registra la evidencia de avance de cada día: qué hiciste y qué cambió. Si te sirve, sube una foto o un documento con tu plan de 30 días.",
+              "instrucciones": "Sube tu plan de 30 días (lo armas el día 7) o escribe aquí tus compromisos medibles para las próximas cuatro semanas.",
               "archivo": true,
               "obligatoria": false
             }
@@ -161,6 +161,7 @@
         "correcta": 0,
         "explicacion": "El participante prioriza su dimensión más baja y elige acciones que produzcan evidencia observable, como una conversación realizada o una responsabilidad transferida."
       }
-    ]
+    ],
+    "sinExamen": true
   }
 }

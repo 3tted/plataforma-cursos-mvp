@@ -51,6 +51,19 @@ export default function PaginaExamen() {
     return <p className="texto-suave">Cargando examen…</p>;
   }
 
+  // Un curso sin examen final (la coach lo dejó así): no hay nada que presentar.
+  if (datos.curso.sinExamen) {
+    return (
+      <div className="pagina-estrecha">
+        <h1>Este curso no lleva examen final</h1>
+        <p className="texto-suave">Lo terminas al completar todas sus lecciones, y queda en tu expediente.</p>
+        <Link href="/curso" className="boton">
+          Volver al curso
+        </Link>
+      </div>
+    );
+  }
+
   const { examenFinal, aprobarCon, intentosExamen } = evaluaciones;
   const preguntas = examenFinal.preguntas;
   const base = lecciones.filter((l) => !l.deCoach);

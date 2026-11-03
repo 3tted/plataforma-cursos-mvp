@@ -47,11 +47,12 @@ export const diagnostico = (id: string): Diagnostico | undefined => DIAGNOSTICOS
 
 /**
  * Marcas que una lección puede llevar en su texto: un diagnóstico
- * (<!-- diagnostico:id -->) o los botones para agendar con la coach (<!-- agendar -->).
+ * (<!-- diagnostico:id -->), un plan por días (<!-- plan:id -->) o los botones
+ * para agendar con la coach (<!-- agendar -->).
  */
-export const MARCA_DIAGNOSTICO = /<!--\s*(?:diagnostico:([a-z0-9-]+)|(agendar))\s*-->/;
+export const MARCA_DIAGNOSTICO = /<!--\s*(?:diagnostico:([a-z0-9-]+)|plan:([a-z0-9-]+)|(agendar))\s*-->/;
 
-export type ParteLeccion = { texto: string } | { diagnostico: string } | { agendar: true };
+export type ParteLeccion = { texto: string } | { diagnostico: string } | { plan: string } | { agendar: true };
 
 /** Parte el texto de una lección en tramos de texto, diagnósticos y botones de agenda, en orden. */
 export function partirLeccion(texto: string): ParteLeccion[] {
@@ -60,7 +61,7 @@ export function partirLeccion(texto: string): ParteLeccion[] {
   for (let m = resto.match(MARCA_DIAGNOSTICO); m && m.index !== undefined; m = resto.match(MARCA_DIAGNOSTICO)) {
     const antes = resto.slice(0, m.index).trim();
     if (antes) partes.push({ texto: antes });
-    partes.push(m[1] ? { diagnostico: m[1] } : { agendar: true });
+    partes.push(m[1] ? { diagnostico: m[1] } : m[2] ? { plan: m[2] } : { agendar: true });
     resto = resto.slice(m.index + m[0].length);
   }
   if (resto.trim()) partes.push({ texto: resto.trim() });
@@ -73,6 +74,9 @@ export const sinMarcas = (texto: string) => texto.replace(new RegExp(MARCA_DIAGN
 /** ¿La lección incrusta este diagnóstico? (El servidor lo revisa antes de guardar un resultado.) */
 export const llevaDiagnostico = (texto: string, id: string) =>
   partirLeccion(texto).some((p) => "diagnostico" in p && p.diagnostico === id);
+
+/** ¿La lección incrusta este plan por días? */
+export const llevaPlan = (texto: string, id: string) => partirLeccion(texto).some((p) => "plan" in p && p.plan === id);
 
 /**
  * Revisa las respuestas que manda el navegador: una lista por dimensión, con

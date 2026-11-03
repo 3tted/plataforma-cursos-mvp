@@ -78,30 +78,42 @@ export default function ExpedienteCurso({ curso }: { curso: ResumenCurso }) {
             )}
           </dd>
         </div>
-        <div>
-          <dt>Examen final</dt>
-          <dd>
-            {examen.mejorPuntaje !== null ? (
-              <span className="cifra">{examen.mejorPuntaje}%</span>
-            ) : (
-              <span className="texto-suave">Sin presentar</span>
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt>Intentos</dt>
-          <dd>
-            <span className="cifra">
-              {examen.intentos} de {examen.intentosMaximos}
-            </span>
-          </dd>
-        </div>
+        {expediente.sinExamen ? (
+          <div>
+            <dt>Examen final</dt>
+            <dd>
+              <span className="texto-suave">Este curso no lleva</span>
+            </dd>
+          </div>
+        ) : (
+          <>
+            <div>
+              <dt>Examen final</dt>
+              <dd>
+                {examen.mejorPuntaje !== null ? (
+                  <span className="cifra">{examen.mejorPuntaje}%</span>
+                ) : (
+                  <span className="texto-suave">Sin presentar</span>
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>Intentos</dt>
+              <dd>
+                <span className="cifra">
+                  {examen.intentos} de {examen.intentosMaximos}
+                </span>
+              </dd>
+            </div>
+          </>
+        )}
       </dl>
 
       <div className="expediente-siguiente">
         {estado === "aprobado" && examen.aprobadoEn ? (
           <p>
-            <IconoAprobado width={18} height={18} /> Aprobaste el curso el {fecha(examen.aprobadoEn)}.
+            <IconoAprobado width={18} height={18} />{" "}
+            {expediente.sinExamen ? "Terminaste el curso el" : "Aprobaste el curso el"} {fecha(examen.aprobadoEn)}.
           </p>
         ) : estado === "examen-pendiente" ? (
           <Link href="/curso/examen" className="boton boton-chico" onClick={() => cambiarCurso(curso.id)}>

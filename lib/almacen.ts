@@ -4,6 +4,7 @@ import path from "path";
 import { migrarACuentas } from "./cuentas";
 import { sumarEjemplos } from "./ejemplos";
 import type {
+  AvancePlan,
   Categoria,
   Comentario,
   ComunidadCreada,
@@ -59,6 +60,8 @@ export interface Almacen {
   entregas?: EntregaPractica[];
   /** Resultados de los diagnósticos (como el Radar de INCREASE), uno por alumno y lección. */
   diagnosticos?: ResultadoDiagnostico[];
+  /** Avance de los alumnos en los planes por días, uno por alumno y lección. */
+  planes?: AvancePlan[];
   /** Comunidades y cursos que crean las coaches desde la plataforma. */
   comunidadesCoach?: ComunidadCreada[];
   cursosCoach?: CursoCreado[];

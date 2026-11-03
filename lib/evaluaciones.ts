@@ -52,7 +52,8 @@ async function evaluacionesDeCursoCreado(id: string): Promise<Evaluaciones | nul
     repaso: Object.fromEntries(
       curso.modulos.flatMap((m) => m.lecciones).filter((l) => l.repaso.length > 0).map((l) => [l.id, l.repaso]),
     ),
-    examenFinal: { titulo: `Examen final: ${curso.titulo}`, preguntas: curso.examen },
+    // Sin examen final, no hay preguntas que presentar (las suyas se guardan en el curso).
+    examenFinal: { titulo: `Examen final: ${curso.titulo}`, preguntas: curso.sinExamen ? [] : curso.examen },
   };
 }
 
@@ -164,6 +165,14 @@ export function expedienteDe(a: Almacen, curso: DatosCurso, ev: Evaluaciones, au
     aprobadoEn,
   };
 
+  // Un curso sin examen final se termina al completar las lecciones.
+  const sinExamen = ev.examenFinal.preguntas.length === 0;
+  const terminado = leccionesTotal > 0 && leccionesHechas === leccionesTotal;
+  if (sinExamen && terminado) {
+    examen.aprobado = true;
+    examen.aprobadoEn = a.progreso?.find((p) => p.autor === autor)?.actualizado ?? null;
+  }
+
   // Requiere apoyo desde que reprueba un intento del examen (aunque le queden
   // intentos): así la coach lo ve a tiempo.
   const estado: EstadoAlumno = examen.aprobado
@@ -191,6 +200,7 @@ export function expedienteDe(a: Almacen, curso: DatosCurso, ev: Evaluaciones, au
     porModulo,
     repaso,
     examen,
+    ...(sinExamen ? { sinExamen: true } : {}),
     ultimaActividad: fechas.length ? fechas.sort().at(-1)! : null,
   };
 }

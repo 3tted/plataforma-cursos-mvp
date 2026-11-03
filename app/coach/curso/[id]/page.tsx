@@ -619,15 +619,31 @@ export default function EditorCurso() {
 
       <section className="tarjeta editor-seccion" aria-labelledby="examen-editor-titulo">
         <h2 id="examen-editor-titulo">Examen final</h2>
-        <p className="texto-suave">
-          Se desbloquea al terminar todas las lecciones. Se aprueba con 70% y hay 3 intentos.
-        </p>
-        <EditorPreguntas
-          preguntas={curso.examen}
-          alCambiar={(examen) => cambiar((c) => ({ ...c, examen }))}
-          lecciones={lecciones.map((l) => ({ id: l.id, titulo: l.titulo }))}
-          vacio="Todavía no hay preguntas. El examen necesita al menos una para publicar el curso."
-        />
+        <label className="editor-gratis editor-sin-examen">
+          <input
+            type="checkbox"
+            checked={!!curso.sinExamen}
+            onChange={(e) => cambiar((c) => ({ ...c, sinExamen: e.target.checked || undefined }))}
+          />
+          Este curso no lleva examen final: se termina al completar sus lecciones
+        </label>
+        {curso.sinExamen ? (
+          <p className="texto-suave">
+            Tus alumnos no verán examen. Si ya escribiste preguntas, se guardan por si lo vuelves a activar.
+          </p>
+        ) : (
+          <>
+            <p className="texto-suave">
+              Se desbloquea al terminar todas las lecciones. Se aprueba con 70% y hay 3 intentos.
+            </p>
+            <EditorPreguntas
+              preguntas={curso.examen}
+              alCambiar={(examen) => cambiar((c) => ({ ...c, examen }))}
+              lecciones={lecciones.map((l) => ({ id: l.id, titulo: l.titulo }))}
+              vacio="Todavía no hay preguntas. El examen necesita al menos una para publicar el curso."
+            />
+          </>
+        )}
       </section>
 
       {curso.estado === "borrador" && (

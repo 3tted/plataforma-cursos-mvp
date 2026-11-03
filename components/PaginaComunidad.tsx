@@ -12,7 +12,7 @@ import TarjetaPublicacion from "@/components/TarjetaPublicacion";
 import MenuComunidad from "@/components/MenuComunidad";
 import PresentacionComunidad from "@/components/PresentacionComunidad";
 import { useTitulo } from "@/components/useTitulo";
-import { api, moneda } from "@/lib/cliente";
+import { api, moneda, todoGratis } from "@/lib/cliente";
 import { COMUNIDADES } from "@/lib/comunidades";
 import { CATEGORIAS, type Categoria, type ComunidadCreada, type Publicacion, type ResumenComunidad } from "@/lib/tipos";
 
@@ -262,7 +262,7 @@ export default function PaginaComunidad({ id }: { id: string }) {
           <PreguntaRapida />
         </section>
 
-        {usuario?.rol === "alumno" && !tieneAcceso && (
+        {usuario?.rol === "alumno" && !tieneAcceso && !todoGratis(cursosComunidad) && (
           <section className="lateral-bloque tarjeta-membresia" aria-label="Membresía">
             <h2>Membresía</h2>
             <p className="precio">

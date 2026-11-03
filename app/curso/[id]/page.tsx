@@ -19,6 +19,7 @@ import AgendarSesion from "@/components/AgendarSesion";
 import BotonInscribirse from "@/components/BotonInscribirse";
 import DiagnosticoRadar from "@/components/DiagnosticoRadar";
 import Markdown from "@/components/Markdown";
+import PlanDias from "@/components/PlanDias";
 import PracticaLeccion from "@/components/PracticaLeccion";
 import PreguntaRapida from "@/components/PreguntaRapida";
 import RepasoLeccion from "@/components/RepasoLeccion";
@@ -115,6 +116,7 @@ export default function PaginaLeccion() {
   const hechasModulo = modulo.lecciones.filter((l) => completadas.includes(l.id)).length;
   const siguienteBloqueada = !!siguiente && !siguiente.gratis && !tieneAcceso;
   const cursoTerminado = !leccion.deCoach && completadasBase === base.length;
+  const sinExamen = !!datos.curso.sinExamen;
   const precio = moneda(datos.comunidad.precio_mensual);
   const enlaceMembresia = (desde: string) => `/membresia?leccion=${desde}`;
   const textoUnirse = pagoPendiente ? "Ver mi ficha de pago" : `Activar membresía por ${precio} al mes`;
@@ -216,7 +218,7 @@ export default function PaginaLeccion() {
   const completarYSeguir = () => {
     completar();
     if (siguienteBloqueada) router.push(enlaceMembresia(siguiente.id));
-    else router.push(siguiente ? `/curso/${siguiente.id}` : "/curso/examen");
+    else router.push(siguiente ? `/curso/${siguiente.id}` : sinExamen ? "/curso" : "/curso/examen");
   };
 
   return (
@@ -286,15 +288,17 @@ export default function PaginaLeccion() {
             </div>
           );
         })}
-        <Link href="/curso/examen" className="indice-examen">
-          <IconoExamen width={16} height={16} /> Examen final
-          {!cursoTerminado && (
-            <>
-              <IconoCandado width={12} height={12} />
-              <span className="sr-only"> (se desbloquea al terminar las lecciones)</span>
-            </>
-          )}
-        </Link>
+        {!sinExamen && (
+          <Link href="/curso/examen" className="indice-examen">
+            <IconoExamen width={16} height={16} /> Examen final
+            {!cursoTerminado && (
+              <>
+                <IconoCandado width={12} height={12} />
+                <span className="sr-only"> (se desbloquea al terminar las lecciones)</span>
+              </>
+            )}
+          </Link>
+        )}
       </nav>
 
       <article className="leccion">
@@ -426,6 +430,8 @@ export default function PaginaLeccion() {
               {partirLeccion(leccion.contenido).map((parte, i) =>
                 "diagnostico" in parte ? (
                   <DiagnosticoRadar key={i} id={parte.diagnostico} leccion={leccion.id} />
+                ) : "plan" in parte ? (
+                  <PlanDias key={i} id={parte.plan} leccion={leccion.id} />
                 ) : "agendar" in parte ? (
                   <AgendarSesion
                     key={i}
@@ -610,8 +616,8 @@ export default function PaginaLeccion() {
                 </>
               ) : cursoTerminado ? (
                 <>
-                  <small>Último paso</small>
-                  <strong>Examen final</strong>
+                  <small>{sinExamen ? "Curso terminado" : "Último paso"}</small>
+                  <strong>{sinExamen ? "Completaste todas las lecciones" : "Examen final"}</strong>
                 </>
               ) : siguiente ? (
                 <>
@@ -660,11 +666,12 @@ export default function PaginaLeccion() {
               ) : guiado ? (
                 // Sin nada pendiente (una lección de solo texto): seguir la completa y abre lo que sigue.
                 <button type="button" className="boton" onClick={completarYSeguir}>
-                  {siguiente ? "Siguiente lección" : "Ir al examen final"} <IconoFlechaDer width={16} height={16} />
+                  {siguiente ? "Siguiente lección" : sinExamen ? "Terminar el curso" : "Ir al examen final"}{" "}
+                  <IconoFlechaDer width={16} height={16} />
                 </button>
               ) : cursoTerminado ? (
-                <Link href="/curso/examen" className="boton">
-                  Presentar el examen <IconoFlechaDer width={16} height={16} />
+                <Link href={sinExamen ? "/perfil" : "/curso/examen"} className="boton">
+                  {sinExamen ? "Ver mi expediente" : "Presentar el examen"} <IconoFlechaDer width={16} height={16} />
                 </Link>
               ) : siguienteBloqueada ? (
                 <Link href={enlaceMembresia(siguiente.id)} className="boton">

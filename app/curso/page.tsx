@@ -191,7 +191,11 @@ export default function PaginaCurso() {
               ) : terminado ? (
                 <>
                   <p className="curso-siguiente">
-                    {examen?.aprobado ? "Aprobaste el curso." : "Terminaste las lecciones. Te falta el examen final."}
+                    {datos.curso.sinExamen
+                      ? "Terminaste el curso."
+                      : examen?.aprobado
+                        ? "Aprobaste el curso."
+                        : "Terminaste las lecciones. Te falta el examen final."}
                   </p>
                   <Link href={examen?.aprobado ? "/perfil" : "/curso/examen"} className="boton">
                     {examen?.aprobado ? "Ver mi expediente" : "Presentar el examen"}
@@ -337,22 +341,41 @@ export default function PaginaCurso() {
               </span>
               Al terminar
             </h2>
-            <p>
-              Presentas un <strong>examen final</strong>
-              {preguntasExamen ? ` de ${preguntasExamen} preguntas` : ""}. Lo apruebas con{" "}
-              <span className="cifra">{evaluaciones?.aprobarCon ?? 70}%</span>, tienes{" "}
-              <span className="cifra">{evaluaciones?.intentosExamen ?? 3}</span> intentos y queda en tu expediente.
-            </p>
+            {datos.curso.sinExamen ? (
+              <p>
+                Este curso no lleva examen final: lo terminas al completar sus{" "}
+                <span className="cifra">{base.length}</span> lecciones y queda en tu expediente.
+              </p>
+            ) : (
+              <p>
+                Presentas un <strong>examen final</strong>
+                {preguntasExamen ? ` de ${preguntasExamen} preguntas` : ""}. Lo apruebas con{" "}
+                <span className="cifra">{evaluaciones?.aprobarCon ?? 70}%</span>, tienes{" "}
+                <span className="cifra">{evaluaciones?.intentosExamen ?? 3}</span> intentos y queda en tu expediente.
+              </p>
+            )}
             <p className="texto-suave curso-al-terminar-estado">
-              {esCoach
-                ? "Puedes revisarlo como lo verán tus alumnos; tus respuestas no se guardan."
-                : examen?.aprobado
-                  ? `Aprobado con ${examen.mejorPuntaje}%.`
+              {datos.curso.sinExamen
+                ? esCoach
+                  ? "Tus alumnos terminan el curso al completar todas las lecciones."
                   : terminado
-                    ? "Ya puedes presentarlo."
-                    : `Se desbloquea al terminar las ${base.length} lecciones. Llevas ${hechas}.`}
+                    ? "Ya terminaste el curso."
+                    : `Llevas ${hechas} de ${base.length} lecciones.`
+                : esCoach
+                  ? "Puedes revisarlo como lo verán tus alumnos; tus respuestas no se guardan."
+                  : examen?.aprobado
+                    ? `Aprobado con ${examen.mejorPuntaje}%.`
+                    : terminado
+                      ? "Ya puedes presentarlo."
+                      : `Se desbloquea al terminar las ${base.length} lecciones. Llevas ${hechas}.`}
             </p>
-            {examen?.aprobado ? (
+            {datos.curso.sinExamen ? (
+              terminado && !esCoach ? (
+                <Link href="/perfil" className="boton boton-secundario boton-chico">
+                  Ver mi expediente
+                </Link>
+              ) : null
+            ) : examen?.aprobado ? (
               <Link href="/perfil" className="boton boton-secundario boton-chico">
                 Ver mi expediente
               </Link>

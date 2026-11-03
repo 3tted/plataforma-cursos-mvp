@@ -24,7 +24,7 @@ interface LeccionEjemplo {
 interface Ejemplo {
   empresa: Pick<Empresa, "id" | "nombre" | "dueno" | "color" | "logo" | "giro">;
   comunidad: Omit<ComunidadCreada, "autor" | "empresa" | "creadaEn">;
-  curso: Pick<CursoCreado, "titulo" | "subtitulo" | "aprenderas" | "requisitos" | "preguntas_sugeridas"> & {
+  curso: Pick<CursoCreado, "titulo" | "subtitulo" | "aprenderas" | "requisitos" | "preguntas_sugeridas" | "sinExamen"> & {
     modulos: { titulo: string; lecciones: LeccionEjemplo[] }[];
     examen: Omit<PreguntaCurso, "id">[];
   };
@@ -97,6 +97,7 @@ function sembrarEjemplo(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<str
     preguntas_sugeridas: e.curso.preguntas_sugeridas,
     modulos,
     examen: e.curso.examen.map((p) => ({ ...p, id: `KF${siguiente(a)}` })),
+    ...(e.curso.sinExamen ? { sinExamen: true } : {}),
     autor,
     empresa,
     creadoEn: ahora,
@@ -128,6 +129,31 @@ function sumarAgenda(a: Almacen, { e }: { e: Ejemplo }): void {
   }
 }
 
+/**
+ * El plan de 7 días pasó de texto a una lista por días (<!-- plan:… -->): si la
+ * lección sigue con el texto de antes, se cambia por el nuevo, y su práctica
+ * (si nadie la cambió) pasa a pedir el plan de 30 días.
+ */
+const PRACTICA_PLAN_ANTERIOR =
+  "Registra la evidencia de avance de cada día: qué hiciste y qué cambió. Si te sirve, sube una foto o un documento con tu plan de 30 días.";
+
+function sumarPlan(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<string, string> }): void {
+  const curso = cursoDelEjemplo(a, e);
+  const fuente = e.curso.modulos.flatMap((m) => m.lecciones).find((l) => l.archivo.endsWith("05-plan.md"));
+  const leccion = curso?.modulos.flatMap((m) => m.lecciones).find((l) => l.titulo === fuente?.titulo);
+  if (!fuente || !leccion) return;
+  if (leccion.contenido.includes("## Día 1 · Haz visible la brecha") && !leccion.contenido.includes("<!-- plan:")) {
+    leccion.contenido = textos.get(fuente.archivo) ?? leccion.contenido;
+  }
+  if (leccion.practica?.instrucciones === PRACTICA_PLAN_ANTERIOR && fuente.practica) leccion.practica = fuente.practica;
+}
+
+/** El Radar es un diagnóstico: el curso queda sin examen final (sus preguntas se guardan). */
+function quitarExamen(a: Almacen, { e }: { e: Ejemplo }): void {
+  const curso = cursoDelEjemplo(a, e);
+  if (curso && e.curso.sinExamen && curso.sinExamen === undefined) curso.sinExamen = true;
+}
+
 const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
   (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
 
@@ -136,9 +162,11 @@ const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
  * en los almacenes que ya lo tenían ("increase:practicas"…); uno recién
  * sembrado ya los trae.
  */
-const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: { e: Ejemplo }) => void }[] = [
+const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: { e: Ejemplo; textos: Map<string, string> }) => void }[] = [
   { id: "practicas", aplicar: sumarPracticas },
   { id: "agenda", aplicar: sumarAgenda },
+  { id: "plan", aplicar: sumarPlan },
+  { id: "sin-examen", aplicar: quitarExamen },
 ];
 
 /**

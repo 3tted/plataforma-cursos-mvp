@@ -168,9 +168,14 @@ export default function PracticaLeccion({
               <li key={e.id}>
                 <p className="practica-autor">
                   <strong>{e.autor}</strong> <span className="texto-suave">· {fechaCorta(e.actualizadaEn)}</span>
+                  {e.porRevisar && <span className="practica-etiqueta">Por revisar</span>}
                 </p>
                 {e.texto && <p className="practica-texto">{e.texto}</p>}
                 {e.archivo && <ArchivoEntregado archivo={e.archivo} />}
+                <ComentarEntrega
+                  entrega={e}
+                  alGuardar={(nueva) => setEntregas((lista) => lista.map((x) => (x.id === nueva.id ? nueva : x)))}
+                />
               </li>
             ))}
           </ul>
@@ -237,7 +242,77 @@ export default function PracticaLeccion({
           {mensaje.texto}
         </p>
       )}
+      {entrega?.respuesta && (
+        <div className="practica-respuesta">
+          <p className="practica-autor">
+            <strong>Comentario de {entrega.respuesta.autor}</strong>{" "}
+            <span className="texto-suave">· {fechaCorta(entrega.respuesta.fecha)}</span>
+          </p>
+          <p className="practica-texto">{entrega.respuesta.texto}</p>
+        </div>
+      )}
     </section>
+  );
+}
+
+// El comentario del equipo a una entrega: se escribe y se guarda ahí mismo.
+function ComentarEntrega({ entrega, alGuardar }: { entrega: EntregaVista; alGuardar: (e: EntregaVista) => void }) {
+  const [texto, setTexto] = useState(entrega.respuesta?.texto ?? "");
+  const [abierto, setAbierto] = useState(false);
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState("");
+
+  const guardar = async () => {
+    setError("");
+    setOcupado(true);
+    try {
+      const r = await api<{ entrega: EntregaVista }>("/api/practica", { method: "PATCH", json: { id: entrega.id, respuesta: texto } });
+      alGuardar(r.entrega);
+      setAbierto(false);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setOcupado(false);
+    }
+  };
+
+  if (!abierto) {
+    return (
+      <div className="practica-respuesta">
+        {entrega.respuesta && (
+          <>
+            <p className="practica-autor">
+              <strong>Tu comentario</strong> <span className="texto-suave">· {fechaCorta(entrega.respuesta.fecha)}</span>
+            </p>
+            <p className="practica-texto">{entrega.respuesta.texto}</p>
+          </>
+        )}
+        <button type="button" className="enlace" onClick={() => setAbierto(true)}>
+          {entrega.respuesta ? "Cambiar mi comentario" : "Comentarle"}
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="practica-respuesta">
+      <label className="campo">
+        <span>Tu comentario para {entrega.autor}</span>
+        <textarea rows={3} value={texto} maxLength={2000} onChange={(e) => setTexto(e.target.value)} />
+      </label>
+      <div className="practica-acciones">
+        <button type="button" className="boton" onClick={guardar} disabled={ocupado || !texto.trim()}>
+          {ocupado ? "Guardando…" : "Enviar comentario"}
+        </button>
+        <button type="button" className="enlace" onClick={() => setAbierto(false)} disabled={ocupado}>
+          Cancelar
+        </button>
+      </div>
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }
 

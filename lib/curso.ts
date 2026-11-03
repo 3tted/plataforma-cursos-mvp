@@ -124,6 +124,7 @@ export function datosDeCursoCreado(c: CursoCreado, comunidad: Comunidad): DatosC
       id: c.id,
       ...(c.estado !== "publicado" ? { sinPublicar: true } : {}),
       ...(c.foto ? { foto: c.foto } : {}),
+      ...(c.sinExamen ? { sinExamen: true } : {}),
       titulo: c.titulo,
       subtitulo: c.subtitulo,
       aprenderas: c.aprenderas,
@@ -292,6 +293,7 @@ export function resumenDe({ curso, comunidad }: DatosCurso): ResumenCurso {
     gratis: etiquetaGratis(modulos),
     publicado: !curso.sinPublicar,
     ...(curso.foto ? { foto: curso.foto } : {}),
+    ...(curso.sinExamen ? { sinExamen: true } : {}),
   };
 }
 

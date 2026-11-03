@@ -45,7 +45,9 @@ function suEntrega(a: Almacen, cuenta: Cuenta, leccion: string, curso: string): 
 
 export const GET = manejar(async (req: Request) => {
   const cuenta = await cuentaDeReq(req);
-  const { leccion, datos } = await leccionConPractica(new URL(req.url).searchParams.get("leccion"));
+  const parametros = new URL(req.url).searchParams;
+  if (parametros.has("pendientes")) return pendientesDelEquipo(cuenta);
+  const { leccion, datos } = await leccionConPractica(parametros.get("leccion"));
   if (delEquipo(cuenta, datos)) {
     const entregas = await consultar((a) =>
       (a.entregas ?? [])
@@ -57,6 +59,45 @@ export const GET = manejar(async (req: Request) => {
   }
   const suya = await consultar((a) => (a.entregas ?? []).find((e) => e.cuenta === cuenta.id && e.leccion === leccion));
   return Response.json({ equipo: false, entrega: suya ? vistaDeEntrega(suya) : null });
+});
+
+/**
+ * Para el panel de la coach: las prácticas de los cursos de su empresa, las
+ * que esperan su comentario primero, con el título de la lección y del curso.
+ */
+async function pendientesDelEquipo(cuenta: Cuenta): Promise<Response> {
+  if (cuenta.rol !== "coach" || !cuenta.empresa) throw new SinPermiso("Esto es para el equipo de una empresa.");
+  const entregas = await consultar((a) => {
+    const lecciones = new Map<string, { leccion: string; curso: string }>();
+    for (const c of (a.cursosCoach ?? []).filter((x) => x.empresa === cuenta.empresa)) {
+      for (const l of c.modulos.flatMap((m) => m.lecciones)) lecciones.set(l.id, { leccion: l.titulo, curso: c.titulo });
+    }
+    return (a.entregas ?? [])
+      .filter((e) => lecciones.has(e.leccion))
+      .map((e) => ({ ...vistaDeEntrega(e), titulos: lecciones.get(e.leccion)! }))
+      .sort((x, y) => Number(y.porRevisar) - Number(x.porRevisar) || y.actualizadaEn.localeCompare(x.actualizadaEn))
+      .slice(0, 50);
+  });
+  return Response.json({ entregas, porRevisar: entregas.filter((e) => e.porRevisar).length });
+}
+
+// PATCH {id, respuesta}: el equipo le deja (o cambia) su comentario a una entrega.
+export const PATCH = manejar(async (req: Request) => {
+  const datosPeticion = await leerJson(req);
+  const cuenta = await cuentaDeReq(req);
+  const id = Number(datosPeticion.id);
+  const comentario = texto(datosPeticion.respuesta, "respuesta", 2000);
+  const entrega = await consultar((a) => (a.entregas ?? []).find((e) => e.id === id));
+  if (!entrega) return error("No encontramos esa práctica.", 404);
+  const datos = await cursoDeLeccion(entrega.leccion, { borradores: true });
+  if (!datos || !delEquipo(cuenta, datos)) throw new SinPermiso("Solo el equipo de la empresa del curso comenta las prácticas.");
+  const vista = await modificar((a) => {
+    const e = (a.entregas ?? []).find((x) => x.id === id);
+    if (!e) throw new ErrorDeDatos("Esa práctica ya no existe.");
+    e.respuesta = { texto: comentario, autor: cuenta.nombre, fecha: new Date().toISOString() };
+    return vistaDeEntrega(e);
+  });
+  return Response.json({ entrega: vista });
 });
 
 export const POST = manejar(async (req: Request) => {

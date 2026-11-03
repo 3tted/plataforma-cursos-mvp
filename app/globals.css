@@ -10316,3 +10316,149 @@ button.tarjeta-comunidad-enlace {
   color: var(--acento-texto);
   font-weight: 700;
 }
+
+.practica-respuesta {
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--linea-fuerte);
+}
+
+.practica .practica-respuesta:not(.practica-entregas .practica-respuesta) {
+  padding: 12px 14px;
+  border: 0;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+  box-shadow: inset 3px 0 0 var(--acento);
+}
+
+.practica-autor .practica-etiqueta {
+  margin-left: 6px;
+}
+
+/* ---------- Plan por días (por ejemplo, el plan de 7 días de INCREASE) ---------- */
+
+.plan-dias {
+  display: grid;
+  gap: 18px;
+  margin: 24px 0;
+}
+
+.plan-dias-encabezado {
+  display: grid;
+  gap: 10px;
+  padding: 20px 22px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+}
+
+.plan-dias-encabezado h2,
+.plan-dias-encabezado p {
+  margin: 0;
+}
+
+.plan-dias-lista {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-dia {
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+}
+
+.plan-dia[data-hecho="true"] {
+  box-shadow: inset 4px 0 0 var(--acento);
+}
+
+.plan-dia p {
+  margin: 0;
+}
+
+.plan-dia .campo {
+  margin: 0;
+}
+
+.plan-dia-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: baseline;
+}
+
+.plan-dia-cabecera h3 {
+  margin: 0;
+}
+
+.plan-dia-numero {
+  color: var(--acento-texto);
+  font-family: var(--fuente-display);
+  font-size: var(--t-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.plan-dia-hecho {
+  position: relative;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-self: start;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.plan-dia-hecho input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.plan-dia-hecho:has(input:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.plan-dia-hecho svg {
+  opacity: 0.35;
+}
+
+.plan-dia[data-hecho="true"] .plan-dia-hecho {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--acento-tinta);
+}
+
+.plan-dia[data-hecho="true"] .plan-dia-hecho svg {
+  opacity: 1;
+}
+
+.plan-evidencias {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: var(--t-small);
+}
+
+.plan-evidencias li[data-hecho="false"] {
+  color: var(--tinta-3);
+}
+
+.practica-entregas summary {
+  cursor: pointer;
+}

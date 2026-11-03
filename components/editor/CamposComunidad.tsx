@@ -10,6 +10,9 @@ export type FormaComunidad = {
   coach_titulo: string;
   /** Como texto, tal cual lo escribe la coach. */
   precio_mensual: string;
+  /** Para que sus alumnos le agenden una sesión (opcionales). */
+  whatsapp: string;
+  agenda: string;
 };
 
 export const COMUNIDAD_VACIA: FormaComunidad = {
@@ -19,6 +22,8 @@ export const COMUNIDAD_VACIA: FormaComunidad = {
   tema: "Finanzas",
   coach_titulo: "",
   precio_mensual: "390",
+  whatsapp: "",
+  agenda: "",
 };
 
 // Lo que la coach escribe de su comunidad, igual al crearla que al editarla.
@@ -95,6 +100,37 @@ export default function CamposComunidad({
           placeholder="Por ejemplo: Chef y asesora de negocios"
         />
       </label>
+      <fieldset className="campos-agenda">
+        <legend>Para que tus alumnos agenden una sesión contigo (opcional)</legend>
+        <p className="texto-suave">
+          Aparecen como botones al final de un diagnóstico y donde pongas una invitación a agendar. Con ninguno, no se
+          muestran.
+        </p>
+        <div className="forma-fila">
+          <label className="campo">
+            <span>Tu WhatsApp</span>
+            <input
+              type="tel"
+              inputMode="tel"
+              value={forma.whatsapp}
+              onChange={poner("whatsapp")}
+              maxLength={20}
+              placeholder="10 dígitos, por ejemplo 656 123 4567"
+            />
+          </label>
+          <label className="campo">
+            <span>Liga de tu agenda</span>
+            <input
+              type="url"
+              inputMode="url"
+              value={forma.agenda}
+              onChange={poner("agenda")}
+              maxLength={300}
+              placeholder="https://calendly.com/tu-nombre"
+            />
+          </label>
+        </div>
+      </fieldset>
     </>
   );
 }

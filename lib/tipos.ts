@@ -22,6 +22,34 @@ export interface Comunidad {
   empresaNombre?: string;
   precio_mensual: number;
   moneda: string;
+  /** Cómo agendan los alumnos una sesión con la coach (lo pone ella al editar su comunidad). */
+  agenda?: AgendaComunidad;
+}
+
+/** WhatsApp (solo dígitos, con código de país) y/o liga de agenda (Calendly, Google Calendar…). */
+export interface AgendaComunidad {
+  whatsapp?: string;
+  enlace?: string;
+}
+
+/** El resultado de un alumno en un diagnóstico (por ejemplo, el Radar de INCREASE). */
+export interface ResultadoDiagnostico {
+  id: number;
+  diagnostico: string;
+  leccion: string;
+  curso: string;
+  /** Id de la cuenta del alumno. */
+  cuenta: string;
+  autor: string;
+  correo: string;
+  respuestas: Record<string, number[]>;
+  /** Puntos de cada dimensión, por su id. */
+  puntos: Record<string, number>;
+  total: number;
+  /** Ids de la dimensión más baja (varias si empatan). */
+  masBajas: string[];
+  creadoEn: string;
+  actualizadoEn: string;
 }
 
 export interface Leccion {

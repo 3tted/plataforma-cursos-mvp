@@ -58,6 +58,7 @@ export const PATCH = manejar((req: Request) =>
       const c = comunidadDeCoach(a, datos.id, coach);
       Object.assign(c, campos);
       if (!campos.acerca) delete c.acerca;
+      if (!campos.agenda) delete c.agenda;
       return c;
     });
     return Response.json(comunidad);

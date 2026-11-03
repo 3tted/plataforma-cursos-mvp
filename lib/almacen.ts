@@ -21,6 +21,7 @@ import type {
   Presentacion,
   ProgresoAlumno,
   Publicacion,
+  ResultadoDiagnostico,
   Rol,
   Sesion,
   VideoFuente,
@@ -56,6 +57,8 @@ export interface Almacen {
   ejemplos?: string[];
   /** Prácticas que entregan los alumnos en las lecciones que la piden. Opcional: llegó después. */
   entregas?: EntregaPractica[];
+  /** Resultados de los diagnósticos (como el Radar de INCREASE), uno por alumno y lección. */
+  diagnosticos?: ResultadoDiagnostico[];
   /** Comunidades y cursos que crean las coaches desde la plataforma. */
   comunidadesCoach?: ComunidadCreada[];
   cursosCoach?: CursoCreado[];

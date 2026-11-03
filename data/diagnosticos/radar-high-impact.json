@@ -3,11 +3,31 @@
   "titulo": "Radar de Liderazgo High Impact™",
   "instrucciones": "Responde según tu comportamiento habitual durante los últimos 30 días, no según cómo te gustaría liderar.",
   "escala": [
-    { "valor": 1, "texto": "Casi nunca", "detalle": "Es una brecha frecuente." },
-    { "valor": 2, "texto": "Pocas veces", "detalle": "Lo consigo de manera inconsistente." },
-    { "valor": 3, "texto": "Algunas veces", "detalle": "Mi desempeño es variable." },
-    { "valor": 4, "texto": "Frecuentemente", "detalle": "Es una fortaleza habitual." },
-    { "valor": 5, "texto": "Casi siempre", "detalle": "Es una práctica consistente." }
+    {
+      "valor": 1,
+      "texto": "Casi nunca",
+      "detalle": "Es una brecha frecuente."
+    },
+    {
+      "valor": 2,
+      "texto": "Pocas veces",
+      "detalle": "Lo consigo de manera inconsistente."
+    },
+    {
+      "valor": 3,
+      "texto": "Algunas veces",
+      "detalle": "Mi desempeño es variable."
+    },
+    {
+      "valor": 4,
+      "texto": "Frecuentemente",
+      "detalle": "Es una fortaleza habitual."
+    },
+    {
+      "valor": 5,
+      "texto": "Casi siempre",
+      "detalle": "Es una práctica consistente."
+    }
   ],
   "dimensiones": [
     {
@@ -64,17 +84,54 @@
     }
   ],
   "porDimension": [
-    { "desde": 4, "hasta": 8, "texto": "Brecha prioritaria" },
-    { "desde": 9, "hasta": 12, "texto": "En desarrollo" },
-    { "desde": 13, "hasta": 16, "texto": "Fortaleza funcional" },
-    { "desde": 17, "hasta": 20, "texto": "Fortaleza consistente" }
+    {
+      "desde": 4,
+      "hasta": 8,
+      "texto": "Brecha prioritaria"
+    },
+    {
+      "desde": 9,
+      "hasta": 12,
+      "texto": "En desarrollo"
+    },
+    {
+      "desde": 13,
+      "hasta": 16,
+      "texto": "Fortaleza funcional"
+    },
+    {
+      "desde": 17,
+      "hasta": 20,
+      "texto": "Fortaleza consistente"
+    }
   ],
   "global": [
-    { "desde": 16, "hasta": 32, "texto": "Necesitas identificar y atender varias brechas prioritarias." },
-    { "desde": 33, "hasta": 48, "texto": "Tu liderazgo está en una etapa de desarrollo e integración." },
-    { "desde": 49, "hasta": 64, "texto": "Tienes bases funcionales que puedes convertir en mayor impacto." },
-    { "desde": 65, "hasta": 80, "texto": "Tus respuestas reflejan prácticas consistentes que conviene contrastar con resultados reales." }
+    {
+      "desde": 16,
+      "hasta": 32,
+      "texto": "Necesitas identificar y atender varias brechas prioritarias."
+    },
+    {
+      "desde": 33,
+      "hasta": 48,
+      "texto": "Tu liderazgo está en una etapa de desarrollo e integración."
+    },
+    {
+      "desde": 49,
+      "hasta": 64,
+      "texto": "Tienes bases funcionales que puedes convertir en mayor impacto."
+    },
+    {
+      "desde": 65,
+      "hasta": 80,
+      "texto": "Tus respuestas reflejan prácticas consistentes que conviene contrastar con resultados reales."
+    }
   ],
   "regla": "No te quedes con el promedio. La dimensión con menor puntuación puede ofrecerte una hipótesis útil sobre dónde comenzar, pero debes contrastarla con hechos: decisiones demoradas, conflictos recurrentes, objetivos incumplidos o dependencia operativa del empresario.",
-  "aviso": "Escala de autoevaluación creada para este producto piloto. No constituye una prueba psicométrica validada ni permite diagnosticar por sí sola la capacidad real de liderazgo."
+  "aviso": "Escala de autoevaluación creada para este producto piloto. No constituye una prueba psicométrica validada ni permite diagnosticar por sí sola la capacidad real de liderazgo.",
+  "cta": {
+    "titulo": "Siguiente paso: valida tu ruta en una Sesión de Claridad Estratégica",
+    "texto": "Ya tienes tu diagnóstico. Ahora no lo ejecutes solo: en 30 minutos exploras tu resultado, identificas una prioridad de evolución y determinas qué tipo de entrenamiento se ajusta mejor a tu siguiente etapa.",
+    "mensaje": "Hola, soy {nombre}. Hice el Radar de Liderazgo High Impact: saqué {total}/{maximo} y mi dimensión más baja es {dimension} ({puntos}/20). Quiero agendar mi Sesión de Claridad Estratégica."
+  }
 }

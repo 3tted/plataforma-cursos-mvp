@@ -10189,3 +10189,130 @@ button.tarjeta-comunidad-enlace {
   border-radius: var(--radio-control);
   background: var(--superficie-2);
 }
+
+/* ---------- Agendar una sesión con la coach (WhatsApp o liga de agenda) ---------- */
+
+.agendar {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0 8px;
+  padding: 20px 22px;
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  box-shadow: inset 4px 0 0 var(--acento);
+}
+
+.agendar h3,
+.agendar p {
+  margin: 0;
+}
+
+.agendar-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.agendar-aviso {
+  padding: 10px 14px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+  font-size: var(--t-small);
+}
+
+.diagnostico-guardado {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: var(--t-small);
+}
+
+.diagnostico-guardado:empty {
+  display: none;
+}
+
+.campos-agenda {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-control);
+}
+
+.campos-agenda legend {
+  padding: 0 6px;
+  font-weight: 700;
+  font-size: var(--t-small);
+}
+
+.campos-agenda p {
+  margin: 0;
+  font-size: var(--t-small);
+}
+
+/* Resultados del diagnóstico para el equipo de la empresa */
+
+.diagnostico-equipo {
+  display: grid;
+  gap: 14px;
+}
+
+.diagnostico-equipo-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.diagnostico-equipo-encabezado h3 {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin: 0;
+}
+
+.diagnostico-tabla {
+  overflow-x: auto;
+}
+
+.diagnostico-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+
+.diagnostico-tabla th,
+.diagnostico-tabla td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--linea);
+  text-align: left;
+  vertical-align: top;
+}
+
+.diagnostico-tabla thead th {
+  color: var(--tinta-2);
+  font-size: var(--t-caption);
+  white-space: nowrap;
+}
+
+.diagnostico-tabla tbody th {
+  font-weight: 600;
+}
+
+.diagnostico-tabla tbody th .texto-suave {
+  display: block;
+  font-size: var(--t-caption);
+  font-weight: 400;
+}
+
+.diagnostico-tabla td.cifra {
+  text-align: center;
+}
+
+.diagnostico-tabla td[data-baja="true"] {
+  color: var(--acento-texto);
+  font-weight: 700;
+}

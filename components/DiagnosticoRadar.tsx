@@ -1,14 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { calcular, diagnostico as buscarDiagnostico, type Diagnostico, type Resultado } from "@/lib/diagnosticos";
+import { api, fechaCorta } from "@/lib/cliente";
+import {
+  calcular,
+  diagnostico as buscarDiagnostico,
+  mensajeDeResultado,
+  type Diagnostico,
+  type Resultado,
+} from "@/lib/diagnosticos";
+import type { ResultadoDiagnostico } from "@/lib/tipos";
+import AgendarSesion from "./AgendarSesion";
 import { useApp } from "./Contexto";
+import { IconoDescargar } from "./Iconos";
 
 // Diagnóstico de autoevaluación dentro de una lección (por ejemplo, el Radar
 // de Liderazgo High Impact de INCREASE): afirmaciones del 1 al 5 agrupadas por
-// dimensión, una gráfica de radar con el resultado y por dónde empezar. Las
-// respuestas se guardan en este navegador para que el alumno vuelva a su
-// resultado; no cuentan como examen.
+// dimensión, una gráfica de radar con el resultado, por dónde empezar y la
+// invitación a agendar con la coach. No cuenta como examen. Las respuestas se
+// recuerdan en el navegador; al revelar el resultado, el de un alumno con
+// cuenta se guarda en el servidor para que el equipo de la empresa lo vea.
+
+type ResultadoGuardado = Omit<ResultadoDiagnostico, "cuenta">
 
 interface Guardado {
   respuestas: Record<string, (number | null)[]>;
@@ -38,24 +51,47 @@ function leer(clave: string, d: Diagnostico): Guardado {
   }
 }
 
-export default function DiagnosticoRadar({ id }: { id: string }) {
+export default function DiagnosticoRadar({ id, leccion }: { id: string; leccion: string }) {
   const d = buscarDiagnostico(id);
   if (!d) return null;
-  return <Radar d={d} />;
+  return <Radar d={d} leccion={leccion} />;
 }
 
-function Radar({ d }: { d: Diagnostico }) {
-  const { usuario } = useApp();
+function Radar({ d, leccion }: { d: Diagnostico; leccion: string }) {
+  const { usuario, pedirEntrada } = useApp();
   const clave = `diagnostico:${d.id}:${usuario?.correo ?? "visitante"}`;
   const [estado, setEstado] = useState<Guardado>(() => vacio(d));
   const [listo, setListo] = useState(false);
   const [aviso, setAviso] = useState("");
+  // null: todavía no se sabe; el equipo de la empresa ve los resultados de sus alumnos.
+  const [equipo, setEquipo] = useState<ResultadoGuardado[] | null>(null);
+  const [guardado, setGuardado] = useState<"si" | "no" | "error" | null>(null);
+  const ruta = `/api/diagnostico?leccion=${encodeURIComponent(leccion)}&diagnostico=${encodeURIComponent(d.id)}`;
 
-  // Se lee después de montar: en el servidor no hay localStorage.
+  // Se lee después de montar: en el servidor no hay localStorage. Con cuenta,
+  // lo guardado en el servidor gana (por ejemplo, si lo hizo en otro dispositivo).
   useEffect(() => {
-    setEstado(leer(clave, d));
+    let vigente = true;
+    const local = leer(clave, d);
+    setEstado(local);
     setListo(true);
-  }, [clave, d]);
+    if (!usuario) return;
+    api<{ equipo: boolean; resultados?: ResultadoGuardado[]; resultado?: ResultadoGuardado | null }>(ruta)
+      .then((r) => {
+        if (!vigente) return;
+        if (r.equipo) setEquipo(r.resultados ?? []);
+        else if (r.resultado) {
+          setGuardado("si");
+          if (!local.revelado) setEstado({ respuestas: r.resultado.respuestas, revelado: true });
+        }
+      })
+      .catch(() => {
+        // Sin conexión: se queda lo de este navegador.
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [clave, d, ruta, usuario]);
 
   useEffect(() => {
     if (!listo) return;
@@ -86,11 +122,20 @@ function Radar({ d }: { d: Diagnostico }) {
     }
     setEstado((e) => ({ ...e, revelado: true }));
     requestAnimationFrame(() => document.getElementById("diagnostico-resultado")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    if (!usuario || equipo) return;
+    setGuardado(null);
+    api<{ guardado: boolean }>("/api/diagnostico", {
+      method: "POST",
+      json: { leccion, diagnostico: d.id, respuestas: estado.respuestas },
+    })
+      .then((r) => setGuardado(r.guardado ? "si" : "no"))
+      .catch(() => setGuardado("error"));
   };
 
   const reiniciar = () => {
     if (respondidas > 0 && !window.confirm("¿Borrar tus respuestas y empezar de nuevo?")) return;
     setAviso("");
+    setGuardado(null);
     setEstado(vacio(d));
   };
 
@@ -182,9 +227,124 @@ function Radar({ d }: { d: Diagnostico }) {
         )}
       </div>
 
-      {estado.revelado && respondidas === total && <ResultadoRadar d={d} r={resultado} />}
+      {estado.revelado && respondidas === total && (
+        <>
+          <ResultadoRadar d={d} r={resultado} />
+          {!equipo && (
+            <p className="diagnostico-guardado" role="status">
+              {!usuario ? (
+                <>
+                  <button type="button" className="enlace" onClick={() => pedirEntrada("alumno")}>
+                    Entra a tu cuenta
+                  </button>{" "}
+                  para guardar tu resultado y que tu coach lo vea.
+                </>
+              ) : guardado === "si" ? (
+                "Tu resultado quedó guardado: tu coach lo puede ver para acompañarte."
+              ) : guardado === "error" ? (
+                "No pudimos guardar tu resultado. Revisa tu conexión y vuelve a tocar «Revelar mi Radar»."
+              ) : null}
+            </p>
+          )}
+          {d.cta && (
+            <AgendarSesion
+              titulo={d.cta.titulo}
+              texto={d.cta.texto}
+              mensaje={mensajeDeResultado(d, resultado, usuario?.nombre ?? "")}
+            />
+          )}
+        </>
+      )}
+
+      {equipo && <ResultadosEquipo d={d} resultados={equipo} />}
 
       <p className="diagnostico-nota texto-suave">{d.aviso}</p>
+    </section>
+  );
+}
+
+// Lo que ve el equipo de la empresa: el resultado de cada alumno, con su
+// dimensión más baja, para darle seguimiento. Se puede descargar en CSV.
+function ResultadosEquipo({ d, resultados }: { d: Diagnostico; resultados: ResultadoGuardado[] }) {
+  const nombre = (id: string) => d.dimensiones.find((x) => x.id === id)?.nombre ?? id;
+  const maximo = d.dimensiones.reduce((s, x) => s + x.afirmaciones.length, 0) * Math.max(...d.escala.map((e) => e.valor));
+
+  const descargar = () => {
+    const celda = (v: string | number) => `"${String(v).replaceAll('"', '""')}"`;
+    const filas = [
+      ["Alumno", "Correo", "Fecha", ...d.dimensiones.map((x) => x.nombre), "Total", "Dimensión más baja"],
+      ...resultados.map((r) => [
+        r.autor,
+        r.correo,
+        r.actualizadoEn.slice(0, 10),
+        ...d.dimensiones.map((x) => r.puntos[x.id] ?? ""),
+        r.total,
+        r.masBajas.map(nombre).join(" y "),
+      ]),
+    ];
+    const csv = "﻿" + filas.map((f) => f.map(celda).join(",")).join("\r\n");
+    const enlace = document.createElement("a");
+    enlace.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    enlace.download = `${d.id}-resultados.csv`;
+    enlace.click();
+    URL.revokeObjectURL(enlace.href);
+  };
+
+  return (
+    <section className="diagnostico-equipo tarjeta" aria-labelledby="diagnostico-equipo-titulo">
+      <div className="diagnostico-equipo-encabezado">
+        <h3 id="diagnostico-equipo-titulo">
+          Resultados de tus alumnos <span className="cifra">{resultados.length}</span>
+        </h3>
+        {resultados.length > 0 && (
+          <button type="button" className="boton boton-fantasma" onClick={descargar}>
+            <IconoDescargar width={16} height={16} /> Descargar en Excel (CSV)
+          </button>
+        )}
+      </div>
+      {resultados.length === 0 ? (
+        <p className="texto-suave">
+          Todavía nadie revela su Radar. Cuando un alumno lo haga, aquí verás su resultado y su dimensión más baja.
+        </p>
+      ) : (
+        <div className="diagnostico-tabla">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Alumno</th>
+                {d.dimensiones.map((x) => (
+                  <th key={x.id} scope="col">
+                    {x.corto}
+                  </th>
+                ))}
+                <th scope="col">Total</th>
+                <th scope="col">Por dónde empezar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resultados.map((r) => (
+                <tr key={r.id}>
+                  <th scope="row">
+                    {r.autor}
+                    <span className="texto-suave">
+                      {r.correo} · {fechaCorta(r.actualizadoEn)}
+                    </span>
+                  </th>
+                  {d.dimensiones.map((x) => (
+                    <td key={x.id} className="cifra" data-baja={r.masBajas.includes(x.id)}>
+                      {r.puntos[x.id]}
+                    </td>
+                  ))}
+                  <td className="cifra">
+                    {r.total}/{maximo}
+                  </td>
+                  <td>{r.masBajas.map(nombre).join(" y ")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }

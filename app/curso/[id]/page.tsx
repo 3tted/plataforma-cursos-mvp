@@ -15,6 +15,7 @@ import {
   IconoFlechaIzq,
   IconoSello,
 } from "@/components/Iconos";
+import AgendarSesion from "@/components/AgendarSesion";
 import BotonInscribirse from "@/components/BotonInscribirse";
 import DiagnosticoRadar from "@/components/DiagnosticoRadar";
 import Markdown from "@/components/Markdown";
@@ -424,7 +425,13 @@ export default function PaginaLeccion() {
             >
               {partirLeccion(leccion.contenido).map((parte, i) =>
                 "diagnostico" in parte ? (
-                  <DiagnosticoRadar key={i} id={parte.diagnostico} />
+                  <DiagnosticoRadar key={i} id={parte.diagnostico} leccion={leccion.id} />
+                ) : "agendar" in parte ? (
+                  <AgendarSesion
+                    key={i}
+                    titulo={`Agenda tu sesión con ${datos.comunidad.coach}`}
+                    mensaje={`Hola, soy ${usuario?.nombre ?? ""}. Vengo del curso «${datos.curso.titulo}» y quiero agendar una sesión.`}
+                  />
                 ) : (
                   <Markdown key={i} texto={parte.texto} nivelTitulos={2} />
                 ),

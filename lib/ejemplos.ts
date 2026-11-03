@@ -110,7 +110,7 @@ function sembrarEjemplo(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<str
  * las que su dueño ya cambió.
  */
 function sumarPracticas(a: Almacen, { e }: { e: Ejemplo }): void {
-  const curso = (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
+  const curso = cursoDelEjemplo(a, e);
   if (!curso) return;
   const porTitulo = new Map(e.curso.modulos.flatMap((m) => m.lecciones).map((l) => [l.titulo, l.practica]));
   for (const l of curso.modulos.flatMap((m) => m.lecciones)) {
@@ -119,24 +119,46 @@ function sumarPracticas(a: Almacen, { e }: { e: Ejemplo }): void {
   }
 }
 
+/** La invitación a pedir la sesión «en la comunidad» pasó a ser los botones de agenda (WhatsApp o liga). */
+const INVITACION_ANTERIOR = "Para pedir tu sesión, publícalo en la comunidad, en la categoría Dudas, con tu dimensión más baja.";
+
+function sumarAgenda(a: Almacen, { e }: { e: Ejemplo }): void {
+  for (const l of cursoDelEjemplo(a, e)?.modulos.flatMap((m) => m.lecciones) ?? []) {
+    if (l.contenido.includes(INVITACION_ANTERIOR)) l.contenido = l.contenido.replace(INVITACION_ANTERIOR, "<!-- agendar -->");
+  }
+}
+
+const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
+  (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
+
 /**
- * Siembra las empresas de ejemplo que este almacén todavía no tiene. Devuelve si cambió algo.
- * Si sus archivos no están a la mano (una ruta que no lleva /data en el despliegue), lo deja
- * para la siguiente lectura en vez de fallar.
+ * Cambios que llegaron después de sembrar un ejemplo. Se aplican una sola vez
+ * en los almacenes que ya lo tenían ("increase:practicas"…); uno recién
+ * sembrado ya los trae.
+ */
+const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: { e: Ejemplo }) => void }[] = [
+  { id: "practicas", aplicar: sumarPracticas },
+  { id: "agenda", aplicar: sumarAgenda },
+];
+
+/**
+ * Siembra las empresas de ejemplo que este almacén todavía no tiene y aplica
+ * sus actualizaciones pendientes. Devuelve si cambió algo. Si sus archivos no
+ * están a la mano (una ruta que no lleva /data en el despliegue), lo deja para
+ * la siguiente lectura en vez de fallar.
  */
 export async function sumarEjemplos(a: Almacen): Promise<boolean> {
   const sembrados = new Set(a.ejemplos ?? []);
-  // Cada ejemplo se siembra una vez ("increase") y sus prácticas se activan una vez ("increase:practicas").
-  const pendientes = EJEMPLOS.filter((x) => !sembrados.has(x) || !sembrados.has(`${x}:practicas`));
+  const claves = (nombre: string) => [nombre, ...ACTUALIZACIONES.map((x) => `${nombre}:${x.id}`)];
+  const pendientes = EJEMPLOS.filter((x) => claves(x).some((c) => !sembrados.has(c)));
   if (pendientes.length === 0) return false;
   let cambiado = false;
   for (const nombre of pendientes) {
     const ejemplo = await leerEjemplo(nombre).catch(() => null);
     if (!ejemplo) continue;
-    // Recién sembrado ya trae sus prácticas.
-    if (sembrados.has(nombre)) sumarPracticas(a, ejemplo);
-    else sembrarEjemplo(a, ejemplo);
-    sembrados.add(nombre).add(`${nombre}:practicas`);
+    if (!sembrados.has(nombre)) sembrarEjemplo(a, ejemplo);
+    else for (const x of ACTUALIZACIONES) if (!sembrados.has(`${nombre}:${x.id}`)) x.aplicar(a, ejemplo);
+    for (const c of claves(nombre)) sembrados.add(c);
     cambiado = true;
   }
   a.ejemplos = [...sembrados];

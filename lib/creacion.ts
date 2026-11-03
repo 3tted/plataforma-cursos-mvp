@@ -1,7 +1,7 @@
 import { nuevoId, type Almacen } from "./almacen";
 import { COMUNIDADES, TEMAS } from "./comunidades";
 import { ErrorDeDatos } from "./http";
-import type { ComunidadCreada, CursoCreado, LeccionCreada, ModuloCreado, PracticaLeccion, PreguntaCurso } from "./tipos";
+import type { AgendaComunidad, ComunidadCreada, CursoCreado, LeccionCreada, ModuloCreado, PracticaLeccion, PreguntaCurso } from "./tipos";
 
 // Comunidades y cursos que crea la coach desde la plataforma. El borrador se
 // guarda aunque esté incompleto; al publicar se revisa que el alumno pueda
@@ -32,7 +32,38 @@ function slug(nombre: string): string {
     .slice(0, 40);
 }
 
-type CamposComunidad = Pick<ComunidadCreada, "nombre" | "descripcion" | "acerca" | "tema" | "precio_mensual" | "coach_titulo">;
+type CamposComunidad = Pick<
+  ComunidadCreada,
+  "nombre" | "descripcion" | "acerca" | "tema" | "precio_mensual" | "coach_titulo" | "agenda"
+>;
+
+/**
+ * Cómo agendan los alumnos una sesión: WhatsApp (10 dígitos de México o con
+ * código de país) y/o la liga de su agenda. Sin ninguno, no hay agenda.
+ */
+export function agendaDe(whatsapp: unknown, enlace: unknown): AgendaComunidad | undefined {
+  const agenda: AgendaComunidad = {};
+  const digitos = typeof whatsapp === "string" ? whatsapp.replace(/\D/g, "") : "";
+  if (digitos) {
+    const numero = digitos.length === 10 ? `52${digitos}` : digitos;
+    if (numero.length < 11 || numero.length > 15) {
+      throw new ErrorDeDatos("Escribe tu WhatsApp con sus 10 dígitos (o con el código de país si no es de México).");
+    }
+    agenda.whatsapp = numero;
+  }
+  const liga = texto(enlace, 300);
+  if (liga) {
+    let url: URL | null = null;
+    try {
+      url = new URL(/^https?:\/\//i.test(liga) ? liga : `https://${liga}`);
+    } catch {
+      url = null;
+    }
+    if (!url || !url.hostname.includes(".")) throw new ErrorDeDatos("La liga de tu agenda no es válida. Cópiala completa, por ejemplo https://calendly.com/tu-nombre.");
+    agenda.enlace = url.toString();
+  }
+  return agenda.whatsapp || agenda.enlace ? agenda : undefined;
+}
 
 /** Revisa lo que la coach escribe de su comunidad (al crearla o al editarla). */
 export function camposDeComunidad(datos: Record<string, unknown>): CamposComunidad {
@@ -52,6 +83,7 @@ export function camposDeComunidad(datos: Record<string, unknown>): CamposComunid
     tema,
     precio_mensual: precio,
     coach_titulo: texto(datos.coach_titulo, 80) || "Coach",
+    agenda: agendaDe(datos.whatsapp, datos.agenda),
   };
 }
 
@@ -63,7 +95,7 @@ export interface Creadora {
 }
 
 export function nuevaComunidad(a: Almacen, { nombre: autor, empresa }: Creadora, datos: Record<string, unknown>): ComunidadCreada {
-  const { nombre, descripcion, acerca, tema, precio_mensual, coach_titulo } = camposDeComunidad(datos);
+  const { nombre, descripcion, acerca, tema, precio_mensual, coach_titulo, agenda } = camposDeComunidad(datos);
   const base = slug(nombre) || "comunidad";
   const usados = new Set([...COMUNIDADES.map((c) => c.id), ...(a.comunidadesCoach ?? []).map((c) => c.id)]);
   let id = base;
@@ -78,6 +110,7 @@ export function nuevaComunidad(a: Almacen, { nombre: autor, empresa }: Creadora,
     tema,
     precio_mensual,
     moneda: "MXN",
+    ...(agenda ? { agenda } : {}),
     autor,
     empresa,
     creadaEn: new Date().toISOString(),

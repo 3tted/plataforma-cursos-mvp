@@ -40,6 +40,7 @@ import {
   VideoCamera,
   X,
   GoogleLogo,
+  WhatsappLogo,
   LinkSimple,
   UserPlus,
   Buildings,
@@ -101,3 +102,4 @@ export const IconoGoogle = icono(GoogleLogo, "bold");
 export const IconoEnlace = icono(LinkSimple);
 export const IconoInvitar = icono(UserPlus);
 export const IconoEmpresa = icono(Buildings);
+export const IconoWhatsapp = icono(WhatsappLogo);

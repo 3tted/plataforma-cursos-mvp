@@ -112,6 +112,7 @@ export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
     ...marcaDe(a, c.empresa),
     precio_mensual: c.precio_mensual,
     moneda: c.moneda,
+    ...(c.agenda ? { agenda: c.agenda } : {}),
   };
 }
 

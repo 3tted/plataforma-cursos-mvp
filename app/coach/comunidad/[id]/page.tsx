@@ -18,6 +18,9 @@ const formaDe = (c: ComunidadCreada): FormaComunidad => ({
   tema: c.tema,
   coach_titulo: c.coach_titulo,
   precio_mensual: String(c.precio_mensual),
+  // Como lo guarda el servidor: con 52 y sin espacios.
+  whatsapp: c.agenda?.whatsapp ?? "",
+  agenda: c.agenda?.enlace ?? "",
 });
 
 // Editar una comunidad de la coach: su foto de portada y todo lo que se lee

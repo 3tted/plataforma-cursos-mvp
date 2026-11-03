@@ -38,6 +38,43 @@ export interface Leccion {
   video?: { url: string; tipo: string; nombre: string; subidoEn: string; inicio?: number; fin?: number };
   /** Presentación con IA (diapositivas narradas con la voz del dispositivo), si no hay video. */
   presentacion?: { diapositivas: Diapositiva[]; creadaEn: string; conVoz: boolean; opciones?: OpcionesPresentacion };
+  /** Práctica que el alumno entrega en esta lección, si la coach la activó. */
+  practica?: PracticaLeccion;
+}
+
+/** La coach la activa en las lecciones que la necesitan: notas o respuestas por escrito y, si quiere, un archivo. */
+export interface PracticaLeccion {
+  instrucciones: string;
+  /** El alumno puede subir un archivo (PDF, Word, Excel, PowerPoint o imagen). */
+  archivo: boolean;
+  /** Hay que entregarla para completar la lección. */
+  obligatoria: boolean;
+}
+
+/** Lo que entregó un alumno en la práctica de una lección. */
+export interface EntregaPractica {
+  id: number;
+  leccion: string;
+  curso: string;
+  /** Id de la cuenta del alumno. */
+  cuenta: string;
+  autor: string;
+  texto: string;
+  /** `ruta`: la del archivo en Vercel Blob (con su `url`) o su nombre en el disco. */
+  archivo?: { nombre: string; tipo: string; bytes: number; ruta: string; url?: string };
+  enviadaEn: string;
+  actualizadaEn: string;
+}
+
+/** Una entrega como la ve el navegador: el archivo se descarga por la API, con permiso. */
+export interface EntregaVista {
+  id: number;
+  leccion: string;
+  autor: string;
+  texto: string;
+  archivo?: { nombre: string; tipo: string; bytes: number; url: string };
+  enviadaEn: string;
+  actualizadaEn: string;
 }
 
 /** Una diapositiva de la presentación de una lección. */
@@ -157,6 +194,7 @@ export interface LeccionCreada {
   transcripcion: string;
   preguntas_sugeridas: string[];
   repaso: PreguntaCurso[];
+  practica?: PracticaLeccion;
 }
 
 export interface ModuloCreado {

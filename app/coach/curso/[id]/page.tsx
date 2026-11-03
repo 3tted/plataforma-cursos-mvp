@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/components/Contexto";
+import EditorPractica from "@/components/editor/EditorPractica";
 import EditorPreguntas from "@/components/editor/EditorPreguntas";
 import FotoPortada from "@/components/editor/FotoPortada";
 import VideoEnEditor from "@/components/editor/VideoEnEditor";
@@ -471,6 +472,7 @@ export default function EditorCurso() {
                     {l.gratis && " · Gratis"}
                     {videos[l.id] && " · Video"}
                     {l.repaso.length > 0 && ` · ${l.repaso.length} de repaso`}
+                    {l.practica && " · Práctica"}
                   </span>
                 </summary>
                 <div className="editor-leccion-cuerpo">
@@ -555,6 +557,10 @@ export default function EditorCurso() {
                       vacio="Sin preguntas de repaso. Te recomendamos dos."
                       maximo={10}
                     />
+                  </div>
+                  <div className="campo">
+                    <span>Práctica (actívala solo si esta lección la necesita)</span>
+                    <EditorPractica practica={l.practica} alCambiar={(practica) => cambiarLeccion(i, k, { practica })} />
                   </div>
                   <div className="editor-leccion-acciones">
                     <button

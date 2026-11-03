@@ -10071,3 +10071,121 @@ button.tarjeta-comunidad-enlace {
     padding: 10px 4px;
   }
 }
+
+/* ---------- Práctica de una lección (notas o archivo del alumno) ---------- */
+
+.practica {
+  display: grid;
+  gap: 14px;
+  margin: 28px 0 8px;
+  padding: 20px 22px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie);
+}
+
+.practica-encabezado h2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 6px;
+}
+
+.practica-encabezado p {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.practica-etiqueta {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--t-caption);
+  font-weight: 600;
+}
+
+.practica .campo {
+  margin: 0;
+}
+
+.practica-archivo,
+.practica-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+}
+
+.practica-descarga {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.practica-estado {
+  font-size: var(--t-small);
+}
+
+.practica-ok {
+  margin: 0;
+  color: var(--acento-texto);
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.practica-subtitulo {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin: 4px 0 0;
+}
+
+.practica-entregas {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.practica-entregas li {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+}
+
+.practica-autor,
+.practica-texto {
+  margin: 0;
+}
+
+.practica-texto {
+  white-space: pre-line;
+}
+
+.editor-practica {
+  display: grid;
+  gap: 4px;
+}
+
+/* Las casillas van dentro de un .campo: sin el estilo de los cuadros de texto. */
+.editor-practica .editor-gratis input[type="checkbox"] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  accent-color: var(--acento);
+}
+
+.editor-practica[data-activa="true"] {
+  padding: 4px 14px 10px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+}

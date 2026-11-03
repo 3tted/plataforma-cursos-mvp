@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import type { Almacen } from "./almacen";
 import { CUENTAS_DEMO, cuentaPorCorreo, nuevoIdCuenta } from "./cuentas";
-import type { ComunidadCreada, CursoCreado, Empresa, PreguntaCurso } from "./tipos";
+import type { ComunidadCreada, CursoCreado, Empresa, PracticaLeccion, PreguntaCurso } from "./tipos";
 
 // Empresas de ejemplo con su comunidad y su curso (data/ejemplos/*.json). Se
 // siembran una sola vez en el almacén, como si su dueño las hubiera creado
@@ -18,6 +18,7 @@ interface LeccionEjemplo {
   archivo: string;
   duracion_min: number;
   resumen: string;
+  practica?: PracticaLeccion;
 }
 
 interface Ejemplo {
@@ -80,6 +81,7 @@ function sembrarEjemplo(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<str
       transcripcion: "",
       preguntas_sugeridas: [],
       repaso: [],
+      ...(l.practica ? { practica: l.practica } : {}),
     })),
   }));
   a.cursosCoach ??= [];
@@ -103,20 +105,38 @@ function sembrarEjemplo(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<str
 }
 
 /**
+ * Las prácticas llegaron después de sembrar INCREASE: en los almacenes que ya
+ * la tenían se activan una sola vez en sus lecciones (por título), sin tocar
+ * las que su dueño ya cambió.
+ */
+function sumarPracticas(a: Almacen, { e }: { e: Ejemplo }): void {
+  const curso = (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
+  if (!curso) return;
+  const porTitulo = new Map(e.curso.modulos.flatMap((m) => m.lecciones).map((l) => [l.titulo, l.practica]));
+  for (const l of curso.modulos.flatMap((m) => m.lecciones)) {
+    const practica = porTitulo.get(l.titulo);
+    if (practica && !l.practica) l.practica = practica;
+  }
+}
+
+/**
  * Siembra las empresas de ejemplo que este almacén todavía no tiene. Devuelve si cambió algo.
  * Si sus archivos no están a la mano (una ruta que no lleva /data en el despliegue), lo deja
  * para la siguiente lectura en vez de fallar.
  */
 export async function sumarEjemplos(a: Almacen): Promise<boolean> {
   const sembrados = new Set(a.ejemplos ?? []);
-  const nuevos = EJEMPLOS.filter((x) => !sembrados.has(x));
-  if (nuevos.length === 0) return false;
+  // Cada ejemplo se siembra una vez ("increase") y sus prácticas se activan una vez ("increase:practicas").
+  const pendientes = EJEMPLOS.filter((x) => !sembrados.has(x) || !sembrados.has(`${x}:practicas`));
+  if (pendientes.length === 0) return false;
   let cambiado = false;
-  for (const nombre of nuevos) {
+  for (const nombre of pendientes) {
     const ejemplo = await leerEjemplo(nombre).catch(() => null);
     if (!ejemplo) continue;
-    sembrarEjemplo(a, ejemplo);
-    sembrados.add(nombre);
+    // Recién sembrado ya trae sus prácticas.
+    if (sembrados.has(nombre)) sumarPracticas(a, ejemplo);
+    else sembrarEjemplo(a, ejemplo);
+    sembrados.add(nombre).add(`${nombre}:practicas`);
     cambiado = true;
   }
   a.ejemplos = [...sembrados];

@@ -1,7 +1,7 @@
 import { nuevoId, type Almacen } from "./almacen";
 import { COMUNIDADES, TEMAS } from "./comunidades";
 import { ErrorDeDatos } from "./http";
-import type { ComunidadCreada, CursoCreado, LeccionCreada, ModuloCreado, PreguntaCurso } from "./tipos";
+import type { ComunidadCreada, CursoCreado, LeccionCreada, ModuloCreado, PracticaLeccion, PreguntaCurso } from "./tipos";
 
 // Comunidades y cursos que crea la coach desde la plataforma. El borrador se
 // guarda aunque esté incompleto; al publicar se revisa que el alumno pueda
@@ -141,6 +141,15 @@ function pregunta(a: Almacen, v: unknown, prefijo: string, ids: Map<string, stri
   };
 }
 
+/** La práctica de una lección, si la coach la activó (sin el campo, la lección no la pide). */
+function practicaDe(v: unknown): { practica?: PracticaLeccion } {
+  if (!v || typeof v !== "object") return {};
+  const p = v as Record<string, unknown>;
+  return {
+    practica: { instrucciones: texto(p.instrucciones, 2000), archivo: p.archivo === true, obligatoria: p.obligatoria === true },
+  };
+}
+
 /**
  * Guarda lo que manda el editor sobre el borrador actual. Las lecciones nuevas
  * (sin id K…) reciben su id aquí; las preguntas del examen que apuntaban a una
@@ -177,6 +186,7 @@ export function aplicarEdicion(a: Almacen, actual: CursoCreado, entrada: Record<
         transcripcion: texto(l.transcripcion, MAX_TEXTO_LECCION),
         preguntas_sugeridas: lista(l.preguntas_sugeridas, 4, 200),
         repaso: (Array.isArray(l.repaso) ? l.repaso : []).slice(0, MAX_REPASO).map((p) => pregunta(a, p, "KR", ids)),
+        ...practicaDe(l.practica),
       })),
     };
   });
@@ -210,6 +220,9 @@ export function pendientesParaPublicar(c: CursoCreado): string[] {
     const nombre = l.titulo ? `«${l.titulo}»` : `La lección ${i + 1}`;
     if (!l.titulo) faltan.push(`La lección ${i + 1} necesita un título.`);
     if (l.contenido.length < 40) faltan.push(`${nombre} necesita su texto (al menos un párrafo).`);
+    if (l.practica && l.practica.instrucciones.length < 10) {
+      faltan.push(`${nombre}: escribe qué debe entregar el alumno en la práctica, o desactívala.`);
+    }
     l.repaso.forEach((p, j) => {
       const problema = problemaDePregunta(p);
       if (problema) faltan.push(`Repaso de ${nombre}, pregunta ${j + 1}: ${problema}`);

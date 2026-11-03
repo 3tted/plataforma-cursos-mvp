@@ -10,6 +10,7 @@ import type {
   Cuenta,
   CursoCreado,
   Empresa,
+  EntregaPractica,
   Inscripcion,
   IntentoExamen,
   Invitacion,
@@ -53,6 +54,8 @@ export interface Almacen {
   semillas?: string[];
   /** Empresas de ejemplo ya sembradas (lib/ejemplos.ts), para no volver a poner una que se borró. */
   ejemplos?: string[];
+  /** Prácticas que entregan los alumnos en las lecciones que la piden. Opcional: llegó después. */
+  entregas?: EntregaPractica[];
   /** Comunidades y cursos que crean las coaches desde la plataforma. */
   comunidadesCoach?: ComunidadCreada[];
   cursosCoach?: CursoCreado[];
@@ -72,6 +75,8 @@ const DIRECTORIO =
 const ARCHIVO = path.join(DIRECTORIO, "almacen.json");
 /** Los videos de las lecciones se guardan como archivos junto al almacén. */
 export const DIRECTORIO_VIDEOS = path.join(DIRECTORIO, "videos");
+/** Archivos que suben los alumnos en las prácticas (sin Vercel Blob). */
+export const DIRECTORIO_PRACTICAS = path.join(DIRECTORIO, "practicas");
 const SEMILLA = path.join(process.cwd(), "data", "comunidad-seed.json");
 const VIDEOS_MUESTRA = path.join(process.cwd(), "data", "videos");
 

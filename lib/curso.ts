@@ -140,6 +140,7 @@ export function datosDeCursoCreado(c: CursoCreado, comunidad: Comunidad): DatosC
           preguntas_sugeridas: l.preguntas_sugeridas,
           contenido: l.contenido,
           transcripcion: l.transcripcion,
+          ...(l.practica ? { practica: l.practica } : {}),
         })),
       })),
     },

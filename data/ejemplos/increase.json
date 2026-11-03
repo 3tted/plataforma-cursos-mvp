@@ -67,13 +67,23 @@
             "titulo": "El Espejo Ejecutivo™",
             "archivo": "ejemplos/increase/04-espejo.md",
             "duracion_min": 8,
-            "resumen": "Cinco preguntas por escrito para convertir tu resultado en conciencia sobre tu forma actual de liderar."
+            "resumen": "Cinco preguntas por escrito para convertir tu resultado en conciencia sobre tu forma actual de liderar.",
+            "practica": {
+              "instrucciones": "Responde por escrito las cinco preguntas del Espejo Ejecutivo, con ejemplos concretos de tu negocio. Solo tú y el equipo de INCREASE ven tu práctica.",
+              "archivo": false,
+              "obligatoria": false
+            }
           },
           {
             "titulo": "Tu plan de acción de 7 días",
             "archivo": "ejemplos/increase/05-plan.md",
             "duracion_min": 6,
-            "resumen": "Un ejercicio diario de 15 a 25 minutos, empezando por tu dimensión más baja, con evidencia observable de avance."
+            "resumen": "Un ejercicio diario de 15 a 25 minutos, empezando por tu dimensión más baja, con evidencia observable de avance.",
+            "practica": {
+              "instrucciones": "Registra la evidencia de avance de cada día: qué hiciste y qué cambió. Si te sirve, sube una foto o un documento con tu plan de 30 días.",
+              "archivo": true,
+              "obligatoria": false
+            }
           },
           {
             "titulo": "Siguiente paso: Sesión de Claridad Estratégica",
@@ -87,19 +97,34 @@
     "examen": [
       {
         "enunciado": "¿Cuántas dimensiones de liderazgo evalúa el Radar High Impact™?",
-        "opciones": ["Dos", "Cuatro", "Seis", "Dieciséis"],
+        "opciones": [
+          "Dos",
+          "Cuatro",
+          "Seis",
+          "Dieciséis"
+        ],
         "correcta": 1,
         "explicacion": "Son cuatro: claridad y dirección, mentalidad y autoliderazgo, comunicación e influencia, y visión y expansión."
       },
       {
         "enunciado": "¿Entre qué valores puede quedar la puntuación de cada dimensión?",
-        "opciones": ["Entre 0 y 10", "Entre 1 y 5", "Entre 4 y 20", "Entre 16 y 80"],
+        "opciones": [
+          "Entre 0 y 10",
+          "Entre 1 y 5",
+          "Entre 4 y 20",
+          "Entre 16 y 80"
+        ],
         "correcta": 2,
         "explicacion": "Cada dimensión tiene cuatro afirmaciones calificadas del 1 al 5, así que suma entre 4 y 20. El total va de 16 a 80."
       },
       {
         "enunciado": "Si una dimensión suma 10 puntos, ¿cómo se interpreta?",
-        "opciones": ["Brecha prioritaria", "En desarrollo", "Fortaleza funcional", "Fortaleza consistente"],
+        "opciones": [
+          "Brecha prioritaria",
+          "En desarrollo",
+          "Fortaleza funcional",
+          "Fortaleza consistente"
+        ],
         "correcta": 1,
         "explicacion": "De 9 a 12 puntos la dimensión está en desarrollo."
       },
@@ -127,7 +152,12 @@
       },
       {
         "enunciado": "¿Qué deben producir las acciones del plan de siete días?",
-        "opciones": ["Evidencia observable", "Más horas de trabajo", "Un nuevo cuestionario", "Una calificación más alta en el Radar"],
+        "opciones": [
+          "Evidencia observable",
+          "Más horas de trabajo",
+          "Un nuevo cuestionario",
+          "Una calificación más alta en el Radar"
+        ],
         "correcta": 0,
         "explicacion": "El participante prioriza su dimensión más baja y elige acciones que produzcan evidencia observable, como una conversación realizada o una responsabilidad transferida."
       }

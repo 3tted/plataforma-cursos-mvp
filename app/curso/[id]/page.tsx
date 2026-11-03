@@ -18,6 +18,7 @@ import {
 import BotonInscribirse from "@/components/BotonInscribirse";
 import DiagnosticoRadar from "@/components/DiagnosticoRadar";
 import Markdown from "@/components/Markdown";
+import PracticaLeccion from "@/components/PracticaLeccion";
 import PreguntaRapida from "@/components/PreguntaRapida";
 import RepasoLeccion from "@/components/RepasoLeccion";
 import { useEvaluaciones } from "@/components/useEvaluaciones";
@@ -63,6 +64,8 @@ export default function PaginaLeccion() {
   const [recienMarcada, setRecienMarcada] = useState(false);
   // La pestaña elegida vale para esta lección; al cambiar de lección se vuelve al resumen.
   const [eleccion, setEleccion] = useState<{ leccion: string; pestana: Pestana } | null>(null);
+  // Lecciones cuya práctica ya entregó (lo avisa el recuadro de la práctica al cargarla).
+  const [practicasEntregadas, setPracticasEntregadas] = useState<string[]>([]);
   const leccion = lecciones.find((l) => l.id === id);
   useTitulo(leccion?.titulo ?? (datos ? "Lección" : null));
 
@@ -160,11 +163,15 @@ export default function PaginaLeccion() {
   const queVer = leccion.video || !leccion.presentacion ? "el video" : "la presentación";
   const videoListo = !guiado || (!leccion.video && !leccion.presentacion) || vistos.includes(leccion.id);
   const repasoListo = !guiado || preguntasRepaso === 0 || repasados.includes(leccion.id);
+  // La práctica, si la coach la hizo obligatoria, también hay que entregarla.
+  const practicaLista = !guiado || !leccion.practica?.obligatoria || practicasEntregadas.includes(leccion.id);
   const pendiente = !videoListo
     ? `Termina ${queVer} para continuar`
     : !repasoListo
       ? "Responde el repaso para continuar"
-      : null;
+      : !practicaLista
+        ? "Entrega tu práctica para continuar"
+        : null;
 
   const completar = () => {
     if (hecha) return;
@@ -179,15 +186,20 @@ export default function PaginaLeccion() {
       // A continuación, las preguntas de esta lección.
       elegir("repaso");
       document.getElementById("pestana-repaso")?.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
+    } else if (practicaLista) {
       completar();
     }
   };
 
   const alRevisarRepaso = () => {
     marcarRepasado(leccion.id);
-    if (guiado && videoListo) completar();
+    if (guiado && videoListo && practicaLista) completar();
   };
+
+  const alCambiarPractica = (entregada: boolean) =>
+    setPracticasEntregadas((lista) =>
+      entregada ? (lista.includes(leccion.id) ? lista : [...lista, leccion.id]) : lista.filter((x) => x !== leccion.id),
+    );
 
   const preguntar = (pregunta: string) => {
     setLeccionContexto(leccion.id);
@@ -416,6 +428,13 @@ export default function PaginaLeccion() {
                 ) : (
                   <Markdown key={i} texto={parte.texto} nivelTitulos={2} />
                 ),
+              )}
+              {leccion.practica && !leccion.deCoach && (
+                <PracticaLeccion
+                  key={leccion.id}
+                  leccion={{ ...leccion, practica: leccion.practica }}
+                  alCambiar={alCambiarPractica}
+                />
               )}
             </div>
             {leccion.transcripcion && (

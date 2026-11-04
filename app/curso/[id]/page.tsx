@@ -410,6 +410,11 @@ export default function PaginaLeccion() {
               {esperaDia.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" })}, a partir de la
               medianoche. Mientras tanto, aplica lo de hoy.
             </p>
+            {leccion.resumen && (
+              <p className="bloqueo-adelanto">
+                <strong>Lo que harás mañana:</strong> {leccion.resumen}
+              </p>
+            )}
             {previa && (
               <div className="bloqueo-acciones">
                 <Link href={`/curso/${previa.id}`} className="boton boton-secundario">
@@ -424,9 +429,12 @@ export default function PaginaLeccion() {
               <IconoCandado width={22} height={22} />
             </span>
             <h2>Primero termina la lección anterior</h2>
-            <p className="texto-suave">
-              Las lecciones se abren en orden: mira el video y contesta el repaso de cada una para pasar a la siguiente.
-            </p>
+            <p className="texto-suave">Las lecciones se abren en orden: termina la anterior para pasar a esta.</p>
+            {leccion.resumen && (
+              <p className="bloqueo-adelanto">
+                <strong>Lo que harás en esta lección:</strong> {leccion.resumen}
+              </p>
+            )}
             {previa && (
               <div className="bloqueo-acciones">
                 <Link href={`/curso/${previa.id}`} className="boton">

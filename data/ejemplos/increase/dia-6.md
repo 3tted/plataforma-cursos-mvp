@@ -1,6 +1,6 @@
 **Tiempo:** de 15 a 25 minutos.
 
-## Lo que haces hoy
+## Tu tarea de hoy
 
 Describe un escenario favorable y uno adverso para tu negocio durante los próximos 90 días. Define una acción preventiva para cada uno.
 

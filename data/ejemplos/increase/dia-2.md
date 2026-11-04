@@ -1,6 +1,6 @@
 **Tiempo:** de 15 a 25 minutos.
 
-## Lo que haces hoy
+## Tu tarea de hoy
 
 Define tres resultados importantes para los próximos 30 días. Elimina o delega una actividad que no contribuya a ellos.
 

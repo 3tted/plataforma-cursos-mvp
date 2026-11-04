@@ -2,7 +2,7 @@ Empieza el reto. Va **un día a la vez**: cada día se abre al siguiente de term
 
 **Tiempo:** de 15 a 25 minutos.
 
-## Lo que haces hoy
+## Tu tarea de hoy
 
 Escribe el principal problema de resultados que enfrentas y conecta ese problema con un comportamiento de liderazgo que necesitas revisar.
 

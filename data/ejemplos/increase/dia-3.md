@@ -1,6 +1,6 @@
 **Tiempo:** de 15 a 25 minutos.
 
-## Lo que haces hoy
+## Tu tarea de hoy
 
 Identifica una situación que activa miedo, duda, impulsividad o necesidad de control. Diseña una respuesta alternativa y practícala.
 

@@ -1,6 +1,6 @@
 **Tiempo:** de 15 a 25 minutos.
 
-## Lo que haces hoy
+## Tu tarea de hoy
 
 Selecciona una decisión o responsabilidad que puedas transferir. Define el resultado esperado, los límites y el seguimiento.
 

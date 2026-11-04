@@ -1,6 +1,6 @@
 **Tiempo:** de 15 a 25 minutos.
 
-## Lo que haces hoy
+## Tu tarea de hoy
 
 Aborda una conversación pendiente con claridad sobre hechos, impacto, expectativas y acuerdos. Escucha también la perspectiva de la otra persona.
 

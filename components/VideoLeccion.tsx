@@ -57,6 +57,9 @@ export default function VideoLeccion({
   // La coach dice cómo quiere la presentación antes de generarla, y luego la edita.
   const [pidiendo, setPidiendo] = useState(false);
   const [editando, setEditando] = useState(false);
+  // En una lección de lectura (ya tiene texto), subir un video es opcional: se
+  // muestra compacto para que el coach vea la lección como la ve el alumno.
+  const [abrirSubida, setAbrirSubida] = useState(false);
 
   // Presentación con IA (diapositivas narradas por la voz del dispositivo).
   const generarPresentacion = async (opciones: OpcionesPresentacion) => {
@@ -380,6 +383,22 @@ export default function VideoLeccion({
   // ---------------------------------------------------------------- sin video, alumno
   // Una lección sin video ni presentación es de lectura: el alumno va directo al texto.
   if (!esCoach) return null;
+
+  // ---------------------------------------------------------------- sin video, lección de lectura, coach
+  if (leccion.contenido.trim() && !abrirSubida && estado !== "subiendo" && !pidiendo && !generando && !arrastrando) {
+    return (
+      <div className="video-coach video-lectura">
+        {selector}
+        <span className="texto-suave">Lección de lectura: tus alumnos van directo al texto.</span>
+        <span className="video-coach-acciones">
+          <button type="button" className="boton boton-chico boton-secundario" onClick={() => setAbrirSubida(true)}>
+            <IconoSubir width={16} height={16} /> Agregar un video o presentación
+          </button>
+        </span>
+        {error}
+      </div>
+    );
+  }
 
   // ---------------------------------------------------------------- sin video (o subiendo), coach
   return (

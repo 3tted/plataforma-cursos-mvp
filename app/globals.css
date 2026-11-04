@@ -10860,3 +10860,19 @@ button.tarjeta-comunidad-enlace {
 .plan-bienvenida p {
   margin: 0;
 }
+
+/* Lección de lectura vista por el coach: subir un video es opcional */
+.video-lectura {
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  border: 1px dashed var(--linea-fuerte);
+  border-radius: var(--radio-control);
+}
+
+/* Lo que trae una lección bloqueada, para saber qué viene */
+.bloqueo-adelanto {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+}

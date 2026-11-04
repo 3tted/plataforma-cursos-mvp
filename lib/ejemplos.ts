@@ -252,6 +252,15 @@ function limpiarRespuestas(a: Almacen, { e }: { e: Ejemplo }): void {
   for (const id of lecciones) a.reinicios[id] = ahora;
 }
 
+/** En los días del reto, «Lo que haces hoy» pasa a llamarse «Tu tarea de hoy» (si el coach no lo cambió). */
+function nombrarTarea(a: Almacen, { e }: { e: Ejemplo }): void {
+  const curso = cursoDelEjemplo(a, e);
+  if (!curso) return;
+  for (const l of curso.modulos.flatMap((m) => m.lecciones)) {
+    if (/^Día \d/.test(l.titulo)) l.contenido = l.contenido.replace(/^## Lo que haces hoy$/m, "## Tu tarea de hoy");
+  }
+}
+
 const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
   (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
 
@@ -268,6 +277,7 @@ const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: LeidoEjemplo
   { id: "reto-7-dias", aplicar: armarReto },
   { id: "cuenta", aplicar: cambiarCuenta },
   { id: "limpiar-respuestas", aplicar: limpiarRespuestas },
+  { id: "tarea-de-hoy", aplicar: nombrarTarea },
 ];
 
 /**

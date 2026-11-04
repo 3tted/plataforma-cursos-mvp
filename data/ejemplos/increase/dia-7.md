@@ -1,6 +1,6 @@
 **Tiempo:** de 15 a 25 minutos.
 
-## Lo que haces hoy
+## Tu tarea de hoy
 
 Revisa lo ejecutado, identifica qué cambió y establece tres compromisos medibles para las próximas cuatro semanas.
 

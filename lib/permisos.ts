@@ -1,3 +1,4 @@
+import { enPausa, ponerAlDia } from "./plan";
 import type { Almacen } from "./almacen";
 import { EMPRESA_MERKATICS } from "./cuentas";
 import { cursoDeLeccion, cargarCurso, idCurso } from "./curso";
@@ -68,6 +69,19 @@ export function comunidadDeCoach(a: Almacen, id: unknown, coach: Coach): Comunid
   if (!c) throw new ErrorDeDatos("No encontramos esa comunidad.");
   if ((c.empresa ?? EMPRESA_MERKATICS) !== coach.empresa) throw new SinPermiso("Esta comunidad es de otra empresa.");
   return c;
+}
+
+/**
+ * Para crear comunidades y cursos, la empresa no puede estar en pausa por su
+ * plan (lib/plan.ts). Se llama dentro de `modificar`: pone el plan al día.
+ */
+export function exigirEmpresaActiva(a: Almacen, coach: Coach): void {
+  const plan = (a.empresas ?? []).find((x) => x.id === coach.empresa)?.plan;
+  if (!plan) return;
+  ponerAlDia(a, plan);
+  if (enPausa(plan)) {
+    throw new SinPermiso("Tu empresa está en pausa: falta el pago de tu plan. Ve a «Mi plan» para ponerte al corriente.");
+  }
 }
 
 /** La empresa de la coach; con `administrar`, solo si es su dueño o un administrador. */

@@ -21,7 +21,7 @@ const TIPOS: { id: Tipo; titulo: string; detalle: string; Icono: typeof IconoAlu
   {
     id: "empresa",
     titulo: "Quiero abrir mi empresa",
-    detalle: "Vende tus cursos con tu comunidad y tu marca. Quedas como dueño e invitas a tu equipo.",
+    detalle: "Vende tus cursos con tu comunidad y tu marca. Pruébalo 7 días gratis.",
     Icono: IconoEmpresa,
   },
   {
@@ -138,8 +138,8 @@ export default function Bienvenida() {
           json: { empresa, giro, alumnos, nombre, correo, contrasena },
         });
         alEntrar(r.cuenta);
-        avisar(`${r.empresa.nombre} quedó registrada y eres su dueño. Empieza por crear tu primera comunidad.`);
-        router.push("/coach/comunidades?crear=comunidad");
+        avisar(`${r.empresa.nombre} quedó registrada y eres su dueño. Empiezan tus 7 días gratis.`);
+        router.push("/coach/plan?nueva=1");
       } else {
         alEntrar((await api<{ cuenta: CuentaPublica }>("/api/cuentas", { method: "POST", json: { nombre, correo, contrasena } })).cuenta);
       }

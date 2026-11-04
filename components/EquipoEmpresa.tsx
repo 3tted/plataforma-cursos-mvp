@@ -33,7 +33,10 @@ interface EmpresaRegistrada {
   equipo: number;
   comunidades: number;
   cursos: number;
+  plan?: { estado: "prueba" | "activo" | "pausado" | "cancelado"; metodo: string | null; cancelado: boolean };
 }
+
+const ESTADO_PLAN = { prueba: "En prueba", activo: "Activo", pausado: "En pausa", cancelado: "Cancelado" } as const;
 
 const NOMBRE_ROL: Record<RolEmpresa, string> = { dueno: "Dueño", admin: "Administrador", coach: "Coach" };
 
@@ -285,8 +288,8 @@ export default function EquipoEmpresa({ empresa, administra }: { empresa: string
           <div className="equipo-invitar">
             <h3>Empresas registradas</h3>
             <p className="texto-suave">
-              Todas las empresas de la plataforma. Modo demostración: se activan al registrarse; en la versión real se
-              revisarían antes.
+              Todas las empresas de la plataforma y su plan. Modo demostración: se activan al registrarse con 7 días
+              gratis y los pagos son simulados.
             </p>
             {!empresas ? (
               <p className="texto-suave">Cargando empresas…</p>
@@ -300,6 +303,7 @@ export default function EquipoEmpresa({ empresa, administra }: { empresa: string
                       <th>Equipo</th>
                       <th>Comunidades</th>
                       <th>Cursos</th>
+                      <th>Plan</th>
                       <th>Registro</th>
                     </tr>
                   </thead>
@@ -314,6 +318,11 @@ export default function EquipoEmpresa({ empresa, administra }: { empresa: string
                         <td className="numero">{e.equipo}</td>
                         <td className="numero">{e.comunidades}</td>
                         <td className="numero">{e.cursos}</td>
+                        <td>
+                          {e.plan
+                            ? `${ESTADO_PLAN[e.plan.estado]}${e.plan.cancelado && e.plan.estado !== "cancelado" ? " (cancelará)" : ""}`
+                            : "Sin cobro"}
+                        </td>
                         <td>{fechaCorta(e.creadaEn)}</td>
                       </tr>
                     ))}

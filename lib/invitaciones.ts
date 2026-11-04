@@ -1,3 +1,4 @@
+import { planNuevo } from "./plan";
 import { randomBytes } from "crypto";
 import type { Almacen } from "./almacen";
 import { idEmpresaLibre } from "./cuentas";
@@ -50,7 +51,7 @@ export function aceptarInvitacion(a: Almacen, i: Invitacion, cuenta: Cuenta): vo
   } else {
     const nombre = i.nombreEmpresa || cuenta.nombre;
     const id = idEmpresaLibre(a, nombre);
-    a.empresas = [...(a.empresas ?? []), { id, dueno: cuenta.nombre, nombre, creadaEn: ahora, actualizadaEn: ahora }];
+    a.empresas = [...(a.empresas ?? []), { id, dueno: cuenta.nombre, nombre, plan: planNuevo(), creadaEn: ahora, actualizadaEn: ahora }];
     Object.assign(cuenta, { rol: "coach", empresa: id, rolEmpresa: "dueno" });
   }
   i.usadaPor = cuenta.nombre;

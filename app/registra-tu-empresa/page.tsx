@@ -66,8 +66,8 @@ export default function PaginaRegistraTuEmpresa() {
         json: { empresa, giro, alumnos, ...(usuario ? {} : { nombre, correo, contrasena }) },
       });
       guardarUsuario(r.cuenta);
-      avisar(`${r.empresa.nombre} quedó registrada y eres su dueño. Empieza por crear tu primera comunidad.`);
-      router.push("/coach/comunidades?crear=comunidad");
+      avisar(`${r.empresa.nombre} quedó registrada y eres su dueño. Empiezan tus 7 días gratis.`);
+      router.push("/coach/plan?nueva=1");
     } catch (err) {
       setError((err as Error).message);
       setEnviando(false);
@@ -101,10 +101,14 @@ export default function PaginaRegistraTuEmpresa() {
 
         <h2 className="coaches-subtitulo">Cómo funciona</h2>
         <ol className="coaches-pasos">
-          <li>Registras tu empresa y quedas como su dueño.</li>
-          <li>Invitas a tu equipo: administradores y coaches.</li>
-          <li>Creas tus comunidades y tus cursos (a mano o con IA) y tus alumnos se inscriben.</li>
+          <li>Registras tu empresa y quedas como su dueño. Tienes 7 días gratis con todo abierto.</li>
+          <li>Configuras tu marca, invitas a tu equipo y creas tus comunidades y cursos (a mano o con IA).</li>
+          <li>Eliges cómo pagar: tarjeta, OXXO, SPEI o Mercado Pago. Al terminar la prueba se cobra el primer mes.</li>
         </ol>
+        <p className="coaches-precio">
+          <strong>7 días gratis</strong>, después <strong>1 USD al mes</strong> (precio provisional). Cancelas cuando
+          quieras; si cancelas durante la prueba, no se te cobra nada.
+        </p>
 
         <h2 className="coaches-subtitulo">Quién hace qué</h2>
         <dl className="coaches-roles">
@@ -204,11 +208,11 @@ export default function PaginaRegistraTuEmpresa() {
               </p>
             )}
             <button type="submit" className="boton boton-bloque" disabled={enviando}>
-              {enviando ? "Registrando…" : "Registrar mi empresa"}
+              {enviando ? "Registrando…" : "Empezar mis 7 días gratis"}
             </button>
             <p className="nota">
-              Modo demostración: tu empresa queda lista al momento. En la versión real, Merkatics la revisaría antes de
-              activarla.
+              Modo demostración: tu empresa queda lista al momento y los pagos son simulados (no se cobra nada). Después
+              de registrarte eliges tu forma de pago.
             </p>
             <p className="nota">¿Te invitaron al equipo de una empresa? Abre el enlace que te compartieron.</p>
           </form>

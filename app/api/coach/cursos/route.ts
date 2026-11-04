@@ -1,7 +1,7 @@
 import { modificar } from "@/lib/almacen";
 import { nuevoCurso } from "@/lib/creacion";
 import { leerJson, manejar } from "@/lib/http";
-import { coachDe, conPermiso, destinoDeCurso } from "@/lib/permisos";
+import { coachDe, conPermiso, destinoDeCurso, exigirEmpresaActiva } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +12,7 @@ export const POST = manejar((req: Request) =>
     const datos = await leerJson(req);
     const coach = await coachDe(req);
     const curso = await modificar((a) => {
+      exigirEmpresaActiva(a, coach);
       const nuevo = nuevoCurso(a, coach, destinoDeCurso(a, datos.comunidad, coach));
       (a.cursosCoach ??= []).push(nuevo);
       return nuevo;

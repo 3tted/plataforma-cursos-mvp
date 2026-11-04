@@ -4,7 +4,7 @@ import { iaDisponible } from "@/lib/asistente";
 import { videoConIA } from "@/lib/curso-video";
 import { camposDeComunidad, nuevaComunidad } from "@/lib/creacion";
 import { leerJson, manejar } from "@/lib/http";
-import { coachDe, comunidadDeCoach, conPermiso } from "@/lib/permisos";
+import { coachDe, comunidadDeCoach, conPermiso, exigirEmpresaActiva } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +39,7 @@ export const POST = manejar((req: Request) =>
     const coach = await coachDe(req);
     const datos = await leerJson(req);
     const comunidad = await modificar((a) => {
+      exigirEmpresaActiva(a, coach);
       const nueva = nuevaComunidad(a, coach, datos);
       (a.comunidadesCoach ??= []).push(nueva);
       return nueva;

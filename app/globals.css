@@ -10642,3 +10642,221 @@ button.tarjeta-comunidad-enlace {
   align-items: center;
   gap: 6px;
 }
+
+/* ---------- Plan de la empresa con Merkatics (prueba de 7 días, pagos simulados) ---------- */
+
+.coaches-precio {
+  margin: 4px 0 0;
+  padding: 12px 16px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+  font-size: var(--t-small);
+}
+
+.mi-plan {
+  display: grid;
+  gap: 18px;
+}
+
+.mi-plan .cabecera-pagina {
+  margin-bottom: 0;
+}
+
+.plan-bienvenida a {
+  font-weight: 700;
+}
+
+.plan-estado {
+  display: grid;
+  gap: 10px;
+}
+
+.plan-estado h2,
+.plan-estado p {
+  margin: 0;
+}
+
+.plan-estado h2 {
+  font-size: var(--t-headline);
+}
+
+.plan-estado-pausa {
+  border-color: var(--error);
+}
+
+.plan-estado-pausa h2 {
+  color: var(--error);
+}
+
+.plan-dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  max-width: 420px;
+}
+
+.plan-dias span {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  border: 1px solid var(--linea);
+}
+
+.plan-dias span[data-usado="true"] {
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+.plan-metodo-actual {
+  font-size: var(--t-small);
+}
+
+.mi-plan-rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.mi-plan-lateral {
+  display: grid;
+  gap: 18px;
+}
+
+.plan-forma,
+.plan-cobros,
+.plan-demo {
+  display: grid;
+  gap: 12px;
+}
+
+.plan-forma h2,
+.plan-cobros h2,
+.plan-demo h2 {
+  margin: 0;
+  font-size: var(--t-title);
+}
+
+.plan-demo p {
+  margin: 0;
+}
+
+.plan-demo .boton {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan-campos {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.plan-campos > .boton {
+  justify-self: start;
+}
+
+.plan-tarjetas {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.plan-tarjetas legend {
+  font-size: var(--t-caption);
+  font-weight: 700;
+  color: var(--tinta-2);
+}
+
+.plan-tarjetas .nota {
+  margin: 0;
+}
+
+.plan-tarjeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-control);
+  cursor: pointer;
+  font-size: var(--t-small);
+}
+
+.plan-tarjeta[data-activo="true"] {
+  border-color: var(--coral-dark);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+  background: var(--white);
+}
+
+.plan-tarjeta input {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.plan-tarjeta-numero {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.plan-cancelar {
+  margin: 0;
+}
+
+.plan-cobros-lista {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-cobros-lista li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--linea);
+  font-size: var(--t-small);
+}
+
+.plan-cobros-lista li:first-child {
+  border-top: 0;
+}
+
+.plan-cobro-monto {
+  font-weight: 700;
+}
+
+.aviso-plan {
+  margin: -8px 0 18px;
+  font-size: var(--t-small);
+}
+
+.aviso-plan p {
+  margin: 0;
+}
+
+.aviso-plan[data-pausa="true"] {
+  border-color: var(--error);
+}
+
+@media (max-width: 860px) {
+  .mi-plan-rejilla {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plan-bienvenida p {
+  margin: 0;
+}

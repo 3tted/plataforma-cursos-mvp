@@ -328,8 +328,58 @@ export interface Empresa {
   giro?: string;
   /** Cuántos alumnos tenía al registrarse (un rango de RANGOS_ALUMNOS). */
   alumnosAprox?: string;
+  /**
+   * Su plan con Merkatics (lib/plan.ts): 7 días de prueba gratis y luego el
+   * paquete mensual, con pagos SIMULADOS. Las empresas registradas antes de que
+   * existiera (y las de ejemplo) no lo tienen: no se les cobra.
+   */
+  plan?: PlanEmpresa;
   creadaEn: string;
   actualizadaEn: string;
+}
+
+/** Cómo paga la empresa su plan: tarjeta y Mercado Pago se cobran solos; OXXO y SPEI, con una ficha cada mes. */
+export type MetodoPlan = "tarjeta" | "oxxo" | "spei" | "mercadopago";
+
+/** Una tarjeta de prueba (el MVP nunca pide ni guarda una tarjeta real). */
+export interface TarjetaPlan {
+  id: string;
+  marca: string;
+  ultimos4: string;
+}
+
+/** Un cobro del plan: el primer mes al terminar la prueba y luego uno cada mes. */
+export interface CobroPlan {
+  id: number;
+  /** 1 = primer mes después de la prueba. */
+  periodo: number;
+  monto: number;
+  moneda: string;
+  metodo: MetodoPlan;
+  /** pendiente: ficha de OXXO o SPEI sin pagar; fallido: tarjeta rechazada; anulado: se cambió de método. */
+  estado: "pagado" | "pendiente" | "fallido" | "anulado";
+  referencia: string;
+  clabe?: string;
+  /** Hasta cuándo se puede pagar una ficha pendiente. */
+  venceEn?: string;
+  creadoEn: string;
+  pagadoEn?: string;
+}
+
+export interface PlanEmpresa {
+  /** prueba: sus 7 días gratis; activo: al corriente; pausado: le falta pagar; cancelado: lo canceló y ya terminó lo pagado. */
+  estado: "prueba" | "activo" | "pausado" | "cancelado";
+  /** Por qué está pausado. */
+  motivo?: "sin-metodo" | "sin-pago" | "rechazada";
+  inicio: string;
+  pruebaHasta: string;
+  /** Hasta cuándo tiene acceso (al principio, el fin de la prueba; cada pago lo recorre un mes). */
+  cubiertoHasta: string;
+  metodo?: MetodoPlan;
+  tarjeta?: TarjetaPlan;
+  /** Lo canceló: no se le vuelve a cobrar y el acceso termina en cubiertoHasta. */
+  cancelado?: boolean;
+  cobros: CobroPlan[];
 }
 
 /**

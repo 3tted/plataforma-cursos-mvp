@@ -14,6 +14,7 @@ import {
   nuevoIdCuenta,
 } from "@/lib/cuentas";
 import { ErrorDeDatos, leerJson, manejar, texto } from "@/lib/http";
+import { planNuevo } from "@/lib/plan";
 import { coachDe, SinPermiso } from "@/lib/permisos";
 import { abrirSesion, cookieDeSesion, cuentaDe } from "@/lib/sesion";
 import { RANGOS_ALUMNOS, type Cuenta, type Empresa } from "@/lib/tipos";
@@ -70,6 +71,8 @@ export const POST = manejar(async (req: Request) => {
       nombre: nombreEmpresa,
       ...(giro ? { giro } : {}),
       alumnosAprox: alumnos,
+      // 7 días de prueba gratis y luego el plan mensual (pagos simulados).
+      plan: planNuevo(),
       creadaEn: ahora,
       actualizadaEn: ahora,
     };
@@ -103,6 +106,8 @@ export const GET = manejar(async (req: Request) => {
             ...(e.giro ? { giro: e.giro } : {}),
             ...(e.alumnosAprox ? { alumnosAprox: e.alumnosAprox } : {}),
             creadaEn: e.creadaEn,
+            // Su plan con Merkatics (pagos simulados): sin plan, empresa de ejemplo o anterior a los planes.
+            ...(e.plan ? { plan: { estado: e.plan.estado, metodo: e.plan.metodo ?? null, cancelado: e.plan.cancelado === true } } : {}),
             equipo: (a.cuentas ?? []).filter((c) => c.rol === "coach" && c.empresa === e.id).length,
             // La de Merkatics también tiene las comunidades y los cursos que vienen con la plataforma.
             comunidades: comunidades + (deEjemplo ? COMUNIDADES.length : 0),

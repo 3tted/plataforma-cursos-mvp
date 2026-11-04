@@ -11,7 +11,12 @@ export const dynamic = "force-dynamic";
 // alumno lo recupere al volver a entrar. Cada alumno guarda solo el suyo (por su sesión).
 export const GET = manejar(async (req: Request) => {
   const autor = (await cuentaDeReq(req)).nombre;
-  return Response.json({ completadas: await consultar((a) => completadasDe(a, autor)) });
+  return Response.json(
+    await consultar((a) => ({
+      completadas: completadasDe(a, autor),
+      fechas: a.progreso?.find((p) => p.autor === autor)?.fechas ?? {},
+    })),
+  );
 });
 
 export const POST = manejar(async (req: Request) => {
@@ -24,12 +29,17 @@ export const POST = manejar(async (req: Request) => {
   );
   const completadas = [...new Set(datos.completadas.filter((id): id is string => typeof id === "string" && validas.has(id)))];
 
-  await modificar((a) => {
+  // Cada lección guarda la fecha en que se completó por primera vez (la que se
+  // desmarca la pierde): con ella se abren las lecciones «al día siguiente».
+  const fechas = await modificar((a) => {
     a.progreso ??= [];
     const actual = a.progreso.find((p) => p.autor === autor);
     const actualizado = new Date().toISOString();
-    if (actual) Object.assign(actual, { completadas, actualizado });
-    else a.progreso.push({ autor, completadas, actualizado });
+    const antes = actual?.fechas ?? {};
+    const fechas = Object.fromEntries(completadas.map((id) => [id, antes[id] ?? actualizado]));
+    if (actual) Object.assign(actual, { completadas, actualizado, fechas });
+    else a.progreso.push({ autor, completadas, actualizado, fechas });
+    return fechas;
   });
-  return Response.json({ completadas });
+  return Response.json({ completadas, fechas });
 });

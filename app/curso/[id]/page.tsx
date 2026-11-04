@@ -54,6 +54,7 @@ export default function PaginaLeccion() {
     marcarVisto,
     repasados,
     marcarRepasado,
+    fechasCompletadas,
     inscripcionLista,
     enComunidad,
     inscritoEn,
@@ -154,12 +155,30 @@ export default function PaginaLeccion() {
   const esVisitante = !usuario;
   const esAlumno = !coachAqui;
   const guiado = esAlumno && !esVisitante && !leccion.deCoach && !hecha;
+  // Una lección «al día siguiente» espera a que pase el día en que se completó
+  // la anterior (en la hora del alumno). Devuelve cuándo se abre, o null si ya.
+  const abreEl = (idLeccion: string): Date | null => {
+    const i = base.findIndex((l) => l.id === idLeccion);
+    const l = base[i];
+    if (!esAlumno || esVisitante || i <= 0 || !l?.abreAlDiaSiguiente || completadas.includes(idLeccion)) return null;
+    const terminada = fechasCompletadas[base[i - 1].id];
+    if (!terminada) return null;
+    const manana = new Date(terminada);
+    manana.setHours(24, 0, 0, 0);
+    return Date.now() < manana.getTime() ? manana : null;
+  };
   const enOrdenLeccion = (idLeccion: string) => {
     const i = base.findIndex((l) => l.id === idLeccion);
-    return !esAlumno || esVisitante || i <= 0 || completadas.includes(idLeccion) || completadas.includes(base[i - 1].id);
+    const anteriorLista =
+      !esAlumno || esVisitante || i <= 0 || completadas.includes(idLeccion) || completadas.includes(base[i - 1].id);
+    return anteriorLista && !abreEl(idLeccion);
   };
   const previa = base[base.findIndex((l) => l.id === leccion.id) - 1];
   const enOrden = !!leccion.deCoach || enOrdenLeccion(leccion.id);
+  const esperaDia = leccion.deCoach ? null : abreEl(leccion.id);
+  // Lo que sigue se abre mañana: antes de terminar esta (se abrirá mañana) o ya terminada (todavía no es mañana).
+  const siguienteManana =
+    !!siguiente && esAlumno && !esVisitante && !!siguiente.abreAlDiaSiguiente && (hecha ? !!abreEl(siguiente.id) : true);
   // Para ver la lección hay que estar en la comunidad e inscrito en su curso.
   const inscrito = !esAlumno || esVisitante || !inscripcionLista || (enComunidad && inscritoEn(cursoId));
   // Video o presentación: hay que verlo completo para abrir el repaso.
@@ -217,6 +236,8 @@ export default function PaginaLeccion() {
 
   const completarYSeguir = () => {
     completar();
+    // Si lo que sigue se abre mañana, se queda aquí: la barra dice cuándo vuelve.
+    if (siguienteManana) return;
     if (siguienteBloqueada) router.push(enlaceMembresia(siguiente.id));
     else router.push(siguiente ? `/curso/${siguiente.id}` : sinExamen ? "/curso" : "/curso/examen");
   };
@@ -252,12 +273,13 @@ export default function PaginaLeccion() {
                   const lHecha = completadas.includes(l.id);
                   const lBloqueada = !l.gratis && !tieneAcceso;
                   const lEnEspera = !lBloqueada && !l.deCoach && !enOrdenLeccion(l.id);
+                  const lManana = lEnEspera && !!abreEl(l.id);
                   return (
                     <li key={l.id}>
                       <Link
                         href={`/curso/${l.id}`}
                         aria-current={l.id === leccion.id ? "page" : undefined}
-                        title={lEnEspera ? "Se abre al terminar la anterior" : lBloqueada ? "Para miembros" : undefined}
+                        title={lManana ? "Se abre mañana" : lEnEspera ? "Se abre al terminar la anterior" : lBloqueada ? "Para miembros" : undefined}
                       >
                         <span
                           className="indice-marca"
@@ -275,7 +297,13 @@ export default function PaginaLeccion() {
                           {l.titulo}
                           {(lHecha || lBloqueada || lEnEspera) && (
                             <span className="sr-only">
-                              {lHecha ? " (completada)" : lBloqueada ? " (con membresía)" : " (se abre al terminar la anterior)"}
+                              {lHecha
+                                ? " (completada)"
+                                : lBloqueada
+                                  ? " (con membresía)"
+                                  : lManana
+                                    ? " (se abre mañana)"
+                                    : " (se abre al terminar la anterior)"}
                             </span>
                           )}
                         </span>
@@ -370,6 +398,25 @@ export default function PaginaLeccion() {
                 texto="Inscribirme"
               />
             </div>
+          </div>
+        ) : esperaDia ? (
+          <div className="tarjeta bloqueo">
+            <span className="bloqueo-icono">
+              <IconoCandado width={22} height={22} />
+            </span>
+            <h2>Esta lección se abre mañana</h2>
+            <p className="texto-suave">
+              Va un día a la vez: terminaste la anterior hoy, así que esta se abre el{" "}
+              {esperaDia.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" })}, a partir de la
+              medianoche. Mientras tanto, aplica lo de hoy.
+            </p>
+            {previa && (
+              <div className="bloqueo-acciones">
+                <Link href={`/curso/${previa.id}`} className="boton boton-secundario">
+                  <IconoFlechaIzq width={16} height={16} /> Volver a «{previa.titulo}»
+                </Link>
+              </div>
+            )}
           </div>
         ) : !enOrden ? (
           <div className="tarjeta bloqueo">
@@ -520,6 +567,11 @@ export default function PaginaLeccion() {
                         </span>
                       </p>
                     )}
+                    {siguienteManana && siguiente && (
+                      <p className="sello-nota">
+                        «{siguiente.titulo}» se abre mañana. Va un día a la vez: hoy aplica lo que acabas de hacer.
+                      </p>
+                    )}
                     {siguienteBloqueada && !cursoTerminado && (
                       <p className="sello-nota">
                         Lo que sigue ({datos.curso.modulos
@@ -619,6 +671,11 @@ export default function PaginaLeccion() {
                   <small>{sinExamen ? "Curso terminado" : "Último paso"}</small>
                   <strong>{sinExamen ? "Completaste todas las lecciones" : "Examen final"}</strong>
                 </>
+              ) : siguiente && siguienteManana ? (
+                <>
+                  <small>Siguiente lección · se abre mañana</small>
+                  <strong>{siguiente.titulo}</strong>
+                </>
               ) : siguiente ? (
                 <>
                   <small>
@@ -666,8 +723,18 @@ export default function PaginaLeccion() {
               ) : guiado ? (
                 // Sin nada pendiente (una lección de solo texto): seguir la completa y abre lo que sigue.
                 <button type="button" className="boton" onClick={completarYSeguir}>
-                  {siguiente ? "Siguiente lección" : sinExamen ? "Terminar el curso" : "Ir al examen final"}{" "}
+                  {siguienteManana
+                    ? "Terminar por hoy"
+                    : siguiente
+                      ? "Siguiente lección"
+                      : sinExamen
+                        ? "Terminar el curso"
+                        : "Ir al examen final"}{" "}
                   <IconoFlechaDer width={16} height={16} />
+                </button>
+              ) : siguienteManana ? (
+                <button type="button" className="boton" disabled title="Va un día a la vez">
+                  Se abre mañana
                 </button>
               ) : cursoTerminado ? (
                 <Link href={sinExamen ? "/perfil" : "/curso/examen"} className="boton">

@@ -473,6 +473,7 @@ export default function EditorCurso() {
                     {videos[l.id] && " · Video"}
                     {l.repaso.length > 0 && ` · ${l.repaso.length} de repaso`}
                     {l.practica && " · Práctica"}
+                    {l.abreAlDiaSiguiente && " · Al día siguiente"}
                   </span>
                 </summary>
                 <div className="editor-leccion-cuerpo">
@@ -502,6 +503,14 @@ export default function EditorCurso() {
                         onChange={(e) => cambiarLeccion(i, k, { gratis: e.target.checked })}
                       />
                       Gratis (sin membresía)
+                    </label>
+                    <label className="editor-gratis">
+                      <input
+                        type="checkbox"
+                        checked={!!l.abreAlDiaSiguiente}
+                        onChange={(e) => cambiarLeccion(i, k, { abreAlDiaSiguiente: e.target.checked || undefined })}
+                      />
+                      Se abre al día siguiente de terminar la anterior
                     </label>
                   </div>
                   <label className="campo">

@@ -21,7 +21,7 @@
   },
   "curso": {
     "titulo": "Radar de Liderazgo High Impact™",
-    "subtitulo": "Diagnóstico de liderazgo y expansión de potencial: identifica tu principal brecha y sal con una ruta de 7 días.",
+    "subtitulo": "Diagnóstico de liderazgo y reto de 7 días: identifica tu principal brecha y conviértela en acciones con evidencia.",
     "aprenderas": [
       "Evaluar tu liderazgo en cuatro dimensiones: claridad, mentalidad, comunicación y visión",
       "Ver tu resultado en una gráfica de radar y saber qué significa cada puntuación",
@@ -38,31 +38,22 @@
     ],
     "modulos": [
       {
-        "titulo": "Tu diagnóstico",
+        "titulo": "Descubrimiento y diagnóstico",
         "lecciones": [
           {
-            "titulo": "¿Tu liderazgo está preparado para el siguiente nivel?",
+            "titulo": "Las 4 dimensiones del liderazgo",
+            "antes": "¿Tu liderazgo está preparado para el siguiente nivel?",
             "archivo": "ejemplos/increase/01-arquitectura.md",
             "duracion_min": 4,
-            "resumen": "Qué evalúa el Radar de Liderazgo High Impact™ y sus cuatro dimensiones: claridad, mentalidad, comunicación y visión."
+            "resumen": "Qué evalúa el Radar de Liderazgo High Impact™: claridad, mentalidad, comunicación y visión."
           },
           {
-            "titulo": "Responde tu Radar High Impact™",
-            "archivo": "ejemplos/increase/02-cuestionario.md",
-            "duracion_min": 10,
-            "resumen": "Dieciséis afirmaciones del 1 al 5, cuatro por dimensión. Al terminar ves tu radar y por dónde empezar."
+            "titulo": "Evalúa tu liderazgo",
+            "antes": "Responde tu Radar High Impact™",
+            "archivo": "ejemplos/increase/02-radar.md",
+            "duracion_min": 12,
+            "resumen": "Las 16 afirmaciones del Radar, tu gráfica, cómo leer tu resultado y por dónde empezar."
           },
-          {
-            "titulo": "Cómo interpretar tu puntuación",
-            "archivo": "ejemplos/increase/03-interpretacion.md",
-            "duracion_min": 4,
-            "resumen": "Qué significa tu puntuación en cada dimensión y en total, y la regla INCREASE para leer tu resultado."
-          }
-        ]
-      },
-      {
-        "titulo": "De la conciencia a la acción",
-        "lecciones": [
           {
             "titulo": "El Espejo Ejecutivo™",
             "archivo": "ejemplos/increase/04-espejo.md",
@@ -72,24 +63,108 @@
               "instrucciones": "Responde por escrito las cinco preguntas del Espejo Ejecutivo, con ejemplos concretos de tu negocio. Solo tú y el equipo de INCREASE ven tu práctica.",
               "archivo": false,
               "obligatoria": false
-            }
-          },
+            },
+            "antes": "El Espejo Ejecutivo™"
+          }
+        ]
+      },
+      {
+        "titulo": "El reto de 7 días",
+        "lecciones": [
           {
-            "titulo": "Tu plan de acción de 7 días",
-            "archivo": "ejemplos/increase/05-plan.md",
-            "duracion_min": 6,
-            "resumen": "Un ejercicio diario de 15 a 25 minutos, empezando por tu dimensión más baja, con evidencia observable de avance.",
+            "titulo": "Día 1: Haz visible la brecha",
+            "archivo": "ejemplos/increase/dia-1.md",
+            "duracion_min": 20,
+            "resumen": "Escribe el principal problema de resultados que enfrentas y conecta ese problema con un comportamiento de liderazgo que necesitas revisar.",
             "practica": {
-              "instrucciones": "Sube tu plan de 30 días (lo armas el día 7) o escribe aquí tus compromisos medibles para las próximas cuatro semanas.",
-              "archivo": true,
-              "obligatoria": false
+              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: una brecha prioritaria definida.",
+              "archivo": false,
+              "obligatoria": true
             }
           },
           {
-            "titulo": "Siguiente paso: Sesión de Claridad Estratégica",
+            "titulo": "Día 2: Recupera la dirección",
+            "archivo": "ejemplos/increase/dia-2.md",
+            "duracion_min": 20,
+            "resumen": "Define tres resultados importantes para los próximos 30 días.",
+            "abreAlDiaSiguiente": true,
+            "practica": {
+              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: tres prioridades y una actividad eliminada o delegada.",
+              "archivo": false,
+              "obligatoria": true
+            }
+          },
+          {
+            "titulo": "Día 3: Interrumpe el patrón",
+            "archivo": "ejemplos/increase/dia-3.md",
+            "duracion_min": 20,
+            "resumen": "Identifica una situación que activa miedo, duda, impulsividad o necesidad de control.",
+            "abreAlDiaSiguiente": true,
+            "practica": {
+              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: un patrón reconocido y una respuesta diferente.",
+              "archivo": false,
+              "obligatoria": true
+            }
+          },
+          {
+            "titulo": "Día 4: Eleva la conversación",
+            "archivo": "ejemplos/increase/dia-4.md",
+            "duracion_min": 20,
+            "resumen": "Aborda una conversación pendiente con claridad sobre hechos, impacto, expectativas y acuerdos.",
+            "abreAlDiaSiguiente": true,
+            "practica": {
+              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: una conversación realizada y un acuerdo concreto.",
+              "archivo": false,
+              "obligatoria": true
+            }
+          },
+          {
+            "titulo": "Día 5: Deja de ser el cuello de botella",
+            "archivo": "ejemplos/increase/dia-5.md",
+            "duracion_min": 20,
+            "resumen": "Selecciona una decisión o responsabilidad que puedas transferir.",
+            "abreAlDiaSiguiente": true,
+            "practica": {
+              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: una responsabilidad transferida o un plan explícito de transferencia.",
+              "archivo": false,
+              "obligatoria": true
+            }
+          },
+          {
+            "titulo": "Día 6: Diseña un escenario futuro",
+            "archivo": "ejemplos/increase/dia-6.md",
+            "duracion_min": 20,
+            "resumen": "Describe un escenario favorable y uno adverso para tu negocio durante los próximos 90 días.",
+            "abreAlDiaSiguiente": true,
+            "practica": {
+              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: dos escenarios y dos acciones de preparación.",
+              "archivo": false,
+              "obligatoria": true
+            }
+          },
+          {
+            "titulo": "Día 7: Instala tu siguiente nivel",
+            "archivo": "ejemplos/increase/dia-7.md",
+            "duracion_min": 20,
+            "resumen": "Revisa lo ejecutado, identifica qué cambió y establece tres compromisos medibles para las próximas cuatro semanas.",
+            "abreAlDiaSiguiente": true,
+            "practica": {
+              "instrucciones": "Escribe tus tres compromisos medibles para las próximas cuatro semanas, o sube tu plan de 30 días.",
+              "archivo": true,
+              "obligatoria": true
+            }
+          }
+        ]
+      },
+      {
+        "titulo": "El siguiente nivel",
+        "lecciones": [
+          {
+            "titulo": "Sesión de Claridad Estratégica",
             "archivo": "ejemplos/increase/06-siguiente-paso.md",
             "duracion_min": 2,
-            "resumen": "Valida tu ruta en una sesión de 30 minutos y define qué entrenamiento se ajusta a tu siguiente etapa."
+            "resumen": "Valida tu ruta en una sesión de 30 minutos y define qué entrenamiento se ajusta a tu siguiente etapa.",
+            "antes": "Siguiente paso: Sesión de Claridad Estratégica"
           }
         ]
       }

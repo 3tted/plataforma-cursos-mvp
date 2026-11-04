@@ -220,6 +220,7 @@ export function aplicarEdicion(a: Almacen, actual: CursoCreado, entrada: Record<
         preguntas_sugeridas: lista(l.preguntas_sugeridas, 4, 200),
         repaso: (Array.isArray(l.repaso) ? l.repaso : []).slice(0, MAX_REPASO).map((p) => pregunta(a, p, "KR", ids)),
         ...practicaDe(l.practica),
+        ...(l.abreAlDiaSiguiente === true ? { abreAlDiaSiguiente: true } : {}),
       })),
     };
   });

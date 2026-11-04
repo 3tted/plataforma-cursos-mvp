@@ -137,6 +137,8 @@ interface ContextoApp {
   guardarPagoPendiente: (p: Pago | null) => void;
   tieneAcceso: boolean;
   completadas: string[];
+  /** Cuándo completó cada lección (ISO), para las que se abren al día siguiente. */
+  fechasCompletadas: Record<string, string>;
   alternarCompletada: (id: string) => void;
   /** Lecciones cuyo video ya vio completo (sin adelantarlo). */
   vistos: string[];
@@ -167,6 +169,7 @@ const CLAVES = {
   usuario: "fc.usuario",
   membresia: "fc.membresia",
   completadas: "fc.completadas",
+  fechasCompletadas: "fc.fechasCompletadas",
   pagoPendiente: "fc.pagoPendiente",
   leccionDeseada: "fc.leccionDeseada",
   chat: "fc.chat",
@@ -177,7 +180,7 @@ const CLAVES = {
 };
 
 /** Lo que este navegador guarda por persona (se borra si entra otra). */
-const CLAVES_PERSONALES = ["membresia", "completadas", "vistos", "repasados", "pagoPendiente", "leccionDeseada"] as const;
+const CLAVES_PERSONALES = ["membresia", "completadas", "fechasCompletadas", "vistos", "repasados", "pagoPendiente", "leccionDeseada"] as const;
 
 /**
  * Anota de quién es lo guardado en el navegador. Si entra otra cuenta (o
@@ -221,6 +224,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   const [membresias, setMembresias] = useState<Record<string, Membresia>>({});
   const [pagoPendiente, setPagoPendiente] = useState<Pago | null>(null);
   const [completadas, setCompletadas] = useState<string[]>([]);
+  const [fechasCompletadas, setFechasCompletadas] = useState<Record<string, string>>({});
   const [vistos, setVistos] = useState<string[]>([]);
   const [repasados, setRepasados] = useState<string[]>([]);
   const [chat, setChat] = useState<MensajeChat[]>([]);
@@ -295,6 +299,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
         guardarLocal(CLAVES.pagoPendiente, null);
       }
       setCompletadas(leerLocal<string[]>(CLAVES.completadas) ?? []);
+      setFechasCompletadas(leerLocal<Record<string, string>>(CLAVES.fechasCompletadas) ?? {});
       setVistos(leerLocal<string[]>(CLAVES.vistos) ?? []);
       setRepasados(leerLocal<string[]>(CLAVES.repasados) ?? []);
       setLeccionDeseada(leerLocal<string>(CLAVES.leccionDeseada));
@@ -340,6 +345,8 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
       // Entró otra persona: lo que recordaba el navegador era de la anterior.
       setMembresias({});
       setCompletadas([]);
+    setFechasCompletadas({});
+      setFechasCompletadas({});
       setVistos([]);
       setRepasados([]);
       setPagoPendiente(null);
@@ -372,6 +379,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     setUsuario(null);
     setMembresias({});
     setCompletadas([]);
+    setFechasCompletadas({});
     setVistos([]);
     setRepasados([]);
     setPagoPendiente(null);
@@ -467,18 +475,36 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
 
   // El avance también se guarda en el servidor: la coach lo ve en su matriz,
   // el examen final lo revisa y el alumno lo recupera al volver a entrar.
-  const enviarProgreso = useCallback((lista: string[]) => {
-    void api("/api/progreso", { method: "POST", json: { completadas: lista } }).catch(() => {
-      // sin conexión: el navegador lo conserva y se reenvía en el siguiente cambio
+  // Con el avance viajan las fechas en que se completó cada lección: así se
+  // abren las que piden esperar al día siguiente, también en otro dispositivo.
+  const ponerFechas = useCallback((nuevas: Record<string, string>) => {
+    setFechasCompletadas((actuales) => {
+      const juntas = { ...nuevas };
+      // Si las dos tienen fecha, cuenta la más antigua (la de la primera vez).
+      for (const [id, f] of Object.entries(actuales)) if (!juntas[id] || f < juntas[id]) juntas[id] = f;
+      guardarLocal(CLAVES.fechasCompletadas, juntas);
+      return juntas;
     });
   }, []);
+
+  const enviarProgreso = useCallback(
+    (lista: string[]) => {
+      void api<{ fechas?: Record<string, string> }>("/api/progreso", { method: "POST", json: { completadas: lista } })
+        .then((r) => r.fechas && ponerFechas(r.fechas))
+        .catch(() => {
+          // sin conexión: el navegador lo conserva y se reenvía en el siguiente cambio
+        });
+    },
+    [ponerFechas],
+  );
 
   useEffect(() => {
     if (!listo || usuario?.rol !== "alumno") return;
     let vigente = true;
-    api<{ completadas: string[] }>("/api/progreso")
-      .then(({ completadas: remotas }) => {
+    api<{ completadas: string[]; fechas?: Record<string, string> }>("/api/progreso")
+      .then(({ completadas: remotas, fechas }) => {
         if (!vigente) return;
+        if (fechas) ponerFechas(fechas);
         setCompletadas((locales) => [...new Set([...locales, ...remotas])]);
         const union = [...new Set([...(leerLocal<string[]>(CLAVES.completadas) ?? []), ...remotas])];
         guardarLocal(CLAVES.completadas, union);
@@ -490,13 +516,21 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     return () => {
       vigente = false;
     };
-  }, [listo, usuario?.nombre, usuario?.rol, enviarProgreso]);
+  }, [listo, usuario?.nombre, usuario?.rol, enviarProgreso, ponerFechas]);
 
   const alternarCompletada = useCallback(
     (id: string) => {
-      const nuevo = completadas.includes(id) ? completadas.filter((x) => x !== id) : [...completadas, id];
+      const quitar = completadas.includes(id);
+      const nuevo = quitar ? completadas.filter((x) => x !== id) : [...completadas, id];
       setCompletadas(nuevo);
       guardarLocal(CLAVES.completadas, nuevo);
+      setFechasCompletadas((actuales) => {
+        const fechas = { ...actuales };
+        if (quitar) delete fechas[id];
+        else fechas[id] ??= new Date().toISOString();
+        guardarLocal(CLAVES.fechasCompletadas, fechas);
+        return fechas;
+      });
       if (usuario?.rol === "alumno") enviarProgreso(nuevo);
     },
     [completadas, usuario, enviarProgreso],
@@ -622,6 +656,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
     guardarPagoPendiente,
     tieneAcceso: coachAqui || membresia !== null,
     completadas,
+    fechasCompletadas,
     alternarCompletada,
     vistos,
     marcarVisto,

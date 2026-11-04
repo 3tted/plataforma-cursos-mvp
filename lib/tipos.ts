@@ -82,6 +82,8 @@ export interface Leccion {
   presentacion?: { diapositivas: Diapositiva[]; creadaEn: string; conVoz: boolean; opciones?: OpcionesPresentacion };
   /** Práctica que el alumno entrega en esta lección, si la coach la activó. */
   practica?: PracticaLeccion;
+  /** Se abre hasta el día siguiente de completar la anterior (por ejemplo, un reto de 7 días). */
+  abreAlDiaSiguiente?: boolean;
 }
 
 /** La coach la activa en las lecciones que la necesitan: notas o respuestas por escrito y, si quiere, un archivo. */
@@ -250,6 +252,7 @@ export interface LeccionCreada {
   preguntas_sugeridas: string[];
   repaso: PreguntaCurso[];
   practica?: PracticaLeccion;
+  abreAlDiaSiguiente?: boolean;
 }
 
 export interface ModuloCreado {
@@ -589,6 +592,8 @@ export interface ProgresoAlumno {
   autor: string;
   completadas: string[];
   actualizado: string;
+  /** Cuándo completó cada lección (para las que se abren al día siguiente). Opcional: llegó después. */
+  fechas?: Record<string, string>;
 }
 
 export interface IntentoRepaso {

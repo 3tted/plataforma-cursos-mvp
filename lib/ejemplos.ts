@@ -19,6 +19,9 @@ interface LeccionEjemplo {
   duracion_min: number;
   resumen: string;
   practica?: PracticaLeccion;
+  abreAlDiaSiguiente?: boolean;
+  /** Título que tenía antes en el curso ya publicado (al reorganizarlo conserva su id y lo de sus alumnos). */
+  antes?: string;
 }
 
 interface Ejemplo {
@@ -82,6 +85,7 @@ function sembrarEjemplo(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<str
       preguntas_sugeridas: [],
       repaso: [],
       ...(l.practica ? { practica: l.practica } : {}),
+      ...(l.abreAlDiaSiguiente ? { abreAlDiaSiguiente: true } : {}),
     })),
   }));
   a.cursosCoach ??= [];
@@ -148,6 +152,52 @@ function sumarPlan(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<string, 
   if (leccion.practica?.instrucciones === PRACTICA_PLAN_ANTERIOR && fuente.practica) leccion.practica = fuente.practica;
 }
 
+/**
+ * El curso pasó de 6 lecciones a 3 módulos y 11 lecciones (diagnóstico, reto
+ * de 7 días con un día por lección y sesión de claridad). Solo se reorganiza si
+ * sigue como se sembró; las lecciones que se quedan conservan su id, así no se
+ * pierden los resultados del Radar ni las prácticas ya entregadas.
+ */
+const LECCIONES_ANTERIORES = [
+  "¿Tu liderazgo está preparado para el siguiente nivel?",
+  "Responde tu Radar High Impact™",
+  "Cómo interpretar tu puntuación",
+  "El Espejo Ejecutivo™",
+  "Tu plan de acción de 7 días",
+  "Siguiente paso: Sesión de Claridad Estratégica",
+];
+const SUBTITULO_ANTERIOR =
+  "Diagnóstico de liderazgo y expansión de potencial: identifica tu principal brecha y sal con una ruta de 7 días.";
+
+function armarReto(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<string, string> }): void {
+  const curso = cursoDelEjemplo(a, e);
+  const actuales = curso?.modulos.flatMap((m) => m.lecciones) ?? [];
+  if (!curso || actuales.map((l) => l.titulo).join("|") !== LECCIONES_ANTERIORES.join("|")) return;
+  const porTitulo = new Map(actuales.map((l) => [l.titulo, l]));
+  curso.modulos = e.curso.modulos.map((m, i) => ({
+    id: `M${i + 1}`,
+    titulo: m.titulo,
+    lecciones: m.lecciones.map((l) => {
+      const anterior = l.antes ? porTitulo.get(l.antes) : undefined;
+      return {
+        id: anterior?.id ?? `K${siguiente(a)}`,
+        titulo: l.titulo,
+        duracion_min: l.duracion_min,
+        gratis: true,
+        resumen: l.resumen,
+        contenido: textos.get(l.archivo) ?? anterior?.contenido ?? "",
+        transcripcion: "",
+        preguntas_sugeridas: [],
+        repaso: [],
+        ...(l.practica ? { practica: anterior?.practica ?? l.practica } : {}),
+        ...(l.abreAlDiaSiguiente ? { abreAlDiaSiguiente: true } : {}),
+      };
+    }),
+  }));
+  if (curso.subtitulo === SUBTITULO_ANTERIOR) curso.subtitulo = e.curso.subtitulo;
+  curso.actualizadoEn = new Date().toISOString();
+}
+
 /** El Radar es un diagnóstico: el curso queda sin examen final (sus preguntas se guardan). */
 function quitarExamen(a: Almacen, { e }: { e: Ejemplo }): void {
   const curso = cursoDelEjemplo(a, e);
@@ -167,6 +217,7 @@ const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: { e: Ejemplo
   { id: "agenda", aplicar: sumarAgenda },
   { id: "plan", aplicar: sumarPlan },
   { id: "sin-examen", aplicar: quitarExamen },
+  { id: "reto-7-dias", aplicar: armarReto },
 ];
 
 /**

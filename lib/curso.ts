@@ -143,6 +143,7 @@ export function datosDeCursoCreado(c: CursoCreado, comunidad: Comunidad): DatosC
           contenido: l.contenido,
           transcripcion: l.transcripcion,
           ...(l.practica ? { practica: l.practica } : {}),
+          ...(l.abreAlDiaSiguiente ? { abreAlDiaSiguiente: true } : {}),
         })),
       })),
     },

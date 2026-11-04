@@ -61,6 +61,12 @@ export interface Almacen {
   entregas?: EntregaPractica[];
   /** Resultados de los diagnósticos (como el Radar de INCREASE), uno por alumno y lección. */
   diagnosticos?: ResultadoDiagnostico[];
+  /**
+   * Lecciones cuyas respuestas se borraron (id → fecha). Los navegadores
+   * descartan lo que tenían guardado de antes de esa fecha, para que no lo
+   * vuelvan a subir.
+   */
+  reinicios?: Record<string, string>;
   /** Quienes respondieron el diagnóstico en la página pública de una empresa y dejaron sus datos. */
   prospectos?: ProspectoDiagnostico[];
   /** Avance de los alumnos en los planes por días, uno por alumno y lección. */

@@ -226,6 +226,32 @@ function quitarExamen(a: Almacen, { e }: { e: Ejemplo }): void {
   if (curso && e.curso.sinExamen && curso.sinExamen === undefined) curso.sinExamen = true;
 }
 
+/**
+ * Borra las respuestas del curso (a pedido del usuario, para empezar limpio):
+ * resultados del Radar, prospectos de su página pública, prácticas entregadas
+ * y el avance de los alumnos en sus lecciones. Las inscripciones se quedan.
+ * Los archivos de las prácticas ya no aparecen en ninguna parte.
+ */
+function limpiarRespuestas(a: Almacen, { e }: { e: Ejemplo }): void {
+  const curso = cursoDelEjemplo(a, e);
+  if (!curso) return;
+  const lecciones = new Set(curso.modulos.flatMap((m) => m.lecciones.map((l) => l.id)));
+  const delCurso = (x: { leccion: string }) => lecciones.has(x.leccion);
+  a.diagnosticos = (a.diagnosticos ?? []).filter((x) => x.curso !== curso.id && !delCurso(x));
+  a.prospectos = (a.prospectos ?? []).filter((x) => x.empresa !== e.empresa.id);
+  a.entregas = (a.entregas ?? []).filter((x) => x.curso !== curso.id && !delCurso(x));
+  a.planes = (a.planes ?? []).filter((x) => x.curso !== curso.id && !delCurso(x));
+  a.repasos = (a.repasos ?? []).filter((x) => !delCurso(x));
+  a.examenes = (a.examenes ?? []).filter((x) => x.curso !== curso.id);
+  for (const p of a.progreso ?? []) {
+    p.completadas = p.completadas.filter((id) => !lecciones.has(id));
+    if (p.fechas) for (const id of lecciones) delete p.fechas[id];
+  }
+  const ahora = new Date().toISOString();
+  a.reinicios ??= {};
+  for (const id of lecciones) a.reinicios[id] = ahora;
+}
+
 const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
   (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
 
@@ -241,6 +267,7 @@ const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: LeidoEjemplo
   { id: "sin-examen", aplicar: quitarExamen },
   { id: "reto-7-dias", aplicar: armarReto },
   { id: "cuenta", aplicar: cambiarCuenta },
+  { id: "limpiar-respuestas", aplicar: limpiarRespuestas },
 ];
 
 /**

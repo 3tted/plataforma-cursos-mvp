@@ -501,9 +501,23 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!listo || usuario?.rol !== "alumno") return;
     let vigente = true;
-    api<{ completadas: string[]; fechas?: Record<string, string> }>("/api/progreso")
-      .then(({ completadas: remotas, fechas }) => {
+    api<{ completadas: string[]; fechas?: Record<string, string>; reinicios?: Record<string, string> }>("/api/progreso")
+      .then(({ completadas: remotas, fechas, reinicios = {} }) => {
         if (!vigente) return;
+        // Lecciones cuyas respuestas se borraron: lo que este navegador recuerda
+        // de ellas es de antes (lo de después ya está en el servidor).
+        const borrada = (id: string) => id in reinicios && !remotas.includes(id);
+        if (Object.keys(reinicios).length > 0) {
+          const locales = leerLocal<string[]>(CLAVES.completadas) ?? [];
+          if (locales.some(borrada)) guardarLocal(CLAVES.completadas, locales.filter((id) => !borrada(id)));
+          const fechasLocales = leerLocal<Record<string, string>>(CLAVES.fechasCompletadas) ?? {};
+          if (Object.keys(fechasLocales).some(borrada)) {
+            const limpias = Object.fromEntries(Object.entries(fechasLocales).filter(([id]) => !borrada(id)));
+            guardarLocal(CLAVES.fechasCompletadas, limpias);
+            setFechasCompletadas(limpias);
+          }
+          setCompletadas((actuales) => actuales.filter((id) => !borrada(id)));
+        }
         if (fechas) ponerFechas(fechas);
         setCompletadas((locales) => [...new Set([...locales, ...remotas])]);
         const union = [...new Set([...(leerLocal<string[]>(CLAVES.completadas) ?? []), ...remotas])];

@@ -31,6 +31,8 @@ type ResultadoGuardado = Omit<ResultadoDiagnostico, "cuenta">
 interface Guardado {
   respuestas: Record<string, (number | null)[]>;
   revelado: boolean;
+  /** Cuándo se guardó en el navegador (para descartarlo si después se borraron las respuestas del curso). */
+  guardadoEn?: string;
 }
 
 const vacio = (d: Diagnostico): Guardado => ({
@@ -64,7 +66,11 @@ function leer(clave: string, d: Diagnostico): Guardado {
         return typeof v === "number" ? v : null;
       });
     }
-    return { respuestas: base.respuestas, revelado: Boolean(g.revelado) };
+    return {
+      respuestas: base.respuestas,
+      revelado: Boolean(g.revelado),
+      ...(typeof g.guardadoEn === "string" ? { guardadoEn: g.guardadoEn } : {}),
+    };
   } catch {
     return vacio(d);
   }
@@ -121,9 +127,24 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
     setEstado(local);
     setListo(true);
     if (!usuario || !leccion) return;
-    api<{ equipo: boolean; resultados?: ResultadoGuardado[]; resultado?: ResultadoGuardado | null }>(ruta)
+    api<{
+      equipo: boolean;
+      resultados?: ResultadoGuardado[];
+      resultado?: ResultadoGuardado | null;
+      reinicio?: string | null;
+    }>(ruta)
       .then((r) => {
         if (!vigente) return;
+        // Se borraron las respuestas del curso después de lo que recuerda este navegador.
+        if (!r.equipo && !r.resultado && r.reinicio && (!local.guardadoEn || local.guardadoEn < r.reinicio)) {
+          try {
+            localStorage.removeItem(claveVisitante(d));
+          } catch {
+            // Sin almacenamiento: nada que borrar.
+          }
+          setEstado(vacio(d));
+          return;
+        }
         if (r.equipo) setEquipo(r.resultados ?? []);
         else if (r.resultado) {
           setGuardado("si");
@@ -159,6 +180,7 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
     setEstado((e) => ({
       ...e,
       respuestas: { ...e.respuestas, [dimension]: e.respuestas[dimension].map((v, j) => (j === i ? valor : v)) },
+      guardadoEn: new Date().toISOString(),
     }));
   };
 
@@ -168,7 +190,7 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
       document.querySelector(".diagnostico-afirmacion[data-pendiente='true']")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    setEstado((e) => ({ ...e, revelado: true }));
+    setEstado((e) => ({ ...e, revelado: true, guardadoEn: new Date().toISOString() }));
     requestAnimationFrame(() => document.getElementById("diagnostico-resultado")?.scrollIntoView({ behavior: "smooth", block: "start" }));
     if (!usuario || equipo || !leccion) return;
     guardar(estado.respuestas);
@@ -178,7 +200,7 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
     if (respondidas > 0 && !window.confirm("¿Borrar tus respuestas y empezar de nuevo?")) return;
     setAviso("");
     setGuardado(null);
-    setEstado(vacio(d));
+    setEstado({ ...vacio(d), guardadoEn: new Date().toISOString() });
   };
 
   let numero = 0;

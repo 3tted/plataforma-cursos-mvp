@@ -42,10 +42,11 @@ export const GET = manejar(async (req: Request) => {
     );
     return Response.json({ equipo: true, resultados });
   }
-  const suyo = await consultar((a) =>
-    (a.diagnosticos ?? []).find((r) => r.cuenta === cuenta.id && r.leccion === leccion && r.diagnostico === d.id),
-  );
-  return Response.json({ equipo: false, resultado: suyo ? vista(suyo) : null });
+  const { suyo, reinicio } = await consultar((a) => ({
+    suyo: (a.diagnosticos ?? []).find((r) => r.cuenta === cuenta.id && r.leccion === leccion && r.diagnostico === d.id),
+    reinicio: a.reinicios?.[leccion] ?? null,
+  }));
+  return Response.json({ equipo: false, resultado: suyo ? vista(suyo) : null, reinicio });
 });
 
 export const POST = manejar(async (req: Request) => {

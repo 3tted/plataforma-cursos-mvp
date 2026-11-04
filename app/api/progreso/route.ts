@@ -15,6 +15,7 @@ export const GET = manejar(async (req: Request) => {
     await consultar((a) => ({
       completadas: completadasDe(a, autor),
       fechas: a.progreso?.find((p) => p.autor === autor)?.fechas ?? {},
+      reinicios: a.reinicios ?? {},
     })),
   );
 });

@@ -1,5 +1,5 @@
 {
-  "_nota": "Empresa de ejemplo que se siembra una sola vez en el almacén (lib/ejemplos.ts): INCREASE, con su comunidad y el Radar de Liderazgo High Impact como curso. Queda como cualquier empresa creada en la plataforma: su dueño la edita desde su panel. El precio de la membresía es provisional.",
+  "_nota": "Empresa de ejemplo que se siembra una sola vez en el almacén (lib/ejemplos.ts): INCREASE, con su comunidad y el Radar de Liderazgo High Impact como curso. Queda como cualquier empresa creada en la plataforma: su dueño la edita desde su panel. El precio de la membresía es provisional. La cuenta de su dueño entra con el correo y la contraseña de «cuenta» (a pedido del usuario, para presentarla).",
   "empresa": {
     "id": "increase",
     "nombre": "INCREASE",
@@ -7,6 +7,12 @@
     "color": "#1f2d54",
     "logo": "/empresas/increase-logo.png",
     "giro": "Coaching de liderazgo para emprendedores y empresarios"
+  },
+  "cuenta": {
+    "nombre": "Gabo Orpinel",
+    "correo": "increase@example.com",
+    "contrasena": "123",
+    "antes": "gabo.orpinel@example.com"
   },
   "comunidad": {
     "id": "liderazgo-high-impact",

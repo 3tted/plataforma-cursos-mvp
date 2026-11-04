@@ -1,14 +1,14 @@
 import { promises as fs } from "fs";
 import path from "path";
 import type { Almacen } from "./almacen";
-import { CUENTAS_DEMO, cuentaPorCorreo, nuevoIdCuenta } from "./cuentas";
+import { cifrarContrasena, cuentaPorCorreo, nuevoIdCuenta } from "./cuentas";
 import type { ComunidadCreada, CursoCreado, Empresa, PracticaLeccion, PreguntaCurso } from "./tipos";
 
 // Empresas de ejemplo con su comunidad y su curso (data/ejemplos/*.json). Se
 // siembran una sola vez en el almacén, como si su dueño las hubiera creado
 // desde la plataforma: después se editan, se publican o se borran como
-// cualquier otra, y no vuelven a aparecer. Su cuenta de demostración es la de
-// CUENTAS_DEMO que lleva su empresa.
+// cualquier otra, y no vuelven a aparecer. La cuenta de su dueño viene en el
+// ejemplo, con su propia contraseña.
 
 const DATOS = path.join(process.cwd(), "data");
 const EJEMPLOS = ["increase"];
@@ -26,6 +26,8 @@ interface LeccionEjemplo {
 
 interface Ejemplo {
   empresa: Pick<Empresa, "id" | "nombre" | "dueno" | "color" | "logo" | "giro">;
+  /** La cuenta de su dueño. `antes`: el correo que tenía (para cambiarla en los almacenes que ya la tienen). */
+  cuenta: { nombre: string; correo: string; contrasena: string; antes?: string };
   comunidad: Omit<ComunidadCreada, "autor" | "empresa" | "creadaEn">;
   curso: Pick<CursoCreado, "titulo" | "subtitulo" | "aprenderas" | "requisitos" | "preguntas_sugeridas" | "sinExamen"> & {
     modulos: { titulo: string; lecciones: LeccionEjemplo[] }[];
@@ -36,14 +38,22 @@ interface Ejemplo {
 const siguiente = (a: Almacen) => a.siguienteId++;
 
 /** Lee el ejemplo y el texto de sus lecciones antes de tocar el almacén: si falta un archivo, no queda a medias. */
-async function leerEjemplo(nombre: string): Promise<{ e: Ejemplo; textos: Map<string, string> }> {
+async function leerEjemplo(nombre: string): Promise<LeidoEjemplo> {
   const e = JSON.parse(await fs.readFile(path.join(DATOS, "ejemplos", `${nombre}.json`), "utf8")) as Ejemplo;
   const archivos = e.curso.modulos.flatMap((m) => m.lecciones.map((l) => l.archivo));
   const textos = await Promise.all(archivos.map((a) => fs.readFile(path.join(DATOS, a), "utf8")));
-  return { e, textos: new Map(archivos.map((a, i) => [a, textos[i].trim()])) };
+  // La contraseña se cifra aquí (es asíncrono) para que lo demás toque el almacén de un jalón.
+  const contrasena = await cifrarContrasena(e.cuenta.contrasena);
+  return { e, textos: new Map(archivos.map((a, i) => [a, textos[i].trim()])), contrasena };
 }
 
-function sembrarEjemplo(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<string, string> }): void {
+interface LeidoEjemplo {
+  e: Ejemplo;
+  textos: Map<string, string>;
+  contrasena: { sal: string; hash: string };
+}
+
+function sembrarEjemplo(a: Almacen, { e, textos, contrasena }: LeidoEjemplo): void {
   const ahora = new Date().toISOString();
   const empresa = e.empresa.id;
   const autor = e.empresa.dueno;
@@ -52,16 +62,15 @@ function sembrarEjemplo(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<str
   if (!a.empresas.some((x) => x.id === empresa)) a.empresas.push({ ...e.empresa, creadaEn: ahora, actualizadaEn: ahora });
 
   a.cuentas ??= [];
-  for (const d of CUENTAS_DEMO.filter((x) => x.empresa === empresa)) {
-    if (cuentaPorCorreo(a, d.correo)) continue;
+  if (!cuentaPorCorreo(a, e.cuenta.correo)) {
     a.cuentas.push({
       id: nuevoIdCuenta(),
-      correo: d.correo,
-      nombre: d.nombre,
-      rol: d.rol,
+      correo: e.cuenta.correo,
+      nombre: e.cuenta.nombre,
+      rol: "coach",
       empresa,
-      rolEmpresa: d.rolEmpresa ?? "coach",
-      demo: true,
+      rolEmpresa: "dueno",
+      contrasena,
       creadaEn: ahora,
     });
   }
@@ -198,6 +207,19 @@ function armarReto(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<string, 
   curso.actualizadoEn = new Date().toISOString();
 }
 
+/**
+ * La cuenta del dueño era de demostración (gabo.orpinel@example.com, con la
+ * contraseña de demo). Ahora entra con el correo y la contraseña del ejemplo;
+ * conserva su id, así que sigue siendo dueña de todo lo de la empresa.
+ */
+function cambiarCuenta(a: Almacen, { e, contrasena }: LeidoEjemplo): void {
+  const cuenta = e.cuenta.antes ? cuentaPorCorreo(a, e.cuenta.antes) : undefined;
+  if (!cuenta || cuenta.empresa !== e.empresa.id || cuentaPorCorreo(a, e.cuenta.correo)) return;
+  cuenta.correo = e.cuenta.correo;
+  cuenta.contrasena = contrasena;
+  delete cuenta.demo;
+}
+
 /** El Radar es un diagnóstico: el curso queda sin examen final (sus preguntas se guardan). */
 function quitarExamen(a: Almacen, { e }: { e: Ejemplo }): void {
   const curso = cursoDelEjemplo(a, e);
@@ -212,12 +234,13 @@ const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
  * en los almacenes que ya lo tenían ("increase:practicas"…); uno recién
  * sembrado ya los trae.
  */
-const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: { e: Ejemplo; textos: Map<string, string> }) => void }[] = [
+const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: LeidoEjemplo) => void }[] = [
   { id: "practicas", aplicar: sumarPracticas },
   { id: "agenda", aplicar: sumarAgenda },
   { id: "plan", aplicar: sumarPlan },
   { id: "sin-examen", aplicar: quitarExamen },
   { id: "reto-7-dias", aplicar: armarReto },
+  { id: "cuenta", aplicar: cambiarCuenta },
 ];
 
 /**

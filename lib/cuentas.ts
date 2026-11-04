@@ -64,14 +64,6 @@ export const CUENTAS_DEMO: {
     rolEmpresa: "coach",
     detalle: "Coach de Vende por WhatsApp",
   },
-  {
-    nombre: "Gabo Orpinel",
-    correo: "gabo.orpinel@example.com",
-    rol: "coach",
-    rolEmpresa: "dueno",
-    empresa: "increase",
-    detalle: "Dueño de INCREASE (Radar de Liderazgo)",
-  },
   { nombre: "Lucía Herrera", correo: "lucia.herrera@example.com", rol: "alumno", detalle: "Alumna" },
 ];
 

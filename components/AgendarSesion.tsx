@@ -1,25 +1,29 @@
 "use client";
 
 import Link from "next/link";
+import type { AgendaComunidad } from "@/lib/tipos";
 import { useApp } from "./Contexto";
 import { IconoCalendario, IconoWhatsapp } from "./Iconos";
 
 // Invitación a agendar una sesión con la coach: un botón de WhatsApp (con el
 // mensaje ya escrito) y otro a su liga de agenda, según lo que ella puso al
 // editar su comunidad. Sin ninguno, el alumno ve cómo pedirla en la
-// comunidad y la coach, dónde configurarlo.
+// comunidad y la coach, dónde configurarlo. En una página pública (sin
+// comunidad cargada) llega la agenda por `publico`.
 export default function AgendarSesion({
   titulo,
   texto,
   mensaje,
+  publico,
 }: {
   titulo: string;
   texto?: string;
   /** Lo que se manda por WhatsApp. */
   mensaje: string;
+  publico?: { agenda?: AgendaComunidad };
 }) {
   const { datos, coachAqui } = useApp();
-  const agenda = datos?.comunidad.agenda;
+  const agenda = publico ? publico.agenda : datos?.comunidad.agenda;
   const whatsapp = agenda?.whatsapp ? `https://wa.me/${agenda.whatsapp}?text=${encodeURIComponent(mensaje)}` : null;
 
   return (
@@ -39,6 +43,8 @@ export default function AgendarSesion({
             </a>
           )}
         </div>
+      ) : publico ? (
+        <p className="texto-suave">Te escribiremos al WhatsApp o al correo que nos dejaste para agendarla.</p>
       ) : coachAqui ? (
         <p className="agendar-aviso">
           Tus alumnos todavía no ven botones para agendar.{" "}

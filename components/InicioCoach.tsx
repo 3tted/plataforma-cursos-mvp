@@ -11,6 +11,7 @@ import { useApp } from "./Contexto";
 import { IconoComunidad, IconoFlechaDer } from "./Iconos";
 import PortadaTema from "./PortadaTema";
 import PublicacionesRecientes from "./PublicacionesRecientes";
+import RadarProspectos from "./RadarProspectos";
 import { useCursosDeMiEmpresa } from "./useMiEmpresa";
 
 // Primero quien necesita ayuda, luego quien está por presentar el examen.
@@ -257,6 +258,8 @@ export default function InicioCoach() {
           </ul>
         </section>
       )}
+
+      <RadarProspectos />
 
       <PublicacionesRecientes titulo="Lo último en tu comunidad" />
     </div>

@@ -6,12 +6,13 @@ import { variablesDeMarca } from "@/lib/marca";
 import type { MarcaEmpresa } from "@/lib/tipos";
 import { useApp } from "./Contexto";
 
-// La marca de la empresa se aplica en su página (/e/<id>) y dentro de su
+// La marca de la empresa se aplica en su página (/e/<id>), en la de su
+// diagnóstico (/radar/<id>) y dentro de su
 // comunidad: la comunidad, sus cursos, sus lecciones, su asistente y su
 // membresía. El directorio, el inicio y el panel de coach siguen con la marca
 // de Merkatics, porque reúnen a varias empresas.
 const RUTAS_CON_MARCA = /^\/(c|comunidad|curso|membresia)(\/|$)/;
-const RUTA_EMPRESA = /^\/e\/[^/]+$/;
+const RUTA_EMPRESA = /^\/(e|radar)\/[^/]+$/;
 
 /** La marca de la comunidad (o de la empresa) que se está viendo, o null (marca de Merkatics). */
 export function useMarcaActiva(): MarcaEmpresa | null {

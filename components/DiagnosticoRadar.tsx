@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { api, fechaCorta } from "@/lib/cliente";
 import {
   calcular,
@@ -9,7 +10,7 @@ import {
   type Diagnostico,
   type Resultado,
 } from "@/lib/diagnosticos";
-import type { ResultadoDiagnostico } from "@/lib/tipos";
+import type { AgendaComunidad, ResultadoDiagnostico } from "@/lib/tipos";
 import AgendarSesion from "./AgendarSesion";
 import { useApp } from "./Contexto";
 import { IconoDescargar } from "./Iconos";
@@ -20,6 +21,10 @@ import { IconoDescargar } from "./Iconos";
 // invitación a agendar con la coach. No cuenta como examen. Las respuestas se
 // recuerdan en el navegador; al revelar el resultado, el de un alumno con
 // cuenta se guarda en el servidor para que el equipo de la empresa lo vea.
+// En la página pública de la empresa (/radar/<empresa>) se responde sin
+// cuenta: se ve el resultado completo y se piden nombre y WhatsApp o correo
+// para guardarlo y agendar. Si después crea su cuenta en el mismo navegador,
+// su resultado pasa solo a la lección.
 
 type ResultadoGuardado = Omit<ResultadoDiagnostico, "cuenta">
 
@@ -32,6 +37,20 @@ const vacio = (d: Diagnostico): Guardado => ({
   respuestas: Object.fromEntries(d.dimensiones.map((x) => [x.id, x.afirmaciones.map(() => null)])),
   revelado: false,
 });
+
+/** Lo que se respondió sin cuenta (en la página pública o en la lección). */
+const claveVisitante = (d: Diagnostico) => `diagnostico:${d.id}:visitante`;
+
+const sinRespuestas = (g: Guardado) => Object.values(g.respuestas).flat().every((v) => v === null);
+const completo = (g: Guardado) => Object.values(g.respuestas).flat().every((v) => v !== null);
+
+/** Lo que necesita la página pública: la empresa, su comunidad y su agenda. */
+export interface RadarPublico {
+  empresa: string;
+  coach: string;
+  comunidad: string;
+  agenda?: AgendaComunidad;
+}
 
 function leer(clave: string, d: Diagnostico): Guardado {
   try {
@@ -57,25 +76,51 @@ export default function DiagnosticoRadar({ id, leccion }: { id: string; leccion:
   return <Radar d={d} leccion={leccion} />;
 }
 
-function Radar({ d, leccion }: { d: Diagnostico; leccion: string }) {
-  const { usuario, pedirEntrada } = useApp();
-  const clave = `diagnostico:${d.id}:${usuario?.correo ?? "visitante"}`;
+/** El diagnóstico en la página pública de la empresa, sin cuenta. */
+export function DiagnosticoPublico({ id, publico }: { id: string; publico: RadarPublico }) {
+  const d = buscarDiagnostico(id);
+  if (!d) return null;
+  return <Radar d={d} publico={publico} />;
+}
+
+function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publico?: RadarPublico }) {
+  const { usuario: conCuenta, pedirEntrada } = useApp();
+  // En la página pública todo es como visitante, aunque haya sesión abierta.
+  const usuario = publico ? null : conCuenta;
+  const clave = usuario ? `diagnostico:${d.id}:${usuario.correo}` : claveVisitante(d);
   const [estado, setEstado] = useState<Guardado>(() => vacio(d));
   const [listo, setListo] = useState(false);
   const [aviso, setAviso] = useState("");
   // null: todavía no se sabe; el equipo de la empresa ve los resultados de sus alumnos.
   const [equipo, setEquipo] = useState<ResultadoGuardado[] | null>(null);
   const [guardado, setGuardado] = useState<"si" | "no" | "error" | null>(null);
-  const ruta = `/api/diagnostico?leccion=${encodeURIComponent(leccion)}&diagnostico=${encodeURIComponent(d.id)}`;
+  const ruta = `/api/diagnostico?leccion=${encodeURIComponent(leccion ?? "")}&diagnostico=${encodeURIComponent(d.id)}`;
+
+  const guardar = (respuestas: Guardado["respuestas"]) => {
+    setGuardado(null);
+    api<{ guardado: boolean }>("/api/diagnostico", {
+      method: "POST",
+      json: { leccion, diagnostico: d.id, respuestas },
+    })
+      .then((r) => setGuardado(r.guardado ? "si" : "no"))
+      .catch(() => setGuardado("error"));
+  };
+  const guardarRef = useRef(guardar);
+  guardarRef.current = guardar;
 
   // Se lee después de montar: en el servidor no hay localStorage. Con cuenta,
   // lo guardado en el servidor gana (por ejemplo, si lo hizo en otro dispositivo).
   useEffect(() => {
     let vigente = true;
-    const local = leer(clave, d);
+    let local = leer(clave, d);
+    // Lo respondió sin cuenta (en la página pública) y luego entró: se lo trae.
+    if (usuario && sinRespuestas(local)) {
+      const visita = leer(claveVisitante(d), d);
+      if (!sinRespuestas(visita)) local = visita;
+    }
     setEstado(local);
     setListo(true);
-    if (!usuario) return;
+    if (!usuario || !leccion) return;
     api<{ equipo: boolean; resultados?: ResultadoGuardado[]; resultado?: ResultadoGuardado | null }>(ruta)
       .then((r) => {
         if (!vigente) return;
@@ -83,6 +128,9 @@ function Radar({ d, leccion }: { d: Diagnostico; leccion: string }) {
         else if (r.resultado) {
           setGuardado("si");
           if (!local.revelado) setEstado({ respuestas: r.resultado.respuestas, revelado: true });
+        } else if (local.revelado && completo(local)) {
+          // Ya lo había revelado antes de tener cuenta: se guarda para su coach.
+          guardarRef.current(local.respuestas);
         }
       })
       .catch(() => {
@@ -91,7 +139,7 @@ function Radar({ d, leccion }: { d: Diagnostico; leccion: string }) {
     return () => {
       vigente = false;
     };
-  }, [clave, d, ruta, usuario]);
+  }, [clave, d, ruta, usuario, leccion]);
 
   useEffect(() => {
     if (!listo) return;
@@ -122,14 +170,8 @@ function Radar({ d, leccion }: { d: Diagnostico; leccion: string }) {
     }
     setEstado((e) => ({ ...e, revelado: true }));
     requestAnimationFrame(() => document.getElementById("diagnostico-resultado")?.scrollIntoView({ behavior: "smooth", block: "start" }));
-    if (!usuario || equipo) return;
-    setGuardado(null);
-    api<{ guardado: boolean }>("/api/diagnostico", {
-      method: "POST",
-      json: { leccion, diagnostico: d.id, respuestas: estado.respuestas },
-    })
-      .then((r) => setGuardado(r.guardado ? "si" : "no"))
-      .catch(() => setGuardado("error"));
+    if (!usuario || equipo || !leccion) return;
+    guardar(estado.respuestas);
   };
 
   const reiniciar = () => {
@@ -230,7 +272,8 @@ function Radar({ d, leccion }: { d: Diagnostico; leccion: string }) {
       {estado.revelado && respondidas === total && (
         <>
           <ResultadoRadar d={d} r={resultado} />
-          {!equipo && (
+          {publico && <ContactoRadar d={d} r={resultado} respuestas={estado.respuestas} publico={publico} />}
+          {!equipo && !publico && (
             <p className="diagnostico-guardado" role="status">
               {!usuario ? (
                 <>
@@ -246,7 +289,7 @@ function Radar({ d, leccion }: { d: Diagnostico; leccion: string }) {
               ) : null}
             </p>
           )}
-          {d.cta && (
+          {d.cta && !publico && (
             <AgendarSesion
               titulo={d.cta.titulo}
               texto={d.cta.texto}
@@ -260,6 +303,185 @@ function Radar({ d, leccion }: { d: Diagnostico; leccion: string }) {
 
       <p className="diagnostico-nota texto-suave">{d.aviso}</p>
     </section>
+  );
+}
+
+interface Contacto {
+  nombre: string;
+  whatsapp: string;
+  correo: string;
+}
+
+// En la página pública, después del resultado: nombre y WhatsApp o correo para
+// guardarlo y que el equipo de la empresa le dé seguimiento. Ya enviado, se ven
+// los botones para agendar y la invitación a seguir con el curso gratis. Los
+// datos se recuerdan en este navegador; si vuelve a revelar su Radar con otras
+// respuestas, se actualiza solo.
+function ContactoRadar({
+  d,
+  r,
+  respuestas,
+  publico,
+}: {
+  d: Diagnostico;
+  r: Resultado;
+  respuestas: Guardado["respuestas"];
+  publico: RadarPublico;
+}) {
+  const clave = `radar-contacto:${publico.empresa}`;
+  const [forma, setForma] = useState<Contacto>({ nombre: "", whatsapp: "", correo: "" });
+  const [guardado, setGuardado] = useState<Contacto | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState("");
+  const enviadas = useRef("");
+  const firma = JSON.stringify(respuestas);
+
+  const enviar = async (contacto: Contacto) => {
+    await api("/api/radar/" + encodeURIComponent(publico.empresa), {
+      method: "POST",
+      json: { ...contacto, respuestas },
+    });
+    enviadas.current = firma;
+  };
+
+  useEffect(() => {
+    try {
+      const g = JSON.parse(localStorage.getItem(clave) ?? "null") as (Contacto & { firma?: string }) | null;
+      if (g?.nombre) {
+        setGuardado(g);
+        setForma(g);
+        enviadas.current = g.firma ?? "";
+      }
+    } catch {
+      // Sin almacenamiento: se piden los datos otra vez.
+    }
+  }, [clave]);
+
+  // Volvió a revelar con otras respuestas: se actualiza lo que ve la coach.
+  useEffect(() => {
+    if (!guardado || enviadas.current === firma) return;
+    enviar(guardado)
+      .then(() => {
+        try {
+          localStorage.setItem(clave, JSON.stringify({ ...guardado, firma }));
+        } catch {
+          // Nada: ya quedó guardado en el servidor.
+        }
+      })
+      .catch(() => {
+        // Se intenta de nuevo la próxima vez que lo revele.
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [guardado, firma]);
+
+  const alEnviar = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!forma.nombre.trim()) return setError("Escribe tu nombre.");
+    if (!forma.whatsapp.trim() && !forma.correo.trim()) return setError("Déjanos tu WhatsApp o tu correo.");
+    setError("");
+    setEnviando(true);
+    try {
+      const contacto = { nombre: forma.nombre.trim(), whatsapp: forma.whatsapp.trim(), correo: forma.correo.trim() };
+      await enviar(contacto);
+      try {
+        localStorage.setItem(clave, JSON.stringify({ ...contacto, firma }));
+      } catch {
+        // Sin almacenamiento: ya quedó guardado en el servidor.
+      }
+      setGuardado(contacto);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  if (!guardado) {
+    return (
+      <form className="radar-contacto tarjeta" onSubmit={alEnviar} noValidate>
+        <h3>Guarda tu resultado y agenda tu sesión</h3>
+        <p>
+          Déjanos tu nombre y tu WhatsApp o correo. {publico.coach} recibe tu Radar para preparar tu Sesión de Claridad
+          Estratégica, y tú ves los botones para agendarla.
+        </p>
+        <label className="campo">
+          <span>Tu nombre</span>
+          <input
+            value={forma.nombre}
+            onChange={(e) => setForma({ ...forma, nombre: e.target.value })}
+            maxLength={80}
+            autoComplete="name"
+            required
+          />
+        </label>
+        <div className="radar-contacto-fila">
+          <label className="campo">
+            <span>WhatsApp</span>
+            <input
+              value={forma.whatsapp}
+              onChange={(e) => setForma({ ...forma, whatsapp: e.target.value })}
+              inputMode="tel"
+              autoComplete="tel"
+              maxLength={20}
+              placeholder="10 dígitos"
+            />
+          </label>
+          <label className="campo">
+            <span>o correo</span>
+            <input
+              type="email"
+              value={forma.correo}
+              onChange={(e) => setForma({ ...forma, correo: e.target.value })}
+              autoComplete="email"
+              maxLength={120}
+            />
+          </label>
+        </div>
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
+        <div className="radar-contacto-acciones">
+          <button type="submit" className="boton" disabled={enviando}>
+            {enviando ? "Guardando…" : "Guardar mi resultado"}
+          </button>
+          <span className="texto-suave">Tus datos solo los ve el equipo de {publico.coach} para contactarte.</span>
+        </div>
+      </form>
+    );
+  }
+
+  const nombre = guardado.nombre.split(" ")[0];
+  return (
+    <>
+      <p className="diagnostico-guardado" role="status">
+        Listo, {nombre}: tu resultado quedó guardado y {publico.coach} ya lo puede ver.{" "}
+        <button type="button" className="enlace" onClick={() => setGuardado(null)}>
+          Cambiar mis datos
+        </button>
+      </p>
+      {d.cta && (
+        <AgendarSesion
+          titulo={d.cta.titulo}
+          texto={d.cta.texto}
+          mensaje={mensajeDeResultado(d, r, guardado.nombre)}
+          publico={{ agenda: publico.agenda }}
+        />
+      )}
+      <aside className="radar-reto">
+        <div>
+          <h3>Sigue con el reto de 7 días, gratis</h3>
+          <p>
+            Trabaja tu dimensión más baja con una acción de 15 a 25 minutos al día. Crea tu cuenta desde este mismo
+            navegador y tu Radar pasa solo a tu curso.
+          </p>
+        </div>
+        <Link className="boton boton-secundario" href={`/c/${publico.comunidad}`}>
+          Empezar el reto
+        </Link>
+      </aside>
+    </>
   );
 }
 

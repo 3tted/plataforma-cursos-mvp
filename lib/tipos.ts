@@ -26,6 +26,27 @@ export interface Comunidad {
   agenda?: AgendaComunidad;
 }
 
+/**
+ * Alguien que respondió el diagnóstico en la página pública de la empresa
+ * (/radar/<empresa>) sin cuenta y dejó sus datos para guardar su resultado o
+ * agendar. Solo lo ve el equipo de esa empresa.
+ */
+export interface ProspectoDiagnostico {
+  id: number;
+  empresa: string;
+  diagnostico: string;
+  nombre: string;
+  /** Solo dígitos, con código de país. */
+  whatsapp?: string;
+  correo?: string;
+  respuestas: Record<string, number[]>;
+  puntos: Record<string, number>;
+  total: number;
+  masBajas: string[];
+  creadoEn: string;
+  actualizadoEn: string;
+}
+
 /** WhatsApp (solo dígitos, con código de país) y/o liga de agenda (Calendly, Google Calendar…). */
 export interface AgendaComunidad {
   whatsapp?: string;

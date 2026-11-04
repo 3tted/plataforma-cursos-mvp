@@ -22,6 +22,7 @@ import type {
   Presentacion,
   ProgresoAlumno,
   Publicacion,
+  ProspectoDiagnostico,
   ResultadoDiagnostico,
   Rol,
   Sesion,
@@ -60,6 +61,8 @@ export interface Almacen {
   entregas?: EntregaPractica[];
   /** Resultados de los diagnósticos (como el Radar de INCREASE), uno por alumno y lección. */
   diagnosticos?: ResultadoDiagnostico[];
+  /** Quienes respondieron el diagnóstico en la página pública de una empresa y dejaron sus datos. */
+  prospectos?: ProspectoDiagnostico[];
   /** Avance de los alumnos en los planes por días, uno por alumno y lección. */
   planes?: AvancePlan[];
   /** Comunidades y cursos que crean las coaches desde la plataforma. */

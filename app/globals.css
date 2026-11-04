@@ -10462,3 +10462,148 @@ button.tarjeta-comunidad-enlace {
 .practica-entregas summary {
   cursor: pointer;
 }
+
+/* ---------- Página pública del diagnóstico de una empresa (/radar/<empresa>) ---------- */
+
+.pagina-radar {
+  max-width: 820px;
+  margin-inline: auto;
+}
+
+.pagina-radar-cabecera {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.pagina-radar-cabecera h1 {
+  margin: 0;
+  font-size: var(--t-display);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.pagina-radar-antetitulo {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: var(--t-small);
+  font-weight: 700;
+}
+
+.pagina-radar-bajada {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
+
+.pagina-radar-datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pagina-radar-datos li {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+/* En la página pública el diagnóstico ya tiene su título arriba. */
+.pagina-radar .diagnostico-encabezado h2 {
+  display: none;
+}
+
+.radar-contacto {
+  display: grid;
+  gap: 14px;
+}
+
+.radar-contacto h3,
+.radar-contacto p {
+  margin: 0;
+}
+
+.radar-contacto-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.radar-contacto-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  font-size: var(--t-small);
+}
+
+.radar-reto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  padding: 20px 22px;
+  border-radius: var(--radio-hoja);
+  background: var(--superficie-2);
+}
+
+.radar-reto h3,
+.radar-reto p {
+  margin: 0;
+}
+
+.radar-reto > div {
+  display: grid;
+  gap: 6px;
+  max-width: 52ch;
+}
+
+@media (max-width: 560px) {
+  .radar-contacto-fila {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Inicio del coach: su página del Radar y quienes dejaron sus datos */
+
+.radar-prospectos-enlace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 10px 14px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+}
+
+.radar-prospectos-enlace a {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.radar-prospecto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+}
+
+.radar-prospecto-contacto {
+  display: flex;
+  gap: 6px;
+}
+
+.radar-prospecto-contacto .pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useApp } from "@/components/Contexto";
+import InvitacionRadar from "@/components/InvitacionRadar";
 import TarjetaComunidad from "@/components/TarjetaComunidad";
 import { useTitulo } from "@/components/useTitulo";
 import { api } from "@/lib/cliente";
@@ -78,6 +79,7 @@ export default function PaginaEmpresa() {
           </button>
         )}
       </header>
+      <InvitacionRadar empresa={empresa.id} />
       {suyas.length > 0 && (
         <ul className="directorio-grupo-lista">
           {suyas.map((c) => (

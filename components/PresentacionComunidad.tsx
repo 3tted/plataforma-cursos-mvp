@@ -7,6 +7,7 @@ import type { Publicacion } from "@/lib/tipos";
 import Avatar from "./Avatar";
 import BotonInscribirse from "./BotonInscribirse";
 import { useApp } from "./Contexto";
+import InvitacionRadar from "./InvitacionRadar";
 import { IconoBillete, IconoCheck, IconoComunidad, IconoEditar, IconoPlay, IconoPublicacion } from "./Iconos";
 import { acentoSobreOscuro } from "@/lib/marca";
 import { posterDeVideo } from "@/lib/poster";
@@ -145,6 +146,8 @@ export default function PresentacionComunidad({
           )}
         </div>
       )}
+
+      {comunidad.empresa && <InvitacionRadar empresa={comunidad.empresa} comunidad={comunidadId} />}
 
       {vista && (
         <div className="presentacion-galeria">

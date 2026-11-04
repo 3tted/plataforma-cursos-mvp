@@ -10607,3 +10607,38 @@ button.tarjeta-comunidad-enlace {
   align-items: center;
   gap: 4px;
 }
+
+/* Invitación al diagnóstico público de la empresa (comunidad y página de la empresa) */
+
+.invitacion-radar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 18px 20px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-hoja);
+  background: var(--superficie-2);
+}
+
+.invitacion-radar > div {
+  display: grid;
+  gap: 4px;
+  max-width: 56ch;
+}
+
+.invitacion-radar p {
+  margin: 0;
+}
+
+.invitacion-radar-titulo {
+  font-weight: 700;
+  font-size: var(--t-title);
+}
+
+.invitacion-radar .boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

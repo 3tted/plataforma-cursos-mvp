@@ -7,7 +7,8 @@ import { useApp } from "@/components/Contexto";
 import { DiagnosticoPublico } from "@/components/DiagnosticoRadar";
 import { useTitulo } from "@/components/useTitulo";
 import { api } from "@/lib/cliente";
-import { diagnostico as buscarDiagnostico } from "@/lib/diagnosticos";
+import { totalPreguntas } from "@/lib/diagnosticos";
+import { useDiagnostico } from "@/components/useDiagnostico";
 import type { AgendaComunidad, MarcaEmpresa } from "@/lib/tipos";
 
 interface DatosRadar {
@@ -25,7 +26,7 @@ export default function PaginaRadar() {
   const { fijarMarcaPagina } = useApp();
   const [radar, setRadar] = useState<DatosRadar | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const d = radar ? buscarDiagnostico(radar.diagnostico) : undefined;
+  const d = useDiagnostico(radar?.diagnostico);
   useTitulo(d?.titulo ?? "Diagnóstico");
 
   useEffect(() => {
@@ -56,7 +57,8 @@ export default function PaginaRadar() {
   }
   if (!radar || !d) return <p className="texto-suave">Cargando…</p>;
 
-  const afirmaciones = d.dimensiones.reduce((s, x) => s + x.afirmaciones.length, 0);
+  const preguntas = totalPreguntas(d);
+  const delCoach = d.bandasEn === "porcentaje";
   return (
     <div className="pagina-radar">
       <header className="pagina-radar-cabecera">
@@ -65,15 +67,16 @@ export default function PaginaRadar() {
         </p>
         <h1>{d.titulo}</h1>
         <p className="pagina-radar-bajada">
-          Descubre en qué dimensión de tu liderazgo está tu principal brecha: claridad, mentalidad, comunicación o
-          visión. Al terminar ves tu gráfica y por dónde empezar.
+          {delCoach
+            ? "Responde con honestidad y al terminar ves tu resultado y por dónde te conviene empezar."
+            : "Descubre en qué dimensión de tu liderazgo está tu principal brecha: claridad, mentalidad, comunicación o visión. Al terminar ves tu gráfica y por dónde empezar."}
         </p>
         <ul className="pagina-radar-datos">
           <li>
-            <span className="cifra">{afirmaciones}</span> afirmaciones
+            <span className="cifra">{preguntas}</span> {delCoach ? "preguntas" : "afirmaciones"}
           </li>
           <li>
-            <span className="cifra">5</span> minutos
+            <span className="cifra">{delCoach ? Math.max(2, Math.round(preguntas / 3)) : 5}</span> minutos
           </li>
           <li>Sin crear cuenta</li>
         </ul>

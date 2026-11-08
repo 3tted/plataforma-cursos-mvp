@@ -159,9 +159,15 @@ function material(l: Leccion): string[] {
 
 const MODELOS_GEMINI = ["gemini-flash-latest", "gemini-flash-lite-latest"];
 
-type Pedido = { sistema: string; mensaje: string; esquema: object };
+export type Pedido = {
+  sistema: string;
+  mensaje: string;
+  esquema: object;
+  /** Tiempo máximo por modelo (ms); si se pasa, se prueba el siguiente. */
+  tiempo?: number;
+};
 
-async function conGemini({ sistema, mensaje, esquema }: Pedido): Promise<string> {
+async function conGemini({ sistema, mensaje, esquema, tiempo = 55_000 }: Pedido): Promise<string> {
   const cliente = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY });
   for (const [i, model] of MODELOS_GEMINI.entries()) {
     try {
@@ -173,7 +179,7 @@ async function conGemini({ sistema, mensaje, esquema }: Pedido): Promise<string>
           responseMimeType: "application/json",
           responseJsonSchema: esquema,
           maxOutputTokens: 16_384,
-          abortSignal: AbortSignal.timeout(55_000),
+          abortSignal: AbortSignal.timeout(tiempo),
           httpOptions: { retryOptions: { attempts: 2 } },
           ...(model === "gemini-flash-latest" ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
         },
@@ -181,11 +187,13 @@ async function conGemini({ sistema, mensaje, esquema }: Pedido): Promise<string>
       if (!r.text) throw new ErrorDeDatos("La IA no respondió. Inténtalo de nuevo.");
       return r.text;
     } catch (e) {
-      const reintentable = e instanceof ApiError && [429, 500, 503, 404].includes(e.status);
+      // Saturado, sin cuota o tardado: se prueba el siguiente modelo (Flash-Lite responde más rápido).
+      const tardo = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+      const reintentable = tardo || (e instanceof ApiError && [429, 500, 503, 404].includes(e.status));
       if (reintentable && i < MODELOS_GEMINI.length - 1) continue;
       if (e instanceof ErrorDeDatos) throw e;
       console.error("Presentación con IA (Gemini):", e);
-      if (e instanceof Error && e.name === "TimeoutError") throw new ErrorDeDatos("La IA tardó demasiado. Inténtalo de nuevo.");
+      if (tardo) throw new ErrorDeDatos("La IA tardó demasiado. Inténtalo de nuevo.");
       throw new ErrorDeDatos(mensajeDeErrorGemini(e));
     }
   }
@@ -212,9 +220,10 @@ async function conClaude({ sistema, mensaje, esquema }: Pedido): Promise<string>
   }
 }
 
-async function preguntar(p: Pedido): Promise<string> {
+/** Pide a la IA configurada (Gemini o Claude) una respuesta en JSON con el esquema dado. También la usan los diagnósticos. */
+export async function preguntar(p: Pedido): Promise<string> {
   const proveedor = proveedorIA();
-  if (!proveedor) throw new ErrorDeDatos("Para generar presentaciones hace falta conectar una IA (clave de Gemini o de Claude).");
+  if (!proveedor) throw new ErrorDeDatos("Para usar la IA hace falta conectarla (clave de Gemini o de Claude).");
   return proveedor === "gemini" ? conGemini(p) : conClaude(p);
 }
 

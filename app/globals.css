@@ -10876,3 +10876,566 @@ button.tarjeta-comunidad-enlace {
   border-radius: var(--radio-control);
   background: var(--superficie-2);
 }
+
+/* ---------- Creador de diagnósticos del coach (/coach/diagnostico/<id>) ---------- */
+
+.seccion-diagnostico .boton {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seccion-diagnostico-formas {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: var(--t-small);
+}
+
+.seccion-diagnostico-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
+.seccion-diagnostico-resumen p {
+  margin: 0;
+}
+
+.seccion-diagnostico-nombre {
+  font-weight: 700;
+  font-size: var(--t-title);
+}
+
+.diag-editor {
+  display: grid;
+  gap: 18px;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-bottom: 96px;
+}
+
+.diag-editor .cabecera-pagina {
+  margin-bottom: 0;
+}
+
+.diag-editor-rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  align-items: start;
+}
+
+.diag-editor-principal {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.diag-ayuda {
+  position: sticky;
+  top: 84px;
+  display: grid;
+  gap: 14px;
+}
+
+.diag-ayuda-tarjeta {
+  display: grid;
+  gap: 10px;
+}
+
+.diag-ayuda-tarjeta h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--t-title);
+}
+
+.diag-ayuda-tarjeta .boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.diag-consejos {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: var(--t-small);
+}
+
+.diag-revision {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--linea);
+  font-size: var(--t-small);
+}
+
+.diag-revision h3,
+.diag-revision p {
+  margin: 0;
+}
+
+.diag-revision ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diag-revision li {
+  display: grid;
+  gap: 4px;
+}
+
+.diag-revision-propuesta {
+  padding: 8px 10px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+}
+
+.diag-revision .enlace {
+  justify-self: start;
+}
+
+.diag-forma {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.diag-forma legend {
+  margin-bottom: 6px;
+  font-size: var(--t-caption);
+  font-weight: 700;
+  color: var(--tinta-2);
+}
+
+.diag-area {
+  display: grid;
+  gap: 14px;
+}
+
+.diag-area-cabecera {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.diag-area-cabecera .campo {
+  flex: 1;
+}
+
+.diag-preguntas {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diag-pregunta {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+}
+
+.diag-pregunta-fila {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+}
+
+.diag-pregunta-fila textarea,
+.diag-opcion input:not([type="number"]),
+.diag-rango textarea,
+.diag-rango input:not([type="number"]) {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--linea-campo);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.diag-pregunta-tipo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 38px;
+}
+
+.diag-pregunta-tipo button {
+  padding: 5px 12px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: 999px;
+  background: var(--superficie);
+  font-size: var(--t-caption);
+  font-weight: 700;
+  color: var(--tinta-2);
+  cursor: pointer;
+}
+
+.diag-pregunta-tipo button[aria-pressed="true"] {
+  border-color: var(--graphite);
+  background: var(--graphite);
+  color: var(--white);
+}
+
+.diag-pregunta > .nota,
+.diag-opciones {
+  margin: 0;
+  padding-left: 38px;
+}
+
+.diag-opciones {
+  display: grid;
+  gap: 6px;
+}
+
+.diag-opciones .nota {
+  margin: 0;
+}
+
+.diag-opciones .enlace {
+  justify-self: start;
+}
+
+.diag-opcion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.diag-puntos {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-caption);
+  color: var(--tinta-2);
+}
+
+.diag-puntos input,
+.diag-rango-limites input {
+  width: 64px;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--linea-campo);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.diag-area-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.diag-area-acciones .boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diag-rangos {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.diag-rangos legend {
+  margin-bottom: 6px;
+  font-size: var(--t-caption);
+  font-weight: 700;
+  color: var(--tinta-2);
+}
+
+.diag-rangos .enlace {
+  justify-self: start;
+}
+
+.diag-rango {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+}
+
+.diag-rango-limites {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-small);
+  color: var(--tinta-2);
+}
+
+.diag-vista-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.diag-vista {
+  padding: 4px 18px;
+  border: 1px dashed var(--linea-fuerte);
+  border-radius: var(--radio-hoja);
+}
+
+.diag-guardar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding: 12px max(16px, calc((100vw - 1180px) / 2));
+  border-top: 1px solid var(--linea);
+  background: var(--superficie);
+  font-size: var(--t-small);
+}
+
+.diag-guardar-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+}
+
+.diag-guardar-estado details ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.diag-guardar-estado .casilla {
+  min-height: 0;
+}
+
+.diag-guardar-acciones {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.diag-inicio {
+  display: grid;
+  gap: 14px;
+}
+
+.diag-inicio h2 {
+  margin: 0;
+  font-size: var(--t-headline);
+}
+
+.diag-inicio-opciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.diag-inicio-opcion {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.diag-inicio-opcion:hover,
+.diag-inicio-opcion:focus-visible {
+  border-color: var(--coral-dark);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+}
+
+.diag-inicio-opcion strong {
+  font-size: var(--t-title);
+}
+
+.diag-inicio-opcion svg,
+.diag-inicio-icono {
+  color: var(--acento);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.diag-guia,
+.diag-forma-ia {
+  display: grid;
+  gap: 12px;
+  max-width: 760px;
+}
+
+.diag-guia h2,
+.diag-guia p,
+.diag-forma-ia h2,
+.diag-forma-ia p {
+  margin: 0;
+}
+
+.diag-forma-ia h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diag-guia-ejemplos {
+  display: grid;
+  gap: 6px;
+}
+
+.diag-guia-bien,
+.diag-guia-mal,
+.diag-guia-ejemplo {
+  padding: 10px 14px;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+}
+
+.diag-guia-mal {
+  color: var(--tinta-2);
+}
+
+.diag-guia-puntos {
+  display: flex;
+  gap: 6px;
+}
+
+.diag-guia-puntos span {
+  width: 28px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  border: 1px solid var(--linea);
+}
+
+.diag-guia-puntos span[data-activo="true"] {
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+.diag-guia-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.diag-guia-acciones .boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Preguntas de opciones dentro del diagnóstico (alumno) */
+.diagnostico-opciones-lista {
+  display: grid;
+  gap: 6px;
+}
+
+.diagnostico-opciones-lista label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-control);
+  cursor: pointer;
+  font-size: var(--t-small);
+}
+
+.diagnostico-opciones-lista label[data-elegida="true"] {
+  border-color: var(--coral-dark);
+  box-shadow: inset 0 0 0 1px var(--coral-dark);
+  background: var(--white);
+}
+
+.diagnostico-opciones-lista input {
+  margin: 0;
+  width: 17px;
+  height: 17px;
+}
+
+.diagnostico-resultado-cuerpo[data-sin-grafica="true"] {
+  grid-template-columns: 1fr;
+}
+
+.diagnostico-incompleto p {
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .diag-editor-rejilla {
+    grid-template-columns: 1fr;
+  }
+
+  .diag-ayuda {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .diag-forma {
+    grid-template-columns: 1fr;
+  }
+
+  .diag-pregunta-tipo,
+  .diag-pregunta > .nota,
+  .diag-opciones {
+    padding-left: 0;
+  }
+
+  .diag-rango {
+    grid-template-columns: 1fr auto;
+  }
+
+  .diag-rango-limites {
+    grid-column: 1 / -1;
+  }
+}
+
+/* En celular, la barra de guardar del diagnóstico va arriba del menú inferior */
+@media (max-width: 760px) {
+  .diag-guardar {
+    bottom: calc(var(--alto-nav-inferior) + env(safe-area-inset-bottom));
+    padding: 10px 16px;
+  }
+
+  .diag-editor {
+    padding-bottom: calc(var(--alto-nav-inferior) + 150px);
+  }
+}

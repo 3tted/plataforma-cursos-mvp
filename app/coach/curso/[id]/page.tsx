@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/components/Contexto";
 import EditorPractica from "@/components/editor/EditorPractica";
+import SeccionDiagnostico from "@/components/editor/SeccionDiagnostico";
 import EditorPreguntas from "@/components/editor/EditorPreguntas";
 import FotoPortada from "@/components/editor/FotoPortada";
 import VideoEnEditor from "@/components/editor/VideoEnEditor";
@@ -414,6 +415,8 @@ export default function EditorCurso() {
           />
         </label>
       </section>
+
+      <SeccionDiagnostico curso={curso.id} sinGuardar={sinGuardar} />
 
       <section className="editor-seccion" aria-labelledby="temario-editor-titulo">
         <h2 id="temario-editor-titulo">Temario</h2>

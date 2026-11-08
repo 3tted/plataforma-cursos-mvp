@@ -29,7 +29,7 @@ import VideoLeccion from "@/components/VideoLeccion";
 import AvisoSinPublicar from "@/components/AvisoSinPublicar";
 import EnlaceEditarCurso from "@/components/EnlaceEditarCurso";
 import { moneda, parteGratis } from "@/lib/cliente";
-import { partirLeccion } from "@/lib/diagnosticos";
+import { diagnosticoDeLeccion, partirLeccion } from "@/lib/diagnosticos";
 
 type Pestana = "resumen" | "transcripcion" | "repaso";
 
@@ -69,6 +69,8 @@ export default function PaginaLeccion() {
   const [eleccion, setEleccion] = useState<{ leccion: string; pestana: Pestana } | null>(null);
   // Lecciones cuya práctica ya entregó (lo avisa el recuadro de la práctica al cargarla).
   const [practicasEntregadas, setPracticasEntregadas] = useState<string[]>([]);
+  // Lecciones con diagnóstico cuyo resultado ya vio el alumno (sin eso no avanza).
+  const [diagnosticosVistos, setDiagnosticosVistos] = useState<string[]>([]);
   const leccion = lecciones.find((l) => l.id === id);
   useTitulo(leccion?.titulo ?? (datos ? "Lección" : null));
 
@@ -187,7 +189,12 @@ export default function PaginaLeccion() {
   const repasoListo = !guiado || preguntasRepaso === 0 || repasados.includes(leccion.id);
   // La práctica, si la coach la hizo obligatoria, también hay que entregarla.
   const practicaLista = !guiado || !leccion.practica?.obligatoria || practicasEntregadas.includes(leccion.id);
-  const pendiente = !videoListo
+  // El diagnóstico de la lección (como el primer paso de un curso) hay que responderlo para seguir.
+  const conDiagnostico = !!diagnosticoDeLeccion(leccion.contenido);
+  const diagnosticoListo = !guiado || !conDiagnostico || hecha || diagnosticosVistos.includes(leccion.id);
+  const pendiente = !diagnosticoListo
+    ? "Responde el diagnóstico y mira tu resultado para continuar"
+    : !videoListo
     ? `Termina ${queVer} para continuar`
     : !repasoListo
       ? "Responde el repaso para continuar"
@@ -484,7 +491,17 @@ export default function PaginaLeccion() {
             >
               {partirLeccion(leccion.contenido).map((parte, i) =>
                 "diagnostico" in parte ? (
-                  <DiagnosticoRadar key={i} id={parte.diagnostico} leccion={leccion.id} />
+                  <DiagnosticoRadar
+                    key={i}
+                    id={parte.diagnostico}
+                    leccion={leccion.id}
+                    tituloLeccion={leccion.titulo}
+                    alCambiarRevelado={(visto) =>
+                      setDiagnosticosVistos((lista) =>
+                        visto ? (lista.includes(leccion.id) ? lista : [...lista, leccion.id]) : lista.filter((x) => x !== leccion.id),
+                      )
+                    }
+                  />
                 ) : "plan" in parte ? (
                   <PlanDias key={i} id={parte.plan} leccion={leccion.id} />
                 ) : "agendar" in parte ? (

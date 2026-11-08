@@ -1,7 +1,7 @@
 import { consultar, modificar, nuevoId, type Almacen } from "@/lib/almacen";
 import { correoValido, normalizarCorreo } from "@/lib/cuentas";
 import { marcaDe } from "@/lib/curso";
-import { calcular, diagnostico as buscarDiagnostico, partirLeccion, respuestasValidas } from "@/lib/diagnosticos";
+import { calcular, diagnosticoEn, problemasDe, respuestasValidas, diagnosticoDeLeccion } from "@/lib/diagnosticos";
 import { ErrorDeDatos, error, leerJson, manejar, texto } from "@/lib/http";
 import { coachOpcional } from "@/lib/permisos";
 import type { ProspectoDiagnostico } from "@/lib/tipos";
@@ -30,9 +30,10 @@ function radarDe(a: Almacen, empresa: string) {
     const comunidad = (a.comunidadesCoach ?? []).find((c) => c.id === curso.comunidad);
     if (!comunidad) continue;
     for (const leccion of curso.modulos.flatMap((m) => m.lecciones)) {
-      const parte = partirLeccion(leccion.contenido).find((p) => "diagnostico" in p);
-      const d = parte && "diagnostico" in parte ? buscarDiagnostico(parte.diagnostico) : undefined;
-      if (!d) continue;
+      const id = diagnosticoDeLeccion(leccion.contenido);
+      const d = id ? diagnosticoEn(a, id) : undefined;
+      // Uno creado por el coach que todavía está incompleto no se publica.
+      if (!d || problemasDe(d).length > 0) continue;
       return {
         empresa: { id: e.id, nombre: e.nombre },
         ...marcaDe(a, e.id),
@@ -90,8 +91,10 @@ export const POST = manejar(async (req: Request, { params }: Params) => {
   if (correo && !correoValido(correo)) return error("Revisa tu correo: parece que le falta algo.");
   if (!whatsapp && !correo) return error("Déjanos tu WhatsApp o tu correo para poder contactarte.");
 
-  const radar = await consultar((a) => radarDe(a, empresa));
-  const d = radar && buscarDiagnostico(radar.diagnostico);
+  const { radar, d } = await consultar((a) => {
+    const r = radarDe(a, empresa);
+    return { radar: r, d: r ? diagnosticoEn(a, r.diagnostico) : undefined };
+  });
   if (!radar || !d) return error("Esta empresa no tiene un diagnóstico público.", 404);
   const respuestas = respuestasValidas(d, cuerpo.respuestas);
   if (!respuestas) return error("Responde todas las afirmaciones antes de guardar tu resultado.");

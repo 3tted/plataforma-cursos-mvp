@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/cliente";
-import { diagnostico as buscarDiagnostico } from "@/lib/diagnosticos";
+import { totalPreguntas } from "@/lib/diagnosticos";
+import { useDiagnostico } from "./useDiagnostico";
 import { IconoFlechaDer } from "./Iconos";
 
 // Invitación a la página pública del diagnóstico de la empresa (/radar/<empresa>)
@@ -25,21 +26,24 @@ export default function InvitacionRadar({ empresa, comunidad }: { empresa: strin
     };
   }, [empresa]);
 
-  const d = radar ? buscarDiagnostico(radar.diagnostico) : undefined;
+  const d = useDiagnostico(radar?.diagnostico);
   if (!radar || !d || (comunidad && radar.comunidad.id !== comunidad)) return null;
-  const afirmaciones = d.dimensiones.reduce((s, x) => s + x.afirmaciones.length, 0);
+  const preguntas = totalPreguntas(d);
+  const minutos = Math.max(2, Math.round(preguntas / 3));
+  const delCoach = d.bandasEn === "porcentaje";
 
   return (
     <aside className="invitacion-radar" aria-label={d.titulo}>
       <div>
         <p className="invitacion-radar-titulo">Antes de empezar, haz tu {d.titulo}</p>
         <p className="texto-suave">
-          {afirmaciones} afirmaciones, 5 minutos y sin crear cuenta: descubre en qué dimensión de tu liderazgo está tu
-          principal brecha.
+          {delCoach
+            ? `${preguntas} preguntas, unos ${minutos} minutos y sin crear cuenta: descubre dónde estás y por dónde empezar.`
+            : `${preguntas} afirmaciones, 5 minutos y sin crear cuenta: descubre en qué dimensión de tu liderazgo está tu principal brecha.`}
         </p>
       </div>
       <Link href={`/radar/${encodeURIComponent(empresa)}`} className="boton boton-secundario">
-        Hacer mi Radar <IconoFlechaDer width={16} height={16} />
+        {delCoach ? "Hacer el diagnóstico" : "Hacer mi Radar"} <IconoFlechaDer width={16} height={16} />
       </Link>
     </aside>
   );

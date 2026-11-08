@@ -1,3 +1,4 @@
+import type { DiagnosticoCreado } from "./diagnosticos";
 import { Redis } from "@upstash/redis";
 import { promises as fs } from "fs";
 import path from "path";
@@ -67,6 +68,8 @@ export interface Almacen {
    * vuelvan a subir.
    */
   reinicios?: Record<string, string>;
+  /** Diagnósticos que crean los coaches (lib/diagnosticos.ts). */
+  diagnosticosCoach?: DiagnosticoCreado[];
   /** Quienes respondieron el diagnóstico en la página pública de una empresa y dejaron sus datos. */
   prospectos?: ProspectoDiagnostico[];
   /** Avance de los alumnos en los planes por días, uno por alumno y lección. */

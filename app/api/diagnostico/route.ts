@@ -1,6 +1,6 @@
 import { consultar, modificar, nuevoId } from "@/lib/almacen";
 import { cursoDeLeccion } from "@/lib/curso";
-import { calcular, diagnostico as buscarDiagnostico, llevaDiagnostico, respuestasValidas } from "@/lib/diagnosticos";
+import { calcular, diagnosticoEn, llevaDiagnostico, respuestasValidas } from "@/lib/diagnosticos";
 import { ErrorDeDatos, error, leerJson, manejar, texto } from "@/lib/http";
 import { cuentaDeReq, empresaDeDatos } from "@/lib/permisos";
 import type { Cuenta, DatosCurso, ResultadoDiagnostico } from "@/lib/tipos";
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 async function leccionConDiagnostico(leccionValor: unknown, diagnosticoValor: unknown) {
   const leccion = texto(leccionValor, "leccion", 20);
   const id = texto(diagnosticoValor, "diagnostico", 60);
-  const d = buscarDiagnostico(id);
+  const d = await consultar((a) => diagnosticoEn(a, id));
   const datos = await cursoDeLeccion(leccion, { borradores: true });
   const contenido = datos?.curso.modulos.flatMap((m) => m.lecciones).find((l) => l.id === leccion)?.contenido ?? "";
   if (!d || !datos || !llevaDiagnostico(contenido, id)) throw new ErrorDeDatos("Esta lección no tiene ese diagnóstico.");

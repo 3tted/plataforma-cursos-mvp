@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { api, hace } from "@/lib/cliente";
-import { diagnostico as buscarDiagnostico } from "@/lib/diagnosticos";
+import { maximoDe } from "@/lib/diagnosticos";
+import { useDiagnostico } from "./useDiagnostico";
 import type { ProspectoDiagnostico } from "@/lib/tipos";
 import { useApp } from "./Contexto";
 import { IconoDescargar, IconoWhatsapp } from "./Iconos";
@@ -26,11 +27,11 @@ export default function RadarProspectos() {
       .catch(() => setDatos(null));
   }, [empresa]);
 
-  const d = datos ? buscarDiagnostico(datos.diagnostico) : undefined;
+  const d = useDiagnostico(datos?.diagnostico);
   if (!empresa || !datos?.prospectos || !d) return null;
   const prospectos = datos.prospectos;
   const direccion = `${window.location.origin}/radar/${empresa}`;
-  const maximo = d.dimensiones.reduce((s, x) => s + x.afirmaciones.length, 0) * Math.max(...d.escala.map((e) => e.valor));
+  const maximo = maximoDe(d);
   const nombre = (id: string) => d.dimensiones.find((x) => x.id === id)?.nombre ?? id;
 
   const copiar = async () => {

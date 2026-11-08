@@ -5,8 +5,11 @@ import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { api, fechaCorta } from "@/lib/cliente";
 import {
   calcular,
-  diagnostico as buscarDiagnostico,
+  maximoDe,
   mensajeDeResultado,
+  preguntasDe,
+  problemasDe,
+  totalPreguntas,
   type Diagnostico,
   type Resultado,
 } from "@/lib/diagnosticos";
@@ -14,6 +17,7 @@ import type { AgendaComunidad, ResultadoDiagnostico } from "@/lib/tipos";
 import AgendarSesion from "./AgendarSesion";
 import { useApp } from "./Contexto";
 import { IconoDescargar } from "./Iconos";
+import { useDiagnostico } from "./useDiagnostico";
 
 // Diagnóstico de autoevaluación dentro de una lección (por ejemplo, el Radar
 // de Liderazgo High Impact de INCREASE): afirmaciones del 1 al 5 agrupadas por
@@ -36,7 +40,7 @@ interface Guardado {
 }
 
 const vacio = (d: Diagnostico): Guardado => ({
-  respuestas: Object.fromEntries(d.dimensiones.map((x) => [x.id, x.afirmaciones.map(() => null)])),
+  respuestas: Object.fromEntries(d.dimensiones.map((x) => [x.id, preguntasDe(x).map(() => null)])),
   revelado: false,
 });
 
@@ -61,9 +65,11 @@ function leer(clave: string, d: Diagnostico): Guardado {
     // Solo lo que corresponde a las afirmaciones de hoy, por si el diagnóstico cambió.
     const base = vacio(d);
     for (const x of d.dimensiones) {
-      base.respuestas[x.id] = x.afirmaciones.map((_, i) => {
+      base.respuestas[x.id] = preguntasDe(x).map((p, i) => {
         const v = g.respuestas[x.id]?.[i];
-        return typeof v === "number" ? v : null;
+        // Si la pregunta cambió de opciones, una respuesta que ya no existe se vuelve a pedir.
+        if (typeof v !== "number") return null;
+        return p.opciones ? (v >= 0 && v < p.opciones.length ? v : null) : v >= 1 && v <= 5 ? v : null;
       });
     }
     return {
@@ -76,24 +82,78 @@ function leer(clave: string, d: Diagnostico): Guardado {
   }
 }
 
-export default function DiagnosticoRadar({ id, leccion }: { id: string; leccion: string }) {
-  const d = buscarDiagnostico(id);
+export default function DiagnosticoRadar({
+  id,
+  leccion,
+  tituloLeccion,
+  alCambiarRevelado,
+}: {
+  id: string;
+  leccion: string;
+  /** Si la lección se llama igual que el diagnóstico, no se repite el título. */
+  tituloLeccion?: string;
+  /** La lección lo usa para no dejar avanzar al alumno sin revelar su resultado. */
+  alCambiarRevelado?: (revelado: boolean) => void;
+}) {
+  const d = useDiagnostico(id);
+  const { coachAqui } = useApp();
+  if (d === undefined) return <p className="texto-suave">Cargando el diagnóstico…</p>;
   if (!d) return null;
-  return <Radar d={d} leccion={leccion} />;
+  // Uno creado por el coach que todavía está incompleto: el alumno no lo ve a medias.
+  if (problemasDe(d).length > 0 && d.bandasEn === "porcentaje") {
+    return (
+      <div className="aviso diagnostico-incompleto">
+        <p>
+          {coachAqui
+            ? "Este diagnóstico todavía está incompleto: tus alumnos lo verán cuando lo termines."
+            : "Tu coach está terminando este diagnóstico. Vuelve en un momento."}
+        </p>
+        {coachAqui && (
+          <Link href={`/coach/diagnostico/${encodeURIComponent(id)}`} className="boton boton-chico">
+            Terminar el diagnóstico
+          </Link>
+        )}
+      </div>
+    );
+  }
+  return <Radar d={d} leccion={leccion} alCambiarRevelado={alCambiarRevelado} sinTitulo={tituloLeccion === d.titulo} />;
 }
 
 /** El diagnóstico en la página pública de la empresa, sin cuenta. */
 export function DiagnosticoPublico({ id, publico }: { id: string; publico: RadarPublico }) {
-  const d = buscarDiagnostico(id);
+  const d = useDiagnostico(id);
   if (!d) return null;
   return <Radar d={d} publico={publico} />;
 }
 
-function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publico?: RadarPublico }) {
+/** Vista previa para el coach mientras lo arma: se responde como alumno, sin guardar nada en el servidor. */
+export function DiagnosticoVistaPrevia({ d }: { d: Diagnostico }) {
+  return <Radar d={d} vistaPrevia />;
+}
+
+function Radar({
+  d,
+  leccion,
+  publico,
+  vistaPrevia = false,
+  sinTitulo = false,
+  alCambiarRevelado,
+}: {
+  sinTitulo?: boolean;
+  d: Diagnostico;
+  leccion?: string;
+  publico?: RadarPublico;
+  vistaPrevia?: boolean;
+  alCambiarRevelado?: (revelado: boolean) => void;
+}) {
   const { usuario: conCuenta, pedirEntrada } = useApp();
-  // En la página pública todo es como visitante, aunque haya sesión abierta.
-  const usuario = publico ? null : conCuenta;
-  const clave = usuario ? `diagnostico:${d.id}:${usuario.correo}` : claveVisitante(d);
+  // En la página pública (y en la vista previa) todo es como visitante, aunque haya sesión abierta.
+  const usuario = publico || vistaPrevia ? null : conCuenta;
+  const clave = vistaPrevia
+    ? `diagnostico:${d.id}:vista-previa`
+    : usuario
+      ? `diagnostico:${d.id}:${usuario.correo}`
+      : claveVisitante(d);
   const [estado, setEstado] = useState<Guardado>(() => vacio(d));
   const [listo, setListo] = useState(false);
   const [aviso, setAviso] = useState("");
@@ -171,7 +231,17 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
     }
   }, [clave, estado, listo]);
 
-  const total = d.dimensiones.reduce((s, x) => s + x.afirmaciones.length, 0);
+  const total = totalPreguntas(d);
+  // Los del coach dicen «Ver mi resultado»; el Radar de INCREASE conserva su nombre.
+  const verResultado = d.bandasEn === "porcentaje" ? "Ver mi resultado" : "Revelar mi Radar";
+  const usaEscala = d.dimensiones.some((x) => preguntasDe(x).some((p) => !p.opciones));
+  const variasAreas = d.dimensiones.length > 1;
+  const revelado = estado.revelado && completo(estado);
+  const avisarRef = useRef(alCambiarRevelado);
+  avisarRef.current = alCambiarRevelado;
+  useEffect(() => {
+    if (listo) avisarRef.current?.(revelado);
+  }, [revelado, listo]);
   const respondidas = Object.values(estado.respuestas).flat().filter((v) => v !== null).length;
   const resultado = useMemo(() => calcular(d, estado.respuestas), [d, estado.respuestas]);
 
@@ -186,7 +256,8 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
 
   const revelar = () => {
     if (respondidas < total) {
-      setAviso(`Te faltan ${total - respondidas} afirmaciones por responder.`);
+      const faltan = total - respondidas;
+      setAviso(`Te ${faltan === 1 ? "falta 1 pregunta" : `faltan ${faltan} preguntas`} por responder.`);
       document.querySelector(".diagnostico-afirmacion[data-pendiente='true']")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -207,8 +278,11 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
   return (
     <section className="diagnostico" aria-labelledby={`diagnostico-${d.id}`}>
       <header className="diagnostico-encabezado">
-        <h2 id={`diagnostico-${d.id}`}>{d.titulo}</h2>
+        <h2 id={`diagnostico-${d.id}`} className={sinTitulo ? "sr-only" : undefined}>
+          {d.titulo}
+        </h2>
         <p>{d.instrucciones}</p>
+        {usaEscala && (
         <ol className="diagnostico-escala" aria-label="Escala">
           {d.escala.map((e) => (
             <li key={e.valor}>
@@ -220,6 +294,7 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
             </li>
           ))}
         </ol>
+        )}
         <p className="diagnostico-avance" aria-live="polite">
           <span className="cifra">
             {respondidas}/{total}
@@ -237,18 +312,35 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
         const parcial = resultado.dimensiones[k];
         return (
           <div key={dimension.id} className="diagnostico-dimension">
-            <h3>
-              <span className="cifra">{String(k + 1).padStart(2, "0")}</span> {dimension.nombre}
-            </h3>
-            <p className="diagnostico-pregunta">{dimension.pregunta}</p>
-            {dimension.afirmaciones.map((afirmacion, i) => {
+            {variasAreas && (
+              <h3>
+                <span className="cifra">{String(k + 1).padStart(2, "0")}</span> {dimension.nombre}
+              </h3>
+            )}
+            {dimension.pregunta && <p className="diagnostico-pregunta">{dimension.pregunta}</p>}
+            {preguntasDe(dimension).map((pregunta, i) => {
               numero += 1;
               return (
                 <fieldset key={i} className="diagnostico-afirmacion" data-pendiente={valores[i] === null}>
                   <legend>
                     <span className="pregunta-numero cifra">{numero}</span>
-                    <span>{afirmacion}</span>
+                    <span>{pregunta.texto}</span>
                   </legend>
+                  {pregunta.opciones ? (
+                    <div className="diagnostico-opciones-lista">
+                      {pregunta.opciones.map((o, j) => (
+                        <label key={j} data-elegida={valores[i] === j}>
+                          <input
+                            type="radio"
+                            name={`${d.id}-${dimension.id}-${i}`}
+                            checked={valores[i] === j}
+                            onChange={() => responder(dimension.id, i, j)}
+                          />
+                          <span>{o.texto}</span>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
                   <div className="diagnostico-opciones">
                     {d.escala.map((e) => (
                       <label key={e.valor} data-elegida={valores[i] === e.valor} title={e.texto}>
@@ -263,23 +355,26 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
                       </label>
                     ))}
                   </div>
+                  )}
                 </fieldset>
               );
             })}
-            <p className="diagnostico-subtotal">
-              Puntuación:{" "}
-              <span className="cifra">
-                {parcial.puntos}/{parcial.maximo}
-              </span>{" "}
-              · {completa ? parcial.banda.texto : "Pendiente"}
-            </p>
+            {variasAreas && (
+              <p className="diagnostico-subtotal">
+                Puntuación:{" "}
+                <span className="cifra">
+                  {parcial.puntos}/{parcial.maximo}
+                </span>{" "}
+                · {completa ? parcial.banda.texto : "Pendiente"}
+              </p>
+            )}
           </div>
         );
       })}
 
       <div className="diagnostico-acciones">
         <button type="button" className="boton" onClick={revelar}>
-          Revelar mi Radar
+          {verResultado}
         </button>
         <button type="button" className="boton boton-fantasma" onClick={reiniciar}>
           Reiniciar evaluación
@@ -295,7 +390,7 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
         <>
           <ResultadoRadar d={d} r={resultado} />
           {publico && <ContactoRadar d={d} r={resultado} respuestas={estado.respuestas} publico={publico} />}
-          {!equipo && !publico && (
+          {!equipo && !publico && !vistaPrevia && (
             <p className="diagnostico-guardado" role="status">
               {!usuario ? (
                 <>
@@ -307,7 +402,7 @@ function Radar({ d, leccion, publico }: { d: Diagnostico; leccion?: string; publ
               ) : guardado === "si" ? (
                 "Tu resultado quedó guardado: tu coach lo puede ver para acompañarte."
               ) : guardado === "error" ? (
-                "No pudimos guardar tu resultado. Revisa tu conexión y vuelve a tocar «Revelar mi Radar»."
+                `No pudimos guardar tu resultado. Revisa tu conexión y vuelve a tocar «${verResultado}».`
               ) : null}
             </p>
           )}
@@ -511,7 +606,7 @@ function ContactoRadar({
 // dimensión más baja, para darle seguimiento. Se puede descargar en CSV.
 function ResultadosEquipo({ d, resultados }: { d: Diagnostico; resultados: ResultadoGuardado[] }) {
   const nombre = (id: string) => d.dimensiones.find((x) => x.id === id)?.nombre ?? id;
-  const maximo = d.dimensiones.reduce((s, x) => s + x.afirmaciones.length, 0) * Math.max(...d.escala.map((e) => e.valor));
+  const maximo = maximoDe(d);
 
   const descargar = () => {
     const celda = (v: string | number) => `"${String(v).replaceAll('"', '""')}"`;
@@ -594,25 +689,30 @@ function ResultadosEquipo({ d, resultados }: { d: Diagnostico; resultados: Resul
 }
 
 function ResultadoRadar({ d, r }: { d: Diagnostico; r: Resultado }) {
+  const variasAreas = r.dimensiones.length > 1;
+  // Si ninguna área quedó baja (todas iguales y altas), no hace falta «por dónde empezar» con empate total.
+  const conEmpezar = variasAreas && r.masBajas.length < r.dimensiones.length;
   return (
     <div id="diagnostico-resultado" className="diagnostico-resultado tarjeta">
-      <h3>Tu Radar High Impact</h3>
-      <div className="diagnostico-resultado-cuerpo">
-        <Grafica r={r} />
+      <h3>{d.bandasEn === "porcentaje" ? "Tu resultado" : "Tu Radar High Impact"}</h3>
+      <div className="diagnostico-resultado-cuerpo" data-sin-grafica={r.dimensiones.length < 3}>
+        {r.dimensiones.length >= 3 && <Grafica r={r} />}
         <div>
-          <ul className="diagnostico-puntos">
-            {r.dimensiones.map(({ dimension, puntos, maximo, banda }) => (
-              <li key={dimension.id} data-baja={r.masBajas.includes(dimension)}>
-                <span>{dimension.nombre}</span>
-                <span className="cifra">
-                  {puntos}/{maximo}
-                </span>
-                <span className="diagnostico-banda">{banda.texto}</span>
-              </li>
-            ))}
-          </ul>
+          {variasAreas && (
+            <ul className="diagnostico-puntos">
+              {r.dimensiones.map(({ dimension, puntos, maximo, banda }) => (
+                <li key={dimension.id} data-baja={conEmpezar && r.masBajas.includes(dimension)}>
+                  <span>{dimension.nombre}</span>
+                  <span className="cifra">
+                    {puntos}/{maximo}
+                  </span>
+                  <span className="diagnostico-banda">{banda.texto}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <p className="diagnostico-total">
-            Total:{" "}
+            {variasAreas ? "Total: " : "Tu puntaje: "}
             <span className="cifra">
               {r.total}/{r.maximo}
             </span>
@@ -620,15 +720,17 @@ function ResultadoRadar({ d, r }: { d: Diagnostico; r: Resultado }) {
           <p>{r.global.texto}</p>
         </div>
       </div>
-      <div className="diagnostico-empezar">
-        <h4>
-          {r.masBajas.length === 1
-            ? `Por dónde empezar: ${r.masBajas[0].nombre}`
-            : `Por dónde empezar: ${r.masBajas.map((x) => x.nombre).join(" y ")} (empatadas)`}
-        </h4>
-        <p>{r.masBajas.map((x) => x.descripcion).join(" ")}</p>
-        <p className="texto-suave">{d.regla}</p>
-      </div>
+      {conEmpezar && (
+        <div className="diagnostico-empezar">
+          <h4>
+            {r.masBajas.length === 1
+              ? `Por dónde empezar: ${r.masBajas[0].nombre}`
+              : `Por dónde empezar: ${r.masBajas.map((x) => x.nombre).join(" y ")} (empatadas)`}
+          </h4>
+          {r.masBajas.some((x) => x.descripcion) && <p>{r.masBajas.map((x) => x.descripcion).join(" ")}</p>}
+          {d.regla && <p className="texto-suave">{d.regla}</p>}
+        </div>
+      )}
     </div>
   );
 }

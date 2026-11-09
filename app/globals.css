@@ -11501,3 +11501,9 @@ button.tarjeta-comunidad-enlace {
   padding: 0;
   border: 0;
 }
+
+/* La barra de arriba (y la de abajo en celular) y el pie siguen con la letra de
+   Merkatics en todas las páginas: la letra de la marca va solo en el contenido. */
+[data-titulos] :is(.barra, .visitantes-barra, .pie) {
+  --fuente-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}

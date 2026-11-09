@@ -25,7 +25,7 @@ interface LeccionEjemplo {
 }
 
 interface Ejemplo {
-  empresa: Pick<Empresa, "id" | "nombre" | "dueno" | "color" | "logo" | "giro" | "colorAcento" | "titulos">;
+  empresa: Pick<Empresa, "id" | "nombre" | "dueno" | "color" | "logo" | "giro" | "colorAcento">;
   /** La cuenta de su dueño. `antes`: el correo que tenía (para cambiarla en los almacenes que ya la tienen). */
   cuenta: { nombre: string; correo: string; contrasena: string; antes?: string; bio?: string };
   /** Los textos que tenían antes la empresa y la comunidad (para cambiarlos solo si el coach no los tocó). */
@@ -308,12 +308,11 @@ function textosDelSitio(a: Almacen, { e }: { e: Ejemplo }): void {
   if (cuenta && cuenta.empresa === e.empresa.id && !cuenta.bio && e.cuenta.bio) cuenta.bio = e.cuenta.bio;
 }
 
-/** El naranja de acento y los títulos condensados de su página, si su marca no se ha tocado. */
+/** El naranja de acento de su página, si su marca no se ha tocado. */
 function marcaDelSitio(a: Almacen, { e }: { e: Ejemplo }): void {
   const empresa = (a.empresas ?? []).find((x) => x.id === e.empresa.id);
-  if (!empresa || empresa.colorAcento || empresa.titulos) return;
+  if (!empresa || empresa.colorAcento) return;
   if (e.empresa.colorAcento) empresa.colorAcento = e.empresa.colorAcento;
-  if (e.empresa.titulos) empresa.titulos = e.empresa.titulos;
 }
 
 const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>

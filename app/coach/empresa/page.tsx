@@ -8,8 +8,8 @@ import EquipoEmpresa from "@/components/EquipoEmpresa";
 import NavCoach from "@/components/NavCoach";
 import { useTitulo } from "@/components/useTitulo";
 import { api } from "@/lib/cliente";
-import { COLOR_MERKATICS, normalizarColor, tonosDeMarca, variablesDeMarca } from "@/lib/marca";
-import type { Empresa } from "@/lib/tipos";
+import { COLOR_MERKATICS, normalizarColor, TITULOS_MARCA, tonosDeMarca, variablesDeMarca } from "@/lib/marca";
+import type { Empresa, TitulosMarca } from "@/lib/tipos";
 
 type EmpresaVista = Empresa & {
   color: string;
@@ -61,6 +61,10 @@ export default function PaginaMiEmpresa() {
   const [nombre, setNombre] = useState("");
   const [color, setColor] = useState(COLOR_MERKATICS);
   const [textoColor, setTextoColor] = useState(COLOR_MERKATICS);
+  // Segundo color (opcional) y letra de los títulos.
+  const [acento, setAcento] = useState<string | null>(null);
+  const [textoAcento, setTextoAcento] = useState("");
+  const [titulos, setTitulos] = useState<TitulosMarca>("clasica");
   const [guardando, setGuardando] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -77,6 +81,9 @@ export default function PaginaMiEmpresa() {
         setNombre(e.nombre);
         setColor(e.color);
         setTextoColor(e.color);
+        setAcento(e.colorAcento ?? null);
+        setTextoAcento(e.colorAcento ?? "");
+        setTitulos(e.titulos ?? "clasica");
       })
       .catch((e) => setError((e as Error).message));
     api<{ comunidades: { id: string }[] }>("/api/coach/comunidades")
@@ -95,12 +102,23 @@ export default function PaginaMiEmpresa() {
   const tonos = tonosDeMarca(color);
   const puedeEditar = empresa?.puedeEditar === true;
   const sinGuardar =
-    puedeEditar && !!empresa && (!empresa.conMarca || nombre.trim() !== empresa.nombre || color !== empresa.color);
+    puedeEditar &&
+    !!empresa &&
+    (!empresa.conMarca ||
+      nombre.trim() !== empresa.nombre ||
+      color !== empresa.color ||
+      (acento ?? null) !== (empresa.colorAcento ?? null) ||
+      titulos !== (empresa.titulos ?? "clasica"));
 
   const elegirColor = (valor: string) => {
     setTextoColor(valor);
     const normal = normalizarColor(valor);
     if (normal) setColor(normal);
+  };
+  const elegirAcento = (valor: string) => {
+    setTextoAcento(valor);
+    const normal = normalizarColor(valor);
+    if (normal) setAcento(normal);
   };
 
   const guardar = async (e: FormEvent) => {
@@ -109,7 +127,7 @@ export default function PaginaMiEmpresa() {
     setError(null);
     setAviso(null);
     try {
-      const guardada = await api<EmpresaVista>("/api/coach/empresa", { method: "PUT", json: { nombre, color } });
+      const guardada = await api<EmpresaVista>("/api/coach/empresa", { method: "PUT", json: { nombre, color, acento, titulos } });
       setEmpresa(guardada);
       setAviso("Cambios guardados. Tus comunidades ya se ven con tu marca.");
       await recargarCurso();
@@ -223,6 +241,53 @@ export default function PaginaMiEmpresa() {
                   </div>
                 </fieldset>
 
+                <fieldset className="mi-empresa-acento">
+                  <legend>Color de acento (opcional)</legend>
+                  <label className="casilla">
+                    <input
+                      type="checkbox"
+                      checked={acento !== null}
+                      onChange={(e) => {
+                        const nuevo = e.target.checked ? normalizarColor(textoAcento) ?? "#f17c12" : null;
+                        setAcento(nuevo);
+                        if (nuevo) setTextoAcento(nuevo);
+                      }}
+                    />
+                    Usar un segundo color en íconos, barras de avance, gráficas y etiquetas
+                  </label>
+                  {acento !== null && (
+                    <div className="mi-empresa-propio">
+                      <label className="mi-empresa-selector">
+                        <input type="color" value={acento} onChange={(e) => elegirAcento(e.target.value)} aria-label="Elegir el color de acento" />
+                        <span>Color de acento</span>
+                      </label>
+                      <label className="campo mi-empresa-hex">
+                        <span className="sr-only">Código del color de acento</span>
+                        <input
+                          value={textoAcento}
+                          onChange={(e) => elegirAcento(e.target.value)}
+                          maxLength={7}
+                          spellCheck={false}
+                          aria-invalid={!normalizarColor(textoAcento)}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </fieldset>
+
+                <fieldset className="mi-empresa-letras">
+                  <legend>Letra de los títulos</legend>
+                  {TITULOS_MARCA.map((t) => (
+                    <label key={t.id} className="metodo" data-activo={titulos === t.id}>
+                      <input type="radio" name="titulos" checked={titulos === t.id} onChange={() => setTitulos(t.id)} />
+                      <span className="mi-empresa-letra-muestra" data-letra={t.id}>
+                        {t.nombre}
+                      </span>
+                      <span className="texto-suave">{t.detalle}</span>
+                    </label>
+                  ))}
+                </fieldset>
+
                 <div className={tonos.ajustado ? "mi-empresa-contraste mi-empresa-contraste-ajustado" : "mi-empresa-contraste"} role="status">
                   {tonos.ajustado ? (
                     <p>
@@ -239,7 +304,8 @@ export default function PaginaMiEmpresa() {
                       <span style={{ background: tonos.botones }} /> Botones y enlaces <code>{tonos.botones}</code>
                     </li>
                     <li>
-                      <span style={{ background: tonos.acento }} /> Íconos y avance <code>{tonos.acento}</code>
+                      <span style={{ background: acento ? tonosDeMarca(acento).acento : tonos.acento }} /> Íconos y avance{" "}
+                      <code>{acento ? tonosDeMarca(acento).acento : tonos.acento}</code>
                     </li>
                     <li>
                       <span style={{ background: tonos.texto }} /> Texto destacado <code>{tonos.texto}</code>
@@ -313,7 +379,12 @@ export default function PaginaMiEmpresa() {
           </div>
 
           {/* Vista previa con los colores elegidos, antes de guardar. */}
-          <section className="mi-empresa-previa" aria-labelledby="previa-titulo" style={variablesDeMarca(color) as CSSProperties}>
+          <section
+            className="mi-empresa-previa"
+            aria-labelledby="previa-titulo"
+            style={variablesDeMarca(color, acento) as CSSProperties}
+            data-titulos={titulos === "clasica" ? undefined : titulos}
+          >
             <h2 id="previa-titulo">Así lo verán tus alumnos</h2>
             <div className="previa-marco" aria-hidden="true">
               <div className="previa-barra">

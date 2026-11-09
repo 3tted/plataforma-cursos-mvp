@@ -87,7 +87,17 @@ export function marcaDe(a: Almacen, empresa: string | undefined): { marca?: Marc
   const e = (a.empresas ?? []).find((x) => x.id === empresa);
   // Sin logo propio, la barra lleva el nombre de la empresa; Merkatics sigue con su logo de siempre.
   const logo = e?.logo ?? (e?.id === EMPRESA_MERKATICS ? "/merkatics-logo.png" : undefined);
-  return e?.color ? { marca: { nombre: e.nombre, color: e.color, ...(logo ? { logo } : {}) } } : {};
+  return e?.color
+    ? {
+        marca: {
+          nombre: e.nombre,
+          color: e.color,
+          ...(logo ? { logo } : {}),
+          ...(e.colorAcento ? { acento: e.colorAcento } : {}),
+          ...(e.titulos && e.titulos !== "clasica" ? { titulos: e.titulos } : {}),
+        },
+      }
+    : {};
 }
 
 function empresaNombreDe(a: Almacen, empresa: string | undefined): { empresaNombre?: string } {

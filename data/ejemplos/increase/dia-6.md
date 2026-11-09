@@ -2,10 +2,10 @@
 
 ## Tu tarea de hoy
 
-Describe un escenario favorable y uno adverso para tu negocio durante los próximos 90 días. Define una acción preventiva para cada uno.
+1. Entrega una responsabilidad que todavía retienes.
+2. Define el resultado esperado, los límites y el seguimiento.
+3. Acuerda la fecha de revisión.
 
-## Evidencia de avance
+## Tus notas
 
-Dos escenarios y dos acciones de preparación.
-
-Cuando lo tengas, escribe abajo tu evidencia en una o dos líneas. Mañana se abre el día 7.
+Al terminar, escribe abajo qué responsabilidad entregaste, a quién, con qué resultado esperado y en qué fecha la revisan. Mañana se abre el día 7.

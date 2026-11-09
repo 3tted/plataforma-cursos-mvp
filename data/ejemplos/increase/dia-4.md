@@ -2,10 +2,10 @@
 
 ## Tu tarea de hoy
 
-Aborda una conversación pendiente con claridad sobre hechos, impacto, expectativas y acuerdos. Escucha también la perspectiva de la otra persona.
+1. Aborda una conversación postergada o necesaria.
+2. Comunica expectativas de forma directa y respetuosa.
+3. Pide y ofrece retroalimentación concreta.
 
-## Evidencia de avance
+## Tus notas
 
-Una conversación realizada y un acuerdo concreto.
-
-Cuando lo tengas, escribe abajo tu evidencia en una o dos líneas. Mañana se abre el día 5.
+Al terminar, escribe abajo con quién conversaste, qué expectativas acordaron y qué retroalimentación diste y recibiste. Mañana se abre el día 5.

@@ -6,21 +6,24 @@
     "dueno": "Gabo Orpinel",
     "color": "#1f2d54",
     "logo": "/empresas/increase-logo.png",
-    "giro": "Coaching de liderazgo para emprendedores y empresarios"
+    "giro": "Entrenamiento de liderazgo para dueños de negocio y directivos",
+    "colorAcento": "#f17c12",
+    "titulos": "condensada"
   },
   "cuenta": {
     "nombre": "Gabo Orpinel",
     "correo": "increase@example.com",
     "contrasena": "123",
-    "antes": "gabo.orpinel@example.com"
+    "antes": "gabo.orpinel@example.com",
+    "bio": "Trainer de Éxito y fundador de INCREASE. Entreno a dueños y directivos para dirigir con estrategia. «Coaching your potential.»"
   },
   "comunidad": {
     "id": "liderazgo-high-impact",
     "nombre": "Liderazgo High Impact",
     "coach": "Gabo Orpinel",
-    "coach_titulo": "Coach de liderazgo · INCREASE",
-    "descripcion": "Diagnóstico y entrenamiento de liderazgo para emprendedores y empresarios que quieren llevar sus resultados al siguiente nivel.",
-    "acerca": "Para emprendedores y empresarios que han descubierto que trabajar más no siempre significa avanzar más. Empieza con el Radar de Liderazgo High Impact™: identifica tu principal brecha de liderazgo y sal con una ruta práctica de evolución para los próximos siete días. En INCREASE trabajamos claridad estratégica, autoliderazgo, comunicación de impacto y capacidad de expansión.",
+    "coach_titulo": "Trainer de Éxito · Fundador de INCREASE",
+    "descripcion": "Si todo depende de ti, tu negocio no puede crecer más que tú. Entrenamiento de liderazgo para dueños y directivos que quieren pasar de apagar fuegos a dirigir con estrategia.",
+    "acerca": "INCREASE entrena a dueños de negocio, directores y líderes de equipo que sienten que todo depende de ellos y quieren dirigir con más estrategia.\n\nAquí empiezas con el Radar de Liderazgo High Impact™: identificas tu principal brecha, la conviertes en conciencia con el Espejo Ejecutivo™ y la trabajas en un reto de siete días con acciones concretas. Al final, validas tu ruta en una Sesión de Claridad Estratégica.\n\nTe acompaña Gabo Orpinel, Trainer de Éxito y fundador de INCREASE, con sede en Ciudad Juárez. Su enfoque parte de una idea simple: el crecimiento de un negocio está limitado por el liderazgo de quien lo dirige. Más de 300 líderes han hecho su diagnóstico, y equipos de empresas como Eco Living, Ben-In, PBC Insurance y Creo Dental ya han entrenado su liderazgo con él.\n\n«Coaching your potential.»",
     "tema": "Liderazgo",
     "precio_mensual": 490,
     "moneda": "MXN"
@@ -64,9 +67,9 @@
             "titulo": "El Espejo Ejecutivo™",
             "archivo": "ejemplos/increase/04-espejo.md",
             "duracion_min": 8,
-            "resumen": "Cinco preguntas por escrito para convertir tu resultado en conciencia sobre tu forma actual de liderar.",
+            "resumen": "Cuatro preguntas por escrito para convertir tu resultado del Radar en conciencia y en un primer compromiso.",
             "practica": {
-              "instrucciones": "Responde por escrito las cinco preguntas del Espejo Ejecutivo, con ejemplos concretos de tu negocio. Solo tú y el equipo de INCREASE ven tu práctica.",
+              "instrucciones": "Responde por escrito las cuatro preguntas del Espejo Ejecutivo, con ejemplos concretos de tu negocio. Solo tú y el equipo de INCREASE ven tu práctica.",
               "archivo": false,
               "obligatoria": false
             },
@@ -78,87 +81,94 @@
         "titulo": "El reto de 7 días",
         "lecciones": [
           {
-            "titulo": "Día 1: Haz visible la brecha",
+            "titulo": "Día 1: Obsérvate",
             "archivo": "ejemplos/increase/dia-1.md",
             "duracion_min": 20,
-            "resumen": "Escribe el principal problema de resultados que enfrentas y conecta ese problema con un comportamiento de liderazgo que necesitas revisar.",
+            "resumen": "Identifica tres situaciones donde reaccionaste en automático. Nombra el patrón que se repite en ellas. Escribe qué harías distinto la próxima vez.",
             "practica": {
-              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: una brecha prioritaria definida.",
+              "instrucciones": "Tus notas de hoy: las tres situaciones, el patrón que se repite y qué harías distinto la próxima vez.",
               "archivo": false,
               "obligatoria": true
-            }
+            },
+            "antes": "Día 1: Haz visible la brecha"
           },
           {
-            "titulo": "Día 2: Recupera la dirección",
+            "titulo": "Día 2: Recupera la claridad",
             "archivo": "ejemplos/increase/dia-2.md",
             "duracion_min": 20,
-            "resumen": "Define tres resultados importantes para los próximos 30 días.",
+            "resumen": "Define las tres prioridades de tu equipo. Comunica qué se espera de cada persona. Alinea tu agenda con esas prioridades.",
             "abreAlDiaSiguiente": true,
             "practica": {
-              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: tres prioridades y una actividad eliminada o delegada.",
+              "instrucciones": "Tus notas de hoy: las tres prioridades de tu equipo, qué le comunicaste a cada persona y qué cambiaste en tu agenda.",
               "archivo": false,
               "obligatoria": true
-            }
+            },
+            "antes": "Día 2: Recupera la dirección"
           },
           {
-            "titulo": "Día 3: Interrumpe el patrón",
+            "titulo": "Día 3: Rompe el ciclo reactivo",
             "archivo": "ejemplos/increase/dia-3.md",
             "duracion_min": 20,
-            "resumen": "Identifica una situación que activa miedo, duda, impulsividad o necesidad de control.",
+            "resumen": "Haz una pausa antes de responder en una situación difícil. Identifica la emoción que aparece. Responde con intención, no por impulso.",
             "abreAlDiaSiguiente": true,
             "practica": {
-              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: un patrón reconocido y una respuesta diferente.",
+              "instrucciones": "Tus notas de hoy: la situación difícil, la emoción que apareció y cómo respondiste.",
               "archivo": false,
               "obligatoria": true
-            }
+            },
+            "antes": "Día 3: Interrumpe el patrón"
           },
           {
-            "titulo": "Día 4: Eleva la conversación",
+            "titulo": "Día 4: Eleva la calidad de tus conversaciones",
             "archivo": "ejemplos/increase/dia-4.md",
             "duracion_min": 20,
-            "resumen": "Aborda una conversación pendiente con claridad sobre hechos, impacto, expectativas y acuerdos.",
+            "resumen": "Aborda una conversación postergada o necesaria. Comunica expectativas de forma directa y respetuosa. Pide y ofrece retroalimentación concreta.",
             "abreAlDiaSiguiente": true,
             "practica": {
-              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: una conversación realizada y un acuerdo concreto.",
+              "instrucciones": "Tus notas de hoy: con quién conversaste, qué expectativas acordaron y qué retroalimentación diste y recibiste.",
               "archivo": false,
               "obligatoria": true
-            }
+            },
+            "antes": "Día 4: Eleva la conversación"
           },
           {
-            "titulo": "Día 5: Deja de ser el cuello de botella",
+            "titulo": "Día 5: Desarrolla a alguien",
             "archivo": "ejemplos/increase/dia-5.md",
             "duracion_min": 20,
-            "resumen": "Selecciona una decisión o responsabilidad que puedas transferir.",
+            "resumen": "Conversa sobre desarrollo con una persona de tu equipo. Pregunta antes de solucionar por ella. Define una habilidad a desarrollar este mes.",
             "abreAlDiaSiguiente": true,
             "practica": {
-              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: una responsabilidad transferida o un plan explícito de transferencia.",
+              "instrucciones": "Tus notas de hoy: con quién conversaste, qué le preguntaste y qué habilidad va a desarrollar este mes.",
               "archivo": false,
               "obligatoria": true
-            }
+            },
+            "antes": "Día 5: Deja de ser el cuello de botella"
           },
           {
-            "titulo": "Día 6: Diseña un escenario futuro",
+            "titulo": "Día 6: Delega y genera accountability",
             "archivo": "ejemplos/increase/dia-6.md",
             "duracion_min": 20,
-            "resumen": "Describe un escenario favorable y uno adverso para tu negocio durante los próximos 90 días.",
+            "resumen": "Entrega una responsabilidad que todavía retienes. Define el resultado esperado, los límites y el seguimiento. Acuerda la fecha de revisión.",
             "abreAlDiaSiguiente": true,
             "practica": {
-              "instrucciones": "Escribe en una o dos líneas tu evidencia de hoy: dos escenarios y dos acciones de preparación.",
+              "instrucciones": "Tus notas de hoy: qué responsabilidad entregaste, a quién, con qué resultado esperado y en qué fecha la revisan.",
               "archivo": false,
               "obligatoria": true
-            }
+            },
+            "antes": "Día 6: Diseña un escenario futuro"
           },
           {
-            "titulo": "Día 7: Instala tu siguiente nivel",
+            "titulo": "Día 7: Define tu compromiso High Impact",
             "archivo": "ejemplos/increase/dia-7.md",
             "duracion_min": 20,
-            "resumen": "Revisa lo ejecutado, identifica qué cambió y establece tres compromisos medibles para las próximas cuatro semanas.",
+            "resumen": "Revisa tu avance de la semana. Elige tres comportamientos a mantener. Comprométete con ellos durante 30 días.",
             "abreAlDiaSiguiente": true,
             "practica": {
-              "instrucciones": "Escribe tus tres compromisos medibles para las próximas cuatro semanas, o sube tu plan de 30 días.",
+              "instrucciones": "Tus notas de hoy: tus tres comportamientos a mantener y tu compromiso para los próximos 30 días. También puedes subir tu plan de 30 días.",
               "archivo": true,
               "obligatoria": true
-            }
+            },
+            "antes": "Día 7: Instala tu siguiente nivel"
           }
         ]
       },
@@ -244,5 +254,11 @@
       }
     ],
     "sinExamen": true
+  },
+  "textosAntes": {
+    "giro": "Coaching de liderazgo para emprendedores y empresarios",
+    "coach_titulo": "Coach de liderazgo · INCREASE",
+    "descripcion": "Diagnóstico y entrenamiento de liderazgo para emprendedores y empresarios que quieren llevar sus resultados al siguiente nivel.",
+    "acerca": "Para emprendedores y empresarios que han descubierto que trabajar más no siempre significa avanzar más. Empieza con el Radar de Liderazgo High Impact™: identifica tu principal brecha de liderazgo y sal con una ruta práctica de evolución para los próximos siete días. En INCREASE trabajamos claridad estratégica, autoliderazgo, comunicación de impacto y capacidad de expansión."
   }
 }

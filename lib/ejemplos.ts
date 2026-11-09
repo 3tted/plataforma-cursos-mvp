@@ -25,9 +25,11 @@ interface LeccionEjemplo {
 }
 
 interface Ejemplo {
-  empresa: Pick<Empresa, "id" | "nombre" | "dueno" | "color" | "logo" | "giro">;
+  empresa: Pick<Empresa, "id" | "nombre" | "dueno" | "color" | "logo" | "giro" | "colorAcento" | "titulos">;
   /** La cuenta de su dueño. `antes`: el correo que tenía (para cambiarla en los almacenes que ya la tienen). */
-  cuenta: { nombre: string; correo: string; contrasena: string; antes?: string };
+  cuenta: { nombre: string; correo: string; contrasena: string; antes?: string; bio?: string };
+  /** Los textos que tenían antes la empresa y la comunidad (para cambiarlos solo si el coach no los tocó). */
+  textosAntes?: { giro: string; coach_titulo: string; descripcion: string; acerca: string };
   comunidad: Omit<ComunidadCreada, "autor" | "empresa" | "creadaEn">;
   curso: Pick<CursoCreado, "titulo" | "subtitulo" | "aprenderas" | "requisitos" | "preguntas_sugeridas" | "sinExamen"> & {
     modulos: { titulo: string; lecciones: LeccionEjemplo[] }[];
@@ -71,6 +73,7 @@ function sembrarEjemplo(a: Almacen, { e, textos, contrasena }: LeidoEjemplo): vo
       empresa,
       rolEmpresa: "dueno",
       contrasena,
+      ...(e.cuenta.bio ? { bio: e.cuenta.bio } : {}),
       creadaEn: ahora,
     });
   }
@@ -261,6 +264,58 @@ function nombrarTarea(a: Almacen, { e }: { e: Ejemplo }): void {
   }
 }
 
+/**
+ * El reto de 7 días y el Espejo Ejecutivo del workbook de INCREASE: cada día
+ * con sus tres acciones y sus notas, y el Espejo con sus cuatro preguntas. Se
+ * actualizan las lecciones que ya existían (por su título de antes o el de
+ * hoy): conservan su id, así que el avance y las prácticas de los alumnos se
+ * quedan.
+ */
+function retoDelWorkbook(a: Almacen, { e, textos }: { e: Ejemplo; textos: Map<string, string> }): void {
+  const curso = cursoDelEjemplo(a, e);
+  if (!curso) return;
+  const guardadas = curso.modulos.flatMap((m) => m.lecciones);
+  for (const l of e.curso.modulos.flatMap((m) => m.lecciones)) {
+    if (!/(dia-\d|04-espejo)\.md$/.test(l.archivo)) continue;
+    const actual = guardadas.find((x) => x.titulo === l.titulo || (l.antes && x.titulo === l.antes));
+    const texto = textos.get(l.archivo);
+    if (!actual || !texto) continue;
+    actual.titulo = l.titulo;
+    actual.resumen = l.resumen;
+    actual.contenido = texto;
+    if (l.practica) actual.practica = { ...l.practica };
+  }
+  curso.actualizadoEn = new Date().toISOString();
+}
+
+/**
+ * Los textos de la empresa, la comunidad y el coach con los de su página
+ * (diagnostico.increase.com.mx). Solo cambia lo que sigue igual a como se
+ * sembró: lo que el coach ya editó se respeta.
+ */
+function textosDelSitio(a: Almacen, { e }: { e: Ejemplo }): void {
+  const antes = e.textosAntes;
+  if (!antes) return;
+  const empresa = (a.empresas ?? []).find((x) => x.id === e.empresa.id);
+  if (empresa && empresa.giro === antes.giro && e.empresa.giro) empresa.giro = e.empresa.giro;
+  const comunidad = (a.comunidadesCoach ?? []).find((c) => c.id === e.comunidad.id && c.empresa === e.empresa.id);
+  if (comunidad) {
+    if (comunidad.coach_titulo === antes.coach_titulo) comunidad.coach_titulo = e.comunidad.coach_titulo;
+    if (comunidad.descripcion === antes.descripcion) comunidad.descripcion = e.comunidad.descripcion;
+    if (comunidad.acerca === antes.acerca) comunidad.acerca = e.comunidad.acerca;
+  }
+  const cuenta = cuentaPorCorreo(a, e.cuenta.correo);
+  if (cuenta && cuenta.empresa === e.empresa.id && !cuenta.bio && e.cuenta.bio) cuenta.bio = e.cuenta.bio;
+}
+
+/** El naranja de acento y los títulos condensados de su página, si su marca no se ha tocado. */
+function marcaDelSitio(a: Almacen, { e }: { e: Ejemplo }): void {
+  const empresa = (a.empresas ?? []).find((x) => x.id === e.empresa.id);
+  if (!empresa || empresa.colorAcento || empresa.titulos) return;
+  if (e.empresa.colorAcento) empresa.colorAcento = e.empresa.colorAcento;
+  if (e.empresa.titulos) empresa.titulos = e.empresa.titulos;
+}
+
 const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
   (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
 
@@ -278,6 +333,9 @@ const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: LeidoEjemplo
   { id: "cuenta", aplicar: cambiarCuenta },
   { id: "limpiar-respuestas", aplicar: limpiarRespuestas },
   { id: "tarea-de-hoy", aplicar: nombrarTarea },
+  { id: "reto-workbook", aplicar: retoDelWorkbook },
+  { id: "textos-sitio", aplicar: textosDelSitio },
+  { id: "marca-sitio", aplicar: marcaDelSitio },
 ];
 
 /**

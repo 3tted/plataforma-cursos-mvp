@@ -38,14 +38,19 @@ export function LogoDeMarca({ marca }: { marca: MarcaEmpresa | null }) {
 export function AplicarMarca() {
   const marca = useMarcaActiva();
   const color = marca?.color;
+  const acento = marca?.acento;
+  const titulos = marca?.titulos;
   useLayoutEffect(() => {
     if (!color) return;
     const raiz = document.documentElement;
-    const variables = variablesDeMarca(color);
+    const variables = variablesDeMarca(color, acento);
     for (const [nombre, valor] of Object.entries(variables)) raiz.style.setProperty(nombre, valor);
+    // La letra de los títulos (globals.css: [data-titulos]).
+    if (titulos) raiz.dataset.titulos = titulos;
     return () => {
       for (const nombre of Object.keys(variables)) raiz.style.removeProperty(nombre);
+      delete raiz.dataset.titulos;
     };
-  }, [color]);
+  }, [color, acento, titulos]);
   return null;
 }

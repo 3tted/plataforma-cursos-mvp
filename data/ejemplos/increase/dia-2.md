@@ -2,10 +2,10 @@
 
 ## Tu tarea de hoy
 
-Define tres resultados importantes para los próximos 30 días. Elimina o delega una actividad que no contribuya a ellos.
+1. Define las tres prioridades de tu equipo.
+2. Comunica qué se espera de cada persona.
+3. Alinea tu agenda con esas prioridades.
 
-## Evidencia de avance
+## Tus notas
 
-Tres prioridades y una actividad eliminada o delegada.
-
-Cuando lo tengas, escribe abajo tu evidencia en una o dos líneas. Mañana se abre el día 3.
+Al terminar, escribe abajo las tres prioridades de tu equipo, qué le comunicaste a cada persona y qué cambiaste en tu agenda. Mañana se abre el día 3.

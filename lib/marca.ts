@@ -70,21 +70,33 @@ export function tonosDeMarca(color: string): TonosDeMarca {
  * --acento) porque una variable heredada llega ya resuelta: cambiar solo
  * --coral-dark en un contenedor no cambiaría el --acento que hereda.
  */
-export function variablesDeMarca(color: string): Record<string, string> {
+export function variablesDeMarca(color: string, acento?: string | null): Record<string, string> {
   const t = tonosDeMarca(color);
+  // Con color de acento: íconos, avance, gráficas y etiquetas van con él (legible sobre blanco, 3:1).
+  const segundo = acento && normalizarColor(acento) ? tonosDeMarca(acento).acento : t.acento;
   return {
-    "--coral": t.acento,
+    "--coral": segundo,
     "--coral-dark": t.botones,
     "--coral-darker": t.texto,
     "--acento": t.botones,
     "--acento-hover": t.texto,
     "--acento-texto": t.texto,
-    "--progreso": t.acento,
-    "--arco-1": t.acento,
+    "--progreso": segundo,
+    "--arco-1": segundo,
     "--arco-2": t.botones,
     "--exito": t.botones,
   };
 }
+
+/** Las letras para los títulos que puede elegir una empresa. */
+export const TITULOS_MARCA = [
+  { id: "clasica", nombre: "Clásica", detalle: "La de Merkatics: moderna y clara." },
+  { id: "condensada", nombre: "Condensada", detalle: "Alta y en mayúsculas: fuerte y ejecutiva." },
+  { id: "elegante", nombre: "Elegante", detalle: "Con remates: sobria y editorial." },
+] as const;
+
+export const esTitulos = (v: unknown): v is "clasica" | "condensada" | "elegante" =>
+  v === "clasica" || v === "condensada" || v === "elegante";
 
 /** Mezcla el color con blanco: 0 lo deja igual, 1 es blanco. */
 const aclarar = (hex: string, cuanto: number) => aHex(aRgb(hex).map((c) => c + (255 - c) * cuanto));

@@ -2,10 +2,10 @@
 
 ## Tu tarea de hoy
 
-Selecciona una decisión o responsabilidad que puedas transferir. Define el resultado esperado, los límites y el seguimiento.
+1. Conversa sobre desarrollo con una persona de tu equipo.
+2. Pregunta antes de solucionar por ella.
+3. Define una habilidad a desarrollar este mes.
 
-## Evidencia de avance
+## Tus notas
 
-Una responsabilidad transferida o un plan explícito de transferencia.
-
-Cuando lo tengas, escribe abajo tu evidencia en una o dos líneas. Mañana se abre el día 6.
+Al terminar, escribe abajo con quién conversaste, qué le preguntaste y qué habilidad va a desarrollar este mes. Mañana se abre el día 6.

@@ -2,10 +2,10 @@
 
 ## Tu tarea de hoy
 
-Identifica una situación que activa miedo, duda, impulsividad o necesidad de control. Diseña una respuesta alternativa y practícala.
+1. Haz una pausa antes de responder en una situación difícil.
+2. Identifica la emoción que aparece.
+3. Responde con intención, no por impulso.
 
-## Evidencia de avance
+## Tus notas
 
-Un patrón reconocido y una respuesta diferente.
-
-Cuando lo tengas, escribe abajo tu evidencia en una o dos líneas. Mañana se abre el día 4.
+Al terminar, escribe abajo la situación difícil, la emoción que apareció y cómo respondiste. Mañana se abre el día 4.

@@ -1,6 +1,6 @@
 import { consultar, modificar } from "@/lib/almacen";
 import { ErrorDeDatos, leerJson, manejar } from "@/lib/http";
-import { COLOR_MERKATICS, normalizarColor } from "@/lib/marca";
+import { COLOR_MERKATICS, esTitulos, normalizarColor } from "@/lib/marca";
 import { coachDe, empresaDeCoach } from "@/lib/permisos";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export const GET = manejar(async (req: Request) => {
   return Response.json({ ...empresa, color: empresa.color ?? COLOR_MERKATICS, conMarca: !!empresa.color, puedeEditar: coach.administra });
 });
 
-// Guarda nombre y color: { nombre, color }.
+// Guarda la marca: { nombre, color, acento?, titulos? } (acento vacío o null: sin color de acento).
 export const PUT = manejar(async (req: Request) => {
   const coach = await coachDe(req);
   const datos = await leerJson(req);
@@ -23,8 +23,17 @@ export const PUT = manejar(async (req: Request) => {
   if (nombre.length < 2) throw new ErrorDeDatos("Ponle un nombre a tu empresa o marca (al menos 2 letras).");
   const color = normalizarColor(datos.color);
   if (!color) throw new ErrorDeDatos("Elige un color válido, por ejemplo #2563eb.");
-  const empresa = await modificar((a) =>
-    Object.assign(empresaDeCoach(a, coach, { administrar: true }), { nombre, color, actualizadaEn: new Date().toISOString() }),
-  );
+  const acento = datos.acento ? normalizarColor(datos.acento) : null;
+  if (datos.acento && !acento) throw new ErrorDeDatos("Elige un color de acento válido, por ejemplo #f17c12.");
+  const titulos = esTitulos(datos.titulos) ? datos.titulos : undefined;
+  const empresa = await modificar((a) => {
+    const e = empresaDeCoach(a, coach, { administrar: true });
+    Object.assign(e, { nombre, color, actualizadaEn: new Date().toISOString() });
+    if (acento) e.colorAcento = acento;
+    else delete e.colorAcento;
+    if (titulos && titulos !== "clasica") e.titulos = titulos;
+    else if (titulos === "clasica") delete e.titulos;
+    return e;
+  });
   return Response.json({ ...empresa, conMarca: true, puedeEditar: true });
 });

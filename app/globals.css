@@ -11439,3 +11439,65 @@ button.tarjeta-comunidad-enlace {
     padding-bottom: calc(var(--alto-nav-inferior) + 150px);
   }
 }
+
+/* ---------- Letra de los títulos de la marca de cada empresa (Mi empresa) ---------- */
+
+[data-titulos="condensada"] {
+  --fuente-display: var(--font-condensada), "Arial Narrow", sans-serif;
+}
+
+[data-titulos="condensada"] :is(h1, h2, h3, .previa-titulo) {
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+
+[data-titulos="elegante"] :is(h1, h2, h3, .previa-titulo) {
+  font-family: var(--font-elegante), Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+.mi-empresa-letras {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.mi-empresa-letras legend,
+.mi-empresa-acento legend {
+  margin-bottom: 6px;
+  font-size: var(--t-caption);
+  font-weight: 700;
+  color: var(--tinta-2);
+}
+
+.mi-empresa-letra-muestra {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.mi-empresa-letra-muestra[data-letra="clasica"] {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+}
+
+.mi-empresa-letra-muestra[data-letra="condensada"] {
+  font-family: var(--font-condensada), "Arial Narrow", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.mi-empresa-letra-muestra[data-letra="elegante"] {
+  font-family: var(--font-elegante), Georgia, serif;
+  font-weight: 700;
+}
+
+.mi-empresa-acento {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}

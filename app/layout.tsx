@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Inter, Montserrat } from "next/font/google";
+import { IBM_Plex_Mono, Inter, Montserrat, Oswald, Playfair_Display } from "next/font/google";
 import Bienvenida from "@/components/Bienvenida";
 import { ProveedorApp } from "@/components/Contexto";
 import Marco from "@/components/Marco";
@@ -15,6 +15,10 @@ const display = Montserrat({
   display: "swap",
 });
 const cuerpo = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
+// Letras que puede elegir una empresa para sus títulos (Mi empresa). No se
+// precargan: solo se descargan en las páginas con esa marca.
+const condensada = Oswald({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-condensada", display: "swap", preload: false });
+const elegante = Playfair_Display({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-elegante", display: "swap", preload: false });
 const mono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
@@ -50,7 +54,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es-MX" className={`${display.variable} ${cuerpo.variable} ${mono.variable}`}>
+    <html lang="es-MX" className={`${display.variable} ${cuerpo.variable} ${mono.variable} ${condensada.variable} ${elegante.variable}`}>
       <body>
         <ProveedorApp>
           <Marco>{children}</Marco>

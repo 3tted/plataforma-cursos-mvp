@@ -11440,6 +11440,61 @@ button.tarjeta-comunidad-enlace {
   }
 }
 
+/* ---------- Letra de los títulos de la marca de cada empresa (Mi empresa) ----------
+   Solo cambia la letra de los títulos: mismo tamaño, sin mayúsculas, y los
+   botones, pestañas, etiquetas, la barra de arriba y el pie quedan igual. */
+
+[data-titulos="condensada"] :is(h1, h2, h3, h4, .previa-titulo) {
+  font-family: var(--font-condensada), "Arial Narrow", sans-serif;
+  letter-spacing: 0;
+}
+
+[data-titulos="elegante"] :is(h1, h2, h3, h4, .previa-titulo) {
+  font-family: var(--font-elegante), Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+/* La barra de arriba y el pie no cambian nunca. */
+[data-titulos] :is(.barra, .visitantes-barra, .pie) :is(h1, h2, h3, h4) {
+  font-family: var(--fuente-display);
+}
+
+.mi-empresa-letras {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.mi-empresa-letras legend,
+.mi-empresa-acento legend {
+  margin-bottom: 6px;
+  font-size: var(--t-caption);
+  font-weight: 700;
+  color: var(--tinta-2);
+}
+
+.mi-empresa-letra-muestra {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.mi-empresa-letra-muestra[data-letra="clasica"] {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+}
+
+.mi-empresa-letra-muestra[data-letra="condensada"] {
+  font-family: var(--font-condensada), "Arial Narrow", sans-serif;
+  font-weight: 700;
+}
+
+.mi-empresa-letra-muestra[data-letra="elegante"] {
+  font-family: var(--font-elegante), Georgia, serif;
+  font-weight: 700;
+}
+
 .mi-empresa-acento {
   display: grid;
   gap: 8px;

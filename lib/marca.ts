@@ -88,6 +88,15 @@ export function variablesDeMarca(color: string, acento?: string | null): Record<
   };
 }
 
+/** Las letras para los títulos que puede elegir una empresa (solo cambia la letra de los títulos). */
+export const TITULOS_MARCA = [
+  { id: "clasica", nombre: "Clásica", detalle: "La de Merkatics: moderna y clara." },
+  { id: "condensada", nombre: "Condensada", detalle: "Alta y angosta: fuerte y ejecutiva." },
+  { id: "elegante", nombre: "Elegante", detalle: "Con remates: sobria y editorial." },
+] as const;
+
+export const esTitulos = (v: unknown): v is "clasica" | "condensada" | "elegante" =>
+  v === "clasica" || v === "condensada" || v === "elegante";
 
 /** Mezcla el color con blanco: 0 lo deja igual, 1 es blanco. */
 const aclarar = (hex: string, cuanto: number) => aHex(aRgb(hex).map((c) => c + (255 - c) * cuanto));

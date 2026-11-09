@@ -8,8 +8,8 @@ import EquipoEmpresa from "@/components/EquipoEmpresa";
 import NavCoach from "@/components/NavCoach";
 import { useTitulo } from "@/components/useTitulo";
 import { api } from "@/lib/cliente";
-import { COLOR_MERKATICS, normalizarColor, tonosDeMarca, variablesDeMarca } from "@/lib/marca";
-import type { Empresa } from "@/lib/tipos";
+import { COLOR_MERKATICS, normalizarColor, TITULOS_MARCA, tonosDeMarca, variablesDeMarca } from "@/lib/marca";
+import type { Empresa, TitulosMarca } from "@/lib/tipos";
 
 type EmpresaVista = Empresa & {
   color: string;
@@ -61,9 +61,10 @@ export default function PaginaMiEmpresa() {
   const [nombre, setNombre] = useState("");
   const [color, setColor] = useState(COLOR_MERKATICS);
   const [textoColor, setTextoColor] = useState(COLOR_MERKATICS);
-  // Segundo color (opcional).
+  // Segundo color (opcional) y letra de los títulos.
   const [acento, setAcento] = useState<string | null>(null);
   const [textoAcento, setTextoAcento] = useState("");
+  const [titulos, setTitulos] = useState<TitulosMarca>("clasica");
   const [guardando, setGuardando] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -82,6 +83,7 @@ export default function PaginaMiEmpresa() {
         setTextoColor(e.color);
         setAcento(e.colorAcento ?? null);
         setTextoAcento(e.colorAcento ?? "");
+        setTitulos(e.titulos ?? "clasica");
       })
       .catch((e) => setError((e as Error).message));
     api<{ comunidades: { id: string }[] }>("/api/coach/comunidades")
@@ -105,7 +107,8 @@ export default function PaginaMiEmpresa() {
     (!empresa.conMarca ||
       nombre.trim() !== empresa.nombre ||
       color !== empresa.color ||
-      (acento ?? null) !== (empresa.colorAcento ?? null));
+      (acento ?? null) !== (empresa.colorAcento ?? null) ||
+      titulos !== (empresa.titulos ?? "clasica"));
 
   const elegirColor = (valor: string) => {
     setTextoColor(valor);
@@ -124,7 +127,7 @@ export default function PaginaMiEmpresa() {
     setError(null);
     setAviso(null);
     try {
-      const guardada = await api<EmpresaVista>("/api/coach/empresa", { method: "PUT", json: { nombre, color, acento } });
+      const guardada = await api<EmpresaVista>("/api/coach/empresa", { method: "PUT", json: { nombre, color, acento, titulos } });
       setEmpresa(guardada);
       setAviso("Cambios guardados. Tus comunidades ya se ven con tu marca.");
       await recargarCurso();
@@ -272,6 +275,18 @@ export default function PaginaMiEmpresa() {
                   )}
                 </fieldset>
 
+                <fieldset className="mi-empresa-letras">
+                  <legend>Letra de los títulos</legend>
+                  {TITULOS_MARCA.map((t) => (
+                    <label key={t.id} className="metodo" data-activo={titulos === t.id}>
+                      <input type="radio" name="titulos" checked={titulos === t.id} onChange={() => setTitulos(t.id)} />
+                      <span className="mi-empresa-letra-muestra" data-letra={t.id}>
+                        {t.nombre}
+                      </span>
+                      <span className="texto-suave">{t.detalle}</span>
+                    </label>
+                  ))}
+                </fieldset>
 
                 <div className={tonos.ajustado ? "mi-empresa-contraste mi-empresa-contraste-ajustado" : "mi-empresa-contraste"} role="status">
                   {tonos.ajustado ? (
@@ -368,6 +383,7 @@ export default function PaginaMiEmpresa() {
             className="mi-empresa-previa"
             aria-labelledby="previa-titulo"
             style={variablesDeMarca(color, acento) as CSSProperties}
+            data-titulos={titulos === "clasica" ? undefined : titulos}
           >
             <h2 id="previa-titulo">Así lo verán tus alumnos</h2>
             <div className="previa-marco" aria-hidden="true">

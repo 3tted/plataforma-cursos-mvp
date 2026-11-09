@@ -94,6 +94,7 @@ export function marcaDe(a: Almacen, empresa: string | undefined): { marca?: Marc
           color: e.color,
           ...(logo ? { logo } : {}),
           ...(e.colorAcento ? { acento: e.colorAcento } : {}),
+          ...(e.titulos && e.titulos !== "clasica" ? { titulos: e.titulos } : {}),
         },
       }
     : {};

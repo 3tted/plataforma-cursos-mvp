@@ -324,8 +324,9 @@ export interface Empresa {
   color?: string;
   /** Logo (url de /api/fotos). */
   logo?: string;
-  /** Color de acento (opcional) de su marca. Todas las empresas usan la misma letra. */
+  /** Color de acento (opcional) y letra de los títulos de su marca. */
   colorAcento?: string;
+  titulos?: TitulosMarca;
   /** A qué se dedica (lo escribe quien la registra). */
   giro?: string;
   /** Cuántos alumnos tenía al registrarse (un rango de RANGOS_ALUMNOS). */
@@ -467,11 +468,15 @@ export interface CuentaPublica {
 }
 
 /** Lo que la interfaz necesita para pintar la marca de una empresa. */
+/** Letra de los títulos de la marca: la de Merkatics, condensada en mayúsculas o elegante (con remates). */
+export type TitulosMarca = "clasica" | "condensada" | "elegante";
+
 export interface MarcaEmpresa {
   nombre: string;
   color: string;
   /** Segundo color: íconos, avance, gráficas y etiquetas (los botones siguen con el principal). */
   acento?: string;
+  titulos?: TitulosMarca;
   logo?: string;
 }
 

@@ -581,7 +581,7 @@ export default function CrearCurso() {
                   </div>
                   {!s.error && (
                     <div className="taller-barra-avance">
-                      <span style={{ width: `${Math.round(s.avance * 100)}%` }} />
+                      <span style={{ transform: `scaleX(${s.avance})` }} />
                     </div>
                   )}
                   {(s.error || s.cancelar) && (

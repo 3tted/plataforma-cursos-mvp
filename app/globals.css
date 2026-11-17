@@ -12024,9 +12024,11 @@ body:has(.taller-pagina) .contenido {
 
 .taller-barra-avance span {
   display: block;
+  width: 100%;
   height: 100%;
   background: var(--coral);
-  transition: width 0.2s;
+  transform-origin: left;
+  transition: transform 0.2s;
 }
 
 .taller-subida-cerrar {

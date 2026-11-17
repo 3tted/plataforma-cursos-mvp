@@ -29,7 +29,7 @@ export const claveGemini = () => Boolean(process.env.GEMINI_API_KEY || process.e
 
 // Flash-Lite empieza a responder en menos de un segundo y casi nunca está
 // saturado; Flash queda de respaldo (ver lib/asistente-gemini.ts).
-export const MODELO_GEMINI = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
+export const MODELO_GEMINI = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
 export function proveedorIA(): ProveedorIA | null {
   const elegido = process.env.IA_PROVEEDOR?.trim().toLowerCase();

@@ -157,7 +157,7 @@ function material(l: Leccion): string[] {
   ].filter(Boolean);
 }
 
-const MODELOS_GEMINI = ["gemini-flash-latest", "gemini-flash-lite-latest"];
+const MODELOS_GEMINI = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.1-flash-lite"];
 
 export type Pedido = {
   sistema: string;

@@ -28,6 +28,7 @@ import type {
   Rol,
   Sesion,
   VideoFuente,
+  TallerCurso,
   VideoLeccion,
 } from "./tipos";
 
@@ -85,6 +86,8 @@ export interface Almacen {
   cuentas?: Cuenta[];
   sesiones?: Sesion[];
   invitaciones?: Invitacion[];
+  /** Cursos que la coach arma platicando con la IA, antes de crearlos (lib/taller.ts). */
+  talleres?: TallerCurso[];
 }
 
 const DIRECTORIO =
@@ -327,6 +330,39 @@ export async function borrarFoto(clave: string): Promise<void> {
   await Promise.all(
     [clave, `${clave}.tipo`].map((a) => fs.rm(path.join(DIRECTORIO_FOTOS, a), { force: true })),
   );
+}
+
+// Textos grandes que no van en el documento del almacén (lo que la IA anotó de
+// un video, el documento de un curso en preparación): cada uno en su propia
+// clave de Redis o su archivo, como las fotos.
+const DIRECTORIO_APARTE = path.join(DIRECTORIO, "aparte");
+const claveAparte = (clave: string) => `${CLAVE}:aparte:${clave}`;
+const archivoAparte = (clave: string) => path.join(DIRECTORIO_APARTE, clave.replace(/[^A-Za-z0-9_-]/g, "_"));
+
+export async function guardarAparte(clave: string, texto: string): Promise<void> {
+  if (redis) {
+    await redis.set(claveAparte(clave), texto);
+    return;
+  }
+  await fs.mkdir(DIRECTORIO_APARTE, { recursive: true });
+  await fs.writeFile(archivoAparte(clave), texto, "utf8");
+}
+
+export async function leerAparte(clave: string): Promise<string | null> {
+  if (redis) return (await redis.get<string>(claveAparte(clave))) ?? null;
+  try {
+    return await fs.readFile(archivoAparte(clave), "utf8");
+  } catch {
+    return null;
+  }
+}
+
+export async function borrarAparte(clave: string): Promise<void> {
+  if (redis) {
+    await redis.del(claveAparte(clave));
+    return;
+  }
+  await fs.rm(archivoAparte(clave), { force: true });
 }
 
 // Lee el almacén; si no existe, lo siembra. `cambiado` indica que hay que guardarlo.

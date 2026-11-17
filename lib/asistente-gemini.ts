@@ -12,7 +12,7 @@ let cliente: GoogleGenAI | null = null;
 // Si el modelo principal está saturado, sin cuota o tarda en empezar, se
 // prueba el siguiente. Flash va sin razonamiento previo: así empieza a
 // escribir en segundos y no en medio minuto (Flash-Lite no acepta esa opción).
-const MODELOS_RESPALDO = ["gemini-flash-lite-latest", "gemini-flash-latest"];
+const MODELOS_RESPALDO = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash"];
 const OPCIONES_POR_MODELO: Record<string, object> = {
   "gemini-flash-latest": { thinkingConfig: { thinkingBudget: 0 } },
 };

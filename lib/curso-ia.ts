@@ -351,7 +351,7 @@ export async function proponerCurso(
 }
 
 // Para armar un curso conviene el modelo más capaz; Lite queda de respaldo.
-export const MODELOS_GEMINI = ["gemini-flash-latest", "gemini-flash-lite-latest"];
+export const MODELOS_GEMINI = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
 
 async function conGemini(doc: Documento, turnos: Turno[], medidas: Medidas, limite: number): Promise<string> {
   const cliente = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY });

@@ -44,6 +44,11 @@ import {
   LinkSimple,
   UserPlus,
   Buildings,
+  FileText,
+  CaretDown,
+  Plus,
+  ArrowUp,
+  ArrowDown,
 } from "@phosphor-icons/react/ssr";
 
 // Una sola familia de íconos (Phosphor) con el mismo trazo en toda la app.
@@ -103,3 +108,8 @@ export const IconoEnlace = icono(LinkSimple);
 export const IconoInvitar = icono(UserPlus);
 export const IconoEmpresa = icono(Buildings);
 export const IconoWhatsapp = icono(WhatsappLogo);
+export const IconoDocumento = icono(FileText);
+export const IconoDesplegar = icono(CaretDown);
+export const IconoMas = icono(Plus);
+export const IconoArriba = icono(ArrowUp);
+export const IconoAbajo = icono(ArrowDown);

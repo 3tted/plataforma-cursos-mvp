@@ -1,5 +1,5 @@
 import path from "path";
-import { ApiError, FileState, GoogleGenAI, MediaResolution, createPartFromUri, type Part } from "@google/genai";
+import { ApiError, FileState, GoogleGenAI, MediaResolution, createPartFromUri, type Content, type Part } from "@google/genai";
 import { DIRECTORIO_VIDEOS } from "./almacen";
 import { claveGemini } from "./asistente";
 import { mensajeDeErrorGemini } from "./asistente-gemini";
@@ -28,13 +28,14 @@ export const videoConIA = () => claveGemini();
 
 // Para ver video, el modelo más nuevo primero (en las pruebas fue el único que
 // respondió con Gemini saturado); los otros quedan de respaldo.
-const MODELOS_GEMINI = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-flash-lite-latest"];
+// (Los alias "gemini-flash-latest" ya no existen.)
+const MODELOS_GEMINI = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
 
 let cliente: GoogleGenAI | null = null;
 const gemini = () => (cliente ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY }));
 
 /** Sube el video a Gemini para que lo vea. Devuelve su nombre ("files/…"). */
-export async function subirAGemini(fuente: VideoFuente): Promise<string> {
+export async function subirAGemini(fuente: Pick<VideoFuente, "archivo" | "url" | "tipo" | "nombreOriginal">): Promise<string> {
   try {
     const archivo = fuente.url
       ? await fetch(await urlParaVer({ archivo: fuente.archivo, url: fuente.url })).then((r) => {
@@ -227,21 +228,28 @@ const pedidoCon = (partes: (string | false)[]) => [...partes, "Responde solo con
  * saturado, prueba con el de respaldo; si no acepta las cantidades en el
  * esquema, las deja solo en el texto. Lanza ErrorDeDatos con un mensaje para la coach.
  */
-async function pedirJSON<T>(
-  parts: Part[],
+export async function pedirJSON<T>(
+  parts: Part[] | Content[],
   instrucciones: string,
   esquema: (conLimites: boolean) => object,
   limiteMs: number,
   conVideo: boolean,
+  /** Otros modelos (en orden) y el tiempo máximo de cada uno, para que uno lento no se coma el de los demás. */
+  opciones: { modelos?: string[]; porModeloMs?: number } = {},
 ): Promise<T> {
+  const modelos = opciones.modelos ?? MODELOS_GEMINI;
+  // Una sola pregunta (sus partes) o la plática completa (turnos con su rol).
+  const contents: Content[] = parts.length && "role" in parts[0] ? (parts as Content[]) : [{ role: "user", parts: parts as Part[] }];
   const hasta = Date.now() + limiteMs;
   let conLimites = true;
-  for (let i = 0; i < MODELOS_GEMINI.length; i++) {
-    const model = MODELOS_GEMINI[i];
+  for (let i = 0; i < modelos.length; i++) {
+    const model = modelos[i];
+    const resta = Math.max(hasta - Date.now(), 5_000);
+    const espera = opciones.porModeloMs && i < modelos.length - 1 ? Math.min(resta, opciones.porModeloMs) : resta;
     try {
       const respuesta = await gemini().models.generateContent({
         model,
-        contents: [{ role: "user", parts }],
+        contents,
         config: {
           systemInstruction: instrucciones,
           responseMimeType: "application/json",
@@ -249,9 +257,8 @@ async function pedirJSON<T>(
           // Baja resolución de imagen: alcanza para seguir la clase y deja ver videos largos.
           ...(conVideo ? { mediaResolution: MediaResolution.MEDIA_RESOLUTION_LOW } : {}),
           maxOutputTokens: 32_768,
-          abortSignal: AbortSignal.timeout(Math.max(hasta - Date.now(), 5_000)),
+          abortSignal: AbortSignal.timeout(espera),
           httpOptions: { retryOptions: { attempts: 2 } },
-          ...(model === "gemini-flash-latest" ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
         },
       });
       const texto = respuesta.text;
@@ -267,9 +274,10 @@ async function pedirJSON<T>(
         i--;
         continue;
       }
-      const reintentable = e instanceof ApiError && [429, 500, 503, 404].includes(e.status);
-      if (reintentable && i < MODELOS_GEMINI.length - 1 && Date.now() < hasta - 30_000) {
-        console.warn(`Curso desde video: ${model} respondió ${(e as ApiError).status}, probando ${MODELOS_GEMINI[i + 1]}.`);
+      const tardo = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+      const reintentable = (e instanceof ApiError && [429, 500, 503, 504, 404].includes(e.status)) || tardo;
+      if (reintentable && i < modelos.length - 1 && Date.now() < hasta - 30_000) {
+        console.warn(`Gemini: ${model} ${tardo ? "tardó demasiado" : `respondió ${(e as ApiError).status}`}, probando ${modelos[i + 1]}.`);
         continue;
       }
       if (e instanceof ErrorDeDatos) throw e;

@@ -5,20 +5,25 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useApp } from "@/components/Contexto";
 import CamposComunidad, { COMUNIDAD_VACIA } from "@/components/editor/CamposComunidad";
-import CrearConIA from "@/components/editor/CrearConIA";
-import CrearDesdeVideo from "@/components/editor/CrearDesdeVideo";
 import { COMUNIDADES } from "@/lib/comunidades";
 import NavCoach from "@/components/NavCoach";
-import { IconoAsistenteGeneral, IconoEditar, IconoFlechaDer, IconoVideo } from "@/components/Iconos";
+import { IconoAsistenteGeneral, IconoDocumento, IconoEditar, IconoFlechaDer, IconoVideo } from "@/components/Iconos";
 import PortadaTema from "@/components/PortadaTema";
 import { useTitulo } from "@/components/useTitulo";
 import { api, hace, moneda } from "@/lib/cliente";
-import type { ComunidadCreada, CursoCreado } from "@/lib/tipos";
+import type { ComunidadCreada, CursoCreado, TallerCurso } from "@/lib/tipos";
 
 type ResumenCursoCoach = Pick<CursoCreado, "id" | "comunidad" | "titulo" | "estado" | "origen" | "actualizadoEn" | "enPagina"> & {
   lecciones: number;
 };
 type Datos = { comunidades: ComunidadCreada[]; cursos: ResumenCursoCoach[]; ia: boolean; iaVideo: boolean };
+/** Un curso que la coach dejó a medias en la pantalla de crear con la IA. */
+type Pendiente = Pick<TallerCurso, "id" | "comunidad" | "modo" | "actualizadoEn"> & { titulo: string; lecciones: number };
+const MODOS: { modo: TallerCurso["modo"]; titulo: string; texto: string }[] = [
+  { modo: "mano", titulo: "A mano", texto: "Tú armas las lecciones y su video; la IA llena lo demás cuando se lo pidas: títulos, apuntes, preguntas y examen." },
+  { modo: "video", titulo: "Con videos", texto: "Sube uno o varios videos. La IA los ve, propone las lecciones (puede dividir uno largo) y lo ajustan platicando." },
+  { modo: "documento", titulo: "Con PDF", texto: "Sube tu PDF o Word. La IA lo lee, arma lecciones, apuntes, repaso y examen, y le pides los cambios." },
+];
 
 /** Clave de la sección de cursos que todavía no están en una comunidad. */
 const SUELTOS = "";
@@ -35,8 +40,7 @@ export default function PaginaMisComunidades() {
   const [verSueltos, setVerSueltos] = useState(false);
   const [forma, setForma] = useState(COMUNIDAD_VACIA);
   const [enviando, setEnviando] = useState<string | null>(null);
-  // Dónde está abierto el formulario de IA (una comunidad o SUELTOS) y con qué material.
-  const [conIA, setConIA] = useState<{ comunidad: string; desde: "documento" | "video" } | null>(null);
+  const [pendientes, setPendientes] = useState<Pendiente[]>([]);
   useTitulo("Comunidades y cursos");
   // Las que vienen con la plataforma (de la empresa Merkatics): se manejan aquí, pero su contenido no se edita.
   const deLaPlataforma = usuario?.empresa === "merkatics" ? COMUNIDADES.map((c) => c.id) : [];
@@ -52,6 +56,9 @@ export default function PaginaMisComunidades() {
         if (pedido || (d.comunidades.length === 0 && d.cursos.length === 0 && deLaPlataforma.length === 0)) setCreando(true);
       })
       .catch((e) => setError((e as Error).message));
+    api<{ talleres: Pendiente[] }>("/api/coach/talleres")
+      .then((r) => setPendientes(r.talleres))
+      .catch(() => setPendientes([]));
   }, [autor, deLaPlataforma.length]);
 
   useEffect(cargar, [cargar]);
@@ -91,15 +98,13 @@ export default function PaginaMisComunidades() {
     }
   };
 
-  const agregarCursoManual = async (comunidad: string) => {
-    setEnviando(`curso:${comunidad}`);
+  // Las tres formas de crear un curso abren la pantalla del chat con la IA (app/coach/crear).
+  const empezarCurso = async (comunidad: string, modo: TallerCurso["modo"]) => {
+    setEnviando(`curso:${comunidad}:${modo}`);
     setError(null);
     try {
-      const curso = await api<CursoCreado>("/api/coach/cursos", {
-        method: "POST",
-        json: { comunidad },
-      });
-      router.push(`/coach/curso/${curso.id}`);
+      const t = await api<{ id: string }>("/api/coach/talleres", { method: "POST", json: { comunidad, modo } });
+      router.push(`/coach/crear/${t.id}`);
     } catch (err) {
       setError((err as Error).message);
       setEnviando(null);
@@ -144,56 +149,54 @@ export default function PaginaMisComunidades() {
     </ul>
   );
 
-  // "Agregar un curso": a mano, con IA y, en una comunidad, uno que ya hizo.
-  const agregarCurso = (comunidad: string) =>
-    conIA?.comunidad === comunidad ? (
-      conIA.desde === "video" ? (
-        <CrearDesdeVideo comunidad={comunidad} alCerrar={() => setConIA(null)} />
-      ) : (
-        <CrearConIA comunidad={comunidad} alCerrar={() => setConIA(null)} />
-      )
-    ) : (
+  // "Agregar un curso": a mano, con videos o con un PDF (las tres con el chat de
+  // la IA), los que dejó a medias y, en una comunidad, uno que ya hizo.
+  const agregarCurso = (comunidad: string) => {
+    const aMedias = pendientes.filter((p) => p.comunidad === comunidad);
+    return (
       <div className="agregar-curso">
         <p className="agregar-curso-titulo">{comunidad ? "Agregar un curso a esta comunidad" : "Crear un curso"}</p>
+        <p className="texto-suave agregar-curso-nota">
+          En las tres, la IA te acompaña en un chat: le pides lo que necesites y el curso se va armando a un lado.
+          {datos && !datos.iaVideo && " (La IA no está conectada en el servidor: puedes armarlo a mano, pero el chat no responderá.)"}
+        </p>
         <div className="agregar-curso-opciones">
-          <button
-            type="button"
-            className="opcion-agregar"
-            onClick={() => void agregarCursoManual(comunidad)}
-            disabled={enviando === `curso:${comunidad}`}
-          >
-            <IconoEditar width={22} height={22} />
-            <span>
-              <strong>{enviando === `curso:${comunidad}` ? "Creando…" : "A mano"}</strong>
-              <span className="texto-suave">Escribe tus lecciones, sube los videos y arma las preguntas.</span>
-            </span>
-            <IconoFlechaDer width={16} height={16} />
-          </button>
-          <button type="button" className="opcion-agregar" onClick={() => setConIA({ comunidad, desde: "video" })} disabled={!datos?.iaVideo}>
-            <IconoVideo width={22} height={22} />
-            <span>
-              <strong>Con IA, a partir de tu video</strong>
-              <span className="texto-suave">
-                {datos?.iaVideo
-                  ? "Sube una clase grabada y la IA la divide en lecciones. Tus alumnos te ven a ti explicando."
-                  : "Necesita Gemini conectado en el servidor (GEMINI_API_KEY)."}
-              </span>
-            </span>
-            <IconoFlechaDer width={16} height={16} />
-          </button>
-          <button type="button" className="opcion-agregar" onClick={() => setConIA({ comunidad, desde: "documento" })} disabled={!datos?.ia}>
-            <IconoAsistenteGeneral width={22} height={22} />
-            <span>
-              <strong>Con IA, a partir de un documento</strong>
-              <span className="texto-suave">
-                {datos?.ia
-                  ? "Sube un PDF o Word con tu material y la IA te propone el curso para que lo revises."
-                  : "Necesita una IA conectada (clave de Gemini o de Claude en el servidor)."}
-              </span>
-            </span>
-            <IconoFlechaDer width={16} height={16} />
-          </button>
+          {MODOS.map(({ modo, titulo, texto }) => {
+            const ocupado = enviando === `curso:${comunidad}:${modo}`;
+            const Icono = modo === "mano" ? IconoEditar : modo === "video" ? IconoVideo : IconoDocumento;
+            return (
+              <button key={modo} type="button" className="opcion-agregar" onClick={() => void empezarCurso(comunidad, modo)} disabled={!!enviando?.startsWith("curso:")}>
+                <Icono width={22} height={22} />
+                <span>
+                  <strong>{ocupado ? "Abriendo…" : titulo}</strong>
+                  <span className="texto-suave">{texto}</span>
+                </span>
+                <IconoFlechaDer width={16} height={16} />
+              </button>
+            );
+          })}
         </div>
+        {aMedias.length > 0 && (
+          <div className="cursos-a-medias">
+            <p className="agregar-curso-titulo">Los que dejaste a medias</p>
+            <ul className="mis-cursos">
+              {aMedias.map((p) => (
+                <li key={p.id}>
+                  <Link href={`/coach/crear/${p.id}`} className="mi-curso">
+                    <span className="mi-curso-titulo">
+                      <IconoAsistenteGeneral width={16} height={16} /> {p.titulo || "Curso sin título"}
+                    </span>
+                    <span className="texto-suave mi-curso-meta">
+                      {MODOS.find((m) => m.modo === p.modo)?.titulo} · <span className="cifra">{p.lecciones}</span>{" "}
+                      {p.lecciones === 1 ? "lección" : "lecciones"} · editado {hace(p.actualizadoEn)}
+                    </span>
+                    <span className="pastilla">Seguir</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {comunidad && sueltos.length > 0 && (
           <form
             className="poner-curso"
@@ -223,6 +226,7 @@ export default function PaginaMisComunidades() {
         )}
       </div>
     );
+  };
 
   return (
     <>

@@ -741,3 +741,81 @@ export interface MatrizAlumnos {
     respuestas: number;
   }[];
 }
+
+// ---------------------------------------------------------------------------
+// Curso en preparación: la coach lo arma platicando con la IA (lib/taller.ts)
+// ---------------------------------------------------------------------------
+
+/** Una lección del curso en preparación. */
+export interface LeccionTaller {
+  /** "L1", "L2"…: la IA y la coach se refieren a ella por este id. */
+  id: string;
+  modulo: string;
+  titulo: string;
+  /** Una línea: qué logra el alumno. */
+  resumen: string;
+  /** Los apuntes, en Markdown. */
+  contenido: string;
+  /** Sin el dato, se calcula del video (o 5 minutos). */
+  duracion_min?: number;
+  preguntas_sugeridas: string[];
+  repaso: PreguntaCurso[];
+  /** El video de la lección (id de un VideoTaller) y, si es solo una parte, su tramo en segundos. */
+  video?: string;
+  inicio?: number;
+  fin?: number;
+}
+
+export interface BorradorTaller {
+  titulo: string;
+  subtitulo: string;
+  aprenderas: string[];
+  requisitos: string;
+  preguntas_sugeridas: string[];
+  lecciones: LeccionTaller[];
+  /** En cada pregunta, "leccion" es el id de la lección (L1…). */
+  examen: PreguntaCurso[];
+}
+
+/** Un video del curso en preparación. La IA lo ve una vez y anota lo que se dice en él (guardado aparte). */
+export interface VideoTaller {
+  id: string;
+  archivo: string;
+  url?: string;
+  tipo: string;
+  bytes: number;
+  nombreOriginal: string;
+  subidoEn: string;
+  duracion?: number;
+  estado: "subido" | "procesando" | "listo" | "error";
+  error?: string;
+  /** El video ya subido a Gemini ("files/…") mientras la IA lo ve. */
+  gemini?: string;
+  /** De qué trata, en 2 a 4 frases (lo escribe la IA al verlo). */
+  resumen?: string;
+}
+
+export interface MensajeTaller {
+  rol: "coach" | "ia";
+  texto: string;
+  /** Lo que cambió la IA en el curso con ese mensaje. */
+  cambios?: string[];
+}
+
+export interface TallerCurso {
+  id: string;
+  empresa: string;
+  /** "" si el curso todavía no va en una comunidad. */
+  comunidad: string;
+  autor: string;
+  modo: "mano" | "video" | "documento";
+  borrador: BorradorTaller;
+  chat: MensajeTaller[];
+  videos: VideoTaller[];
+  /** El documento que subió (su contenido va aparte). */
+  documento?: { nombre: string; tipo: "pdf" | "texto"; palabras?: number };
+  /** Para numerar las lecciones nuevas (L1, L2…). */
+  siguiente: number;
+  creadoEn: string;
+  actualizadoEn: string;
+}

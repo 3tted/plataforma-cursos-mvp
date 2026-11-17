@@ -37,6 +37,9 @@ export const rutaEnLaNube = (leccion: string) => `videos/${leccion}`;
 /** Donde va en Blob el video con el que la IA arma un curso. */
 export const PREFIJO_FUENTE = "videos/fuente";
 
+/** Donde van en Blob los videos de un curso en preparación (lib/taller.ts). */
+export const PREFIJO_TALLER = "videos/taller";
+
 /** ¿La url es de un archivo de Vercel Blob? */
 export function esUrlDeBlob(url: unknown): url is string {
   if (typeof url !== "string") return false;
@@ -106,7 +109,10 @@ export async function urlParaVer(video: { archivo: string; url: string }): Promi
 export async function borrarArchivoDeVideo(video: { archivo: string; url?: string }): Promise<void> {
   try {
     const enUso = await consultar(
-      (a) => (a.videos ?? []).some((v) => v.archivo === video.archivo) || (a.fuentesVideo ?? []).some((f) => f.archivo === video.archivo),
+      (a) =>
+        (a.videos ?? []).some((v) => v.archivo === video.archivo) ||
+        (a.fuentesVideo ?? []).some((f) => f.archivo === video.archivo) ||
+        (a.talleres ?? []).some((t) => t.videos.some((v) => v.archivo === video.archivo)),
     );
     if (enUso) return;
     if (video.url) {

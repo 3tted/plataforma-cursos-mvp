@@ -31,7 +31,7 @@ interface Ejemplo {
   /** Los textos que tenían antes la empresa y la comunidad (para cambiarlos solo si el coach no los tocó). */
   textosAntes?: { giro: string; coach_titulo: string; descripcion: string; acerca: string };
   comunidad: Omit<ComunidadCreada, "autor" | "empresa" | "creadaEn">;
-  curso: Pick<CursoCreado, "titulo" | "subtitulo" | "aprenderas" | "requisitos" | "preguntas_sugeridas" | "sinExamen"> & {
+  curso: Pick<CursoCreado, "titulo" | "subtitulo" | "aprenderas" | "requisitos" | "preguntas_sugeridas" | "sinExamen" | "foto" | "descargas"> & {
     modulos: { titulo: string; lecciones: LeccionEjemplo[] }[];
     examen: Omit<PreguntaCurso, "id">[];
   };
@@ -114,6 +114,8 @@ function sembrarEjemplo(a: Almacen, { e, textos, contrasena }: LeidoEjemplo): vo
     modulos,
     examen: e.curso.examen.map((p) => ({ ...p, id: `KF${siguiente(a)}` })),
     ...(e.curso.sinExamen ? { sinExamen: true } : {}),
+    ...(e.curso.foto ? { foto: e.curso.foto } : {}),
+    ...(e.curso.descargas ? { descargas: e.curso.descargas } : {}),
     autor,
     empresa,
     creadoEn: ahora,
@@ -316,6 +318,14 @@ function marcaDelSitio(a: Almacen, { e }: { e: Ejemplo }): void {
   if (e.empresa.titulos) empresa.titulos = e.empresa.titulos;
 }
 
+/** La portada del curso y su workbook en PDF para descargar (si el coach no puso otra portada). */
+function portadaYWorkbook(a: Almacen, { e }: { e: Ejemplo }): void {
+  const curso = cursoDelEjemplo(a, e);
+  if (!curso) return;
+  if (!curso.foto && e.curso.foto) curso.foto = e.curso.foto;
+  if (!curso.descargas?.length && e.curso.descargas) curso.descargas = e.curso.descargas;
+}
+
 const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
   (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
 
@@ -336,6 +346,7 @@ const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: LeidoEjemplo
   { id: "reto-workbook", aplicar: retoDelWorkbook },
   { id: "textos-sitio", aplicar: textosDelSitio },
   { id: "marca-sitio", aplicar: marcaDelSitio },
+  { id: "portada-workbook", aplicar: portadaYWorkbook },
 ];
 
 /**

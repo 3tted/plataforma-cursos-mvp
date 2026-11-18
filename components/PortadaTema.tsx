@@ -8,6 +8,7 @@ import {
   UsersThree,
   type Icon,
 } from "@phosphor-icons/react";
+import { estiloDeFoto, fotoSubida } from "@/lib/portadas";
 import { useApp } from "./Contexto";
 
 // Portada de un curso o una comunidad. Si tiene foto, se muestra la foto (con
@@ -45,7 +46,7 @@ export default function PortadaTema({
   titulo?: string;
 }) {
   const { fotoDe } = useApp();
-  const foto = propia ? { src: propia, foco: "50% 50%" } : fotoDe(clave);
+  const foto = propia ? fotoSubida(propia) : fotoDe(clave);
   if (foto) {
     return (
       <span className={`portada-tema portada-tema-con-foto ${className}`} data-tema={tema}>
@@ -57,7 +58,7 @@ export default function PortadaTema({
           loading="lazy"
           decoding="async"
           className="portada-tema-foto"
-          style={{ objectPosition: foto.foco }}
+          style={estiloDeFoto(foto)}
         />
         <span className="portada-tema-etiqueta">{tema}</span>
       </span>

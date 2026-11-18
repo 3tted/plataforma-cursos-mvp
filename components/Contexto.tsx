@@ -14,7 +14,7 @@ import {
 } from "react";
 import { api, guardarLocal, guardarSesion, leerLocal, leerSesion } from "@/lib/cliente";
 import { COMUNIDADES, type ComunidadDirectorio } from "@/lib/comunidades";
-import { fotoDePortada, type Foto } from "@/lib/portadas";
+import { fotoDePortada, fotoSubida, type Foto } from "@/lib/portadas";
 import type {
   Categoria,
   CuentaPublica,
@@ -616,7 +616,7 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
         comunidades.find((c) => c.id === clave)?.foto ??
         (datos?.curso.id === clave ? datos.curso.foto : undefined) ??
         (datos?.comunidad.id === clave ? datos.comunidad.foto : undefined);
-      return subida ? { src: subida, foco: "50% 50%" } : fotoDePortada(clave);
+      return subida ? fotoSubida(subida) : fotoDePortada(clave);
     },
     [cursos, comunidades, datos],
   );

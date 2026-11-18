@@ -134,6 +134,7 @@ export function datosDeCursoCreado(c: CursoCreado, comunidad: Comunidad): DatosC
       id: c.id,
       ...(c.estado !== "publicado" ? { sinPublicar: true } : {}),
       ...(c.foto ? { foto: c.foto } : {}),
+      ...(c.descargas?.length ? { descargas: c.descargas } : {}),
       ...(c.sinExamen ? { sinExamen: true } : {}),
       titulo: c.titulo,
       subtitulo: c.subtitulo,

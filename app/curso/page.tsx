@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Avatar from "@/components/Avatar";
 import { useApp } from "@/components/Contexto";
+import { estiloDeFoto } from "@/lib/portadas";
 import {
   IconoAprobado,
   IconoBillete,
   IconoCandado,
   IconoCheck,
+  IconoDescargar,
   IconoExamen,
   IconoPlay,
   IconoVideo,
@@ -123,7 +125,7 @@ export default function PaginaCurso() {
               src={foto.src}
               alt={`Portada del curso «${curso.titulo}»`}
               className="curso-portada-foto"
-              style={{ objectPosition: foto.foco }}
+              style={estiloDeFoto(foto)}
             />
           )}
           <h1>{curso.titulo}</h1>
@@ -140,6 +142,15 @@ export default function PaginaCurso() {
               <span className="cifra">{minutos}</span> min
             </li>
           </ul>
+          {curso.descargas && curso.descargas.length > 0 && (
+            <div className="curso-descargas">
+              {curso.descargas.map((d) => (
+                <a key={d.url} href={d.url} download className="boton boton-chico boton-secundario">
+                  <IconoDescargar width={16} height={16} /> {d.titulo}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
         <div className="curso-progreso">
           {esCoach ? (

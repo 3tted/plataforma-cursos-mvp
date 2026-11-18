@@ -242,6 +242,13 @@ export interface Curso {
   foto?: string;
   /** La coach lo dejó sin examen final: se termina al completar las lecciones. */
   sinExamen?: boolean;
+  /** Material del curso para descargar (por ejemplo, un workbook en PDF). */
+  descargas?: DescargaCurso[];
+}
+
+export interface DescargaCurso {
+  titulo: string;
+  url: string;
 }
 
 export interface DatosCurso {
@@ -294,6 +301,8 @@ export interface CursoCreado {
   origen: "manual" | "ia";
   /** Foto de portada que subió la coach (url de /api/fotos). */
   foto?: string;
+  /** Material del curso para descargar (por ejemplo, un workbook en PDF). */
+  descargas?: DescargaCurso[];
   titulo: string;
   subtitulo: string;
   aprenderas: string[];

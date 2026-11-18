@@ -31,6 +31,13 @@
   "curso": {
     "titulo": "Radar de Liderazgo High Impact™",
     "subtitulo": "Diagnóstico de liderazgo y reto de 7 días: identifica tu principal brecha y conviértela en acciones con evidencia.",
+    "foto": "/ejemplos/increase/portada-curso.webp",
+    "descargas": [
+      {
+        "titulo": "Workbook Radar de Liderazgo (PDF)",
+        "url": "/ejemplos/increase/workbook-radar-de-liderazgo.pdf"
+      }
+    ],
     "aprenderas": [
       "Evaluar tu liderazgo en cuatro dimensiones: claridad, mentalidad, comunicación y visión",
       "Ver tu resultado en una gráfica de radar y saber qué significa cada puntuación",

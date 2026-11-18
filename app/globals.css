@@ -2069,6 +2069,14 @@ button.boton:disabled:hover {
   color: var(--tinta-rubor);
 }
 
+/* Material del curso para descargar (por ejemplo, un workbook en PDF). */
+.curso-descargas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
 .curso-progreso {
   display: grid;
   gap: 4px;

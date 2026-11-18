@@ -33,8 +33,10 @@ export default function PresentacionComunidad({
   const comunidad = datos?.comunidad;
   const tema = temaDe(comunidadId);
 
-  // El video de bienvenida: el de la primera lección gratis que tenga video.
-  const video = datos?.curso.modulos.flatMap((m) => m.lecciones).find((l) => l.gratis && l.video)?.video ?? null;
+  // El video de bienvenida: el de la comunidad o, sin él, el de la primera lección gratis que tenga video.
+  const video = datos?.comunidad.video
+    ? { url: datos.comunidad.video }
+    : (datos?.curso.modulos.flatMap((m) => m.lecciones).find((l) => l.gratis && l.video)?.video ?? null);
   const recientes = (publicaciones ?? []).slice(0, 3);
   // La foto de portada que subió la coach abre la galería.
   const foto = datos?.comunidad.foto;

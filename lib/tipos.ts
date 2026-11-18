@@ -14,6 +14,8 @@ export interface Comunidad {
   acerca?: string;
   /** Foto de portada que subió la coach (url de /api/fotos). */
   foto?: string;
+  /** Video de bienvenida de la comunidad (url); sin el dato, el de la primera lección gratis con video. */
+  video?: string;
   /** Marca de la empresa dueña (color y logo); sin el dato, la de Merkatics. */
   marca?: MarcaEmpresa;
   /** Empresa dueña; sin el dato, la de Merkatics (las comunidades de ejemplo). */

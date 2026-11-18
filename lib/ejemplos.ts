@@ -326,6 +326,12 @@ function portadaYWorkbook(a: Almacen, { e }: { e: Ejemplo }): void {
   if (!curso.descargas?.length && e.curso.descargas) curso.descargas = e.curso.descargas;
 }
 
+/** El video de bienvenida de la comunidad (si el coach no puso otro). */
+function videoDeBienvenida(a: Almacen, { e }: { e: Ejemplo }): void {
+  const comunidad = (a.comunidadesCoach ?? []).find((c) => c.id === e.comunidad.id && c.empresa === e.empresa.id);
+  if (comunidad && !comunidad.video && e.comunidad.video) comunidad.video = e.comunidad.video;
+}
+
 const cursoDelEjemplo = (a: Almacen, e: Ejemplo) =>
   (a.cursosCoach ?? []).find((c) => c.empresa === e.empresa.id && c.comunidad === e.comunidad.id && c.titulo === e.curso.titulo);
 
@@ -347,6 +353,7 @@ const ACTUALIZACIONES: { id: string; aplicar: (a: Almacen, ejemplo: LeidoEjemplo
   { id: "textos-sitio", aplicar: textosDelSitio },
   { id: "marca-sitio", aplicar: marcaDelSitio },
   { id: "portada-workbook", aplicar: portadaYWorkbook },
+  { id: "video-bienvenida", aplicar: videoDeBienvenida },
 ];
 
 /**

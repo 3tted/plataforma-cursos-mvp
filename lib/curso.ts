@@ -117,6 +117,7 @@ export function comunidadCreadaDe(a: Almacen, id: string): Comunidad | null {
     descripcion: c.descripcion,
     ...(c.acerca ? { acerca: c.acerca } : {}),
     ...(c.foto ? { foto: c.foto } : {}),
+    ...(c.video ? { video: c.video } : {}),
     ...(c.empresa ? { empresa: c.empresa } : {}),
     ...empresaNombreDe(a, c.empresa),
     ...marcaDe(a, c.empresa),

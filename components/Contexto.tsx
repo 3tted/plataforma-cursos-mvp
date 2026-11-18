@@ -615,7 +615,9 @@ export function ProveedorApp({ children }: { children: ReactNode }) {
         cursos.find((c) => c.id === clave)?.foto ??
         comunidades.find((c) => c.id === clave)?.foto ??
         (datos?.curso.id === clave ? datos.curso.foto : undefined) ??
-        (datos?.comunidad.id === clave ? datos.comunidad.foto : undefined);
+        (datos?.comunidad.id === clave ? datos.comunidad.foto : undefined) ??
+        // Una comunidad sin foto propia lleva la portada de su curso (como las de la plataforma).
+        (comunidades.some((c) => c.id === clave) ? cursos.find((c) => c.comunidad === clave && c.foto)?.foto : undefined);
       return subida ? fotoSubida(subida) : fotoDePortada(clave);
     },
     [cursos, comunidades, datos],
